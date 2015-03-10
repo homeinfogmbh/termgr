@@ -68,6 +68,17 @@ class Controller():
             else:
                 return i
 
+    def _response_headers(self, content_type, charset,
+                          response_body, cors=True):
+        """ Generates response headers"""
+        result = [('Content-Type',
+                   '; '.join([content_type,
+                              '='.join(['charset', charset])])),
+                  ('Content-Length', str(len(response_body)))]
+        if cors:
+            result.append(('Access-Control-Allow-Origin', '*'))
+        return result
+
     def run(self):
         """Interpret path info"""
         try:
@@ -87,4 +98,6 @@ class Controller():
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 response_body = msg.encode(encoding=charset)
-        return (status, content_type, charset, response_body)
+        response_headers = self._response_headers(content_type, charset,
+                                                  response_body)
+        return (status, response_headers, response_body)

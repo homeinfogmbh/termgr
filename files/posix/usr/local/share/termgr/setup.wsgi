@@ -1,4 +1,16 @@
-"""WSGI main program for ImmoSearch"""
+#! /usr/bin/env python3
+"""Terminal setup interface
+
+XXX: Please note:
+
+    * This web service must be run as a special user,
+      allowed to create and read OpenVPN certs.
+      (Do NOT run this as root!)
+
+    * This web service must be HTTPS-Password
+      protected by the web server, since it does
+      not provide authentication by itself
+"""
 
 from termgr.controllers.setup import SetupController
 
@@ -6,12 +18,7 @@ def application(environ, start_response):
     """Main WSGI method"""
     ctrl = SetupController(environ.get('PATH_INFO', ''),
                            environ.get('QUERY_STRING', ''))
-    status, content_type, charset, response_body = ctrl.run()
-    response_headers = [('Content-Type',
-                         '; '.join([content_type,
-                                    '='.join(['charset', charset])])),
-                       ('Content-Length', str(len(response_body))),
-                       ('Access-Control-Allow-Origin', '*')]
+    status, response_headers, response_body = ctrl.run()
     start_response(status, response_headers)
     return [response_body]
 
