@@ -1,12 +1,12 @@
 """WSGI main program for ImmoSearch"""
 
-from termgr.wsgi import Controller
+from termgr.controllers.setup import SetupController
 
 def application(environ, start_response):
     """Main WSGI method"""
-    wsgi = Controller(environ.get('PATH_INFO', ''),
-                      environ.get('QUERY_STRING', ''))
-    status, content_type, charset, response_body = wsgi.run()
+    ctrl = SetupController(environ.get('PATH_INFO', ''),
+                           environ.get('QUERY_STRING', ''))
+    status, content_type, charset, response_body = ctrl.run()
     response_headers = [('Content-Type',
                          '; '.join([content_type,
                                     '='.join(['charset', charset])])),
