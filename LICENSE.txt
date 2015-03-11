@@ -2,4 +2,4 @@ LICENSE
 	Copyright (C) 2014:		HOMEINFO - Digitale Informationssysteme GmbH
 	All rights reserved.
 	
-	Developers:				Richard Neumann <mail@richard-neumann.de>
+	Developers:				Richard Neumann <r.neumann@homeinfo.de>

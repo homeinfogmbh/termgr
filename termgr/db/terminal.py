@@ -1,7 +1,8 @@
 """Terminal data storage"""
 
 from .abc import TermgrModel
-from peewee import ForeignKeyField, IntegerField, CharField
+from peewee import ForeignKeyField, IntegerField, CharField, NotFoundError,\
+    DoesNotExist
 from homeinfolib import create, connection
 from homeinfo.crm.customer import Customer
 import tarfile
@@ -29,6 +30,17 @@ class Terminal(TermgrModel):
     """The terminal ID"""
     domain = CharField(64)
     """The terminal's domain"""
+
+    @classmethod
+    def by_ids(cls, cid, tid):
+        """Get a terminal by customer id and terminal id"""
+        with connection(Terminal), connection(Customer):
+            try:
+                term = Terminal.get(Terminal.customer == cid,
+                                    Terminal.tid == tid)
+            except DoesNotExist:
+                term = None
+        return term
 
     @property
     def cid(self):
