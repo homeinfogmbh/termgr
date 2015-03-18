@@ -52,6 +52,11 @@ class DatabaseManager(TerminalManager):
 class OpenVPNKeyManager(TerminalManager):
     """Manages OpenVPN Keys"""
 
+    def _gen_key(self):
+        """Generates a new key for the terminal"""
+        host = self.idstr
+        
+
     @property
     def public_key(self):
         """Returns the public key"""
