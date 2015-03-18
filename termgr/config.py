@@ -10,3 +10,4 @@ CONFIG_FILE = '/usr/local/etc/crm.conf'
 config = ConfigParser()
 config.read(CONFIG_FILE)
 db = config['db']
+htpasswd = config['htpasswd']

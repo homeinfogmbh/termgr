@@ -31,6 +31,10 @@ class Terminal(TermgrModel):
     domain = CharField(64)
     """The terminal's domain"""
 
+    def __repr__(self):
+        """Converts the terminal to a unique string"""
+        return '.'.join([str(ident) for ident in self.idents])
+
     @classmethod
     def by_ids(cls, cid, tid):
         """Get a terminal by customer id and terminal id"""
@@ -47,6 +51,11 @@ class Terminal(TermgrModel):
         """Returns the customer's ID"""
         with connection(Customer):
             return self.customer.id
+
+    @property
+    def idents(self):
+        """Returns the terminals identifiers"""
+        return (self.tid, self.cid)
 
     @property
     def hostname(self):
