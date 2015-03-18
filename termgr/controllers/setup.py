@@ -1,7 +1,8 @@
 """Controller for terminal setup management"""
 
 from homeinfolib.wsgi import WsgiController
-from termgr.db.terminal import Terminal
+from ..db.terminal import Terminal
+from ..lib.htpasswd import genhtpasswd
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -76,6 +77,7 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.cid), str(term.tid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'repo_config':
+            passwd = genhtpasswd(term)
             result = term.repo_config
             if result is not None:
                 content_type = 'text/plain'

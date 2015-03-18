@@ -11,3 +11,4 @@ config = ConfigParser()
 config.read(CONFIG_FILE)
 db = config['db']
 htpasswd = config['htpasswd']
+pacman = config['pacman']
