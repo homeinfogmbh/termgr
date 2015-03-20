@@ -159,7 +159,7 @@ class RepositoryManager(TerminalManager):
         htpasswd_file = HtpasswdFile(htpasswd['FILE'])
         user_name = self.idstr
         htpasswd_file.update(user_name, passwd)
-        with open(pacman['template'], 'r') as temp:
+        with open(pacman['TEMPLATE'], 'r') as temp:
             pacman_conf = temp.read()
         pacman_conf.replace('<user_name>', user_name)
         pacman_conf.replace('<password>', passwd)

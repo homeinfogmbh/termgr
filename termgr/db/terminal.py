@@ -1,15 +1,10 @@
 """Terminal data storage"""
 
 from .abc import TermgrModel
-from peewee import ForeignKeyField, IntegerField, CharField, NotFoundError,\
-    DoesNotExist
+from peewee import ForeignKeyField, IntegerField, CharField, DoesNotExist
+from ipaddress import IPv4Address
 from homeinfolib import create, connection
 from homeinfo.crm.customer import Customer
-import tarfile
-from tempfile import NamedTemporaryFile
-from os.path import join
-from os import unlink
-from contextlib import suppress
 
 __author__ = 'Richard Neumann <r.neumann@homeinfo.de>'
 __date__ = '18.09.2014'
@@ -30,6 +25,8 @@ class Terminal(TermgrModel):
     """The terminal ID"""
     domain = CharField(64)
     """The terminal's domain"""
+    _ipv4addr = IntegerField(11, db_column='ipv4addr')
+    """The terminal's IPv4 address"""
 
     def __repr__(self):
         """Converts the terminal to a unique string"""
@@ -63,26 +60,11 @@ class Terminal(TermgrModel):
         return '.'.join([str(self.tid), str(self.cid), self.domain])
 
     @property
-    def vpn_keys(self):
-        """Returns the VPN keys specified for the terminal"""
-        ok = True
-        ca_file = join(vpn['keys_dir'], 'ca.crt')
-        crt_file = join(vpn['keys_dir'], '.'.join([self.hostname, 'crt']))
-        key_file = join(vpn['keys_dir'], '.'.join([self.hostname, 'key']))
-        with NamedTemporaryFile('wb', suffix='.tar.gz', delete=False) as tmp:
-            pass
-        with tarfile.open(tmp.name, 'w:gz') as tar:
-            for f in [ca_file, crt_file, key_file]:
-                try:
-                    tar.add(f)
-                except:
-                    ok = False
-                    break
-        if ok:
-            return tmp.name
-        else:
-            with suppress(FileNotFoundError):
-                unlink(tmp.name)
-            return None
+    def ipv4addr(self):
+        """Returns an IPv4 Address"""
+        return IPv4Address(self._ipv4addr)
 
-    
+    @ipv4addr.setter
+    def ipv4addr(self, ipv4addr):
+        """Sets the IPv4 address"""
+        self._ipv4addr = int(ipv4addr)
