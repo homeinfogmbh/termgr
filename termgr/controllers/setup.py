@@ -47,7 +47,7 @@ class SetupController(WsgiController):
         """Handles an action for a certain
         customer id, terminal id and action
         """
-        status = '200 OK'
+        status = 200
         if action == 'vpn_data':
             mgr = OpenVPNPackage(term)
             try:
@@ -58,7 +58,7 @@ class SetupController(WsgiController):
                 content_type = 'application/x-gzip'
                 charset = None
             else:
-                status = '500 Internal Server Error'
+                status = 500
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 msg = ' '.join(['No OpenVPN configuration found for terminal',
@@ -75,7 +75,7 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body.encode(encoding=charset)
             else:
-                status = '500 Internal Server Error'
+                status = 500
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 msg = ' '.join(['No Repository configuration',
@@ -83,7 +83,7 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         else:
-            status = '501 Not Implemented'
+            status = 501
             content_type = 'text/plain'
             charset = 'utf-8'
             msg = ''.join(['Method "', action, '" is not implemented'])
