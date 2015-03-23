@@ -51,13 +51,11 @@ class SetupController(WsgiController):
         """
         status = '200 OK'
         if action == 'vpn_data':
-            print('debug1')
             mgr = OpenVPNPackage(term)
-            print('debug2')
             try:
                 response_body = mgr.get()
             except:
-                result = None
+                response_body = None
             if response_body is not None:
                 content_type = 'application/x-gzip'
                 charset = None
