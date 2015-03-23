@@ -20,7 +20,7 @@ class Terminal(TermgrModel):
     """CRM's customer(s)"""
 
     customer = ForeignKeyField(Customer, db_column='customer',
-                               related_name='terminals')
+                               related_name='terminals_')
     """The customer this terminal belongs to"""
     tid = IntegerField()
     """The terminal ID"""
