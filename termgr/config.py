@@ -1,4 +1,4 @@
-"""Basic CRM system configuration"""
+"""Terminal setup configuration"""
 
 from configparser import ConfigParser
 
@@ -13,3 +13,4 @@ db = config['db']
 htpasswd = config['htpasswd']
 pacman = config['pacman']
 openvpn = config['openvpn']
+net = config['net']

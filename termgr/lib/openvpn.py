@@ -1,17 +1,16 @@
-"""Library for terminal setup management"""
+"""Library for terminal OpenVPN management"""
 
-from homeinfolib.passwd import genhtpw, HtpasswdFile
-from ..db.terminal import Terminal
-from ..config import htpasswd, pacman, openvpn
 from posix import system
 from tempfile import NamedTemporaryFile
 from tarfile import TarFile
 from os.path import join, isfile
+from ..config import openvpn
+from .abc import TerminalAware
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
-__all__ = ['KeygenError', 'DatabaseManager',
-           'OpenVPNManager', 'RepositoryManager']
+__all__ = ['KeygenError', 'OpenVPNKeygen',
+           'OpenVPNConfig', 'OpenVPNPackage']
 
 
 class KeygenError(Exception):
@@ -19,47 +18,7 @@ class KeygenError(Exception):
     pass
 
 
-class TerminalManager():
-    """Manages terminals"""
-
-    def __init__(self, cid, tid):
-        """Sets user name and password"""
-        self._cid = cid
-        self._tid = tid
-
-    @property
-    def terminal(self):
-        """Returns the appropriate terminal"""
-        return Terminal.by_ids(self._cid, self._tid)
-
-    @property
-    def idstr(self):
-        """Returns a unique string identifier"""
-        return '.'.join([str(self._tid), str(self._cid)])
-
-
-class DatabaseManager(TerminalManager):
-    """Manages terminal database records"""
-
-    @classmethod
-    def add(self, cid, tid):
-        """Adds a new terminal"""
-        pass
-
-    def delete(self):
-        """Deletes the terminal"""
-        pass
-
-    def lockdown(self):
-        """Lockdown terminal"""
-        pass
-
-    def unlock(self):
-        """Unlock terminal"""
-        pass
-
-
-class OpenVPNManager(TerminalManager):
+class OpenVPNKeygen(TerminalAware):
     """Manages OpenVPN keys and configuration"""
 
     @property
@@ -74,7 +33,7 @@ class OpenVPNManager(TerminalManager):
 
     @property
     def ca_file(self):
-        """Returns tha CA file's name"""
+        """Returns the CA file's name"""
         return openvpn['CA_FILE']
 
     @property
@@ -117,8 +76,53 @@ class OpenVPNManager(TerminalManager):
         cmd = ' '.join([build_script, openvpn['EASY_RSA_DIR'], host_name])
         return not system(cmd)
 
+    def generate(self):
+        """Returns the public key"""
+        if not self._key_exists:
+            if not self._build_key():
+                raise KeygenError('Cannot build openVPN key')
+        return self._tar_file
+
+    def revoke(self):
+        """Revokes a terminal's key"""
+        if self._key_exists:
+            pass    # TODO: implement
+
+    def get(self):
+        """Returns the public / private key pair"""
+        if (isfile(self.ca_path)
+                and isfile(self.key_path)
+                and isfile(self.crt_path)):
+            return (self.ca_path, self.key_path, self.crt_path)
+        else:
+            return False
+
+
+class OpenVPNConfig(TerminalAware):
+    """Class that renders an OpenVPN configuration
+    for the respective terminal
+    """
+
+    def get(self):
+        """Get the OpenVPN"""
+        host_name = self.idstr
+        with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
+            config = cfg_temp.read()
+        config = config.replace('<host_name>', host_name)
+        config = config.replace('(template)', '(rendered)')
+        if self.further_servers:
+            config = config.replace(';<further_servers>', self.further_servers)
+        return config
+
+
+class OpenVPNPackage(TerminalAware):
+    """Class that packs an OpenVPN package for the respective
+    terminal containing both, the respective OpenVPN keys and
+    certificates, as well as its configuration
+    """
+
     @property
-    def _tar_file(self):
+    def get(self):
         """Packs the key into a ZIP compressed file"""
         host_name = self.idstr
         with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
@@ -136,36 +140,3 @@ class OpenVPNManager(TerminalManager):
             with open(tmp.name, 'rb') as tar_tmp:
                 tar_data = tar_tmp.read()
         return tar_data
-
-    def generate(self):
-        """Returns the public key"""
-        if not self._key_exists:
-            if not self._build_key():
-                raise KeygenError('Cannot build openVPN key')
-        return self._tar_file
-
-    def revoke(self):
-        """Revokes a terminal's key"""
-        if self._key_exists:
-            pass    # TODO: implement
-
-
-class RepositoryManager(TerminalManager):
-    """Restricted HOMEINFO repository manager"""
-
-    def generate(self):
-        """Returns the pacman repository configuration"""
-        passwd = genhtpw()
-        htpasswd_file = HtpasswdFile(htpasswd['FILE'])
-        user_name = self.idstr
-        htpasswd_file.update(user_name, passwd)
-        with open(pacman['TEMPLATE'], 'r') as temp:
-            pacman_conf = temp.read()
-        pacman_conf.replace('<user_name>', user_name)
-        pacman_conf.replace('<password>', passwd)
-        return pacman_conf
-
-    def revoke(self):
-        """Returns the pacman repository configuration"""
-        htpasswd_file = HtpasswdFile(htpasswd['FILE'])
-        return htpasswd_file.delete(self.idstr)

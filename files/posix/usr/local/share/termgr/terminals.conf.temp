@@ -1,14 +1,21 @@
-##############################################
-# Sample client-side OpenVPN 2.0 config file #
-# for connecting to multi-client server.     #
-#                                            #
-# This configuration can be used by multiple #
-# clients, however each client should have   #
-# its own cert and key files.                #
-#                                            #
-# On Windows, you might want to rename this  #
-# file so it has a .ovpn extension           #
-##############################################
+################################################
+# HOMEINFO – Digitale Informationssysteme GmbH #
+#                                              #
+#  Digital Signage Terminals OpenVPN network   #
+#                                              #
+#             CLIENT (template)                #
+#                                              #
+# This OpenVPN network configuration is        #
+# intended to gather all HOMEINFO digital      #
+# signage terminals in one central management  #
+# network for remote administration.           #
+# Placeholders in the shape of <foo> are to be #
+# replaced by a rendering script.              #
+#                                              #
+# (C) 2015: HOMEINFO                           #
+#    Richard Neumann <r.neumann@homeinfo.de>   #
+#                                              #
+################################################
 
 # Specify that we are a client and that we
 # will be pulling certain config file directives
@@ -40,7 +47,7 @@ proto udp
 # You can have multiple remote entries
 # to load balance between the servers.
 remote openvpn.homeinfo.de 1194
-;remote my-server-2 1194
+;<alternate_servers>
 
 # Choose a random host from the remote
 # list for load-balancing.  Otherwise
@@ -85,7 +92,7 @@ persist-tun
 # a separate .crt/.key file pair
 # for each client.  A single ca
 # file can be used for all clients.
-ca ca.crt
+ca <ca>.crt
 cert <host_name>.crt
 key <host_name>.key
 
@@ -100,21 +107,23 @@ key <host_name>.key
 # your server certificates with the nsCertType
 # field set to "server".  The build-key-server
 # script in the easy-rsa folder will do this.
-;ns-cert-type server
+ns-cert-type server
 
 # If a tls-auth key is used on the server
 # then every client must also have the key.
-;tls-auth ta.key 1
+#tls-auth tls-auth.key 1
+#tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
 
 # Select a cryptographic cipher.
 # If the cipher option is used on the server
 # then you must also specify it here.
-;cipher x
+cipher AES-256-CBC
+auth SHA512
 
 # Enable compression on the VPN link.
 # Don't enable this unless it is also
 # enabled in the server config file.
-comp-lzo
+;comp-lzo
 
 # Set log file verbosity.
 verb 3
