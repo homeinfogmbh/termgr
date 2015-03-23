@@ -3,6 +3,7 @@
 from homeinfolib.passwd import genhtpw, HtpasswdFile
 from ..config import htpasswd
 from .abc import TerminalAware
+from .err import UnconfiguredError
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -12,9 +13,17 @@ __all__ = ['HtpasswdEntry']
 class HtpasswdEntry(TerminalAware):
     """Restricted HOMEINFO repository manager"""
 
+    @property
+    def htpasswd_file(self):
+        """Returns the htpasswd file"""
+        return HtpasswdFile(htpasswd['FILE'])
+
     def get(self):
         """Returns the htpasswd entry tuple"""
-        return (self.idstr, self.htpasswd)
+        if self.htpasswd:
+            return (self.idstr, self.htpasswd)
+        else:
+            raise UnconfiguredError('No htpasswd-password configured')
 
     def generate(self):
         """Returns the pacman repository configuration"""
@@ -25,15 +34,13 @@ class HtpasswdEntry(TerminalAware):
         except:
             return False
         else:
-            htpasswd_file = HtpasswdFile(htpasswd['FILE'])
             user_name = self.idstr
-            htpasswd_file.update(user_name, passwd)
+            self.htpasswd_file.update(user_name, passwd)
             return passwd
 
     def revoke(self):
         """Returns the pacman repository configuration"""
-        htpasswd_file = HtpasswdFile(htpasswd['FILE'])
-        d = htpasswd_file.delete(self.idstr)
+        d = self.htpasswd_file.delete(self.idstr)
         self.terminal.htpasswd = None
         try:
             self.terminal.isave()

@@ -2,6 +2,8 @@
 
 from homeinfolib.wsgi import WsgiController
 from ..db.terminal import Terminal
+from ..lib.openvpn import OpenVPNPackage
+from ..lib.pacman import PacmanConfig
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -50,21 +52,12 @@ class SetupController(WsgiController):
         customer id, terminal id and action
         """
         status = '200 OK'
-        if action == 'info':
-            result = term.info
-            if result is not None:
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                response_body = result.encode(encoding=charset)
-            else:
-                status = '500 Internal Server Error'
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                msg = ' '.join(['No terminal information for terminal',
-                                '.'.join([str(term.cid), str(term.tid)])])
-                response_body = msg.encode(encoding=charset)
-        elif action == 'vpn_data':
-            response_body = term.vpn_data
+        if action == 'vpn_data':
+            mgr = OpenVPNPackage(term)
+            try:
+                response_body = mgr.get()
+            except:
+                result = None
             if response_body is not None:
                 content_type = 'application/x-gzip'
                 charset = None
@@ -76,7 +69,11 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.cid), str(term.tid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'repo_config':
-            result = term.repo_config
+            mgr = PacmanConfig(term)
+            try:
+                result = mgr.get()
+            except:
+                result = None
             if result is not None:
                 content_type = 'text/plain'
                 charset = 'utf-8'

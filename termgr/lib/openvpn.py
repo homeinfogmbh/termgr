@@ -3,22 +3,18 @@
 from posix import system
 from tempfile import NamedTemporaryFile
 from tarfile import TarFile
-from os.path import join, isfile
+from os.path import join, isfile, basename
 from ..config import openvpn
 from .abc import TerminalAware
+from .err import KeygenError, UnconfiguredError
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
-__all__ = ['KeygenError', 'OpenVPNKeygen',
+__all__ = ['KeygenError', 'OpenVPNKeyMgr',
            'OpenVPNConfig', 'OpenVPNPackage']
 
 
-class KeygenError(Exception):
-    """Indicates error in key generation"""
-    pass
-
-
-class OpenVPNKeygen(TerminalAware):
+class OpenVPNKeyMgr(TerminalAware):
     """Manages OpenVPN keys and configuration"""
 
     @property
@@ -90,18 +86,28 @@ class OpenVPNKeygen(TerminalAware):
 
     def get(self):
         """Returns the public / private key pair"""
-        if (isfile(self.ca_path)
-                and isfile(self.key_path)
-                and isfile(self.crt_path)):
-            return (self.ca_path, self.key_path, self.crt_path)
+        if isfile(self.ca_path):
+            if isfile(self.key_path):
+                if isfile(self.crt_path):
+                    return (self.ca_path, self.key_path, self.crt_path)
+                else:
+                    raise UnconfiguredError(' '.join(['Missing',
+                                                      self.crt_path]))
+            else:
+                raise UnconfiguredError(' '.join(['Missing', self.key_path]))
         else:
-            return False
+            raise UnconfiguredError(' '.join(['Missing', self.ca_path]))
 
 
 class OpenVPNConfig(TerminalAware):
     """Class that renders an OpenVPN configuration
     for the respective terminal
     """
+
+    @property
+    def further_servers(self):
+        """List of further servers"""
+        return ''   # XXX: Unused
 
     def get(self):
         """Get the OpenVPN"""
@@ -110,8 +116,7 @@ class OpenVPNConfig(TerminalAware):
             config = cfg_temp.read()
         config = config.replace('<host_name>', host_name)
         config = config.replace('(template)', '(rendered)')
-        if self.further_servers:
-            config = config.replace(';<further_servers>', self.further_servers)
+        config = config.replace(';<further_servers>', self.further_servers)
         return config
 
 
@@ -121,22 +126,32 @@ class OpenVPNPackage(TerminalAware):
     certificates, as well as its configuration
     """
 
-    @property
-    def get(self):
-        """Packs the key into a ZIP compressed file"""
-        host_name = self.idstr
-        with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
-            config_temp = cfg_temp.read()
-        config = config_temp.replace('<host_name>', host_name)
-        config_name = openvpn['CONFIG_NAME']
+    def _pack(self, files, config_name):
+        """Packs a tar.gz file"""
         with NamedTemporaryFile('wb', suffix='.tar.gz') as tmp:
             with TarFile(mode='w|gz', fileobj=tmp) as tar:
-                with NamedTemporaryFile('w') as cfg:
-                    cfg.write(config)
-                    tar.add(cfg.name, '.'.join([config_name, 'conf']))
-                tar.add(self.ca_path, join(config_name, self.ca_file))
-                tar.add(self.crt_path, join(config_name, self.crt_file))
-                tar.add(self.key_path, join(config_name, self.key_file))
+                tar.add(files['ca'], basename(files['ca']))
+                tar.add(files['key'], basename(files['key']))
+                tar.add(files['crt'], basename(files['crt']))
+                tar.add(files['cfg'], config_name)
             with open(tmp.name, 'rb') as tar_tmp:
-                tar_data = tar_tmp.read()
-        return tar_data
+                return tar_tmp.read()
+
+    def get(self):
+        """Packs the key into a ZIP compressed file"""
+        keymgr = OpenVPNKeyMgr(self.terminal)
+        configmgr = OpenVPNConfig(self.terminal)
+        try:
+            ca_path, key_path, crt_path = keymgr.get()
+        except UnconfiguredError:
+            raise UnconfiguredError('OpenVPN key setup incomplete')
+        else:
+            config = configmgr.get()
+            with NamedTemporaryFile('w') as cfg:
+                cfg.write(config)
+                files = {'ca': ca_path,
+                         'key': key_path,
+                         'crt': crt_path,
+                         'cfg': cfg.name}
+                config_name = '.'.join([openvpn['CONFIG_NAME'], 'conf'])
+                return self._pack(files, config_name)

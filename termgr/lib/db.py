@@ -14,8 +14,28 @@ class DBEntry():
     """Manages terminal database records"""
 
     @classmethod
-    def add(self, cid, tid, domain=None):
+    def add(cls, cid, tid, domain=None):
         """Adds a new terminal"""
+        if cls.exists(cid, tid):
+            return False
+        else:
+            terminal = Terminal()
+            terminal.customer = cid
+            terminal.tid = tid
+            if domain is None:
+                terminal.domain = net['DOMAIN']
+            else:
+                terminal.domain = domain
+            try:
+                terminal.isave()
+            except:
+                return False
+            else:
+                return terminal
+
+    @classmethod
+    def exists(cls, cid, tid):
+        """Determines whether a certain terminal exists"""
         try:
             cst = Customer.iget(Customer.id == cid)  # @UndefinedVariable
         except DoesNotExist:
@@ -25,21 +45,9 @@ class DBEntry():
                 terminal = Terminal.iget(   # @UndefinedVariable
                     (Terminal.customer == cst) & (Terminal.tid == tid))
             except DoesNotExist:
-                terminal = Terminal()
-                terminal.customer = cst
-                terminal.tid = tid
-                if domain is None:
-                    terminal.domain = net['DOMAIN']
-                else:
-                    terminal.domain = domain
-                try:
-                    terminal.isave()
-                except:
-                    return False
-                else:
-                    return terminal
-            else:
                 return False
+            else:
+                return terminal
 
     def delete(self):
         """Deletes the terminal"""
