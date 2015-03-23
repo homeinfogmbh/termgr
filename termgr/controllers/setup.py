@@ -73,7 +73,7 @@ class SetupController(WsgiController):
             if result is not None:
                 content_type = 'text/plain'
                 charset = 'utf-8'
-                response_body.encode(encoding=charset)
+                response_body = result.encode(encoding=charset)
             else:
                 status = 500
                 content_type = 'text/plain'
