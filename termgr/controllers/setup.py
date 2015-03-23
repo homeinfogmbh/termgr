@@ -40,6 +40,7 @@ class SetupController(WsgiController):
                             if action is None:
                                 pass
                             else:
+                                print('yes')
                                 return self._handle(term, action)
                         else:
                             pass
