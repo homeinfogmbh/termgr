@@ -99,5 +99,5 @@ Include = /etc/pacman.d/mirrorlist
 #Server = file:///home/custompkgs
 
 [homeinfo]
-SigLevel = TrustAll
+SigLevel = Optional
 Server = https://<user_name>:<password>@tls.homeinfo.de/mirror/pacman
