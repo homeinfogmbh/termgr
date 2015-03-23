@@ -15,7 +15,7 @@ setup(
                 ('/usr/local/etc', ['files/usr/local/etc/termgr.conf']),
                 ('/usr/local/share/termgr',
                  ['files/usr/local/share/termgr/pacman.conf.temp',
-                  'files/usr/local/share/termgr/setup.wsgi',
+                  'files/usr/local/share/termgr/termgr.wsgi',
                   'files/usr/local/share/termgr/terminals.conf.temp']),
                 ('/etc/uwsgi/apps-available',
                  ['files/etc/uwsgi/apps-available/termgr.ini'])],
