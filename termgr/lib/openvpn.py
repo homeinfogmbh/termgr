@@ -2,8 +2,8 @@
 
 from posix import system
 from tempfile import NamedTemporaryFile
-from tarfile import TarFile
 from os.path import join, isfile, basename
+import tarfile
 from ..config import openvpn
 from .abc import TerminalAware
 from .err import KeygenError, UnconfiguredError
@@ -129,7 +129,7 @@ class OpenVPNPackage(TerminalAware):
     def _pack(self, files, config_name):
         """Packs a tar.gz file"""
         with NamedTemporaryFile('wb', suffix='.tar.gz') as tmp:
-            with TarFile(mode='w|gz', fileobj=tmp) as tar:
+            with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
                 tar.add(files['ca'], basename(files['ca']))
                 tar.add(files['key'], basename(files['key']))
                 tar.add(files['crt'], basename(files['crt']))
