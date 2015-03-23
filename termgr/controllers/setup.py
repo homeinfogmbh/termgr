@@ -51,7 +51,9 @@ class SetupController(WsgiController):
         """
         status = '200 OK'
         if action == 'vpn_data':
+            print('debug1')
             mgr = OpenVPNPackage(term)
+            print('debug2')
             try:
                 response_body = mgr.get()
             except:
@@ -60,14 +62,12 @@ class SetupController(WsgiController):
                 content_type = 'application/x-gzip'
                 charset = None
             else:
-                print('debug1')
                 status = '500 Internal Server Error'
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 msg = ' '.join(['No OpenVPN configuration found for terminal',
                                 '.'.join([str(term.cid), str(term.tid)])])
                 response_body = msg.encode(encoding=charset)
-                print('debug2')
         elif action == 'repo_config':
             mgr = PacmanConfig(term)
             try:
