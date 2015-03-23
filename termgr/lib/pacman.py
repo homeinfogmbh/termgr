@@ -12,11 +12,6 @@ __all__ = ['PacmanConfig']
 class PacmanConfig(TerminalAware):
     """Renders the pacman.conf file for a terminal"""
 
-    @property
-    def htpasswd(self):
-        """Returns the respective terminal's htpasswd entry"""
-        return self.terminal.htpasswd
-
     def get(self):
         """Returns the rendered configuration file"""
         htpasswd_entry = HtpasswdEntry(self.terminal)

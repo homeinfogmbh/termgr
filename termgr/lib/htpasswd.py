@@ -19,6 +19,11 @@ class HtpasswdEntry(TerminalAware):
         return self.idstr.replace('.', '_')
 
     @property
+    def htpasswd(self):
+        """Returns the respective terminal's htpasswd entry"""
+        return self.terminal.htpasswd
+
+    @property
     def htpasswd_file(self):
         """Returns the htpasswd file"""
         return HtpasswdFile(htpasswd['FILE'])
