@@ -22,11 +22,11 @@ class Terminal(TermgrModel):
     customer = ForeignKeyField(Customer, db_column='customer',
                                related_name='terminals')
     """The customer this terminal belongs to"""
-    tid = IntegerField(11)
+    tid = IntegerField()
     """The terminal ID"""
     domain = CharField(64)
     """The terminal's domain"""
-    _ipv4addr = IntegerField(11, db_column='ipv4addr', null=True)
+    _ipv4addr = IntegerField(db_column='ipv4addr', null=True)
     """The terminal's IPv4 address"""
     htpasswd = CharField(16, null=True)
     """The terminal's clear-text htpasswd-password"""
