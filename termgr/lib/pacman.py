@@ -21,7 +21,7 @@ class PacmanConfig(TerminalAware):
         if self.htpasswd:
             with open(pacman['TEMPLATE'], 'r') as temp:
                 pacman_conf = temp.read()
-            pacman_conf.replace('<user_name>', self.idstr())
+            pacman_conf.replace('<user_name>', self.idstr)
             pacman_conf.replace('<password>', self.htpasswd)
             return pacman_conf
         else:
