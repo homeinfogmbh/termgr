@@ -128,18 +128,13 @@ class OpenVPNPackage(TerminalAware):
 
     def _pack(self, files, config_name):
         """Packs a tar.gz file"""
-        with NamedTemporaryFile('wb', suffix='.tar.gz') as tmp:
+        with NamedTemporaryFile('w+b', suffix='.tar.gz') as tmp:
             with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
-                print(files['ca'], isfile(files['ca']), basename(files['ca']))
                 tar.add(files['ca'], basename(files['ca']))
-                print(files['key'], isfile(files['key']), basename(files['key']))
                 tar.add(files['key'], basename(files['key']))
-                print(files['crt'], isfile(files['crt']), basename(files['crt']))
                 tar.add(files['crt'], basename(files['crt']))
-                print(files['cfg'], isfile(files['cfg']), config_name)
                 tar.add(files['cfg'], config_name)
-            with open(tmp.name, 'rb') as tar:
-                tar_data = tar.read()
+                tar_data = tmp.read()
         return tar_data
 
     def get(self):
