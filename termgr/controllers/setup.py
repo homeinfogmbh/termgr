@@ -13,13 +13,9 @@ __all__ = ['SetupController']
 class SetupController(WsgiController):
     """Controller for terminal setup automation"""
 
-    def __init__(self):
-        """Initialize request path"""
-        super().__init__('setup')
-
-    def _run(self, qd):
+    def _run(self):
         """Interpret query dictionary"""
-        cid_str = qd.get('cid')
+        cid_str = self._query_dict.get('cid')
         if cid_str is None:
             pass
         else:
@@ -28,7 +24,7 @@ class SetupController(WsgiController):
             except:
                 pass
             else:
-                tid_str = qd.get('tid')
+                tid_str = self._query_dict.get('tid')
                 if tid_str is None:
                     pass
                 else:
@@ -39,7 +35,7 @@ class SetupController(WsgiController):
                     else:
                         term = Terminal.by_ids(cid, tid)
                         if term is not None:
-                            action = qd.get('action')
+                            action = self._query_dict.get('action')
                             if action is None:
                                 pass
                             else:
