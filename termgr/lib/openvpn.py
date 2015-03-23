@@ -130,12 +130,17 @@ class OpenVPNPackage(TerminalAware):
         """Packs a tar.gz file"""
         with NamedTemporaryFile('wb', suffix='.tar.gz') as tmp:
             with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
+                print(files['ca'], isfile(files['ca']), basename(files['ca']))
                 tar.add(files['ca'], basename(files['ca']))
+                print(files['key'], isfile(files['key']), basename(files['key']))
                 tar.add(files['key'], basename(files['key']))
+                print(files['crt'], isfile(files['crt']), basename(files['crt']))
                 tar.add(files['crt'], basename(files['crt']))
+                print(files['cfg'], isfile(files['cfg']), config_name)
                 tar.add(files['cfg'], config_name)
-            with open(tmp.name, 'rb') as tar_tmp:
-                return tar_tmp.read()
+            with open(tmp.name, 'rb') as tar:
+                tar_data = tar.read()
+        return tar_data
 
     def get(self):
         """Packs the key into a ZIP compressed file"""
@@ -154,4 +159,5 @@ class OpenVPNPackage(TerminalAware):
                          'crt': crt_path,
                          'cfg': cfg.name}
                 config_name = '.'.join([openvpn['CONFIG_NAME'], 'conf'])
-                return self._pack(files, config_name)
+                tar_data = self._pack(files, config_name)
+            return tar_data
