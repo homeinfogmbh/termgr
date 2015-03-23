@@ -148,8 +148,9 @@ class OpenVPNPackage(TerminalAware):
             raise UnconfiguredError('OpenVPN key setup incomplete')
         else:
             config = configmgr.get()
-            with NamedTemporaryFile('w') as cfg:
+            with NamedTemporaryFile('w+') as cfg:
                 cfg.write(config)
+                cfg.seek(0)
                 files = {'ca': ca_path,
                          'key': key_path,
                          'crt': crt_path,
