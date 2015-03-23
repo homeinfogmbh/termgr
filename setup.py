@@ -16,7 +16,7 @@ setup(
                 ('/usr/local/share',
                  ['files/usr/local/share/pacman.conf.temp',
                   'files/usr/local/share/setup.wsgi',
-                  'files/usr/local/share/terminals.conf.temp'])
+                  'files/usr/local/share/terminals.conf.temp']),
                 ('/etc/uwsgi/apps-available',
                  ['files/etc/uwsgi/apps-available/termgr.ini'])],
     license=open('LICENSE.txt').read(),
