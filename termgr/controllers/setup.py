@@ -15,6 +15,7 @@ class SetupController(WsgiController):
 
     def _run(self):
         """Interpret query dictionary"""
+        print(self._query_dict)
         cid_str = self._query_dict.get('cid')
         if cid_str is None:
             pass
