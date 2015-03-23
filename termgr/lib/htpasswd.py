@@ -21,7 +21,7 @@ class HtpasswdEntry(TerminalAware):
     @property
     def htpasswd_file(self):
         """Returns the htpasswd file"""
-        return HtpasswdFile(htpasswd['HTPASSWD'])
+        return HtpasswdFile(htpasswd['FILE'])
 
     def get(self):
         """Returns the htpasswd entry tuple"""
