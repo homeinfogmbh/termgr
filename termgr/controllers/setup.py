@@ -15,7 +15,6 @@ class SetupController(WsgiController):
 
     def _run(self):
         """Interpret query dictionary"""
-        print(self._query_dict)
         cid_str = self._query_dict.get('cid')
         if cid_str is None:
             pass
@@ -40,7 +39,6 @@ class SetupController(WsgiController):
                             if action is None:
                                 pass
                             else:
-                                print('yes')
                                 return self._handle(term, action)
                         else:
                             pass
@@ -64,7 +62,7 @@ class SetupController(WsgiController):
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 msg = ' '.join(['No OpenVPN configuration found for terminal',
-                                '.'.join([str(term.cid), str(term.tid)])])
+                                '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'repo_config':
             mgr = PacmanConfig(term)
@@ -82,7 +80,7 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
-                                '.'.join([str(term.cid), str(term.tid)])])
+                                '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         else:
             status = '501 Not Implemented'
