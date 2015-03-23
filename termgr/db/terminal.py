@@ -1,6 +1,7 @@
 """Terminal data storage"""
 
-from peewee import ForeignKeyField, IntegerField, CharField, DoesNotExist
+from peewee import ForeignKeyField, IntegerField, CharField, BigIntegerField,\
+    DoesNotExist
 from ipaddress import IPv4Address
 from homeinfo.crm.customer import Customer
 from homeinfolib.db import improved, create, connection
@@ -23,7 +24,7 @@ class Terminal(TermgrModel):
     """The terminal ID"""
     domain = CharField(64)
     """The terminal's domain"""
-    _ipv4addr = IntegerField(db_column='ipv4addr', null=True)
+    _ipv4addr = BigIntegerField(db_column='ipv4addr', null=True)
     """The terminal's IPv4 address"""
     htpasswd = CharField(16, null=True)
     """The terminal's clear-text htpasswd-password"""
