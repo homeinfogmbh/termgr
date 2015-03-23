@@ -134,6 +134,7 @@ class OpenVPNPackage(TerminalAware):
                 tar.add(files['key'], basename(files['key']))
                 tar.add(files['crt'], basename(files['crt']))
                 tar.add(files['cfg'], config_name)
+            tmp.seek(0)
             tar_data = tmp.read()
         return tar_data
 
