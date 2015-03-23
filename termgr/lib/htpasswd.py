@@ -14,11 +14,6 @@ class HtpasswdEntry(TerminalAware):
     """Restricted HOMEINFO repository manager"""
 
     @property
-    def htid(self):
-        """Returns the htpasswd-idstr with the '.' replaced by a'_'"""
-        return self.idstr.replace('.', '_')
-
-    @property
     def htpasswd(self):
         """Returns the respective terminal's htpasswd entry"""
         return self.terminal.htpasswd
@@ -31,7 +26,7 @@ class HtpasswdEntry(TerminalAware):
     def get(self):
         """Returns the htpasswd entry tuple"""
         if self.htpasswd:
-            return (self.htid, self.htpasswd)
+            return (self.idstr, self.htpasswd)
         else:
             raise UnconfiguredError('No htpasswd-password configured')
 
@@ -44,13 +39,13 @@ class HtpasswdEntry(TerminalAware):
         except:
             return False
         else:
-            user_name = self.htid
+            user_name = self.idstr
             self.htpasswd_file.update(user_name, passwd)
             return passwd
 
     def revoke(self):
         """Returns the pacman repository configuration"""
-        d = self.htpasswd_file.delete(self.htid)
+        d = self.htpasswd_file.delete(self.idstr)
         self.terminal.htpasswd = None
         try:
             self.terminal.isave()
