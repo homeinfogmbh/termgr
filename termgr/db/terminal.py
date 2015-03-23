@@ -10,9 +10,6 @@ __author__ = 'Richard Neumann <r.neumann@homeinfo.de>'
 __date__ = '18.09.2014'
 __all__ = ['Terminal']
 
-# TODO: Move this into configuration!
-vpn = {'keys_dir': '/etc/openvpn/terminals/openssl/keys'}
-
 
 @create
 @improved
@@ -20,7 +17,7 @@ class Terminal(TermgrModel):
     """CRM's customer(s)"""
 
     customer = ForeignKeyField(Customer, db_column='customer',
-                               related_name='terminals_')
+                               related_name='terminals')
     """The customer this terminal belongs to"""
     tid = IntegerField()
     """The terminal ID"""
