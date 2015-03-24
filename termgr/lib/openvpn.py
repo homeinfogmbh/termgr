@@ -28,11 +28,6 @@ class OpenVPNKeyMgr(TerminalAware):
         return join(openvpn['EASY_RSA_DIR'], 'keys')
 
     @property
-    def ca_file(self):
-        """Returns the CA file's name"""
-        return openvpn['CA_FILE']
-
-    @property
     def crt_file(self):
         """Returns the client certificate's file name"""
         return '.'.join([self.host_name, 'crt'])
@@ -45,7 +40,7 @@ class OpenVPNKeyMgr(TerminalAware):
     @property
     def ca_path(self):
         """Returns the full path to the CA's file"""
-        return join(self.key_dir, self.ca_file)
+        return join(self.key_dir, openvpn['CA_FILE'])
 
     @property
     def crt_path(self):
@@ -114,6 +109,7 @@ class OpenVPNConfig(TerminalAware):
         host_name = self.idstr
         with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
             config = cfg_temp.read()
+        config = config.replace('<ca>', openvpn['CA_FILE'])
         config = config.replace('<host_name>', host_name)
         config = config.replace('(template)', '(rendered)')
         config = config.replace(';<further_servers>', self.further_servers)

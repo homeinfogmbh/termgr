@@ -92,7 +92,7 @@ persist-tun
 # a separate .crt/.key file pair
 # for each client.  A single ca
 # file can be used for all clients.
-ca <ca>.crt
+ca <ca>
 cert <host_name>.crt
 key <host_name>.key
 
