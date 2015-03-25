@@ -14,6 +14,9 @@ XXX: Please note:
 
 from termgr.controllers.setup import SetupController
 
+__date__ = "25.03.2015"
+__author__ = "Richard Neumann <r.neumann@homeinfo.de>"
+
 def application(environ, start_response):
     """Main WSGI method"""
     ctrl = SetupController(environ.get('PATH_INFO', ''),
