@@ -10,8 +10,7 @@ from .err import KeygenError, UnconfiguredError
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
-__all__ = ['KeygenError', 'OpenVPNKeyMgr',
-           'OpenVPNConfig', 'OpenVPNPackage']
+__all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackage']
 
 
 class OpenVPNKeyMgr(TerminalAware):
