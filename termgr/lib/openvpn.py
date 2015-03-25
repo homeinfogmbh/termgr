@@ -1,8 +1,8 @@
 """Library for terminal OpenVPN management"""
 
 from posix import system
+from posixpath import join, isfile, basename
 from tempfile import NamedTemporaryFile
-from os.path import join, isfile, basename
 import tarfile
 from ..config import openvpn
 from .abc import TerminalAware
@@ -72,7 +72,10 @@ class OpenVPNKeyMgr(TerminalAware):
         if not self._key_exists:
             if not self._build_key():
                 raise KeygenError('Cannot build openVPN key')
-        return self._tar_file
+            else:
+                return True
+        else:
+            return False    # Already exists
 
     def revoke(self):
         """Revokes a terminal's key"""
@@ -104,16 +107,33 @@ class OpenVPNConfig(TerminalAware):
         """List of further servers"""
         return ''   # XXX: Unused
 
-    def get(self):
-        """Get the OpenVPN"""
+    @property
+    def _render(self, config):
+        """Returns the rendered configuration file"""
         host_name = self.idstr
-        with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
-            config = cfg_temp.read()
         config = config.replace('<ca>', openvpn['CA_FILE'])
         config = config.replace('<host_name>', host_name)
-        config = config.replace('(template)', '(rendered)')
+        host_name_caption = ''.join(['(', host_name, ')'])
+        template_caption = '(template)'
+        len_diff = len(host_name_caption) - len(template_caption)
+        if len_diff > 0:
+            search_fill = ''
+            replace_fill = ''.join((' ' for _ in range(0, len_diff)))
+        elif len_diff < 0:
+            search_fill = ''.join((' ' for _ in range(0, len_diff)))
+            replace_fill = ''
+        else:
+            search_fill = ''
+            replace_fill = ''
+        config = config.replace('(template)' + search_fill,
+                                host_name_caption + replace_fill)
         config = config.replace(';<further_servers>', self.further_servers)
-        return config
+
+    def get(self):
+        """Get the OpenVPN"""
+        with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
+            config = cfg_temp.read()
+        return self._render(config)
 
 
 class OpenVPNPackage(TerminalAware):
