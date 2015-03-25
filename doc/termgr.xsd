@@ -8,7 +8,7 @@
     <xs:element name="termgr" type="TerminalManager"/>
 
 
-    <!-- PCP root type -->
+    <!-- Terminal manager root type -->
     <xs:complexType name="TerminalManager">
         <xs:annotation>
             <xs:documentation xml:lang="en">
