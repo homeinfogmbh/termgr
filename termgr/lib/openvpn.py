@@ -128,6 +128,8 @@ class OpenVPNConfig(TerminalAware):
         config = config.replace('(template)' + search_fill,
                                 host_name_caption + replace_fill)
         config = config.replace(';<further_servers>', self.further_servers)
+        with open('/temp/termgr.dbg', 'w') as dbg:
+            dbg.write(config)
         return config
 
     def get(self):
