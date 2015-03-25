@@ -4,7 +4,6 @@ from homeinfolib.wsgi import WsgiController
 from ..db.terminal import Terminal
 from ..lib.openvpn import OpenVPNPackage
 from ..lib.pacman import PacmanConfig
-from traceback import format_exc
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"

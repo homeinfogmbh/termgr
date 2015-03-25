@@ -105,7 +105,7 @@ class OpenVPNConfig(TerminalAware):
     @property
     def further_servers(self):
         """List of further servers"""
-        return ''   # XXX: Unused
+        return '\n'.join((s.strip() for s in openvpn['SERVERS'].split(',')))
 
     def _render(self, config):
         """Returns the rendered configuration file"""
