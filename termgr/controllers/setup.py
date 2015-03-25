@@ -55,8 +55,6 @@ class SetupController(WsgiController):
                 response_body = mgr.get()
             except:
                 response_body = None
-                with open('/tmp/termgr.except', 'a') as ex:
-                    ex.write(format_exc())
             if response_body is not None:
                 content_type = 'application/x-gzip'
                 charset = None

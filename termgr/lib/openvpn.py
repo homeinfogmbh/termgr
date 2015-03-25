@@ -107,14 +107,11 @@ class OpenVPNConfig(TerminalAware):
         """List of further servers"""
         return ''   # XXX: Unused
 
-    @property
     def _render(self, config):
         """Returns the rendered configuration file"""
         host_name = self.idstr
         config = config.replace('<ca>', openvpn['CA_FILE'])
         config = config.replace('<host_name>', host_name)
-        with open('/tmp/termgr.dbg', 'a') as dbg:
-            dbg.write(config)
         template_caption = '(template)'
         host_name_caption = ''.join(['(', host_name, ')'])
         len_diff = len(host_name_caption) - len(template_caption)
@@ -130,8 +127,6 @@ class OpenVPNConfig(TerminalAware):
         config = config.replace(template_caption + search_fill,
                                 host_name_caption + replace_fill)
         config = config.replace(';<further_servers>', self.further_servers)
-        with open('/tmp/termgr.dbg', 'a') as dbg:
-            dbg.write(config)
         return config
 
     def get(self):
