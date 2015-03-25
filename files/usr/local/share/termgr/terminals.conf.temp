@@ -110,14 +110,12 @@ ns-cert-type server
 
 # If a tls-auth key is used on the server
 # then every client must also have the key.
-#tls-auth tls-auth.key 1
-#tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
 
 # Select a cryptographic cipher.
 # If the cipher option is used on the server
 # then you must also specify it here.
-cipher AES-256-CBC
-auth SHA512
+cipher <cipher>
+auth <auth>
 
 # Enable compression on the VPN link.
 # Don't enable this unless it is also
