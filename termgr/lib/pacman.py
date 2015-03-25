@@ -1,9 +1,9 @@
 """Library for terminal pacman.conf management"""
 
-from homeinfolib.system import run
 from ..config import pacman
 from .abc import TerminalAware
 from .htpasswd import HtpasswdEntry
+from .remotectrl import RemoteController
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -27,6 +27,11 @@ class PacmanConfig(TerminalAware):
 class Pacman(TerminalAware):
     """Wrapper for remote pacman access"""
 
+    def __init__(self, terminal):
+        """Initializes the remote controller"""
+        super().__init__(terminal)
+        self._remote = RemoteController(terminal)
+
     @property
     def _refresh_cmd(self):
         """Returns the refresh command"""
@@ -39,19 +44,28 @@ class Pacman(TerminalAware):
 
     def refresh(self):
         """Refresh repository"""
-        _, _, exit_code = run(self._refresh_cmd)
+        _, _, exit_code = self._remote.execute(self._refresh_cmd)
         return True if not exit_code else False
 
     @property
     def updates(self):
         """Yields available updates"""
-        stdout, _, _ = run(self._update_cmd)
-        out_str = stdout.decode()
-        for line in out_str.split('\n'):
-            line = line.strip()
+        stdout, stderr, exit_code = self._remote.execute(self._update_cmd)
+        if exit_code == 0:
             try:
-                pkg, old_ver, _, new_ver = line.split(' ')
-            except ValueError:
-                continue
+                out_str = stdout.decode()
+            except:
+                pass    # TODO: handle error
             else:
-                yield (pkg, old_ver, new_ver)
+                for line in out_str.split('\n'):
+                    line = line.strip()
+                    try:
+                        pkg, old_ver, _, new_ver = line.split(' ')
+                    except ValueError:
+                        continue
+                    else:
+                        yield (pkg, old_ver, new_ver)
+        elif exit_code == 1:
+            pass    # TODO: No updates available
+        else:
+            print(stderr.decode())    # TODO: Error!

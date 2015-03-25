@@ -1,8 +1,8 @@
 """Virtual terminal library"""
 
 from .abc import TerminalAware
-from termgr.db.vt import TerminalHistory
-from termgr.lib.remotectrl import RemoteController
+from ..db.vt import TerminalHistory
+from .remotectrl import RemoteController
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
