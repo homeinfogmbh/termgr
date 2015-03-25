@@ -113,22 +113,24 @@ class OpenVPNConfig(TerminalAware):
         host_name = self.idstr
         config = config.replace('<ca>', openvpn['CA_FILE'])
         config = config.replace('<host_name>', host_name)
-        host_name_caption = ''.join(['(', host_name, ')'])
+        with open('/tmp/termgr.dbg', 'a') as dbg:
+            dbg.write(config)
         template_caption = '(template)'
+        host_name_caption = ''.join(['(', host_name, ')'])
         len_diff = len(host_name_caption) - len(template_caption)
         if len_diff > 0:
             search_fill = ''
             replace_fill = ''.join((' ' for _ in range(0, len_diff)))
         elif len_diff < 0:
-            search_fill = ''.join((' ' for _ in range(0, len_diff)))
+            search_fill = ''.join((' ' for _ in range(0, -len_diff)))
             replace_fill = ''
         else:
             search_fill = ''
             replace_fill = ''
-        config = config.replace('(template)' + search_fill,
+        config = config.replace(template_caption + search_fill,
                                 host_name_caption + replace_fill)
         config = config.replace(';<further_servers>', self.further_servers)
-        with open('/tmp/termgr.dbg', 'w') as dbg:
+        with open('/tmp/termgr.dbg', 'a') as dbg:
             dbg.write(config)
         return config
 
