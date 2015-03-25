@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOMEINFO Terminal Manager API -->
+<xs:schema  xmlns="http://xml.homeinfo.de/schema/termgr"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
+            targetNamespace="http://xml.homeinfo.de/schema/termgr">
+
+    <!-- Root element -->
+    <xs:element name="termgr" type="TerminalManager"/>
+
+
+    <!-- PCP root type -->
+    <xs:complexType name="TerminalManager">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Pretty Cool Protocol - An XML-RPC solution by HOMEINFO Digitale Informationssysteme GmbH
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:element name="customer" type="Customer" maxOccurs="unbounded"/>
+            <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
+            <xs:element name="screenshot" type="Screenshot" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:complexType>
+
+
+    <!-- Customer data -->
+    <xs:complexType name="Customer">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Terminal data for a certain customer
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="cid" type="xs:integer" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The customer identifier
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The customer's full name
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <!-- Terminal data -->
+    <xs:complexType name="Terminal">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Terminal information
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="status" type="TerminalStatus"/>
+            <xs:element name="ipv4addr" type="IPv4Address"/>
+            <xs:element name="uptime" type="xs:unsignedLong"/>
+            <xs:element name="screenshot" type="Screenshot"/>
+            <xs:element name="touch_event" type="TouchEvent" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="tid" type="xs:integer" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The terminal identifier
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <!-- Screenshot data -->
+    <xs:complexType name="Screenshot">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A screen shot of a terminal
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:base64Binary">
+                <xs:attribute name="timestamp" type="xs:dateTime" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">
+                            The time, when the screenshot was taken
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="mimetype" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">
+                            The screenshot picture's mime type
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+
+    <!-- Touch data -->
+    <xs:complexType name="TouchEvent">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Touch input event
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:dateTime">
+                <xs:attribute name="x" type="xs:integer" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">
+                            The x-coordinate of the touch event
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="y" type="xs:integer" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">
+                            The y-coordinate of the touch event
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="duration" type="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">
+                            The duration of the touch event
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    
+    
+    <!-- Messages -->
+    <xs:complexType name="Message">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Messages
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="text" type="Text">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">
+                        The messages' body or content
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="code" type="xs:integer" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    A unique message code
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    
+    
+    <!-- Localized message text -->
+    <xs:complexType name="Text">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Localized text string
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="lang" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">
+                            The language of the text
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+
+    <!-- Terminal status -->
+    <xs:simpleType name="TerminalStatus">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                The status of the terminal
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="UP"/>
+            <xs:enumeration value="DOWN"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+    <!-- IPv4 address -->
+    <xs:simpleType name="IPv4Address">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                An IPv4 address
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern
+                value="(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])"
+            />
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
