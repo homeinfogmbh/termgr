@@ -1,7 +1,7 @@
 # ./termgr.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:d5297d54a5b0a5c243ac8f456d16d54e3b56338f
-# Generated 2015-03-25 13:55:46.948767 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
+# Generated 2015-03-25 14:00:25.022295 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
 # Namespace http://xml.homeinfo.de/schema/termgr
 
 from __future__ import unicode_literals
@@ -15,7 +15,7 @@ import sys
 import pyxb.utils.six as _six
 
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:4152e0c0-d2ee-11e4-b55e-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:e720f1c2-d2ee-11e4-986b-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -83,7 +83,7 @@ class TerminalStatus (pyxb.binding.datatypes.string, pyxb.binding.basis.enumerat
     _ExpandedName = pyxb.namespace.ExpandedName(Namespace, 'TerminalStatus')
     _XSDLocation = pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 188, 4)
     _Documentation = '\n                The status of the terminal\n            '
-TerminalStatus._CF_enumeration = pyxb.binding.facets.CF_enumeration(value_datatype=TerminalStatus, enum_prefix=None)
+TerminalStatus._CF_enumeration = pyxb.binding.facets.CF_enumeration(enum_prefix=None, value_datatype=TerminalStatus)
 TerminalStatus.UP = TerminalStatus._CF_enumeration.addEnumeration(unicode_value='UP', tag='UP')
 TerminalStatus.DOWN = TerminalStatus._CF_enumeration.addEnumeration(unicode_value='DOWN', tag='DOWN')
 TerminalStatus._InitializeFacetMap(TerminalStatus._CF_enumeration)
@@ -107,7 +107,7 @@ Namespace.addCategoryObject('typeBinding', 'IPv4Address', IPv4Address)
 # Complex type {http://xml.homeinfo.de/schema/termgr}TerminalManager with content type ELEMENT_ONLY
 class TerminalManager (pyxb.binding.basis.complexTypeDefinition):
     """
-                Pretty Cool Protocol - An XML-RPC solution by HOMEINFO Digitale Informationssysteme GmbH
+                A terminal web API solution by HOMEINFO Digitale Informationssysteme GmbH
             """
     _TypeDefinition = None
     _ContentTypeTag = pyxb.binding.basis.complexTypeDefinition._CT_ELEMENT_ONLY

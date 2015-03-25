@@ -12,7 +12,7 @@
     <xs:complexType name="TerminalManager">
         <xs:annotation>
             <xs:documentation xml:lang="en">
-                Pretty Cool Protocol - An XML-RPC solution by HOMEINFO Digitale Informationssysteme GmbH
+                A terminal web API solution by HOMEINFO Digitale Informationssysteme GmbH
             </xs:documentation>
         </xs:annotation>
         <xs:choice>
