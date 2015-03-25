@@ -104,7 +104,8 @@ class OpenVPNConfig(TerminalAware):
     @property
     def servers(self):
         """List of remote servers"""
-        return '\n'.join((s.strip() for s in openvpn['SERVERS'].split(',')))
+        return '\n'.join((' '.join(('remote', s.strip()))
+                          for s in openvpn['SERVERS'].split()))
 
     def _render_caption(self, config, host_name):
         """Renders the openvpn-config file's caption / header"""
