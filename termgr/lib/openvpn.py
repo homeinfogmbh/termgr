@@ -128,6 +128,7 @@ class OpenVPNConfig(TerminalAware):
         config = config.replace('(template)' + search_fill,
                                 host_name_caption + replace_fill)
         config = config.replace(';<further_servers>', self.further_servers)
+        return config
 
     def get(self):
         """Get the OpenVPN"""
