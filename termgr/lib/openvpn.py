@@ -115,11 +115,11 @@ class OpenVPNConfig(TerminalAware):
         host_name_caption = ''.join(['(', host_name, ')'])
         len_diff = len(host_name_caption) - len(template_caption)
         if len_diff > 0:
-            search_fill = ''
-            replace_fill = ''.join((' ' for _ in range(0, len_diff)))
-        elif len_diff < 0:
-            search_fill = ''.join((' ' for _ in range(0, -len_diff)))
+            search_fill = ''.join((' ' for _ in range(0, len_diff)))
             replace_fill = ''
+        elif len_diff < 0:
+            search_fill = ''
+            replace_fill = ''.join((' ' for _ in range(0, -len_diff)))
         else:
             search_fill = ''
             replace_fill = ''
