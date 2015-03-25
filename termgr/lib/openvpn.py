@@ -102,8 +102,8 @@ class OpenVPNConfig(TerminalAware):
     """
 
     @property
-    def further_servers(self):
-        """List of further servers"""
+    def servers(self):
+        """List of remote servers"""
         return '\n'.join((s.strip() for s in openvpn['SERVERS'].split(',')))
 
     def _render(self, config):
@@ -125,7 +125,7 @@ class OpenVPNConfig(TerminalAware):
             replace_fill = ''
         config = config.replace(template_caption + search_fill,
                                 host_name_caption + replace_fill)
-        config = config.replace(';<further_servers>', self.further_servers)
+        config = config.replace('<servers>', self.servers)
         return config
 
     def get(self):
