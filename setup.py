@@ -15,11 +15,13 @@ setup(
     data_files=[('/usr/local/sbin', ['files/usr/local/sbin/build-key-auto']),
                 ('/usr/local/etc', ['files/usr/local/etc/termgr.conf']),
                 ('/usr/local/share/termgr',
-                 ['files/usr/local/share/termgr/pacman.conf.temp',
-                  'files/usr/local/share/termgr/termgr.wsgi',
+                 ['files/usr/local/share/termgr/mgr.wsgi',
+                  'files/usr/local/share/termgr/pacman.conf.temp',
+                  'files/usr/local/share/termgr/setup.wsgi',
                   'files/usr/local/share/termgr/terminals.conf.temp']),
                 ('/etc/uwsgi/apps-available',
-                 ['files/etc/uwsgi/apps-available/termgr.ini'])],
+                 ['files/etc/uwsgi/apps-available/termgr-mgr.ini',
+                  'files/etc/uwsgi/apps-available/termgr-setup.ini'])],
     license=open('LICENSE.txt').read(),
     description=('Homeinfo Terminal Manager')
     )
