@@ -48,7 +48,21 @@ class SetupController(WsgiController):
         customer id, terminal id and action
         """
         status = 200
-        if action == 'vpn_data':
+        if action == 'location':
+            location = term.location
+            if location is not None:
+                content_type = 'text/plain'
+                charset = 'utf-8'
+                response_body = location.encode(encoding=charset)
+            else:
+                status = 500
+                content_type = 'text/plain'
+                charset = 'utf-8'
+                msg = ' '.join(['No Repository configuration',
+                                'found for terminal',
+                                '.'.join([str(term.tid), str(term.cid)])])
+                response_body = msg.encode(encoding=charset)
+        elif action == 'vpn_data':
             mgr = OpenVPNPackage(term)
             try:
                 response_body = mgr.get()
@@ -74,23 +88,6 @@ class SetupController(WsgiController):
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 response_body = result.encode(encoding=charset)
-            else:
-                status = 500
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                msg = ' '.join(['No Repository configuration',
-                                'found for terminal',
-                                '.'.join([str(term.tid), str(term.cid)])])
-                response_body = msg.encode(encoding=charset)
-        elif action == 'location':
-            try:
-                location = str(term.location)
-            except:
-                result = None
-            if result is not None:
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                response_body = location.encode(encoding=charset)
             else:
                 status = 500
                 content_type = 'text/plain'
