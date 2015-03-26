@@ -82,6 +82,23 @@ class SetupController(WsgiController):
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
+        elif action == 'location':
+            try:
+                location = str(term.location)
+            except:
+                result = None
+            if result is not None:
+                content_type = 'text/plain'
+                charset = 'utf-8'
+                response_body = location.encode(encoding=charset)
+            else:
+                status = 500
+                content_type = 'text/plain'
+                charset = 'utf-8'
+                msg = ' '.join(['No Repository configuration',
+                                'found for terminal',
+                                '.'.join([str(term.tid), str(term.cid)])])
+                response_body = msg.encode(encoding=charset)
         else:
             status = 501
             content_type = 'text/plain'

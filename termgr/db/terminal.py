@@ -3,8 +3,9 @@
 from peewee import ForeignKeyField, IntegerField, CharField, BigIntegerField,\
     DoesNotExist
 from ipaddress import IPv4Address
-from homeinfo.crm.customer import Customer
 from homeinfolib.db import improved, create, connection
+from homeinfo.crm.customer import Customer
+from homeinfo.crm.address import Address
 from .abc import TermgrModel
 
 __author__ = 'Richard Neumann <r.neumann@homeinfo.de>'
@@ -28,6 +29,10 @@ class Terminal(TermgrModel):
     """The terminal's IPv4 address"""
     htpasswd = CharField(16, null=True)
     """The terminal's clear-text htpasswd-password"""
+    virtual_display = IntegerField(null=True)
+    """Virtual display, running on the physical terminal"""
+    _location = ForeignKeyField(Address, null=True, db_column='location')
+    """The address of the terminal"""
 
     def __repr__(self):
         """Converts the terminal to a unique string"""
@@ -69,3 +74,16 @@ class Terminal(TermgrModel):
     def ipv4addr(self, ipv4addr):
         """Sets the IPv4 address"""
         self._ipv4addr = int(ipv4addr)
+
+    @property
+    def location(self):
+        """Returns the location of the terminal"""
+        with connection(Address):
+            try:
+                location = ', '.join([' '.join([self._location.street,
+                                                self._location.house_number]),
+                                      ' '.join([self._location.zip,
+                                                self._location.city])])
+            except:
+                location = None
+        return location
