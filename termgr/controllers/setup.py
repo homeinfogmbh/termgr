@@ -4,6 +4,7 @@ from homeinfolib.wsgi import WsgiController
 from ..db.terminal import Terminal
 from ..lib.openvpn import OpenVPNPackage
 from ..lib.pacman import PacmanConfig
+from ..config import ssh
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -63,11 +64,15 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'pubkey':
-            location = term.pubkey
-            if location is not None:
+            try:
+                with open(ssh['PUBKEY'], 'r') as pk:
+                    pubkey = pk.read()
+            except:
+                pubkey = None
+            if pubkey is not None:
                 content_type = 'text/plain'
                 charset = 'utf-8'
-                response_body = location.encode(encoding=charset)
+                response_body = pubkey.encode(encoding=charset)
             else:
                 status = 500
                 content_type = 'text/plain'
