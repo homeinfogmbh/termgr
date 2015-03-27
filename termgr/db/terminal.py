@@ -6,6 +6,7 @@ from ipaddress import IPv4Address
 from homeinfolib.db import improved, create, connection
 from homeinfo.crm.customer import Customer
 from homeinfo.crm.address import Address
+from ..config import ssh
 from .abc import TermgrModel
 
 __author__ = 'Richard Neumann <r.neumann@homeinfo.de>'
@@ -87,3 +88,9 @@ class Terminal(TermgrModel):
             except:
                 location = None
         return location
+
+    @property
+    def pubkey(self):
+        """Returns the terminal's public SSH key"""
+        with open(ssh['PUBKEY'], 'r') as pk:
+            return pk.read()
