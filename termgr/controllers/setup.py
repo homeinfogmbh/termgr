@@ -65,7 +65,7 @@ class SetupController(WsgiController):
                 response_body = msg.encode(encoding=charset)
         elif action == 'pubkey':
             try:
-                with open(ssh['PUBKEY'], 'r') as pk:
+                with open(ssh['PUBLIC_KEY'], 'r') as pk:
                     pubkey = pk.read()
             except:
                 pubkey = None
