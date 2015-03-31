@@ -10,7 +10,7 @@ from .err import KeygenError, UnconfiguredError
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
-__all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackage']
+__all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackager']
 
 
 class OpenVPNKeyMgr(TerminalAware):
@@ -143,14 +143,15 @@ class OpenVPNConfig(TerminalAware):
         return self._render(config)
 
 
-class OpenVPNPackage(TerminalAware):
+class OpenVPNPackager(TerminalAware):
     """Class that packs an OpenVPN package for the respective
     terminal containing both, the respective OpenVPN keys and
     certificates, as well as its configuration
     """
 
-    def _pack(self, files, config_name):
+    def _pack(self, files):
         """Packs a tar.gz file"""
+        config_name = '.'.join([openvpn['CONFIG_NAME'], 'conf'])
         with NamedTemporaryFile('w+b', suffix='.tar.gz') as tmp:
             with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
                 tar.add(files['ca'], basename(files['ca']))
@@ -173,11 +174,10 @@ class OpenVPNPackage(TerminalAware):
             config = configmgr.get()
             with NamedTemporaryFile('w+') as cfg:
                 cfg.write(config)
-                cfg.seek(0)
+                cfg.seek(0)  # Read file from beginning
                 files = {'ca': ca_path,
                          'key': key_path,
                          'crt': crt_path,
                          'cfg': cfg.name}
-                config_name = '.'.join([openvpn['CONFIG_NAME'], 'conf'])
-                tar_data = self._pack(files, config_name)
+                tar_data = self._pack(files)
             return tar_data

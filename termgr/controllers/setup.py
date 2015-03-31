@@ -2,7 +2,7 @@
 
 from homeinfolib.wsgi import WsgiController
 from ..db.terminal import Terminal
-from ..lib.openvpn import OpenVPNPackage
+from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
 from ..config import ssh
 
@@ -40,11 +40,12 @@ class SetupController(WsgiController):
                             if action is None:
                                 pass
                             else:
-                                return self._handle(term, action)
+                                user = self._query_dict.get('user')
+                                return self._handle(term, action, user=user)
                         else:
                             pass
 
-    def _handle(self, term, action):
+    def _handle(self, term, action, user=None):
         """Handles an action for a certain
         customer id, terminal id and action
         """
@@ -64,10 +65,14 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'pubkey':
-            try:
-                with open(ssh['PUBLIC_KEY'], 'r') as pk:
-                    pubkey = pk.read()
-            except:
+            if user is not None:
+                try:
+                    with open(ssh['_'.join(['PUBLIC_KEY', user.upper()])],
+                              'r') as pk:
+                        pubkey = pk.read()
+                except:
+                    pubkey = None
+            else:
                 pubkey = None
             if pubkey is not None:
                 content_type = 'text/plain'
@@ -82,9 +87,9 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'vpn_data':
-            mgr = OpenVPNPackage(term)
+            packager = OpenVPNPackager(term)
             try:
-                response_body = mgr.get()
+                response_body = packager.get()
             except:
                 response_body = None
             if response_body is not None:
@@ -98,9 +103,9 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'repo_config':
-            mgr = PacmanConfig(term)
+            pacman_cfg = PacmanConfig(term)
             try:
-                result = mgr.get()
+                result = pacman_cfg.get()
             except:
                 result = None
             if result is not None:
