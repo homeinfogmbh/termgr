@@ -40,12 +40,11 @@ class SetupController(WsgiController):
                             if action is None:
                                 pass
                             else:
-                                user = self._query_dict.get('user')
-                                return self._handle(term, action, user=user)
+                                return self._handle(term, action)
                         else:
                             pass
 
-    def _handle(self, term, action, user=None):
+    def _handle(self, term, action):
         """Handles an action for a certain
         customer id, terminal id and action
         """
@@ -65,14 +64,10 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 response_body = msg.encode(encoding=charset)
         elif action == 'pubkey':
-            if user is not None:
-                try:
-                    with open(ssh['_'.join(['PUBLIC_KEY', user.upper()])],
-                              'r') as pk:
-                        pubkey = pk.read()
-                except:
-                    pubkey = None
-            else:
+            try:
+                with open(ssh['PUBLIC_KEY'], 'r') as pk:
+                    pubkey = pk.read()
+            except:
                 pubkey = None
             if pubkey is not None:
                 content_type = 'text/plain'
