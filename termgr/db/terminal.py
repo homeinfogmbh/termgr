@@ -26,8 +26,6 @@ class Terminal(TermgrModel):
     domain = CharField(64)
     """The terminal's domain"""
     _ipv4addr = BigIntegerField(db_column='ipv4addr', null=True)
-    """The terminal's IPv4 address"""
-    htpasswd = CharField(16, null=True)
     """The terminal's clear-text htpasswd-password"""
     virtual_display = IntegerField(null=True)
     """Virtual display, running on the physical terminal"""

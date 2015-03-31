@@ -1,8 +1,7 @@
 """Library for terminal pacman.conf management"""
 
-from ..config import pacman
+from ..config import pacman, net
 from .abc import TerminalAware
-from .htpasswd import HtpasswdEntry
 from .remotectrl import RemoteController
 
 __date__ = "10.03.2015"
@@ -15,12 +14,10 @@ class PacmanConfig(TerminalAware):
 
     def get(self):
         """Returns the rendered configuration file"""
-        htpasswd_entry = HtpasswdEntry(self.terminal)
-        user_name, password = htpasswd_entry.get()
         with open(pacman['TEMPLATE'], 'r') as temp:
             pacman_conf = temp.read()
-        pacman_conf = pacman_conf.replace('<user_name>', user_name)
-        pacman_conf = pacman_conf.replace('<password>', password)
+        pacman_conf = pacman_conf.replace('<addr>', net['IPV4ADDR'])
+        pacman_conf = pacman_conf.replace('<port>', net['HTTP_PRIV_PORT'])
         return pacman_conf
 
 
