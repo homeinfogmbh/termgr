@@ -39,10 +39,9 @@ class Terminal(TermgrModel):
     @classmethod
     def by_ids(cls, cid, tid):
         """Get a terminal by customer id and terminal id"""
-        with connection(Terminal), connection(Customer):
+        with connection(Customer):
             try:
-                term = Terminal.get((Terminal.customer == cid)
-                                    & (Terminal.tid == tid))
+                term = cls.iget((cls.customer == cid) & (cls.tid == tid))
             except DoesNotExist:
                 term = None
         return term
