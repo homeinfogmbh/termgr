@@ -2,9 +2,9 @@
 
 from homeinfolib.wsgi import WsgiController
 from terminallib.db import Terminal
-from ..lib.openvpn import OpenVPNPackager
-from ..lib.pacman import PacmanConfig
-from ..config import ssh
+from terminallib.openvpn import OpenVPNPackager
+from terminallib.pacman import PacmanConfig
+from terminallib.config import ssh
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"

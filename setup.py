@@ -12,7 +12,6 @@ setup(
               'termgr.lib',
               'termgr.xml'],
     data_files=[('/usr/local/sbin', ['files/usr/local/sbin/build-key-auto']),
-                ('/usr/local/etc', ['files/usr/local/etc/termgr.conf']),
                 ('/usr/local/share/termgr',
                  ['files/usr/local/share/termgr/mgr.wsgi',
                   'files/usr/local/share/termgr/pacman.conf.temp',
