@@ -1,8 +1,8 @@
 """Controller for terminal management management"""
 
 from homeinfolib.wsgi import WsgiController
-from ..db.terminal import Terminal
-from ..lib.openvpn import OpenVPNPackage
+from terminallib.db import Terminal
+from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
 
 __date__ = "25.03.2015"
@@ -53,7 +53,7 @@ class MgrController(WsgiController):
         """
         status = 200
         if action == 'vpn_data':
-            mgr = OpenVPNPackage(term)
+            mgr = OpenVPNPackager(term)
             try:
                 response_body = mgr.get()
             except:

@@ -2,7 +2,7 @@
 
 from homeinfo.crm.customer import Customer
 from peewee import DoesNotExist
-from ..db.terminal import Terminal
+from terminallib.db import Terminal
 from ..config import net
 
 __date__ = "10.03.2015"

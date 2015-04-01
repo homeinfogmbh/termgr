@@ -1,7 +1,7 @@
 """Controller for terminal setup management"""
 
 from homeinfolib.wsgi import WsgiController
-from ..db.terminal import Terminal
+from terminallib.db import Terminal
 from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
 from ..config import ssh
