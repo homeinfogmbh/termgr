@@ -9,7 +9,6 @@ setup(
     author_email='r.neumann@homeinfo.de',
     packages=['termgr',
               'termgr.controllers',
-              'termgr.lib',
               'termgr.xml'],
     data_files=[('/usr/local/sbin', ['files/usr/local/sbin/build-key-auto']),
                 ('/usr/local/share/termgr',
