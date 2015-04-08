@@ -1,7 +1,9 @@
 """DB -> XML conversion"""
 
-from .termgr import Class, Address, Terminal, TerminalDetail, TouchEvent
 from base64 import b64encode
+from homeinfolib.mime import mimetype
+from .termgr import Class, Address, Terminal, TerminalDetail, TouchEvent
+from termgr.lib.termgr import Screenshot
 
 __date__ = "08.04.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -34,7 +36,10 @@ def terminal2xml(terminal, cid=False, details=None):
         result = TerminalDetail()
         result.status = details.status
         result.uptime = details.uptime
-        result.screenshot = b64encode(details.screenshot)
+        screenshot = Screenshot(b64encode(details.screenshot))
+        screenshot.mimetype = mimetype(details.screenshot)
+        result.screenshot = screenshot
+        result
         for touch_event in details.touch_events:
             timestamp, x, y, duration = touch_event
             te = TouchEvent(timestamp)
