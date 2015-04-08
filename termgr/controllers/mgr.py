@@ -5,6 +5,7 @@ from terminallib.db import Terminal
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
 from datetime import datetime
+from homeinfolib.mime import mimetype
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -21,7 +22,7 @@ class TerminalDetails():
             data = f.read()
         status = 'UP'
         uptime = 10000
-        screenshot = data
+        screenshot = (datetime.now(), mimetype(data), data)
         touch_events = [(datetime.now(), 0, 1, 3),
                         (datetime.now(), 123, 423, 54)]
         return cls(status, uptime, screenshot, touch_events)
