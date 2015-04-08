@@ -1,6 +1,6 @@
 """DB -> XML conversion"""
 
-from .termgr import Class, Address, Terminal
+from .termgr import Class, Address, Terminal, TerminalDetail
 
 __date__ = "08.04.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -27,7 +27,14 @@ def location2xml(location):
 
 def terminal2xml(terminal, cid=False, details=None):
     """Converts a terminal record into an XML class binding"""
-    result = Terminal()
+    if details is None:
+        result = Terminal()
+    else:
+        result = TerminalDetail()
+        result.status = details.status
+        result.uptime = details.uptime
+        result.screenshot = details.screenshot
+        result.touch_event = [e for e in details.touch_events]
     """Sets basic terminal data"""
     if cid:
         result.cid = terminal.cid
@@ -37,9 +44,4 @@ def terminal2xml(terminal, cid=False, details=None):
     result.ipv4addr = str(terminal.ipv4addr)
     result.virtual_display = terminal.virtual_display
     result.location = location2xml(terminal.location)
-    if details is not None:
-        result.status = details.status
-        result.uptime = details.uptime
-        result.screenshot = details.screenshot
-        result.touch_event = [e for e in details.touch_events]
     return result
