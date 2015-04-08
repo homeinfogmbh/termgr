@@ -21,7 +21,7 @@ def location2xml(location):
     result.street = location.street
     result.house_number = location.house_number
     result.city = location.city
-    result.zip_code = location.zip_code
+    result.zip = location.zip
     return result
 
 
