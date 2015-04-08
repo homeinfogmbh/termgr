@@ -23,7 +23,7 @@ class TerminalManager(WsgiController):
             else:
                 cls = int(cls)
                 terminals = Terminal.iselect(   # @UndefinedVariable
-                    Terminal.cls == cls)
+                    Terminal._cls == cls)
         else:
             cid = int(cid)
             if cls is None:
@@ -32,7 +32,7 @@ class TerminalManager(WsgiController):
             else:
                 cls = int(cls)
                 terminals = Terminal.iselect(  # @UndefinedVariable
-                    (Terminal.customer == cid) & (Terminal.cls == cls))
+                    (Terminal.customer == cid) & (Terminal._cls == cls))
         result = termgr()
         for terminal in terminals:
             xml_data = terminal2xml(terminal)
