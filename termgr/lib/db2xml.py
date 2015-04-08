@@ -1,6 +1,7 @@
 """DB -> XML conversion"""
 
-from .termgr import Class, Address, Terminal, TerminalDetail
+from .termgr import Class, Address, Terminal, TerminalDetail, TouchEvent
+from base64 import b64encode
 
 __date__ = "08.04.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -33,8 +34,14 @@ def terminal2xml(terminal, cid=False, details=None):
         result = TerminalDetail()
         result.status = details.status
         result.uptime = details.uptime
-        result.screenshot = details.screenshot
-        result.touch_event = [e for e in details.touch_events]
+        result.screenshot = b64encode(details.screenshot)
+        for touch_event in details.touch_events:
+            x, y, duration = touch_event
+            te = TouchEvent()
+            te.x = x
+            te.y = y
+            te.duration = duration
+            result.touch_event.append(te)
     """Sets basic terminal data"""
     if cid:
         result.cid = terminal.cid

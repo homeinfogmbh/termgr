@@ -4,10 +4,53 @@ from homeinfolib.wsgi import WsgiController
 from terminallib.db import Terminal
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
+from datetime import datetime
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 __all__ = []
+
+
+class TerminalDetails():
+    """Terminal details wrapper"""
+
+    @classmethod
+    def mockup(cls):
+        """Mockup for testing"""
+        with open('/home/rne/.bashrc', 'wb') as f:
+            data = f.read()
+        status = 'UP'
+        uptime = 10000
+        screenshot = data
+        touch_events = [(0, 1, datetime.now()), (123, 423, datetime.now())]
+        return cls(status, uptime, screenshot, touch_events)
+
+    def __init__(self, status, uptime, screenshot, touch_events):
+        """Sets detail data"""
+        self._status = status
+        self._uptime = uptime
+        self._screenshot = screenshot
+        self._touch_events = touch_events
+
+    @property
+    def status(self):
+        """Returns the status"""
+        return self._status
+
+    @property
+    def uptime(self):
+        """Returns the uptime"""
+        return self._uptime
+
+    @property
+    def screenshot(self):
+        """Returns the screenshot"""
+        return self._screenshot
+
+    @property
+    def touch_events(self):
+        """Returns the touch events"""
+        return self._touch_events
 
 
 class TerminalManager(WsgiController):
@@ -62,6 +105,7 @@ class TerminalManager(WsgiController):
                 (Terminal.customer == cid)
                 & (Terminal.tid == tid))
             result = termgr()
-            terminal_detail = terminal2xml(terminal, cid=True, details=None)
+            details = TerminalDetails.mockup()
+            terminal_detail = terminal2xml(terminal, cid=True, details=details)
             result.terminal_detail = terminal_detail
             return result
