@@ -62,6 +62,6 @@ class TerminalManager(WsgiController):
                 (Terminal.customer == cid)
                 & (Terminal.tid == tid))
             result = termgr()
-            result.terminal_detail = terminal2xml(terminal, cid=True,
-                                                  details=None)
+            terminal_detail = terminal2xml(terminal, cid=True, details=None)
+            result.terminal_detail = terminal_detail
             return result
