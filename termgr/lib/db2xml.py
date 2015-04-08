@@ -36,8 +36,8 @@ def terminal2xml(terminal, cid=False, details=None):
         result.uptime = details.uptime
         result.screenshot = b64encode(details.screenshot)
         for touch_event in details.touch_events:
-            x, y, duration = touch_event
-            te = TouchEvent()
+            timestamp, x, y, duration = touch_event
+            te = TouchEvent(timestamp)
             te.x = x
             te.y = y
             te.duration = duration

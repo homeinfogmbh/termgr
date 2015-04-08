@@ -22,7 +22,8 @@ class TerminalDetails():
         status = 'UP'
         uptime = 10000
         screenshot = data
-        touch_events = [(0, 1, datetime.now()), (123, 423, datetime.now())]
+        touch_events = [(datetime.now(), 0, 1, 3),
+                        (datetime.now(), 123, 423, 54)]
         return cls(status, uptime, screenshot, touch_events)
 
     def __init__(self, status, uptime, screenshot, touch_events):
