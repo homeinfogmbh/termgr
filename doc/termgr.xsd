@@ -18,7 +18,7 @@
         <xs:choice>
             <xs:element name="customer" type="Customer" maxOccurs="unbounded"/>
             <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
-            <xs:element name="screenshot" type="Screenshot" maxOccurs="unbounded"/>
+            <xs:element name="terminal_detail" type="TerminalDetail"/>
         </xs:choice>
     </xs:complexType>
 
@@ -50,7 +50,7 @@
     </xs:complexType>
 
 
-    <!-- Terminal data -->
+    <!-- Basic terminal data -->
     <xs:complexType name="Terminal">
         <xs:annotation>
             <xs:documentation xml:lang="en">
@@ -58,11 +58,11 @@
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="status" type="TerminalStatus"/>
+            <xs:element name="cls" type="Class"/>
+            <xs:element name="domain" type="xs:string"/>
             <xs:element name="ipv4addr" type="IPv4Address"/>
-            <xs:element name="uptime" type="xs:unsignedLong"/>
-            <xs:element name="screenshot" type="Screenshot"/>
-            <xs:element name="touch_event" type="TouchEvent" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="virtual_display" type="xs:integer" minOccurs="0"/>
+            <xs:element name="location" type="Address"/>
         </xs:sequence>
         <xs:attribute name="tid" type="xs:integer" use="required">
             <xs:annotation>
@@ -71,6 +71,76 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="cid" type="xs:integer">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The terminal identifier
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <!-- Terminal data -->
+    <xs:complexType name="TerminalDetail">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                More detailed terminal information
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Terminal">
+                <xs:sequence>
+                    <xs:element name="status" type="TerminalStatus"/>
+                    <xs:element name="uptime" type="xs:unsignedLong"/>
+                    <xs:element name="screenshot" type="Screenshot"/>
+                    <xs:element name="touch_event" type="TouchEvent" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+
+    <!-- Terminal list -->
+    <xs:complexType name="Terminals">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A list of Terminals
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <!-- Terminal class -->
+    <xs:complexType name="Class">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Terminal class
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="touch" type="xs:boolean"/>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <!-- Termianl address -->
+    <xs:complexType name="Address">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Termianl address
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="street" type="xs:string"/>
+            <xs:element name="house_number" type="xs:string"/>
+            <xs:element name="city" type="xs:string"/>
+            <xs:element name="zip_code" type="xs:string"/>
+        </xs:sequence>
     </xs:complexType>
 
 

@@ -50,7 +50,7 @@ class SetupController(WsgiController):
         """
         status = 200
         if action == 'location':
-            location = term.location
+            location = term.address
             if location is not None:
                 content_type = 'text/plain'
                 charset = 'utf-8'
