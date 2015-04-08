@@ -1,7 +1,7 @@
 # ./termgr.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:d5297d54a5b0a5c243ac8f456d16d54e3b56338f
-# Generated 2015-04-08 16:50:48.263963 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
+# Generated 2015-04-08 16:55:22.633064 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
 # Namespace http://xml.homeinfo.de/schema/termgr
 
 from __future__ import unicode_literals
@@ -15,7 +15,7 @@ import sys
 import pyxb.utils.six as _six
 
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:a4aae058-ddfe-11e4-b0ca-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:483448d6-ddff-11e4-abfa-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -133,7 +133,7 @@ class TerminalManager (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Element terminal_detail uses Python identifier terminal_detail
-    __terminal_detail = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'terminal_detail'), 'terminal_detail', '__httpxml_homeinfo_deschematermgr_TerminalManager_terminal_detail', True, pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 21, 12), )
+    __terminal_detail = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'terminal_detail'), 'terminal_detail', '__httpxml_homeinfo_deschematermgr_TerminalManager_terminal_detail', False, pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 21, 12), )
 
     
     terminal_detail = property(__terminal_detail.value, __terminal_detail.set, None, None)
@@ -653,8 +653,6 @@ def _BuildAutomaton ():
          ]))
     st_1._set_transitionSet(transitions)
     transitions = []
-    transitions.append(fac.Transition(st_2, [
-         ]))
     st_2._set_transitionSet(transitions)
     return fac.Automaton(states, counters, False, containing_state=None)
 TerminalManager._Automaton = _BuildAutomaton()
