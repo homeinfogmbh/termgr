@@ -17,7 +17,7 @@ class TerminalDetails():
     @classmethod
     def mockup(cls):
         """Mockup for testing"""
-        with open('/home/rne/.bashrc', 'wb') as f:
+        with open('/home/rne/.bashrc', 'rb') as f:
             data = f.read()
         status = 'UP'
         uptime = 10000
