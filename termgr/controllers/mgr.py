@@ -15,19 +15,22 @@ class TerminalManager(WsgiController):
 
     def _list_terminals(self):
         """Lists available terminals"""
-        cid = self._query_dict['cid']
-        cls = self._query_dict['cls']
+        cid = self._query_dict.get('cid')
+        cls = self._query_dict.get('cls')
         if cid is None:
             if cls is None:
                 terminals = Terminal.iselect(True)  # @UndefinedVariable
             else:
+                cls = int(cls)
                 terminals = Terminal.iselect(   # @UndefinedVariable
                     Terminal.cls == cls)
         else:
+            cid = int(cid)
             if cls is None:
                 terminals = Terminal.iselect(  # @UndefinedVariable
                     Terminal.customer == cid)
             else:
+                cls = int(cls)
                 terminals = Terminal.iselect(  # @UndefinedVariable
                     (Terminal.customer == cid) & (Terminal.cls == cls))
         result = termgr()
