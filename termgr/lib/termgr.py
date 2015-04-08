@@ -1,7 +1,7 @@
 # ./termgr.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:d5297d54a5b0a5c243ac8f456d16d54e3b56338f
-# Generated 2015-04-08 17:04:41.360228 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
+# Generated 2015-04-08 17:16:01.116366 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
 # Namespace http://xml.homeinfo.de/schema/termgr
 
 from __future__ import unicode_literals
@@ -15,7 +15,7 @@ import sys
 import pyxb.utils.six as _six
 
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:953b51fa-de00-11e4-b1b3-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:2a65d25e-de02-11e4-9cb1-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -631,12 +631,18 @@ def _BuildAutomaton ():
     import pyxb.utils.fac as fac
 
     counters = set()
+    cc_0 = fac.CounterCondition(min=0, max=None, metadata=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 19, 12))
+    counters.add(cc_0)
+    cc_1 = fac.CounterCondition(min=0, max=None, metadata=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 20, 12))
+    counters.add(cc_1)
     states = []
     final_update = set()
+    final_update.add(fac.UpdateInstruction(cc_0, False))
     symbol = pyxb.binding.content.ElementUse(TerminalManager._UseForTag(pyxb.namespace.ExpandedName(None, 'customer')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 19, 12))
     st_0 = fac.State(symbol, is_initial=True, final_update=final_update, is_unordered_catenation=False)
     states.append(st_0)
     final_update = set()
+    final_update.add(fac.UpdateInstruction(cc_1, False))
     symbol = pyxb.binding.content.ElementUse(TerminalManager._UseForTag(pyxb.namespace.ExpandedName(None, 'terminal')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 20, 12))
     st_1 = fac.State(symbol, is_initial=True, final_update=final_update, is_unordered_catenation=False)
     states.append(st_1)
@@ -646,15 +652,15 @@ def _BuildAutomaton ():
     states.append(st_2)
     transitions = []
     transitions.append(fac.Transition(st_0, [
-         ]))
+        fac.UpdateInstruction(cc_0, True) ]))
     st_0._set_transitionSet(transitions)
     transitions = []
     transitions.append(fac.Transition(st_1, [
-         ]))
+        fac.UpdateInstruction(cc_1, True) ]))
     st_1._set_transitionSet(transitions)
     transitions = []
     st_2._set_transitionSet(transitions)
-    return fac.Automaton(states, counters, False, containing_state=None)
+    return fac.Automaton(states, counters, True, containing_state=None)
 TerminalManager._Automaton = _BuildAutomaton()
 
 

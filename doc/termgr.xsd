@@ -16,8 +16,8 @@
             </xs:documentation>
         </xs:annotation>
         <xs:choice>
-            <xs:element name="customer" type="Customer" maxOccurs="unbounded"/>
-            <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
+            <xs:element name="customer" type="Customer" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="terminal" type="Terminal" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="terminal_detail" type="TerminalDetail"/>
         </xs:choice>
     </xs:complexType>
