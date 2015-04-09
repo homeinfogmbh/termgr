@@ -1,6 +1,6 @@
 """Controller for terminal setup management"""
 
-from homeinfolib.wsgi import WsgiController
+from homeinfolib.wsgi import WsgiController, WsgiResponse
 from terminallib.db import Terminal
 from terminallib.openvpn import OpenVPNPackager
 from terminallib.pacman import PacmanConfig
@@ -16,33 +16,34 @@ class SetupController(WsgiController):
 
     def _run(self):
         """Interpret query dictionary"""
-        cid_str = self._query_dict.get('cid')
+        cid_str = self.qd.get('cid')
         if cid_str is None:
-            pass
+            return self._error('No customer ID specified', status=400)
         else:
             try:
                 cid = int(cid_str)
             except:
-                pass
+                return self._error('Invalid customer ID', status=400)
             else:
-                tid_str = self._query_dict.get('tid')
+                tid_str = self.qd.get('tid')
                 if tid_str is None:
-                    pass
+                    return self._error('No terminal ID specified', status=400)
                 else:
                     try:
                         tid = int(tid_str)
                     except:
-                        pass
+                        return self._error('Invalid terminal ID', status=400)
                     else:
                         term = Terminal.by_ids(cid, tid)
                         if term is not None:
-                            action = self._query_dict.get('action')
+                            action = self.qd.get('action')
                             if action is None:
-                                pass
+                                return self._error('No action specified',
+                                                   status=400)
                             else:
                                 return self._handle(term, action)
                         else:
-                            pass
+                            return self._error('No such terminal', status=404)
 
     def _handle(self, term, action):
         """Handles an action for a certain
@@ -56,13 +57,10 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body = location.encode(encoding=charset)
             else:
-                status = 500
-                content_type = 'text/plain'
-                charset = 'utf-8'
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                response_body = msg.encode(encoding=charset)
+                return self._internal_server_error(msg)
         elif action == 'pubkey':
             try:
                 with open(ssh['PUBLIC_KEY'], 'r') as pk:
@@ -74,13 +72,10 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body = pubkey.encode(encoding=charset)
             else:
-                status = 500
-                content_type = 'text/plain'
-                charset = 'utf-8'
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                response_body = msg.encode(encoding=charset)
+                return self._internal_server_error(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(term)
             try:
@@ -91,12 +86,9 @@ class SetupController(WsgiController):
                 content_type = 'application/x-gzip'
                 charset = None
             else:
-                status = 500
-                content_type = 'text/plain'
-                charset = 'utf-8'
                 msg = ' '.join(['No OpenVPN configuration found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                response_body = msg.encode(encoding=charset)
+                return self._internal_server_error(msg)
         elif action == 'repo_config':
             pacman_cfg = PacmanConfig(term)
             try:
@@ -108,17 +100,12 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body = result.encode(encoding=charset)
             else:
-                status = 500
-                content_type = 'text/plain'
-                charset = 'utf-8'
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                response_body = msg.encode(encoding=charset)
+                return self._internal_server_error(msg)
         else:
-            status = 501
-            content_type = 'text/plain'
-            charset = 'utf-8'
             msg = ''.join(['Method "', action, '" is not implemented'])
-            response_body = msg.encode(encoding=charset)
-        return (status, content_type, charset, response_body)
+            return self._error(msg, status=501)
+        return WsgiResponse(status, content_type, response_body,
+                            charset=charset, cors=True)

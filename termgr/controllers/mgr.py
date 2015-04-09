@@ -1,15 +1,15 @@
 """Controller for terminal management management"""
 
+from datetime import datetime
+from homeinfolib.mime import mimetype
 from homeinfolib.wsgi import WsgiController
 from terminallib.db import Terminal
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
-from datetime import datetime
-from homeinfolib.mime import mimetype
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
-__all__ = []
+__all__ = ['TerminalManager']
 
 
 class TerminalDetails():
@@ -100,14 +100,14 @@ class TerminalManager(WsgiController):
 
     def _details(self, cid, tid):
         """Get details of a certain terminal"""
+        result = termgr()
         if cid is None or tid is None:
-            return None  # TODO: handle error
+            return result  # TODO: handle error
         else:
             terminal = Terminal.iget(   # @UndefinedVariable
                 (Terminal.customer == cid)
                 & (Terminal.tid == tid))
-            result = termgr()
-            details = TerminalDetails.mockup()
+            details = TerminalDetails.mockup()  # XXX: Testing
             terminal_detail = terminal2xml(terminal, cid=True, details=details)
             result.terminal_detail = terminal_detail
             return result
