@@ -1,6 +1,7 @@
 """Controller for terminal setup management"""
 
-from homeinfolib.wsgi import WsgiController, WsgiResponse
+from homeinfolib.wsgi import WsgiController, WsgiResponse, Error,\
+    InternalServerError
 from terminallib.db import Terminal
 from terminallib.openvpn import OpenVPNPackager
 from terminallib.pacman import PacmanConfig
@@ -18,32 +19,31 @@ class SetupController(WsgiController):
         """Interpret query dictionary"""
         cid_str = self.qd.get('cid')
         if cid_str is None:
-            return self._error('No customer ID specified', status=400)
+            return Error('No customer ID specified', status=400)
         else:
             try:
                 cid = int(cid_str)
             except:
-                return self._error('Invalid customer ID', status=400)
+                return Error('Invalid customer ID', status=400)
             else:
                 tid_str = self.qd.get('tid')
                 if tid_str is None:
-                    return self._error('No terminal ID specified', status=400)
+                    return Error('No terminal ID specified', status=400)
                 else:
                     try:
                         tid = int(tid_str)
                     except:
-                        return self._error('Invalid terminal ID', status=400)
+                        return Error('Invalid terminal ID', status=400)
                     else:
                         term = Terminal.by_ids(cid, tid)
                         if term is not None:
                             action = self.qd.get('action')
                             if action is None:
-                                return self._error('No action specified',
-                                                   status=400)
+                                return Error('No action specified', status=400)
                             else:
                                 return self._handle(term, action)
                         else:
-                            return self._error('No such terminal', status=404)
+                            return Error('No such terminal', status=404)
 
     def _handle(self, term, action):
         """Handles an action for a certain
@@ -60,7 +60,7 @@ class SetupController(WsgiController):
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                return self._internal_server_error(msg)
+                return InternalServerError(msg)
         elif action == 'pubkey':
             try:
                 with open(ssh['PUBLIC_KEY'], 'r') as pk:
@@ -75,7 +75,7 @@ class SetupController(WsgiController):
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                return self._internal_server_error(msg)
+                return InternalServerError(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(term)
             try:
@@ -88,7 +88,7 @@ class SetupController(WsgiController):
             else:
                 msg = ' '.join(['No OpenVPN configuration found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                return self._internal_server_error(msg)
+                return InternalServerError(msg)
         elif action == 'repo_config':
             pacman_cfg = PacmanConfig(term)
             try:
@@ -103,9 +103,9 @@ class SetupController(WsgiController):
                 msg = ' '.join(['No Repository configuration',
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
-                return self._internal_server_error(msg)
+                return InternalServerError(msg)
         else:
             msg = ''.join(['Method "', action, '" is not implemented'])
-            return self._error(msg, status=501)
+            return Error(msg, status=501)
         return WsgiResponse(status, content_type, response_body,
                             charset=charset, cors=True)
