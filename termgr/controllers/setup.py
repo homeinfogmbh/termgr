@@ -66,7 +66,9 @@ class SetupController(WsgiController):
             if user == 'homeinfo':
                 pubkey_file = ssh['PUBLIC_KEY_HOMEINFO']
             elif user == 'heed':
-                pubkey_file = ssh['PUBLIC_KEY_HEED']
+                pubkey_file = ssh['PUBLIC_KEY_TERMGR']
+            elif user == 'termgr':
+                pubkey_file = ssh['PUBLIC_KEY_TERMGR']
             else:
                 return Error('Invalid user', status=400)
             try:
