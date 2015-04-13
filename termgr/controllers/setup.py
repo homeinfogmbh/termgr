@@ -72,15 +72,14 @@ class SetupController(WsgiController):
             try:
                 with open(pubkey_file, 'r') as pk:
                     pubkey = pk.read()
-            except:
-                pubkey = None
-            if pubkey is not None:
+            except PermissionError:
+                return Error('Not allowed to read public key')
+            except FileNotFoundError:
+                return Error('Public key not found')
+            else:
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 response_body = pubkey.encode(encoding=charset)
-            else:
-                msg = ' '.join(['No public key found for user', user])
-                return InternalServerError(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(term)
             try:
