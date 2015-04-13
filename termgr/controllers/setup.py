@@ -62,8 +62,15 @@ class SetupController(WsgiController):
                                 '.'.join([str(term.tid), str(term.cid)])])
                 return InternalServerError(msg)
         elif action == 'pubkey':
+            user = self.qd.get('user')
+            if user == 'homeinfo':
+                pubkey_file = ssh['PUBLIC_KEY_HOMEINFO']
+            elif user == 'heed':
+                pubkey_file = ssh['PUBLIC_KEY_HOMEINFO']
+            else:
+                return Error('Invalid user', status=400)
             try:
-                with open(ssh['PUBLIC_KEY'], 'r') as pk:
+                with open(pubkey_file, 'r') as pk:
                     pubkey = pk.read()
             except:
                 pubkey = None
@@ -72,9 +79,7 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body = pubkey.encode(encoding=charset)
             else:
-                msg = ' '.join(['No Repository configuration',
-                                'found for terminal',
-                                '.'.join([str(term.tid), str(term.cid)])])
+                msg = ' '.join(['No public key found for user', user])
                 return InternalServerError(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(term)
