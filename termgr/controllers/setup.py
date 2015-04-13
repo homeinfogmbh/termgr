@@ -66,7 +66,7 @@ class SetupController(WsgiController):
             if user == 'homeinfo':
                 pubkey_file = ssh['PUBLIC_KEY_HOMEINFO']
             elif user == 'heed':
-                pubkey_file = ssh['PUBLIC_KEY_TERMGR']
+                pubkey_file = ssh['PUBLIC_KEY_HIPSTER']
             elif user == 'termgr':
                 pubkey_file = ssh['PUBLIC_KEY_TERMGR']
             else:
