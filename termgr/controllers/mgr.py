@@ -275,8 +275,14 @@ class TerminalManager(WsgiController):
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
             self._gen_vpn(cid, tid)
+            types = [type(cid), type(tid), type(street), type(house_number),
+                     type(zip_code), type(city), type(cls_id), type(cls_name),
+                     type(touch), type(domain), type(ipv4addr),
+                     type(virtual_display)]
+            debug = ', '.join((str(t) for t in types))
             term.isave()
             xml_data = terminal2xml(term, cid=True)
-            return OK(xml_data, content_type='application/xml')
+            #return OK(xml_data, content_type='application/xml')
+            return OK(debug)
         else:
             return Error('Terminal already exists', status=400)
