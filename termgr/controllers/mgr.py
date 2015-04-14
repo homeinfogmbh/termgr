@@ -2,10 +2,11 @@
 
 from datetime import datetime
 from homeinfolib.mime import mimetype
-from homeinfolib.wsgi import WsgiController
+from homeinfolib.wsgi import WsgiController, Error
 from terminallib.db import Terminal
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
+from homeinfo.crm.address import Address
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -59,10 +60,13 @@ class TerminalManager(WsgiController):
     """Manages terminals"""
 
     def _run(self):
-        """foo"""
+        """Runs the terminal manager"""
         cid = self._query_dict.get('cid')
         if cid is not None:
-            cid = int(cid)
+            try:
+                cid = int(cid)
+            except (TypeError, ValueError):
+                return Error('Invalid customer ID', status=400)
         tid = self._query_dict.get('tid')
         if tid is not None:
             tid = int(tid)
@@ -111,3 +115,20 @@ class TerminalManager(WsgiController):
             terminal_detail = terminal2xml(terminal, cid=True, details=details)
             result.terminal_detail = terminal_detail
             return result
+
+    def _add(self, cid, tid, street, house_number, zip_code, city, cls=None,
+             domain=None, ipv4addr=None, virtual_display=None):
+        """Adds a terminal with the specified configuration"""
+        term = Terminal.by_ids(cid, tid)
+        if term is None:
+            term = Terminal()
+            term.customer = cid
+            term.tid = tid
+            addr = Address.iselect(  # @UndefinedVariable
+                (Address.street == street) &
+                (Address.house_number == house_number) &
+                (Address.zip == zip_code) &
+                (Address.city == city))
+            addr = Address()
+            addr.street = street
+            addr
