@@ -281,7 +281,7 @@ class TerminalManager(WsgiController):
                      type(virtual_display)]
             debug = ', '.join((str(t) for t in types))
             # term.isave()
-            xml_data = terminal2xml(term, cid=True)
+            # xml_data = terminal2xml(term, cid=True)
             #return OK(xml_data, content_type='application/xml')
             return OK(debug)
         else:
