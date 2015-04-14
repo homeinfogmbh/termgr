@@ -12,14 +12,14 @@ XXX: Please note:
       not provide authentication by itself
 """
 
-from termgr.controllers.setup import CtlController
+from termgr.controllers.mgr import TerminalManager
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 
 def application(environ, start_response):
     """Main WSGI method"""
-    ctrl = SetupController(environ.get('PATH_INFO', ''),
+    ctrl = TerminalManager(environ.get('PATH_INFO', ''),
                            environ.get('QUERY_STRING', ''))
     status, response_headers, response_body = ctrl.run()
     start_response(status, response_headers)
