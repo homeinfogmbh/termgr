@@ -145,7 +145,7 @@ class TerminalManager(WsgiController):
         for terminal in terminals:
             xml_data = terminal2xml(terminal)
             result.terminal.append(xml_data)
-        return OK(result.toxml(), content_type='application/xml')
+        return OK(result, content_type='application/xml')
 
     def _details(self, cid, tid):
         """Get details of a certain terminal"""
@@ -159,7 +159,7 @@ class TerminalManager(WsgiController):
             details = TerminalDetails.mockup()  # XXX: Testing
             terminal_detail = terminal2xml(terminal, cid=True, details=details)
             result.terminal_detail = terminal_detail
-            return OK(result.toxml(), content_type='application/xml')
+            return OK(result, content_type='application/xml')
 
     def _gen_ip_addr(self):
         """Generates a unique IPv4 address for the terminal"""
@@ -264,6 +264,6 @@ class TerminalManager(WsgiController):
                     return Error('Could not convert terminal data to XML',
                                  status=500)
                 else:
-                    return OK(xml_data.toxml(), content_type='application/xml')
+                    return OK(xml_data, content_type='application/xml')
         else:
             return Error('Terminal already exists', status=400)
