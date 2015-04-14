@@ -18,8 +18,6 @@ __all__ = ['TerminalManager']
 class TerminalDetails():
     """Terminal details wrapper"""
 
-    DEBUG = True
-
     @classmethod
     def mockup(cls):
         """Mockup for testing"""
@@ -66,6 +64,8 @@ class TerminalManager(WsgiController):
     The terminal manager is used for
     internal terminal management
     """
+
+    DEBUG = True
 
     def _run(self):
         """Runs the terminal manager"""
