@@ -286,7 +286,9 @@ class TerminalManager(WsgiController):
             term._cls = self._add_cls(cls_id, cls_name, touch)
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
-            self._gen_vpn(cid, tid)
+            vpn_gen = self._gen_vpn(cid, tid)
+            if not vpn_gen:
+                return Error(str(vpn_gen), status=500)
             term.isave()
             xml_data = termgr()
             xml_data.terminal = [terminal2xml(term, cid=True)]
