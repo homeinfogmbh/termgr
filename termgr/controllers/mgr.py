@@ -70,20 +70,20 @@ class TerminalManager(WsgiController):
     def _run(self):
         """Runs the terminal manager"""
         try:
-            cid = int(self._query_dict.get('cid'))
+            cid = int(self.qd.get('cid'))
         except (TypeError, ValueError):
             return Error('Invalid customer ID', status=400)
         try:
-            tid = int(self._query_dict.get('tid'))
+            tid = int(self.qd.get('tid'))
         except (TypeError, ValueError):
             return Error('Invalid terminal ID', status=400)
-        cls_id = self._query_dict.get('cls')
+        cls_id = self.qd.get('cls')
         if cls_id is not None:
             try:
                 cls_id = int(cls_id)
             except (ValueError, TypeError):
                 return Error('Invalid class ID', status=400)
-        action = self._query_dict.get('action')
+        action = self.qd.get('action')
         if action is None:
             return Error('No action specified', status=400)
         elif action == 'list':
