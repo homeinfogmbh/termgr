@@ -143,7 +143,7 @@ class TerminalManager(WsgiController):
                     (Terminal.customer == cid) & (Terminal._cls == cls))
         result = termgr()
         for terminal in terminals:
-            xml_data = terminal2xml(terminal)
+            xml_data = terminal2xml(terminal, cid=True)
             result.terminal.append(xml_data)
         return OK(result, content_type='application/xml')
 
