@@ -275,10 +275,9 @@ class TerminalManager(WsgiController):
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
             self._gen_vpn(cid, tid)
-            types = [type(cid), type(tid), type(street), type(house_number),
-                     type(zip_code), type(city), type(cls_id), type(cls_name),
-                     type(touch), type(domain), type(ipv4addr),
-                     type(virtual_display)]
+            types = [type(term.customer), type(term.tid), type(term.ipv4addr),
+                     type(term._location), type(term._cls), type(term._domain),
+                     type(term.virtual_display)]
             debug = ', '.join((str(t) for t in types))
             # term.isave()
             # xml_data = terminal2xml(term, cid=True)
