@@ -7,6 +7,7 @@ from homeinfolib.wsgi import WsgiController, Error, OK
 from homeinfo.crm.address import Address
 from terminallib.db import Terminal, Class, Domain
 from terminallib.config import net, openvpn
+from terminallib.remotectrl import RemoteController
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
 from homeinfolib.system import run
@@ -160,11 +161,32 @@ class TerminalManager(WsgiController):
             result.terminal.append(xml_data)
         return OK(result, content_type='application/xml')
 
+    def _get_screenshot(self, terminal, thumbnail=False, display=None):
+        """Gets details of a terminal"""
+        ctrl = RemoteController(terminal)
+        scrot = '/usr/bin/scrot'
+        scrot_args = ['-z', '-t', '20']
+        screenshot = '/tmp/screenshot.png'
+        thumbnail = '/tmp/screenshot-thumb.png'
+        display = display or ':0'
+        scrot_result = ctrl.execute('='.join(['export DISPLAY', display]),
+                                    ';', terminal,
+                                    [scrot] + scrot_args + [screenshot])
+        if scrot_result:
+            if thumbnail:
+                result = ctrl.getfile(thumbnail)
+                return result
+            else:
+                result = ctrl.getfile(screenshot)
+                return result
+        else:
+            return scrot_result
+
     def _details(self, cid, tid):
         """Get details of a certain terminal"""
         result = termgr()
         if cid is None or tid is None:
-            return result  # TODO: handle error
+            return Error('No terminal ID or customer ID specified', status=400)
         else:
             try:
                 terminal = Terminal.iget(   # @UndefinedVariable
