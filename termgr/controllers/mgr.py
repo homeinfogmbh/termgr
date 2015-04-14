@@ -275,17 +275,8 @@ class TerminalManager(WsgiController):
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
             self._gen_vpn(cid, tid)
-            try:
-                term.isave()
-            except:
-                return Error('Could not save display', status=500)
-            else:
-                try:
-                    xml_data = terminal2xml(term, cid=True)
-                except:
-                    return Error('Could not convert terminal data to XML',
-                                 status=500)
-                else:
-                    return OK(xml_data, content_type='application/xml')
+            term.isave()
+            xml_data = terminal2xml(term, cid=True)
+            return OK(xml_data, content_type='application/xml')
         else:
             return Error('Terminal already exists', status=400)
