@@ -18,6 +18,8 @@ __all__ = ['TerminalManager']
 class TerminalDetails():
     """Terminal details wrapper"""
 
+    DEBUG = True
+
     @classmethod
     def mockup(cls):
         """Mockup for testing"""
