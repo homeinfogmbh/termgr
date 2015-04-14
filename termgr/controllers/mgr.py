@@ -1,6 +1,5 @@
 """Controller for terminal management management"""
 
-from os import chdir
 from datetime import datetime
 from ipaddress import IPv4Address, AddressValueError
 from homeinfolib.mime import mimetype
@@ -255,10 +254,8 @@ class TerminalManager(WsgiController):
 
     def _gen_vpn(self, cid, tid):
         """Generates an OpenVPN key pair for the terminal"""
-        rsa_dir = openvpn['EASY_RSA_DIR']
         build_script = openvpn['BUILD_SCRIPT']
         name = '.'.join([str(tid), str(cid)])
-        chdir(rsa_dir)
         pr = run([build_script, name])
         return str(pr)
 
