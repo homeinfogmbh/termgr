@@ -268,8 +268,7 @@ class TerminalManager(WsgiController):
         """Generates an OpenVPN key pair for the terminal"""
         build_script = openvpn['BUILD_SCRIPT']
         name = '.'.join([str(tid), str(cid)])
-        pr = run([build_script, name])
-        return str(pr)
+        return run([build_script, name])
 
     def _add(self, cid, tid, street, house_number, zip_code, city, cls_id,
              cls_name=None, touch=None, domain=None, ipv4addr=None,
@@ -287,10 +286,12 @@ class TerminalManager(WsgiController):
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
             vpn_gen = self._gen_vpn(cid, tid)
-            return Error(str(vpn_gen) + '\nExit code: ' + repr(vpn_gen), status=500)
-            term.isave()
-            xml_data = termgr()
-            xml_data.terminal = [terminal2xml(term, cid=True)]
-            return OK(xml_data, content_type='application/xml')
+            if vpn_gen:
+                term.isave()
+                xml_data = termgr()
+                xml_data.terminal = [terminal2xml(term, cid=True)]
+                return OK(xml_data, content_type='application/xml')
+            else:
+                Error('Could not generate OpenVPN keys', status=500)
         else:
             return Error('Terminal already exists', status=400)
