@@ -288,7 +288,8 @@ class TerminalManager(WsgiController):
             term.virtual_display = virtual_display
             self._gen_vpn(cid, tid)
             term.isave()
-            xml_data = terminal2xml(term, cid=True)
+            xml_data = termgr()
+            xml_data.terminal = [terminal2xml(term, cid=True)]
             return OK(xml_data, content_type='application/xml')
         else:
             return Error('Terminal already exists', status=400)
