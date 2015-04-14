@@ -1,14 +1,16 @@
 """Controller for terminal management management"""
 
+from os import chdir
 from datetime import datetime
+from ipaddress import IPv4Address, AddressValueError
 from homeinfolib.mime import mimetype
 from homeinfolib.wsgi import WsgiController, Error, OK
+from homeinfo.crm.address import Address
 from terminallib.db import Terminal, Class, Domain
+from terminallib.config import net, openvpn
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
-from homeinfo.crm.address import Address
-from ipaddress import IPv4Address, AddressValueError
-from terminallib.config import net
+from homeinfolib.system import run
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -237,19 +239,28 @@ class TerminalManager(WsgiController):
     def _get_tid(self, cid, tid):
         """Gets a unique terminal ID for the customer"""
         if tid is None:
-            return self._gen_tid()
+            return self._gen_tid(cid)
         else:
             if tid in Terminal.used_tids(cid):
-                return self._gen_tid()
+                return self._gen_tid(cid)
             else:
                 return tid
 
-    def _gen_tid(self):
-        """Generates a unique terminal identifier"""
+    def _gen_tid(self, cid):
+        """Generates a unique terminal identifier for a customer"""
         tid = 1
         while tid in Terminal.used_tids(cid):
             tid += 1
         return tid
+
+    def _gen_vpn(self, cid, tid):
+        """Generates an OpenVPN key pair for the terminal"""
+        rsa_dir = openvpn['EASY_RSA_DIR']
+        build_script = openvpn['BUILD_SCRIPT']
+        name = '.'.join([str(tid), str(cid)])
+        chdir(rsa_dir)
+        pr = run([build_script, name])
+        return str(pr)
 
     def _add(self, cid, tid, street, house_number, zip_code, city, cls_id,
              cls_name=None, touch=None, domain=None, ipv4addr=None,
@@ -265,6 +276,7 @@ class TerminalManager(WsgiController):
             term._cls = self._add_cls(cls_id, cls_name, touch)
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
+            self._gen_vpn(cid, tid)
             try:
                 term.isave()
             except:
