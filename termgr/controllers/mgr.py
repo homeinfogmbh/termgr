@@ -69,14 +69,18 @@ class TerminalManager(WsgiController):
 
     def _run(self):
         """Runs the terminal manager"""
-        try:
-            cid = int(self.qd.get('cid'))
-        except (TypeError, ValueError):
-            return Error('Invalid customer ID', status=400)
-        try:
-            tid = int(self.qd.get('tid'))
-        except (TypeError, ValueError):
-            return Error('Invalid terminal ID', status=400)
+        cid = self.qd.get('cid')
+        if cid is not None:
+            try:
+                cid = int(cid)
+            except (TypeError, ValueError):
+                return Error('Invalid customer ID', status=400)
+        tid = self.qd.get('tid')
+        if tid is not None:
+            try:
+                tid = int(tid)
+            except (TypeError, ValueError):
+                return Error('Invalid terminal ID', status=400)
         cls_id = self.qd.get('cls')
         if cls_id is not None:
             try:
@@ -89,8 +93,16 @@ class TerminalManager(WsgiController):
         elif action == 'list':
             return self._list_terminals(cid, cls_id)
         elif action == 'details':
+            if cid is None:
+                return Error('No customer ID specified')
+            if tid is None:
+                return Error('No terminal ID specified')
             return self._details(cid, tid)
         elif action == 'add':
+            if cid is None:
+                return Error('No customer ID specified')
+            if tid is None:
+                return Error('No terminal ID specified')
             street = self.qd.get('street')
             if street is None:
                 return Error('No street specified')
