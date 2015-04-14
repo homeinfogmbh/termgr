@@ -280,7 +280,7 @@ class TerminalManager(WsgiController):
                      type(touch), type(domain), type(ipv4addr),
                      type(virtual_display)]
             debug = ', '.join((str(t) for t in types))
-            term.isave()
+            # term.isave()
             xml_data = terminal2xml(term, cid=True)
             #return OK(xml_data, content_type='application/xml')
             return OK(debug)
