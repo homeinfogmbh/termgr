@@ -2,11 +2,13 @@
 
 from datetime import datetime
 from homeinfolib.mime import mimetype
-from homeinfolib.wsgi import WsgiController, Error
-from terminallib.db import Terminal
+from homeinfolib.wsgi import WsgiController, Error, OK
+from terminallib.db import Terminal, Class, Domain
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
 from homeinfo.crm.address import Address
+from ipaddress import IPv4Address, AddressValueError
+from terminallib.config import net
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -57,31 +59,72 @@ class TerminalDetails():
 
 
 class TerminalManager(WsgiController):
-    """Manages terminals"""
+    """Lists, adds and removes terminals
+
+    The terminal manager is used for
+    internal terminal management
+    """
 
     def _run(self):
         """Runs the terminal manager"""
-        cid = self._query_dict.get('cid')
-        if cid is not None:
+        try:
+            cid = int(self._query_dict.get('cid'))
+        except (TypeError, ValueError):
+            return Error('Invalid customer ID', status=400)
+        try:
+            tid = int(self._query_dict.get('tid'))
+        except (TypeError, ValueError):
+            return Error('Invalid terminal ID', status=400)
+        cls_id = self._query_dict.get('cls')
+        if cls_id is not None:
             try:
-                cid = int(cid)
-            except (TypeError, ValueError):
-                return Error('Invalid customer ID', status=400)
-        tid = self._query_dict.get('tid')
-        if tid is not None:
-            tid = int(tid)
-        cls = self._query_dict.get('cls')
-        if cls is not None:
-            cls = int(cls)
+                cls_id = int(cls_id)
+            except (ValueError, TypeError):
+                return Error('Invalid class ID', status=400)
         action = self._query_dict.get('action')
-        if action == 'list':
+        if action is None:
+            return Error('No action specified', status=400)
+        elif action == 'list':
             return self._list_terminals(cid, cls)
         elif action == 'details':
             return self._details(cid, tid)
+        elif action == 'add':
+            street = self.qd.get('street')
+            if street is None:
+                return Error('No street specified')
+            house_number = self.qd.get('house_number')
+            if house_number is None:
+                return Error('No house number specified')
+            zip_code = self.qd.get('zip_code')
+            if zip_code is None:
+                return Error('No zip code specified')
+            city = self.qd.get('city')
+            if city is None:
+                return Error('No city specified')
+            cls_name = self.qd.get('cls_name')
+            touch = self.qd.get('touch')
+            if cls_id is None and (cls_name is None or touch is None):
+                return Error('Must either specify terminal class'
+                             ' id or class name and touch flag')
+            domain = self.qd.get('domain')
+            if domain is None:
+                return Error('No domain specified', status=400)
+            ipv4addr = self.qd.get('ipv4addr')
+            if ipv4addr is not None:
+                try:
+                    ipv4addr = IPv4Address(ipv4addr)
+                except AddressValueError:
+                    return Error('Invalid IPv4 address', status=400)
+            virtual_display = self.qd.get('virtual_display')
+            display = self._add(cid, tid, street, house_number, zip_code, city,
+                                cls_id=cls_id, cls_name=cls_name, touch=touch,
+                                domain=domain, ipv4addr=ipv4addr,
+                                virtual_display=virtual_display)
+            return display
         else:
-            return None
+            return Error('Invalid action', status=400)
 
-    def _list_terminals(self, cid, cls):
+    def _list_terminals(self, cid=None, cls=None):
         """Lists available terminals"""
         if cid is None:
             if cls is None:
@@ -100,7 +143,7 @@ class TerminalManager(WsgiController):
         for terminal in terminals:
             xml_data = terminal2xml(terminal)
             result.terminal.append(xml_data)
-        return result
+        return OK(result.toxml(), content_type='application/xml')
 
     def _details(self, cid, tid):
         """Get details of a certain terminal"""
@@ -114,21 +157,111 @@ class TerminalManager(WsgiController):
             details = TerminalDetails.mockup()  # XXX: Testing
             terminal_detail = terminal2xml(terminal, cid=True, details=details)
             result.terminal_detail = terminal_detail
-            return result
+            return OK(result.toxml(), content_type='application/xml')
 
-    def _add(self, cid, tid, street, house_number, zip_code, city, cls=None,
-             domain=None, ipv4addr=None, virtual_display=None):
+    def _gen_ip_addr(self):
+        """Generates a unique IPv4 address for the terminal"""
+        net_base = net['IPV4NET']
+        ipv4addr_base = IPv4Address(net_base)
+        # Skip *.0 (network) and *.1 (server)
+        ipv4addr = ipv4addr_base + 2
+        while ipv4addr in Terminal.used_ipv4addr:
+            ipv4addr += 1
+        return ipv4addr
+
+    def _get_ipv4addr(self, ipv4addr):
+        """Gets a valid, unused IPv4 address for a terminal"""
+        try:
+            ipv4addr = IPv4Address(ipv4addr)
+        except AddressValueError:
+            return self._gen_ip_addr()
+        else:
+            if ipv4addr not in Terminal.used_ipv4addr:
+                return ipv4addr
+            else:
+                return self._gen_ip_addr()
+
+    def _add_addr(self, street, house_number, zip_code, city):
+        """Adds an address record to the database"""
+        addr = Address.iselect(  # @UndefinedVariable
+            (Address.street == street) &
+            (Address.house_number == house_number) &
+            (Address.zip_code == zip_code) &
+            (Address.city == city))
+        if addr is None:
+            addr = Address()
+            addr.street = street
+            addr.house_number = house_number
+            addr.zip_code = zip_code
+            addr.city = city
+            addr.isave()
+        return addr
+
+    def _add_cls(self, cls_id, cls_name, touch):
+        """Adds a terminal class"""
+        if cls_id is not None:
+            return cls_id
+        else:
+            cls = Class.iget(  # @UndefinedVariable
+                (Class.name == cls_name) & (Class.touch == touch))
+            if cls is None:
+                cls = Class()
+                cls.name = cls_name
+                cls.touch = True if touch else False
+                cls.isave()
+            return cls
+
+    def _add_domain(self, fqdn):
+        """Adds a domain with a certain FQDN"""
+        domain = Domain.iget(Domain._fqdn == fqdn)  # @UndefinedVariable
+        if domain is None:
+            domain = Domain
+            domain.fqdn = fqdn
+            domain.isave()
+        return domain
+
+    def _get_tid(self, cid, tid):
+        """Gets a unique terminal ID for the customer"""
+        if tid is None:
+            return self._gen_tid()
+        else:
+            if tid in Terminal.used_tids(cid):
+                return self._gen_tid()
+            else:
+                return tid
+
+    def _gen_tid(self):
+        """Generates a unique terminal identifier"""
+        tid = 1
+        while tid in Terminal.used_tids(cid):
+            tid += 1
+        return tid
+
+    def _add(self, cid, tid, street, house_number, zip_code, city, cls_id,
+             cls_name=None, touch=None, domain=None, ipv4addr=None,
+             virtual_display=None):
         """Adds a terminal with the specified configuration"""
         term = Terminal.by_ids(cid, tid)
         if term is None:
             term = Terminal()
             term.customer = cid
-            term.tid = tid
-            addr = Address.iselect(  # @UndefinedVariable
-                (Address.street == street) &
-                (Address.house_number == house_number) &
-                (Address.zip == zip_code) &
-                (Address.city == city))
-            addr = Address()
-            addr.street = street
-            addr
+            term.tid = self._get_tid(tid)
+            term.ipv4addr = self._get_ipv4addr(ipv4addr)
+            term._location = self._add_addr(street, house_number, zip_code)
+            term._cls = self._add_cls(cls_id, cls_name, touch)
+            term._domain = self._add_domain(domain)
+            term.virtual_display = virtual_display
+            try:
+                term.isave()
+            except:
+                return Error('Could not save display', status=500)
+            else:
+                try:
+                    xml_data = terminal2xml(term, cid=True)
+                except:
+                    return Error('Could not convert terminal data to XML',
+                                 status=500)
+                else:
+                    return OK(xml_data.toxml(), content_type='application/xml')
+        else:
+            return Error('Terminal already exists', status=400)
