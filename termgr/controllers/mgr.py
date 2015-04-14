@@ -270,7 +270,7 @@ class TerminalManager(WsgiController):
         if term is None:
             term = Terminal()
             term.customer = cid
-            term.tid = self._get_tid(tid)
+            term.tid = self._get_tid(cid, tid)
             term.ipv4addr = self._get_ipv4addr(ipv4addr)
             term._location = self._add_addr(street, house_number, zip_code)
             term._cls = self._add_cls(cls_id, cls_name, touch)
