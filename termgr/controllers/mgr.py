@@ -10,6 +10,7 @@ from terminallib.config import net, openvpn
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
 from homeinfolib.system import run
+from peewee import DoesNotExist
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -166,13 +167,18 @@ class TerminalManager(WsgiController):
         if cid is None or tid is None:
             return result  # TODO: handle error
         else:
-            terminal = Terminal.iget(   # @UndefinedVariable
-                (Terminal.customer == cid)
-                & (Terminal.tid == tid))
-            details = TerminalDetails.mockup()  # XXX: Testing
-            terminal_detail = terminal2xml(terminal, cid=True, details=details)
-            result.terminal_detail = terminal_detail
-            return OK(result, content_type='application/xml')
+            try:
+                terminal = Terminal.iget(   # @UndefinedVariable
+                    (Terminal.customer == cid)
+                    & (Terminal.tid == tid))
+            except DoesNotExist:
+                return Error('No such terminal', status=400)
+            else:
+                details = TerminalDetails.mockup()  # XXX: Testing
+                terminal_detail = terminal2xml(terminal, cid=True,
+                                               details=details)
+                result.terminal_detail = terminal_detail
+                return OK(result, content_type='application/xml')
 
     def _gen_ip_addr(self):
         """Generates a unique IPv4 address for the terminal"""
@@ -198,42 +204,48 @@ class TerminalManager(WsgiController):
 
     def _add_addr(self, street, house_number, zip_code, city):
         """Adds an address record to the database"""
-        addr = Address.iget(  # @UndefinedVariable
-            (Address.street == street) &
-            (Address.house_number == house_number) &
-            (Address.zip_code == zip_code) &
-            (Address.city == city))
-        if addr is None:
+        try:
+            addr = Address.iget(  # @UndefinedVariable
+                (Address.street == street) &
+                (Address.house_number == house_number) &
+                (Address.zip_code == zip_code) &
+                (Address.city == city))
+        except DoesNotExist:
             addr = Address()
             addr.street = street
             addr.house_number = house_number
             addr.zip_code = zip_code
             addr.city = city
             addr.isave()
-        return addr
+        finally:
+            return addr
 
     def _add_cls(self, cls_id, cls_name, touch):
         """Adds a terminal class"""
         if cls_id is not None:
             return cls_id
         else:
-            cls = Class.iget(  # @UndefinedVariable
-                (Class.name == cls_name) & (Class.touch == touch))
-            if cls is None:
+            try:
+                cls = Class.iget(  # @UndefinedVariable
+                    (Class.name == cls_name) & (Class.touch == touch))
+            except DoesNotExist:
                 cls = Class()
                 cls.name = cls_name
                 cls.touch = True if touch else False
                 cls.isave()
-            return cls
+            finally:
+                return cls
 
     def _add_domain(self, fqdn):
         """Adds a domain with a certain FQDN"""
-        domain = Domain.iget(Domain._fqdn == fqdn)  # @UndefinedVariable
-        if domain is None:
+        try:
+            domain = Domain.iget(Domain._fqdn == fqdn)  # @UndefinedVariable
+        except DoesNotExist:
             domain = Domain
             domain.fqdn = fqdn
             domain.isave()
-        return domain
+        finally:
+            return domain
 
     def _get_tid(self, cid, tid):
         """Gets a unique terminal ID for the customer"""
