@@ -1,7 +1,7 @@
 # ./termgr.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:d5297d54a5b0a5c243ac8f456d16d54e3b56338f
-# Generated 2015-04-08 17:16:01.116366 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
+# Generated 2015-04-14 12:37:38.036250 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
 # Namespace http://xml.homeinfo.de/schema/termgr
 
 from __future__ import unicode_literals
@@ -15,7 +15,7 @@ import sys
 import pyxb.utils.six as _six
 
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:2a65d25e-de02-11e4-9cb1-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:45040268-e292-11e4-82cc-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -83,7 +83,7 @@ class TerminalStatus (pyxb.binding.datatypes.string, pyxb.binding.basis.enumerat
     _ExpandedName = pyxb.namespace.ExpandedName(Namespace, 'TerminalStatus')
     _XSDLocation = pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 258, 4)
     _Documentation = '\n                The status of the terminal\n            '
-TerminalStatus._CF_enumeration = pyxb.binding.facets.CF_enumeration(value_datatype=TerminalStatus, enum_prefix=None)
+TerminalStatus._CF_enumeration = pyxb.binding.facets.CF_enumeration(enum_prefix=None, value_datatype=TerminalStatus)
 TerminalStatus.UP = TerminalStatus._CF_enumeration.addEnumeration(unicode_value='UP', tag='UP')
 TerminalStatus.DOWN = TerminalStatus._CF_enumeration.addEnumeration(unicode_value='DOWN', tag='DOWN')
 TerminalStatus._InitializeFacetMap(TerminalStatus._CF_enumeration)
@@ -374,17 +374,17 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
     city = property(__city.value, __city.set, None, None)
 
     
-    # Element zip uses Python identifier zip
-    __zip = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'zip'), 'zip', '__httpxml_homeinfo_deschematermgr_Address_zip', False, pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 142, 12), )
+    # Element zip_code uses Python identifier zip_code
+    __zip_code = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'zip_code'), 'zip_code', '__httpxml_homeinfo_deschematermgr_Address_zip_code', False, pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 142, 12), )
 
     
-    zip = property(__zip.value, __zip.set, None, None)
+    zip_code = property(__zip_code.value, __zip_code.set, None, None)
 
     _ElementMap.update({
         __street.name() : __street,
         __house_number.name() : __house_number,
         __city.name() : __city,
-        __zip.name() : __zip
+        __zip_code.name() : __zip_code
     })
     _AttributeMap.update({
         
@@ -820,7 +820,7 @@ Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None,
 
 Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'city'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 141, 12)))
 
-Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'zip'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 142, 12)))
+Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'zip_code'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 142, 12)))
 
 def _BuildAutomaton_5 ():
     # Remove this helper function from the namespace after it is invoked
@@ -843,7 +843,7 @@ def _BuildAutomaton_5 ():
     st_2 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
     states.append(st_2)
     final_update = set()
-    symbol = pyxb.binding.content.ElementUse(Address._UseForTag(pyxb.namespace.ExpandedName(None, 'zip')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 142, 12))
+    symbol = pyxb.binding.content.ElementUse(Address._UseForTag(pyxb.namespace.ExpandedName(None, 'zip_code')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 142, 12))
     st_3 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
     states.append(st_3)
     transitions = []
