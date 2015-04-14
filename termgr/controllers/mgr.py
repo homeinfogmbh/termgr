@@ -198,7 +198,7 @@ class TerminalManager(WsgiController):
 
     def _add_addr(self, street, house_number, zip_code, city):
         """Adds an address record to the database"""
-        addr = Address.iselect(  # @UndefinedVariable
+        addr = Address.iget(  # @UndefinedVariable
             (Address.street == street) &
             (Address.house_number == house_number) &
             (Address.zip_code == zip_code) &
@@ -275,17 +275,8 @@ class TerminalManager(WsgiController):
             term._domain = self._add_domain(domain)
             term.virtual_display = virtual_display
             self._gen_vpn(cid, tid)
-            types = [type(term.customer), type(self._get_tid(cid, tid)),
-                     type(self._get_ipv4addr(ipv4addr)),
-                     type(self._add_addr(street, house_number,
-                                         zip_code, city)),
-                     type(self._add_domain(domain)),
-                     type(self._add_cls(cls_id, cls_name, touch)),
-                     type(virtual_display)]
-            debug = ', '.join((str(t) for t in types))
-            # term.isave()
-            # xml_data = terminal2xml(term, cid=True)
-            #return OK(xml_data, content_type='application/xml')
-            return OK(debug)
+            term.isave()
+            xml_data = terminal2xml(term, cid=True)
+            return OK(xml_data, content_type='application/xml')
         else:
             return Error('Terminal already exists', status=400)
