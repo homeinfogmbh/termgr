@@ -11,6 +11,7 @@ from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
 from homeinfolib.system import run
 from peewee import DoesNotExist
+from os.path import join, isfile
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -66,8 +67,6 @@ class TerminalManager(WsgiController):
     The terminal manager is used for
     internal terminal management
     """
-
-    DEBUG = True
 
     def _run(self):
         """Runs the terminal manager"""
@@ -267,8 +266,14 @@ class TerminalManager(WsgiController):
     def _gen_vpn(self, cid, tid):
         """Generates an OpenVPN key pair for the terminal"""
         build_script = openvpn['BUILD_SCRIPT']
-        name = '.'.join([str(tid), str(cid)])
-        return run([build_script, name])
+        key_file_name = '.'.join([str(tid), str(cid)])
+        rsa_dir = openvpn['EASY_RSA_DIR']
+        keys_dir = join(rsa_dir, 'keys')
+        key_file = join(keys_dir, key_file_name)
+        if isfile(key_file):
+            return False
+        else:
+            return run([build_script, key_file_name])
 
     def _add(self, cid, tid, street, house_number, zip_code, city, cls_id,
              cls_name=None, touch=None, domain=None, ipv4addr=None,
