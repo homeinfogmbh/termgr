@@ -87,7 +87,7 @@ class TerminalManager(WsgiController):
         if action is None:
             return Error('No action specified', status=400)
         elif action == 'list':
-            return self._list_terminals(cid, cls)
+            return self._list_terminals(cid, cls_id)
         elif action == 'details':
             return self._details(cid, tid)
         elif action == 'add':
