@@ -68,6 +68,8 @@ class TerminalManager(WsgiController):
     internal terminal management
     """
 
+    DEBUG = True
+
     def _run(self):
         """Runs the terminal manager"""
         cid = self.qd.get('cid')
