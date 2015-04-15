@@ -162,25 +162,26 @@ class TerminalManager(WsgiController):
         return OK(result, content_type='application/xml')
 
     def _get_screenshot(self, terminal, thumbnail=False, display=None):
-        """Gets details of a terminal"""
+        """Creates a screenshot on the terminal and
+        fetches its content to the local machine
+        """
         ctrl = RemoteController(terminal)
         scrot = '/usr/bin/scrot'
         scrot_args = ['-z', '-t', '20']
         screenshot = '/tmp/screenshot.png'
         thumbnail = '/tmp/screenshot-thumb.png'
         display = display or ':0'
-        scrot_result = ctrl.execute('='.join(['export DISPLAY', display]),
-                                    ';', terminal,
-                                    [scrot] + scrot_args + [screenshot])
+        scrot_result = ctrl.execute(['='.join(['export DISPLAY',
+                                               display]), ';']
+                                    + [scrot] + scrot_args + [screenshot])
         if scrot_result:
             if thumbnail:
                 result = ctrl.getfile(thumbnail)
-                return result
             else:
                 result = ctrl.getfile(screenshot)
-                return result
+            return result
         else:
-            return scrot_result
+            return None
 
     def _details(self, cid, tid):
         """Get details of a certain terminal"""
