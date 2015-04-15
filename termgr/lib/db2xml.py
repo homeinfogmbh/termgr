@@ -1,8 +1,8 @@
 """DB -> XML conversion"""
 
 from base64 import b64encode
-from .termgr import Class, Address, Terminal, TerminalDetail, TouchEvent
-from termgr.lib.termgr import Screenshot
+from .termgr import Class, Address, Terminal, TerminalDetail, TouchEvent,\
+    Screenshot
 
 __date__ = "08.04.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -36,7 +36,7 @@ def terminal2xml(terminal, cid=False, details=None):
         result.status = details.status
         result.uptime = details.uptime
         timestamp, mimetype, data = details.screenshot
-        screenshot = Screenshot(b64encode(data))
+        screenshot = Screenshot(data)
         screenshot.timestamp = timestamp
         screenshot.mimetype = mimetype
         result.screenshot = screenshot
