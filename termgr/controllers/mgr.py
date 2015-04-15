@@ -186,6 +186,7 @@ class TerminalManager(WsgiController):
                 return Error('No such terminal', status=400)
             else:
                 # XXX: Testing
+                terminal.ipv4addr = IPv4Address('10.8.0.10')
                 scr_data = RemoteController(terminal).screenshot
                 details = TerminalDetails.mockup(screenshot_data=scr_data)
                 terminal_detail = terminal2xml(terminal, cid=True,
