@@ -23,13 +23,15 @@ class TerminalDetails():
     """Terminal details wrapper"""
 
     @classmethod
-    def mockup(cls):
+    def mockup(cls, screenshot_data=None):
         """Mockup for testing"""
-        with open('/home/rne/asdm04.jpg', 'rb') as f:
-            data = f.read()
+        if screenshot_data is None:
+            with open('/home/rne/asdm04.jpg', 'rb') as f:
+                screenshot_data = f.read()
         status = 'UP'
         uptime = 10000
-        screenshot = (datetime.now(), mimetype(data), data)
+        screenshot = (datetime.now(), mimetype(screenshot_data),
+                      screenshot_data)
         touch_events = [(datetime.now(), 0, 1, 3),
                         (datetime.now(), 123, 423, 54)]
         return cls(status, uptime, screenshot, touch_events)
@@ -161,28 +163,6 @@ class TerminalManager(WsgiController):
             result.terminal.append(xml_data)
         return OK(result, content_type='application/xml')
 
-    def _get_screenshot(self, terminal, thumbnail=False, display=None):
-        """Creates a screenshot on the terminal and
-        fetches its content to the local machine
-        """
-        ctrl = RemoteController(terminal)
-        scrot = '/usr/bin/scrot'
-        scrot_args = ['-z', '-t', '20']
-        screenshot = '/tmp/screenshot.png'
-        thumbnail = '/tmp/screenshot-thumb.png'
-        display = display or ':0'
-        scrot_result = ctrl.execute(['='.join(['export DISPLAY',
-                                               display]), ';']
-                                    + [scrot] + scrot_args + [screenshot])
-        if scrot_result:
-            if thumbnail:
-                result = ctrl.getfile(thumbnail)
-            else:
-                result = ctrl.getfile(screenshot)
-            return result
-        else:
-            return None
-
     def _details(self, cid, tid):
         """Get details of a certain terminal"""
         result = termgr()
@@ -196,7 +176,9 @@ class TerminalManager(WsgiController):
             except DoesNotExist:
                 return Error('No such terminal', status=400)
             else:
-                details = TerminalDetails.mockup()  # XXX: Testing
+                # XXX: Testing
+                scr_data = RemoteController(terminal).screenshot
+                details = TerminalDetails.mockup(screenshot_data=scr_data)
                 terminal_detail = terminal2xml(terminal, cid=True,
                                                details=details)
                 result.terminal_detail = terminal_detail
