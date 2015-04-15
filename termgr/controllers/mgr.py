@@ -191,7 +191,6 @@ class TerminalManager(WsgiController):
                 terminal.ipv4addr = IPv4Address('10.8.0.10')
                 scr_data = RemoteController(terminal).screenshot
                 details = TerminalDetails.mockup(screenshot_data=scr_data)
-                return OK('test123')
                 terminal_detail = terminal2xml(terminal, cid=True,
                                                details=details)
                 result.terminal_detail = terminal_detail
