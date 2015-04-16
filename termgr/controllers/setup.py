@@ -2,10 +2,9 @@
 
 from homeinfolib.wsgi import WsgiController, WsgiResponse, Error,\
     InternalServerError
-from terminallib.db import Terminal
+from terminallib.db import Terminal, SetupOperator
 from terminallib.openvpn import OpenVPNPackager
 from terminallib.pacman import PacmanConfig
-from terminallib.config import ssh
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
@@ -17,15 +16,22 @@ class SetupController(WsgiController):
 
     def _run(self):
         """Interpret query dictionary"""
-        cid_str = self.qd.get('cid')
-        if cid_str is None:
-            return Error('No customer ID specified', status=400)
-        else:
-            try:
-                cid = int(cid_str)
-            except:
-                return Error('Invalid customer ID', status=400)
+        user_name = self.qd.get('user_name')
+        if not user_name:
+            return Error('No user name specified', status=400)
+        passwd = self.qd.get('passwd')
+        if not passwd:
+            return Error('No password specified', status=400)
+        operator = SetupOperator.authenticate(user_name, passwd)
+        if operator:
+            cid_str = self.qd.get('cid')
+            if cid_str is None:
+                return Error('No customer ID specified', status=400)
             else:
+                try:
+                    cid = int(cid_str)
+                except:
+                    return Error('Invalid customer ID', status=400)
                 tid_str = self.qd.get('tid')
                 if tid_str is None:
                     return Error('No terminal ID specified', status=400)
@@ -34,16 +40,20 @@ class SetupController(WsgiController):
                         tid = int(tid_str)
                     except:
                         return Error('Invalid terminal ID', status=400)
-                    else:
-                        term = Terminal.by_ids(cid, tid)
-                        if term is not None:
+                    term = Terminal.by_ids(cid, tid)
+                    if term is not None:
+                        if operator.authorize(term):
                             action = self.qd.get('action')
                             if action is None:
                                 return Error('No action specified', status=400)
                             else:
                                 return self._handle(term, action)
                         else:
-                            return Error('No such terminal', status=404)
+                            return Error('Unauthorized', status=401)
+                    else:
+                        return Error('No such terminal', status=404)
+        else:
+            return Error('Invalid credentials', status=401)
 
     def _handle(self, term, action):
         """Handles an action for a certain
@@ -61,27 +71,6 @@ class SetupController(WsgiController):
                                 'found for terminal',
                                 '.'.join([str(term.tid), str(term.cid)])])
                 return InternalServerError(msg)
-        elif action == 'pubkey':
-            user = self.qd.get('user')
-            if user == 'homeinfo':
-                pubkey_file = ssh['PUBLIC_KEY_HOMEINFO']
-            elif user == 'heed':
-                pubkey_file = ssh['PUBLIC_KEY_HIPSTER']
-            elif user == 'termgr':
-                pubkey_file = ssh['PUBLIC_KEY_TERMGR']
-            else:
-                return Error('Invalid user', status=400)
-            try:
-                with open(pubkey_file, 'r') as pk:
-                    pubkey = pk.read()
-            except PermissionError:
-                return Error('Not allowed to read public key')
-            except FileNotFoundError:
-                return Error('Public key not found')
-            else:
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                response_body = pubkey.encode(encoding=charset)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(term)
             try:
