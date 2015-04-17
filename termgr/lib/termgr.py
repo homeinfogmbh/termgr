@@ -1,7 +1,7 @@
 # ./termgr.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:d5297d54a5b0a5c243ac8f456d16d54e3b56338f
-# Generated 2015-04-14 12:37:38.036250 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
+# Generated 2015-04-17 11:02:57.445573 by PyXB version 1.2.5-DEV using Python 3.4.3.final.0
 # Namespace http://xml.homeinfo.de/schema/termgr
 
 from __future__ import unicode_literals
@@ -15,7 +15,7 @@ import sys
 import pyxb.utils.six as _six
 
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:45040268-e292-11e4-82cc-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:8a5ce820-e4e0-11e4-92ba-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -905,8 +905,10 @@ def _BuildAutomaton_7 ():
     counters = set()
     cc_0 = fac.CounterCondition(min=0, max=1, metadata=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 64, 12))
     counters.add(cc_0)
-    cc_1 = fac.CounterCondition(min=0, max=None, metadata=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 97, 20))
+    cc_1 = fac.CounterCondition(min=0, max=1, metadata=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 96, 20))
     counters.add(cc_1)
+    cc_2 = fac.CounterCondition(min=0, max=None, metadata=pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 97, 20))
+    counters.add(cc_2)
     states = []
     final_update = None
     symbol = pyxb.binding.content.ElementUse(TerminalDetail._UseForTag(pyxb.namespace.ExpandedName(None, 'cls')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 61, 12))
@@ -932,16 +934,17 @@ def _BuildAutomaton_7 ():
     symbol = pyxb.binding.content.ElementUse(TerminalDetail._UseForTag(pyxb.namespace.ExpandedName(None, 'status')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 94, 20))
     st_5 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
     states.append(st_5)
-    final_update = None
+    final_update = set()
     symbol = pyxb.binding.content.ElementUse(TerminalDetail._UseForTag(pyxb.namespace.ExpandedName(None, 'uptime')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 95, 20))
     st_6 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
     states.append(st_6)
     final_update = set()
+    final_update.add(fac.UpdateInstruction(cc_1, False))
     symbol = pyxb.binding.content.ElementUse(TerminalDetail._UseForTag(pyxb.namespace.ExpandedName(None, 'screenshot')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 96, 20))
     st_7 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
     states.append(st_7)
     final_update = set()
-    final_update.add(fac.UpdateInstruction(cc_1, False))
+    final_update.add(fac.UpdateInstruction(cc_2, False))
     symbol = pyxb.binding.content.ElementUse(TerminalDetail._UseForTag(pyxb.namespace.ExpandedName(None, 'touch_event')), pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/termgr.xsd', 97, 20))
     st_8 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
     states.append(st_8)
@@ -976,14 +979,18 @@ def _BuildAutomaton_7 ():
     transitions = []
     transitions.append(fac.Transition(st_7, [
          ]))
-    st_6._set_transitionSet(transitions)
-    transitions = []
     transitions.append(fac.Transition(st_8, [
          ]))
+    st_6._set_transitionSet(transitions)
+    transitions = []
+    transitions.append(fac.Transition(st_7, [
+        fac.UpdateInstruction(cc_1, True) ]))
+    transitions.append(fac.Transition(st_8, [
+        fac.UpdateInstruction(cc_1, False) ]))
     st_7._set_transitionSet(transitions)
     transitions = []
     transitions.append(fac.Transition(st_8, [
-        fac.UpdateInstruction(cc_1, True) ]))
+        fac.UpdateInstruction(cc_2, True) ]))
     st_8._set_transitionSet(transitions)
     return fac.Automaton(states, counters, False, containing_state=None)
 TerminalDetail._Automaton = _BuildAutomaton_7()
