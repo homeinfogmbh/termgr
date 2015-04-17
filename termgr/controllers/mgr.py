@@ -4,7 +4,7 @@ from ipaddress import IPv4Address, AddressValueError
 from peewee import DoesNotExist
 from homeinfolib.wsgi import WsgiController, Error, OK
 from homeinfo.crm.address import Address
-from terminallib.db import Terminal, Class, Domain
+from terminallib.db import Terminal, Class, Domain, Administrator
 from terminallib.remotectrl import RemoteController
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
@@ -26,40 +26,50 @@ class TerminalManager(WsgiController):
 
     def _run(self):
         """Runs the terminal manager"""
-        cid = self.qd.get('cid')
-        if cid is not None:
-            try:
-                cid = int(cid)
-            except (TypeError, ValueError):
-                return Error('Invalid customer ID', status=400)
-        tid = self.qd.get('tid')
-        if tid is not None:
-            try:
-                tid = int(tid)
-            except (TypeError, ValueError):
-                return Error('Invalid terminal ID', status=400)
-        class_id = self.qd.get('class_id')
-        if class_id is not None:
-            try:
-                class_id = int(class_id)
-            except (ValueError, TypeError):
-                return Error('Invalid class ID', status=400)
-        action = self.qd.get('action')
-        if action is None:
-            return Error('No action specified', status=400)
-        elif action == 'list':
-            return self._list_terminals(cid, class_id=class_id)
-        elif action == 'details':
-            if cid is None:
-                return Error('No customer ID specified', status=400)
-            elif tid is None:
-                return Error('No terminal ID specified', status=400)
+        user_name = self.qd.get('user_name')
+        if not user_name:
+            return Error('No user name specified', status=400)
+        passwd = self.qd.get('passwd')
+        if not passwd:
+            return Error('No password specified', status=400)
+        administrator = Administrator.authenticate(user_name, passwd)
+        if administrator:
+            cid = self.qd.get('cid')
+            if cid is not None:
+                try:
+                    cid = int(cid)
+                except (TypeError, ValueError):
+                    return Error('Invalid customer ID', status=400)
+            tid = self.qd.get('tid')
+            if tid is not None:
+                try:
+                    tid = int(tid)
+                except (TypeError, ValueError):
+                    return Error('Invalid terminal ID', status=400)
+            class_id = self.qd.get('class_id')
+            if class_id is not None:
+                try:
+                    class_id = int(class_id)
+                except (ValueError, TypeError):
+                    return Error('Invalid class ID', status=400)
+            action = self.qd.get('action')
+            if action is None:
+                return Error('No action specified', status=400)
+            elif action == 'list':
+                return self._list_terminals(cid, class_id=class_id)
+            elif action == 'details':
+                if cid is None:
+                    return Error('No customer ID specified', status=400)
+                elif tid is None:
+                    return Error('No terminal ID specified', status=400)
+                else:
+                    return self._details(cid, tid)
+            elif action == 'add':
+                return self._add(cid, tid)
             else:
-                return self._details(cid, tid)
-        elif action == 'add':
-            return self._add(cid, tid)
+                return Error('Invalid action', status=400)
         else:
-            return Error('Invalid action', status=400)
+            return Error('Invalid credentials', status=401)
 
     def _add(self, cid, tid):
         """Adds entities"""
