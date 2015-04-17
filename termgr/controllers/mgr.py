@@ -63,7 +63,11 @@ class TerminalManager(WsgiController):
                 elif tid is None:
                     return Error('No terminal ID specified', status=400)
                 else:
-                    return self._details(cid, tid)
+                    if self.qd.get('thumbnail') is None:
+                        thumbnail = False
+                    else:
+                        thumbnail = True
+                    return self._details(cid, tid, thumbnail=thumbnail)
             elif action == 'add':
                 return self._add(cid, tid)
             else:
@@ -138,7 +142,7 @@ class TerminalManager(WsgiController):
             result.terminal.append(xml_data)
         return OK(result, content_type='application/xml')
 
-    def _details(self, cid, tid):
+    def _details(self, cid, tid, thumbnail=False):
         """Get details of a certain terminal"""
         result = termgr()
         if cid is None or tid is None:
@@ -151,8 +155,10 @@ class TerminalManager(WsgiController):
             except DoesNotExist:
                 return Error('No such terminal', status=400)
             else:
-                # XXX: Testing
-                screenshot = RemoteController(terminal).screenshot
+                if thumbnail:
+                    screenshot = RemoteController(terminal).thumbnail
+                else:
+                    screenshot = RemoteController(terminal).screenshot
                 details = TerminalDetails(status=True,  # TODO: Evaluate this!
                                           uptime=None,  # TODO: Evaluate this!
                                           screenshot=screenshot,
