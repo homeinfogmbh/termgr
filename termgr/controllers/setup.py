@@ -1,4 +1,4 @@
-"""Controller for terminal setup management"""
+"""Controller for terminal setup"""
 
 from homeinfolib.wsgi import WsgiController, WsgiResponse, Error,\
     InternalServerError
