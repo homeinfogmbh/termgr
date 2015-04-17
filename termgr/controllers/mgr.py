@@ -142,8 +142,12 @@ class TerminalManager(WsgiController):
                 return Error('No such terminal', status=400)
             else:
                 # XXX: Testing
-                scr_data = RemoteController(terminal).screenshot
-                details = TerminalDetails.mockup(screenshot_data=scr_data)
+                screenshot = RemoteController(terminal).screenshot
+                details = TerminalDetails(status=True,  # TODO: Evaluate this!
+                                          uptime=None,  # TODO: Evaluate this!
+                                          screenshot=screenshot,
+                                          # TODO: Evaluate this!
+                                          touch_events=None)
                 terminal_detail = terminal2xml(terminal, cid=True,
                                                details=details)
                 result.terminal_detail = terminal_detail

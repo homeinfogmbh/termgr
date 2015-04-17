@@ -93,7 +93,7 @@
                 <xs:sequence>
                     <xs:element name="status" type="TerminalStatus"/>
                     <xs:element name="uptime" type="xs:unsignedLong"/>
-                    <xs:element name="screenshot" type="Screenshot"/>
+                    <xs:element name="screenshot" type="Screenshot" minOccurs="0"/>
                     <xs:element name="touch_event" type="TouchEvent" minOccurs="0" maxOccurs="unbounded"/>
                 </xs:sequence>
             </xs:extension>

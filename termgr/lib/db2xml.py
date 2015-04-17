@@ -1,6 +1,5 @@
 """DB -> XML conversion"""
 
-from base64 import b64encode
 from .termgr import Class, Address, Terminal, TerminalDetail, TouchEvent,\
     Screenshot
 
@@ -35,12 +34,12 @@ def terminal2xml(terminal, cid=False, details=None):
         result = TerminalDetail()
         result.status = details.status
         result.uptime = details.uptime
-        timestamp, mimetype, data = details.screenshot
-        screenshot = Screenshot(data)
-        screenshot.timestamp = timestamp
-        screenshot.mimetype = mimetype
-        result.screenshot = screenshot
-        result
+        if details.screenshot:
+            timestamp, mimetype, data = details.screenshot
+            screenshot = Screenshot(data)
+            screenshot.timestamp = timestamp
+            screenshot.mimetype = mimetype
+            result.screenshot = screenshot
         for touch_event in details.touch_events:
             timestamp, x, y, duration = touch_event
             te = TouchEvent(timestamp)
