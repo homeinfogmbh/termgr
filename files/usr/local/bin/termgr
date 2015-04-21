@@ -30,6 +30,8 @@ if options['add']:
     cid = int(cid_str)
     if tid_str is not None:
         desired_tid = int(tid_str)
+    else:
+        desired_tid = None
     tid = Terminal.gen_tid(cid, desired=desired_tid)
 
     class_ = Class.get(Class.id == class_id)
