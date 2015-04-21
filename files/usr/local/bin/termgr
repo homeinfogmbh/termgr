@@ -47,7 +47,7 @@ if options['add']:
     terminal = Terminal()
     terminal.customer = cid
     terminal.tid = tid
-    terminal.cls = class_
+    terminal.class_ = class_
     terminal.domain = domain
     terminal.ipv4addr = Terminal.gen_ipv4addr()
     terminal.virtual_display = None
