@@ -19,12 +19,12 @@ options = docopt(__doc__)
 if options['add']:
     class_id_str = options['<class_id>']
     cid_str = options['<cid>']
-    tid_str = options['<tid>']
+    tid_str = options['--tid']
     street = options['<street>']
     house_number = options['<house_number>']
     zip_code = options['<zip_code>']
     city = options['<city>']
-    state_iso = options['<state_iso>']
+    state_iso = options['--state']
 
     class_id = int(class_id_str)
     cid = int(cid_str)
