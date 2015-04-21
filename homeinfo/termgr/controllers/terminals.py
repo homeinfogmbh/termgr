@@ -2,10 +2,10 @@
 
 from ipaddress import IPv4Address, AddressValueError
 from peewee import DoesNotExist
-from homeinfolib.wsgi import WsgiController, Error, OK
+from homeinfo.wsgi import WsgiController, Error, OK
 from homeinfo.crm.address import Address
-from terminallib.db import Terminal, Class, Domain, Administrator
-from terminallib.remotectrl import RemoteController
+from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
+from homeinfo.terminals.remotectrl import RemoteController
 from ..lib.db2xml import terminal2xml
 from ..lib.termgr import termgr
 from ..lib.details import TerminalDetails

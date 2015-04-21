@@ -1,8 +1,8 @@
 """Controller for terminal class management"""
 
 from peewee import DoesNotExist
-from homeinfolib.wsgi import WsgiController, Error, OK
-from terminallib.db import Class, Administrator
+from homeinfo.wsgi import WsgiController, Error, OK
+from homeinfo.terminals.db import Class, Administrator
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"

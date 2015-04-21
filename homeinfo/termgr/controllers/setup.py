@@ -1,10 +1,10 @@
 """Controller for terminal setup"""
 
-from homeinfolib.wsgi import WsgiController, WsgiResponse, Error,\
+from homeinfo.wsgi import WsgiController, WsgiResponse, Error,\
     InternalServerError
-from terminallib.db import Terminal, SetupOperator
-from terminallib.openvpn import OpenVPNPackager
-from terminallib.pacman import PacmanConfig
+from homeinfo.terminals.db import Terminal, SetupOperator
+from homeinfo.terminals.openvpn import OpenVPNPackager
+from homeinfo.terminals.pacman import PacmanConfig
 
 __date__ = "10.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"

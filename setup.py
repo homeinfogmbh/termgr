@@ -4,12 +4,12 @@ from distutils.core import setup
 
 setup(
     name='termgr',
-    version='0.1.0-indev',
+    version='1.2.0-1',
     author='Richard Neumann',
     author_email='r.neumann@homeinfo.de',
-    packages=['termgr',
-              'termgr.controllers',
-              'termgr.lib'],
+    packages=['homeinfo.termgr',
+              'homeinfo.termgr.controllers',
+              'homeinfo.termgr.lib'],
     data_files=[('/usr/local/sbin', ['files/usr/local/sbin/build-key-auto']),
                 ('/usr/local/share/termgr',
                  ['files/usr/local/share/termgr/mgr.wsgi',
