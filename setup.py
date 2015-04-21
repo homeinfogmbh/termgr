@@ -7,6 +7,7 @@ setup(
     version='1.2.0-1',
     author='Richard Neumann',
     author_email='r.neumann@homeinfo.de',
+    package_dir={'homeinfo': ''},
     packages=['homeinfo.termgr',
               'homeinfo.termgr.controllers',
               'homeinfo.termgr.lib'],
