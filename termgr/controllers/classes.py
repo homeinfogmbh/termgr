@@ -62,32 +62,26 @@ class ClassManager(WsgiController):
 
     def _list(self):
         """Lists all available classes"""
-        for class_ in Class.iselect(True):  # @UndefinedVariable
-            
-            
-        except DoesNotExist:
-            class_ = Class()
-            class_.name = name
-            class_.touch = touch
-            class_.isave()
-        return OK(str(class_.id))
+        for class_ in Class.select().where(True):
+            # TODO: Implement
+            class_
+            pass
 
     def _add(self, name, touch):
         """Adds entities"""
         try:
-            class_ = Class.iget(    # @UndefinedVariable
-                (Class.name == name) & (Class.touch == touch))
+            class_ = Class.get((Class.name == name) & (Class.touch == touch))
         except DoesNotExist:
             class_ = Class()
             class_.name = name
             class_.touch = touch
-            class_.isave()
+            class_.save()
         return OK(str(class_.id))
 
     def _modify(self, class_id, name=None, touch=None):
         """Modifies the class with class_id"""
         try:
-            class_ = Class.iget((Class.id == class_id))  # @UndefinedVariable
+            class_ = Class.get((Class.id == class_id))
         except DoesNotExist:
             return Error('No such class', status=400)
         else:
@@ -95,13 +89,13 @@ class ClassManager(WsgiController):
                 class_.name = name
             if touch is not None:
                 class_.touch = touch
-            class_.isave()
+            class_.save()
             return OK(str(class_.id))
 
     def _delete(self, class_id):
         """Removes the class with class_id"""
         try:
-            class_ = Class.iget((Class.id == class_id))  # @UndefinedVariable
+            class_ = Class.get((Class.id == class_id))
         except DoesNotExist:
             return Error('No such class', status=400)
         else:

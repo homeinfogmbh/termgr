@@ -12,7 +12,7 @@ XXX: Please note:
       not provide authentication by itself
 """
 
-from homeinfo.termgr.controllers.setup import SetupController
+from termgr.controllers.setup import SetupController
 
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"

@@ -6,8 +6,7 @@ from homeinfo.wsgi import WsgiController, Error, OK
 from homeinfo.crm.address import Address
 from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 from homeinfo.terminals.remotectrl import RemoteController
-from ..lib.db2xml import terminal2xml
-from ..lib.termgr import termgr
+from homeinfo.terminals.dom import terminallib
 from ..lib.details import TerminalDetails
 
 __date__ = "25.03.2015"
@@ -175,53 +174,49 @@ class TerminalManager(WsgiController):
         if cid is None:
             if class_id is None:
                 if deleted:
-                    terminals = Terminal.iselect(True)  # @UndefinedVariable
+                    terminals = Terminal.select().where(True)
                 else:
-                    terminals = Terminal.iselect(  # @UndefinedVariable
-                        Terminal.deleted == 0)
+                    terminals = Terminal.select().where(Terminal.deleted == 0)
             else:
                 if deleted:
-                    terminals = Terminal.iselect(   # @UndefinedVariable
-                        Terminal._cls == class_id)
+                    terminals = Terminal.select().where(
+                        Terminal.cls == class_id)
                 else:
-                    terminals = Terminal.iselect(   # @UndefinedVariable
-                        (Terminal._cls == class_id) &
-                        (Terminal.deleted == 0))
+                    terminals = Terminal.select().where(
+                        (Terminal.cls == class_id) & (Terminal.deleted == 0))
         else:
             if class_id is None:
                 if deleted:
-                    terminals = Terminal.iselect(  # @UndefinedVariable
+                    terminals = Terminal.select().where(
                         Terminal.customer == cid)
                 else:
-                    terminals = Terminal.iselect(  # @UndefinedVariable
-                        (Terminal.customer == cid) &
-                        (Terminal.deleted == 0))
+                    terminals = Terminal.select().where(
+                        (Terminal.customer == cid) & (Terminal.deleted == 0))
             else:
                 if deleted:
-                    terminals = Terminal.iselect(  # @UndefinedVariable
+                    terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal._cls == class_id))
+                        (Terminal.cls == class_id))
                 else:
-                    terminals = Terminal.iselect(  # @UndefinedVariable
+                    terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal._cls == class_id) &
+                        (Terminal.cls == class_id) &
                         (Terminal.deleted == 0))
-        result = termgr()
+        result = terminallib()
         for terminal in terminals:
-            xml_data = terminal2xml(terminal, cid=True)
+            xml_data = terminal.todom()
             result.terminal.append(xml_data)
         return OK(result, content_type='application/xml')
 
     def _details(self, cid, tid, thumbnail=False):
         """Get details of a certain terminal"""
-        result = termgr()
+        result = terminallib()
         if cid is None or tid is None:
             return Error('No terminal ID or customer ID specified', status=400)
         else:
             try:
-                terminal = Terminal.iget(   # @UndefinedVariable
-                    (Terminal.customer == cid)
-                    & (Terminal.tid == tid))
+                terminal = Terminal.get((Terminal.customer == cid) &
+                                        (Terminal.tid == tid))
             except DoesNotExist:
                 return Error('No such terminal', status=400)
             else:
@@ -234,8 +229,7 @@ class TerminalManager(WsgiController):
                                           screenshot=screenshot,
                                           # TODO: Evaluate this!
                                           touch_events=None)
-                terminal_detail = terminal2xml(terminal, cid=True,
-                                               details=details)
+                terminal_detail = terminal.todom(details=details)
                 result.terminal_detail = terminal_detail
                 return OK(result, content_type='application/xml')
 
@@ -282,22 +276,19 @@ class TerminalManager(WsgiController):
             terminal.ipv4addr = Terminal.gen_ipv4addr(desired=ipv4addr)
         if location_id is not None:
             try:
-                location = Address.iget(  # @UndefinedVariable
-                    Address.id == location_id)  # @UndefinedVariable
+                location = Address.get(Address.id == location_id)
             except DoesNotExist:
                 return Error('No such location', status=400)
             terminal._location = location
         if class_id is not None:
             try:
-                class_ = Class.iget(  # @UndefinedVariable
-                    Class.id == class_id)  # @UndefinedVariable
+                class_ = Class.get(Class.id == class_id)
             except DoesNotExist:
                 return Error('No such class', status=400)
-            terminal._cls = class_
+            Terminal.cls = class_
         if domain_id is not None:
             try:
-                domain = Domain.iget(  # @UndefinedVariable
-                    Domain.id == domain_id)  # @UndefinedVariable
+                domain = Domain.get(Domain.id == domain_id)
             except DoesNotExist:
                 return Error('No such domain', status=400)
             terminal._domain = domain
@@ -308,12 +299,12 @@ class TerminalManager(WsgiController):
         else:
             okay = True
         try:
-            terminal.isave()
+            terminal.save()
         except:
             return Error('Could not apply changes', status=500)
         else:
-            xml_data = termgr()
-            xml_data.terminal = [terminal2xml(terminal, cid=True)]
+            xml_data = terminallib()
+            xml_data.terminal = [terminal.todom()]
             if okay:
                 return OK(xml_data, content_type='application/xml')
             else:
@@ -328,7 +319,7 @@ class TerminalManager(WsgiController):
                 return Error('Terminal already deleted', status=200)
             else:
                 terminal.deleted = True
-                terminal.isave()
+                terminal.save()
                 return OK('Terminal deleted')
         else:
             return Error('No such terminal', status=400)
