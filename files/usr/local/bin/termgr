@@ -58,3 +58,4 @@ if options['add']:
     else:
         print('OpenVPN keys already present')
     terminal.save()
+    print('Created terminal:', terminal.hostname)
