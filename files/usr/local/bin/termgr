@@ -2,8 +2,8 @@
 """Command line tool to administer HOMEINFO terminals
 
 Usage:
-    termgr add <class_id> <cid> <tid> <street> <house_number> <zip_code>\
-<city> [<state_iso>]
+    termgr add <class_id> <cid> <street> <house_number> <zip_code>\
+<city> [--state=<state_iso>] [--tid=<tid>]
 
 Options:
     -h --help     Show this screen.
