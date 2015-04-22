@@ -11,22 +11,14 @@ Options:
 """
 
 from os import listdir, chmod
+from os.path import join
 from docopt import docopt
+from homeinfo.system import run, evaluate
 from homeinfo.crm.address import Address, State
 from homeinfo.terminals.db import Terminal, Class, Domain
 from homeinfo.terminals.config import openvpn
-from os.path import join
-from homeinfo.system import run
 
 options = docopt(__doc__)
-
-
-def evaluate(ok):
-    """Evaluate boolean result"""
-    if ok:
-        print('[  ok  ]')
-    else:
-        print('[failed]')
 
 
 def aftermath():
@@ -43,12 +35,8 @@ def aftermath():
     evaluate(run('/usr/local/sbin/hosts.gen'))
     print('Generating OpenVPN host configurations', end='  ')
     evaluate(run('/usr/local/sbin/openvpn-clients.gen'))
-    print('Restarting OpenVPN', end='                      ')
-    evaluate(run('/usr/bin/systemctl restart openvpn@terminals.service'))
     print('Creating Nagios3 configurations', end='         ')
     evaluate(run('/usr/local/sbin/monitoring-clients.gen'))
-    print('Restarting Nagios3', end='                      ')
-    evaluate(run('/usr/bin/systemctl restart nagios3.service'))
 
 
 if options['add']:
