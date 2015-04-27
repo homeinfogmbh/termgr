@@ -1,6 +1,6 @@
 """Controller for terminal setup"""
 
-from homeinfo.wsgi import WsgiController, WsgiResponse, Error,\
+from homeinfo.lib.wsgi import WsgiController, WsgiResponse, Error,\
     InternalServerError
 from homeinfo.terminals.db import Terminal, SetupOperator
 from homeinfo.terminals.openvpn import OpenVPNPackager

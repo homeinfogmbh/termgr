@@ -1,7 +1,7 @@
 """Controller for terminal class management"""
 
 from peewee import DoesNotExist
-from homeinfo.wsgi import WsgiController, Error, OK
+from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals.db import Class, Administrator
 
 __date__ = "25.03.2015"
