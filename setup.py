@@ -8,7 +8,7 @@ setup(
     author='Richard Neumann',
     author_email='r.neumann@homeinfo.de',
     requires=['docopt',
-              'homeinfo',
+              'homeinfo.lib',
               'homeinfo.crm',
               'homeinfo.terminals'],
     packages=['termgr',
