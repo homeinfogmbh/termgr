@@ -13,8 +13,8 @@ Options:
 from os import listdir, chmod
 from os.path import join
 from docopt import docopt
-from homeinfo.system import run, evaluate
-from homeinfo.crm.address import Address, State
+from homeinfo.lib.system import run, evaluate
+from homeinfo.crm import Address, State
 from homeinfo.terminals.db import Terminal, Class, Domain
 from homeinfo.terminals.config import openvpn
 
