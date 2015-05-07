@@ -180,10 +180,11 @@ class TerminalManager(WsgiController):
             else:
                 if deleted:
                     terminals = Terminal.select().where(
-                        Terminal.cls == class_id)
+                        Terminal.class_ == class_id)
                 else:
                     terminals = Terminal.select().where(
-                        (Terminal.cls == class_id) & (Terminal.deleted == 0))
+                        (Terminal.class_ == class_id) &
+                        (Terminal.deleted == 0))
         else:
             if class_id is None:
                 if deleted:
@@ -196,11 +197,11 @@ class TerminalManager(WsgiController):
                 if deleted:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal.cls == class_id))
+                        (Terminal.class_ == class_id))
                 else:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal.cls == class_id) &
+                        (Terminal.class_ == class_id) &
                         (Terminal.deleted == 0))
         result = terminallib()
         for terminal in terminals:
