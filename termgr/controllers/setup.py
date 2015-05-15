@@ -14,6 +14,8 @@ __all__ = ['SetupController']
 class SetupController(WsgiController):
     """Controller for terminal setup automation"""
 
+    DEBUG = True
+
     def _run(self):
         """Interpret query dictionary"""
         user_name = self.qd.get('user_name')
