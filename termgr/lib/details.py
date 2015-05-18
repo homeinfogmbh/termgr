@@ -2,8 +2,6 @@
 
 from homeinfo.lib.mime import mimetype
 
-__date__ = "17.04.2015"
-__author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 __all__ = ['TerminalDetails']
 
 

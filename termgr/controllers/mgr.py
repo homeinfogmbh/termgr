@@ -9,8 +9,6 @@ from homeinfo.terminals.remotectrl import RemoteController
 from homeinfo.terminals.dom import terminallib
 from ..lib.details import TerminalDetails
 
-__date__ = "25.03.2015"
-__author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 __all__ = ['TerminalManager']
 
 

@@ -6,8 +6,6 @@ from homeinfo.terminals.db import Terminal, SetupOperator
 from homeinfo.terminals.openvpn import OpenVPNPackager
 from homeinfo.terminals.pacman import PacmanConfig
 
-__date__ = "10.03.2015"
-__author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 __all__ = ['SetupController']
 
 

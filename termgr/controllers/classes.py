@@ -4,8 +4,6 @@ from peewee import DoesNotExist
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals.db import Class, Administrator
 
-__date__ = "25.03.2015"
-__author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 __all__ = ['TerminalManager']
 
 
