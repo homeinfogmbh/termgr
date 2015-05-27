@@ -8,6 +8,8 @@ from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 from homeinfo.terminals.remotectrl import RemoteController
 from homeinfo.terminals.dom import terminallib
 from ..lib.details import TerminalDetails
+from ..lib import dom
+from datetime import datetime
 
 __all__ = ['TerminalManager']
 
@@ -167,41 +169,65 @@ class TerminalManager(WsgiController):
         revoke_vpn = self.qd.get('revoke_vpn')
         return self._delete_terminal(cid, tid, revoke_vpn)
 
-    def _list_terminals(self, cid=None, class_id=None, deleted=False):
+    def _list(self, cid=None, class_id=None, deleted=None):
         """Lists available terminals"""
         if cid is None:
             if class_id is None:
-                if deleted:
+                if deleted is None:
                     terminals = Terminal.select().where(True)
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        ~(Terminal.deleted >> None))
                 else:
-                    terminals = Terminal.select().where(Terminal.deleted == 0)
+                    terminals = Terminal.select().where(
+                        Terminal.deleted >> None)
             else:
-                if deleted:
+                if deleted is None:
                     terminals = Terminal.select().where(
                         Terminal.class_ == class_id)
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        (Terminal.class_ == class_id) &
+                        (~(Terminal.deleted >> None)))
                 else:
                     terminals = Terminal.select().where(
                         (Terminal.class_ == class_id) &
-                        (Terminal.deleted == 0))
+                        (Terminal.deleted >> None))
         else:
             if class_id is None:
-                if deleted:
+                if deleted is None:
                     terminals = Terminal.select().where(
                         Terminal.customer == cid)
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        (Terminal.customer == cid) &
+                        (~(Terminal.deleted >> None)))
                 else:
                     terminals = Terminal.select().where(
-                        (Terminal.customer == cid) & (Terminal.deleted == 0))
+                        (Terminal.customer == cid) &
+                        (Terminal.deleted >> None))
             else:
-                if deleted:
+                if deleted is None:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
                         (Terminal.class_ == class_id))
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        (Terminal.customer == cid) &
+                        (Terminal.class_ == class_id) &
+                        (~(Terminal.deleted >> None)))
                 else:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
                         (Terminal.class_ == class_id) &
-                        (Terminal.deleted == 0))
-        result = terminallib()
+                        (Terminal.deleted >> None))
+        result = dom.termgr()
+        lst = dom.TerminalList()
+        for terminal in terminals:
+            # tso =
+            # TODO: Implement 
+            # lst.terminal.append(tso)
+            pass
         for terminal in terminals:
             xml_data = terminal.todom()
             result.terminal.append(xml_data)
