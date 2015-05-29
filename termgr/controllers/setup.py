@@ -1,10 +1,10 @@
 """Controller for terminal setup"""
 
-from homeinfo.lib.wsgi import WsgiController, WsgiResponse, Error,\
-    InternalServerError
-from homeinfo.terminals.db import Terminal, SetupOperator
+from homeinfo.terminals.lib.db import Terminal, SetupOperator
 from homeinfo.terminals.openvpn import OpenVPNPackager
 from homeinfo.terminals.pacman import PacmanConfig
+from homeinfo.lib.wsgi import WsgiController, WsgiResponse, Error,\
+    InternalServerError
 
 __all__ = ['SetupController']
 

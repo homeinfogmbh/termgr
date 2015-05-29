@@ -2,14 +2,13 @@
 
 from ipaddress import IPv4Address, AddressValueError
 from peewee import DoesNotExist
-from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.crm import Address
-from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
+from homeinfo.lib.wsgi import WsgiController, Error, OK
+from homeinfo.terminals.lib.db import Terminal, Class, Domain, Administrator
+from homeinfo.terminals.lib import dom
 from homeinfo.terminals.remotectrl import RemoteController
 from homeinfo.terminals.dom import terminallib
 from ..lib.details import TerminalDetails
-from ..lib import dom
-from datetime import datetime
 
 __all__ = ['TerminalManager']
 
