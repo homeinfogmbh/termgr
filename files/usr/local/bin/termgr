@@ -75,7 +75,7 @@ if options['add']:
     terminal.ipv4addr = Terminal.gen_ipv4addr()
     terminal.virtual_display = None
     terminal.location = address
-    terminal.deleted = False
+    terminal.deleted = None
     if terminal.gen_vpn_keys():
         print('OpenVPN keys generated')
     else:
