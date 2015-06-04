@@ -15,7 +15,7 @@ from os.path import join
 from docopt import docopt
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
-from homeinfo.terminals.db import Terminal, Class, Domain
+from homeinfo.terminals.lib.db import Terminal, Class, Domain
 from homeinfo.terminals.config import openvpn
 
 options = docopt(__doc__)
