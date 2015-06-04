@@ -23,7 +23,7 @@ options = docopt(__doc__)
 
 def aftermath():
     """Fix stuff after operations"""
-    print('Fixing VPN permissions', end='                  ')
+    print('Fixing VPN permissions', end='                  ', flush=True)
     ok = True
     for file in listdir(openvpn['KEYS_DIR']):
         try:
@@ -31,11 +31,11 @@ def aftermath():
         except:
             ok = False
     evaluate(ok)
-    print('Generating /etc/hosts', end='                   ')
+    print('Generating /etc/hosts', end='                   ', flush=True)
     evaluate(run('/usr/local/sbin/hosts.gen'))
-    print('Generating OpenVPN host configurations', end='  ')
+    print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/local/sbin/openvpn-clients.gen'))
-    print('Creating Nagios3 configurations', end='         ')
+    print('Creating Nagios3 configurations', end='         ', flush=True)
     evaluate(run('/usr/local/sbin/monitoring-clients.gen'))
 
 
