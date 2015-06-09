@@ -2,7 +2,7 @@
 
 from peewee import DoesNotExist
 from homeinfo.lib.wsgi import WsgiController, Error, OK
-from homeinfo.terminals.lib.db import Class, Administrator
+from homeinfo.terminals.db import Class, Administrator
 
 __all__ = ['TerminalManager']
 

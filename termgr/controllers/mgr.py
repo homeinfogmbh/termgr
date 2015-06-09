@@ -4,10 +4,9 @@ from ipaddress import IPv4Address, AddressValueError
 from peewee import DoesNotExist
 from homeinfo.crm import Address
 from homeinfo.lib.wsgi import WsgiController, Error, OK
-from homeinfo.terminals.lib.db import Terminal, Class, Domain, Administrator
-from homeinfo.terminals.lib import dom
+from homeinfo.terminals import dom
+from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 from homeinfo.terminals.remotectrl import RemoteController
-from homeinfo.terminals.dom import terminallib
 from ..lib.details import TerminalDetails
 
 __all__ = ['TerminalManager']
@@ -220,11 +219,10 @@ class TerminalManager(WsgiController):
                         (Terminal.customer == cid) &
                         (Terminal.class_ == class_id) &
                         (Terminal.deleted >> None))
-        result = dom.termgr()
-        lst = dom.TerminalList()
+        result = dom.terminallib()
         for terminal in terminals:
             # tso =
-            # TODO: Implement 
+            # TODO: Implement
             # lst.terminal.append(tso)
             pass
         for terminal in terminals:
@@ -234,7 +232,7 @@ class TerminalManager(WsgiController):
 
     def _details(self, cid, tid, thumbnail=False):
         """Get details of a certain terminal"""
-        result = terminallib()
+        result = dom.terminallib()
         if cid is None or tid is None:
             return Error('No terminal ID or customer ID specified', status=400)
         else:
@@ -327,7 +325,7 @@ class TerminalManager(WsgiController):
         except:
             return Error('Could not apply changes', status=500)
         else:
-            xml_data = terminallib()
+            xml_data = dom.terminallib()
             xml_data.terminal = [terminal.todom()]
             if okay:
                 return OK(xml_data, content_type='application/xml')

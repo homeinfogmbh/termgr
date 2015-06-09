@@ -15,8 +15,10 @@ from os.path import join
 from docopt import docopt
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
-from homeinfo.terminals.lib.db import Terminal, Class, Domain
+from homeinfo.terminals.db import Terminal, Class, Domain
+from homeinfo.terminals.openvpn import OpenVPNKeyMgr
 from homeinfo.terminals.config import openvpn
+from homeinfo.terminals.err import KeygenError
 
 options = docopt(__doc__)
 
@@ -76,11 +78,15 @@ if options['add']:
     terminal.virtual_display = None
     terminal.location = address
     terminal.deleted = None
-    if terminal.gen_vpn_keys():
-        print('OpenVPN keys generated')
-    else:
-        print('OpenVPN keys already present')
     terminal.save()
-    print('Created terminal:', terminal.hostname)
+    print('Created terminal record for host name:', terminal.hostname,
+          'with id:', terminal.id)
+    key_manager = OpenVPNKeyMgr(terminal)
+    try:
+        key_manager.generate()
+    except KeygenError:
+        print('OpenVPN keys already present')
+    else:
+        print('OpenVPN keys generated')
 
 aftermath()
