@@ -2,9 +2,10 @@
 
 from homeinfo.terminals.config import net
 from homeinfo.terminals.abc import TerminalAware
-from homeinfo.terminals.ctrl import RemoteController
 
 from ..config import pacman
+
+from .ctrl import RemoteController
 
 __all__ = ['PacmanConfig']
 
