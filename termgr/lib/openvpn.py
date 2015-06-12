@@ -3,9 +3,11 @@
 from posixpath import join, isfile, basename
 from tempfile import NamedTemporaryFile
 import tarfile
+
 from homeinfo.lib.system import run
 from homeinfo.terminals.abc import TerminalAware
-from .config import openvpn
+
+from ..config import openvpn
 from .err import KeygenError, UnconfiguredError
 
 __all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackager']
@@ -59,7 +61,7 @@ class OpenVPNKeyMgr(TerminalAware):
 
     def generate(self):
         """Generates an OpenVPN key pair for the terminal"""
-        build_script = openvpn['BUILD_SCRIPT']
+        build_script = '/usr/lib/termgr/build-key-terminal'
         key_file_name = '.'.join([str(self.terminal.tid),
                                   str(self.terminal.cid)])
         key_file_path = join(openvpn['KEYS_DIR'], key_file_name)
@@ -131,9 +133,9 @@ class OpenVPNConfig(TerminalAware):
 
     def get(self):
         """Get the OpenVPN"""
-        with open(openvpn['CONFIG_TEMP'], 'r') as cfg_temp:
-            config = cfg_temp.read()
-        return self._render(config)
+        with open('/usr/share/termgr/openvpn.conf.temp', 'r') as temp:
+            template = temp.read()
+        return self._render(template)
 
 
 class OpenVPNPackager(TerminalAware):

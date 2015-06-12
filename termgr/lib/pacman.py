@@ -1,8 +1,10 @@
 """Library for terminal pacman.conf management"""
 
-from .config import pacman, net
-from .abc import TerminalAware
-from .ctrl import RemoteController
+from homeinfo.terminals.config import net
+from homeinfo.terminals.abc import TerminalAware
+from homeinfo.terminals.ctrl import RemoteController
+
+from ..config import pacman
 
 __all__ = ['PacmanConfig']
 
@@ -12,7 +14,7 @@ class PacmanConfig(TerminalAware):
 
     def get(self):
         """Returns the rendered configuration file"""
-        with open(pacman['TEMPLATE'], 'r') as temp:
+        with open('/usr/local/share/terminals/pacman.conf.temp', 'r') as temp:
             pacman_conf = temp.read()
         pacman_conf = pacman_conf.replace('<addr>', net['IPV4ADDR'])
         pacman_conf = pacman_conf.replace('<port>', net['HTTP_PRIV_PORT'])
