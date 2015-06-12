@@ -26,7 +26,7 @@ setup(
                   'files/usr/share/termgr/pacman.conf.temp',
                   'files/usr/share/termgr/openvpn.conf.temp',
                   'files/usr/share/termgr/nagios.hostgroup.temp',
-                  'files/usr/share/termgr/nagios.terminal.temp'])
+                  'files/usr/share/termgr/nagios.terminal.temp']),
                 ('/etc/uwsgi/apps-available',
                  ['files/etc/uwsgi/apps-available/termgr-mgr.ini',
                   'files/etc/uwsgi/apps-available/termgr-setup.ini'])],
