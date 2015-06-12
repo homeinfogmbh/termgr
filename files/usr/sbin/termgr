@@ -34,11 +34,11 @@ def aftermath():
             ok = False
     evaluate(ok)
     print('Generating /etc/hosts', end='                   ', flush=True)
-    evaluate(run('/usr/local/sbin/hosts.gen'))
+    evaluate(run('/usr/local/lib/termgr/hosts.gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    evaluate(run('/usr/local/sbin/openvpn-clients.gen'))
+    evaluate(run('/usr/local/lib/termgr/openvpn-client-config.gen'))
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run('/usr/local/sbin/monitoring-clients.gen'))
+    evaluate(run('/usr/local/lib/termgr/nagios-config.gen'))
 
 
 if options['add']:
