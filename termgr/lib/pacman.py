@@ -15,7 +15,7 @@ class PacmanConfig(TerminalAware):
 
     def get(self):
         """Returns the rendered configuration file"""
-        with open('/usr/local/share/terminals/pacman.conf.temp', 'r') as temp:
+        with open('/usr/share/terminals/pacman.conf.temp', 'r') as temp:
             pacman_conf = temp.read()
         pacman_conf = pacman_conf.replace('<addr>', net['IPV4ADDR'])
         pacman_conf = pacman_conf.replace('<port>', net['HTTP_PRIV_PORT'])
