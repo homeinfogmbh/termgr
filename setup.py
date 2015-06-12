@@ -14,7 +14,7 @@ setup(
     packages=['termgr',
               'termgr.controllers',
               'termgr.lib'],
-    data_files=[('/etc', ['files/etc/termgr.conf'])
+    data_files=[('/etc', ['files/etc/termgr.conf']),
                 ('/usr/sbin', ['files/usr/sbin/termgr']),
                 ('/usr/lib/termgr',
                  ['files/usr/lib/termgr/build-key-terminal',
