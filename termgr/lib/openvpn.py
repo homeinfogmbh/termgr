@@ -7,7 +7,7 @@ import tarfile
 from homeinfo.lib.system import run
 from homeinfo.terminals.abc import TerminalAware
 
-from ..config import openvpn
+from ..config import termgr_config
 from .err import KeygenError, UnconfiguredError
 
 __all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackager']
@@ -24,7 +24,7 @@ class OpenVPNKeyMgr(TerminalAware):
     @property
     def key_dir(self):
         """Returns the VPN keys' directory"""
-        return openvpn['KEYS_DIR']
+        return termgr_config.openvpn['KEYS_DIR']
 
     @property
     def crt_file(self):
@@ -39,7 +39,7 @@ class OpenVPNKeyMgr(TerminalAware):
     @property
     def ca_path(self):
         """Returns the full path to the CA's file"""
-        return join(self.key_dir, openvpn['CA_FILE'])
+        return join(self.key_dir, termgr_config.openvpn['CA_FILE'])
 
     @property
     def crt_path(self):
@@ -64,12 +64,13 @@ class OpenVPNKeyMgr(TerminalAware):
         build_script = '/usr/lib/termgr/build-key-terminal'
         key_file_name = '.'.join([str(self.terminal.tid),
                                   str(self.terminal.cid)])
-        key_file_path = join(openvpn['KEYS_DIR'], key_file_name)
+        key_file_path = join(termgr_config.openvpn['KEYS_DIR'], key_file_name)
         if isfile(key_file_path):
             raise KeygenError(
                 ' '.join(['Keys already exist for', key_file_name]))
         else:
-            return run([build_script, openvpn['EASY_RSA_DIR'], key_file_name])
+            return run([build_script, termgr_config.openvpn['EASY_RSA_DIR'],
+                        key_file_name])
 
     def revoke(self):
         """Revokes a terminal's key"""
@@ -99,8 +100,9 @@ class OpenVPNConfig(TerminalAware):
     @property
     def servers(self):
         """List of remote servers"""
-        return '\n'.join((' '.join(('remote', s.strip(), openvpn['PORT']))
-                          for s in openvpn['SERVERS'].split()))
+        return '\n'.join(
+            (' '.join(('remote', s.strip(), termgr_config.openvpn['PORT']))
+             for s in termgr_config.openvpn['SERVERS'].split()))
 
     def _render_caption(self, config, host_name):
         """Renders the openvpn-config file's caption / header"""
@@ -125,10 +127,10 @@ class OpenVPNConfig(TerminalAware):
         """Returns the rendered configuration file"""
         host_name = self.idstr
         config = self._render_caption(config, host_name)
-        config = config.replace('<ca>', openvpn['CA_FILE'])
+        config = config.replace('<ca>', termgr_config.openvpn['CA_FILE'])
         config = config.replace('<host_name>', host_name)
-        config = config.replace('<cipher>', openvpn['CIPHER'])
-        config = config.replace('<auth>', openvpn['AUTH'])
+        config = config.replace('<cipher>', termgr_config.openvpn['CIPHER'])
+        config = config.replace('<auth>', termgr_config.openvpn['AUTH'])
         return config
 
     def get(self):
@@ -146,7 +148,7 @@ class OpenVPNPackager(TerminalAware):
 
     def _pack(self, files):
         """Packs a tar.gz file"""
-        config_name = '.'.join([openvpn['CONFIG_NAME'], 'conf'])
+        config_name = '.'.join([termgr_config.openvpn['CONFIG_NAME'], 'conf'])
         with NamedTemporaryFile('w+b', suffix='.tar.gz') as tmp:
             with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
                 tar.add(files['ca'], basename(files['ca']))

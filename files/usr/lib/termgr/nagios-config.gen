@@ -6,7 +6,7 @@ from HOMEINFO terminal records
 from os.path import join
 from homeinfo.lib.system import run, evaluate
 from homeinfo.terminals.db import Terminal, Class
-from termgr.config import monitoring
+from termgr.config import termgr_config
 
 __author__ = 'Richard Neumann <r.neumann@homeinfo.de>'
 __date__ = '22.04.2015'
@@ -25,7 +25,8 @@ def mkhosts():
         rendered = rendered.replace('%OS%', 'linux')  # TODO: Make dynamic
         return rendered
 
-    conf_path = join(monitoring['CONF_DIR'], monitoring['HOSTS_FILE_NAME'])
+    conf_path = join(termgr_config.monitoring['CONF_DIR'],
+                     termgr_config.monitoring['HOSTS_FILE_NAME'])
 
     with open('/usr/share/termgr/nagios.terminal.temp', 'r') as temp:
         template = temp.read()
@@ -61,7 +62,8 @@ def mkgroups():
         else:
             return ''
 
-    conf_path = join(monitoring['CONF_DIR'], monitoring['GROUPS_FILE_NAME'])
+    conf_path = join(termgr_config.monitoring['CONF_DIR'],
+                     termgr_config.monitoring['GROUPS_FILE_NAME'])
 
     with open('/usr/share/termgr/nagios.hostgroup.temp', 'r') as temp:
         template = temp.read()

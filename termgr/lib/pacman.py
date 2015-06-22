@@ -3,7 +3,7 @@
 from homeinfo.terminals.config import net
 from homeinfo.terminals.abc import TerminalAware
 
-from ..config import pacman
+from ..config import termgr_config
 
 from .ctrl import RemoteController
 
@@ -33,12 +33,14 @@ class Pacman(TerminalAware):
     @property
     def _refresh_cmd(self):
         """Returns the refresh command"""
-        return [pacman['BINARY'], pacman['REFRESH_CMD']]
+        return [termgr_config.pacman['BINARY'],
+                termgr_config.pacman['REFRESH_CMD']]
 
     @property
     def _update_cmd(self):
         """Returns the refresh command"""
-        return [pacman['BINARY'], pacman['UPDATE_CMD']]
+        return [termgr_config.pacman['BINARY'],
+                termgr_config.pacman['UPDATE_CMD']]
 
     def refresh(self):
         """Refresh repository"""

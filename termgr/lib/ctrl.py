@@ -16,10 +16,6 @@ __all__ = ['RemoteController']
 class RemoteController(TerminalAware):
     """Controls a terminal remotely"""
 
-    # Options for SSH to trick it into not checking the host key
-    _SSH_OPTS = {'UserKnownHostsFile': '/dev/null',
-                 'StrictHostKeyChecking': 'no'}
-
     def __init__(self, user, terminal, keyfile=None, white_list=None, bl=None):
         """Initializes a remote terminal controller"""
         super().__init__(terminal)
@@ -28,6 +24,13 @@ class RemoteController(TerminalAware):
         # Commands white and black list
         self._white_list = white_list
         self._black_list = bl
+        # FUrther options for SSH
+        _SSH_OPTS = {
+            # Trick SSH it into not checking the host key
+            'UserKnownHostsFile': ssh['USER_KNOWN_HOSTS_FILE'],
+            'StrictHostKeyChecking': ssh['STRICT_HOST_KEY_CHECKING'],
+            # Set timeout to avoid blocking of rsync / ssh call
+            'ConnectTimeout': ssh['CONNECT_TIMEOUT']}
 
     @property
     def user(self):
@@ -41,7 +44,7 @@ class RemoteController(TerminalAware):
             '', 'home', self.user, '.ssh', 'terminals')
 
     @property
-    def _identity_file(self):
+    def _identity(self):
         """Returns the SSH identity file argument
         with the respective identity file's path
         """
@@ -57,7 +60,7 @@ class RemoteController(TerminalAware):
     @property
     def _ssh_cmd(self):
         """Returns the SSH basic command line"""
-        return ' '.join([ssh['SSH_BIN'], self._identity_file,
+        return ' '.join([ssh['SSH_BIN'], self._identity,
                          self._ssh_options])
 
     @property
@@ -97,14 +100,13 @@ class RemoteController(TerminalAware):
 
     def _check_command(self, cmd):
         """Checks the command against the white- and blacklists"""
-        result = True
         if self._white_list is not None:
             if cmd not in self._white_list:
-                result = False
+                return False
         if self._black_list is not None:
             if cmd in self._black_list:
-                result = False
-        return result
+                return False
+        return True
 
     def execute(self, cmd, *args):
         """Executes a certain command on a remote terminal"""
@@ -132,15 +134,6 @@ class DisplayController(RemoteController):
         scrot_cmd = self._scrot_cmd(fname)
         return (self.execute(scrot_cmd), datetime.now())
 
-    def screenshot(self, quality=None):
-        """Returns a screenshot"""
-        return self.get_screenshot(thumbnail=False)
-
-    @property
-    def thumbnail(self):
-        """Returns a thumbnail of a screenshot"""
-        return self.get_screenshot(thumbnail=True)
-
     def get_screenshot(self, full=True, thumbnail=False):
         """Creates a screenshot on the terminal and
         fetches its content to the local machine
@@ -157,3 +150,12 @@ class DisplayController(RemoteController):
             return (data, timestamp)
         else:
             return None
+
+    def screenshot(self, quality=None):
+        """Returns a screenshot"""
+        return self.get_screenshot(thumbnail=False)
+
+    @property
+    def thumbnail(self):
+        """Returns a thumbnail of a screenshot"""
+        return self.get_screenshot(thumbnail=True)
