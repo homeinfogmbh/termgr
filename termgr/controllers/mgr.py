@@ -7,9 +7,9 @@ from peewee import DoesNotExist
 from homeinfo.crm import Address
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
+from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 
-from ..lib.ctrl import RemoteController
 from ..lib.details import TerminalDetails
 
 __all__ = ['TerminalManager']
