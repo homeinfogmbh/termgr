@@ -68,10 +68,8 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body = location.encode(encoding=charset)
             else:
-                msg = ' '.join(['No Repository configuration',
-                                'found for terminal',
-                                '.'.join([str(terminal.tid),
-                                          str(terminal.cid)])])
+                msg = 'No location configured for terminal: {0}'.format(
+                    terminal)
                 return InternalServerError(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
@@ -83,9 +81,8 @@ class SetupController(WsgiController):
                 content_type = 'application/x-gzip'
                 charset = None
             else:
-                msg = ' '.join(['No OpenVPN configuration found for terminal',
-                                '.'.join([str(terminal.tid),
-                                          str(terminal.cid)])])
+                msg = ('No OpenVPN configuration found for terminal: '
+                       '{0}'.format(terminal))
                 return InternalServerError(msg)
         elif action == 'repo_config':
             pacman_cfg = PacmanConfig(terminal)
@@ -98,13 +95,11 @@ class SetupController(WsgiController):
                 charset = 'utf-8'
                 response_body = result.encode(encoding=charset)
             else:
-                msg = ' '.join(['No Repository configuration',
-                                'found for terminal',
-                                '.'.join([str(terminal.tid),
-                                          str(terminal.cid)])])
+                msg = ('No Repository configuration found for terminal: '
+                       '{0}'.format(terminal))
                 return InternalServerError(msg)
         else:
-            msg = ''.join(['Method "', action, '" is not implemented'])
+            msg = 'Action "{0}" is not implemented'.format(action)
             return Error(msg, status=501)
-        return WsgiResponse(status, content_type, response_body,
-                            charset=charset, cors=True)
+        return WsgiResponse(
+            status, content_type, response_body, charset=charset, cors=True)

@@ -116,9 +116,10 @@ class TerminalManager(WsgiController):
             except AddressValueError:
                 return Error('Invalid IPv4 address', status=400)
         virtual_display = self.qd.get('virtual_display')
-        return self._add(cid, tid, location_id, class_id,
-                         domain_id, ipv4addr=ipv4addr,
-                         virtual_display=virtual_display)
+        return self._add(
+            cid, tid, location_id, class_id,
+            domain_id, ipv4addr=ipv4addr,
+            virtual_display=virtual_display)
 
     def _modify(self, cid, tid):
         """Adds entities"""
@@ -249,11 +250,12 @@ class TerminalManager(WsgiController):
                     screenshot = RemoteController(terminal).thumbnail
                 else:
                     screenshot = RemoteController(terminal).screenshot
-                details = TerminalDetails(status=True,  # TODO: Evaluate this!
-                                          uptime=None,  # TODO: Evaluate this!
-                                          screenshot=screenshot,
-                                          # TODO: Evaluate this!
-                                          touch_events=None)
+                details = TerminalDetails(
+                    status=True,  # TODO: Evaluate this!
+                    uptime=None,  # TODO: Evaluate this!
+                    screenshot=screenshot,
+                    # TODO: Evaluate this!
+                    touch_events=None)
                 terminal_detail = terminal.todom(details=details)
                 result.terminal_detail = terminal_detail
                 return OK(result, content_type='application/xml')
@@ -266,11 +268,12 @@ class TerminalManager(WsgiController):
             terminal = Terminal()
             terminal.customer = cid
             terminal.tid = Terminal.gen_tid(cid, desired=tid)
-            return self._set_terminal_data(terminal, location_id=location_id,
-                                           class_id=class_id,
-                                           domain_id=domain_id,
-                                           ipv4addr=ipv4addr, vpn_gen=True,
-                                           virtual_display=virtual_display)
+            return self._set_terminal_data(
+                terminal, location_id=location_id,
+                class_id=class_id,
+                domain_id=domain_id,
+                ipv4addr=ipv4addr, vpn_gen=True,
+                virtual_display=virtual_display)
         else:
             return Error('Terminal already exists', status=400)
 
@@ -286,12 +289,13 @@ class TerminalManager(WsgiController):
             if terminal is None:
                 return Error('No such terminal', status=400)
             else:
-                return self._set_terminal_data(terminal,
-                                               location_id=location_id,
-                                               class_id=class_id,
-                                               domain_id=domain_id,
-                                               vpn_gen=False,
-                                               virtual_display=virtual_display)
+                return self._set_terminal_data(
+                    terminal,
+                    location_id=location_id,
+                    class_id=class_id,
+                    domain_id=domain_id,
+                    vpn_gen=False,
+                    virtual_display=virtual_display)
 
     def _set_terminal_data(self, terminal, location_id=None, class_id=None,
                            domain_id=None, ipv4addr=None, vpn_gen=False,
@@ -333,8 +337,8 @@ class TerminalManager(WsgiController):
             if okay:
                 return OK(xml_data, content_type='application/xml')
             else:
-                return Error(xml_data, content_type='application/xml',
-                             status=500)
+                return Error(
+                    xml_data, content_type='application/xml', status=500)
 
     def _delete_terminal(self, cid, tid, revoke_vpn=True):
         """Delete a terminal from the terminals list"""
