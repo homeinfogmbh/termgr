@@ -122,8 +122,8 @@ class OpenVPNConfig(TerminalAware):
         else:
             search_fill = ''
             replace_fill = ''
-        config = config.replace(template_caption + search_fill,
-                                host_name_caption + replace_fill)
+        config = config.replace(
+            template_caption + search_fill, host_name_caption + replace_fill)
         config = config.replace('<servers>', self.servers)
         return config
 
@@ -176,9 +176,10 @@ class OpenVPNPackager(TerminalAware):
             with NamedTemporaryFile('w+') as cfg:
                 cfg.write(config)
                 cfg.seek(0)  # Read file from beginning
-                files = {'ca': ca_path,
-                         'key': key_path,
-                         'crt': crt_path,
-                         'cfg': cfg.name}
+                files = {
+                    'ca': ca_path,
+                    'key': key_path,
+                    'crt': crt_path,
+                    'cfg': cfg.name}
                 tar_data = self._pack(files)
             return tar_data
