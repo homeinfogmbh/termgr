@@ -29,12 +29,12 @@ class OpenVPNKeyMgr(TerminalAware):
     @property
     def crt_file(self):
         """Returns the client certificate's file name"""
-        return '.'.join([self.host_name, 'crt'])
+        return '{0}.crt'.format(self.host_name)
 
     @property
     def key_file(self):
         """Returns the key file's name"""
-        return '.'.join([self.host_name, 'key'])
+        return '{0}.key'.format(self.host_name)
 
     @property
     def ca_path(self):
@@ -62,15 +62,16 @@ class OpenVPNKeyMgr(TerminalAware):
     def generate(self):
         """Generates an OpenVPN key pair for the terminal"""
         build_script = '/usr/lib/termgr/build-key-terminal'
-        key_file_name = '.'.join([str(self.terminal.tid),
-                                  str(self.terminal.cid)])
+        key_file_name = '{0}.{1}'.format(
+            self.terminal.tid, self.terminal.cid)
         key_file_path = join(termgr_config.openvpn['KEYS_DIR'], key_file_name)
         if isfile(key_file_path):
             raise KeygenError(
-                ' '.join(['Keys already exist for', key_file_name]))
+                'Keys already exist in: {0}'.format(key_file_name))
         else:
-            return run([build_script, termgr_config.openvpn['EASY_RSA_DIR'],
-                        key_file_name])
+            return run(
+                [build_script, termgr_config.openvpn['EASY_RSA_DIR'],
+                 key_file_name])
 
     def revoke(self):
         """Revokes a terminal's key"""
@@ -84,12 +85,15 @@ class OpenVPNKeyMgr(TerminalAware):
                 if isfile(self.crt_path):
                     return (self.ca_path, self.key_path, self.crt_path)
                 else:
-                    raise UnconfiguredError(' '.join(['Missing',
-                                                      self.crt_path]))
+                    raise UnconfiguredError(
+                        'Missing client certificate: {0}'.format(
+                            self.crt_path))
             else:
-                raise UnconfiguredError(' '.join(['Missing', self.key_path]))
+                raise UnconfiguredError(
+                    'Missing client key: {0}'.format(self.key_path))
         else:
-            raise UnconfiguredError(' '.join(['Missing', self.ca_path]))
+            raise UnconfiguredError(
+                'Missing CA certificate: {0}'.format(self.ca_path))
 
 
 class OpenVPNConfig(TerminalAware):
@@ -101,8 +105,8 @@ class OpenVPNConfig(TerminalAware):
     def servers(self):
         """List of remote servers"""
         return '\n'.join(
-            (' '.join(('remote', s.strip(), termgr_config.openvpn['PORT']))
-             for s in termgr_config.openvpn['SERVERS'].split()))
+            ('remote {0} {1}'.format(s.strip(), termgr_config.openvpn['PORT'])
+             for s in termgr_config.openvpn['SERVERS'].split() if s.strip()))
 
     def _render_caption(self, config, host_name):
         """Renders the openvpn-config file's caption / header"""
@@ -148,7 +152,7 @@ class OpenVPNPackager(TerminalAware):
 
     def _pack(self, files):
         """Packs a tar.gz file"""
-        config_name = '.'.join([termgr_config.openvpn['CONFIG_NAME'], 'conf'])
+        config_name = '{0}.conf'.format(termgr_config.openvpn['CONFIG_NAME'])
         with NamedTemporaryFile('w+b', suffix='.tar.gz') as tmp:
             with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
                 tar.add(files['ca'], basename(files['ca']))
