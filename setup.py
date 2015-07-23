@@ -30,7 +30,10 @@ setup(
                   'files/usr/share/termgr/nagios.terminal.temp']),
                 ('/etc/uwsgi/apps-available',
                  ['files/etc/uwsgi/apps-available/termgr-mgr.ini',
-                  'files/etc/uwsgi/apps-available/termgr-setup.ini'])],
+                  'files/etc/uwsgi/apps-available/termgr-setup.ini']),
+                ('/etc/nagios3/conf.d',
+                 ['files/etc/nagios3/conf.d/homeinfo-terminal.cfg',
+                  'files/etc/nagios3/conf.d/homeinfo-contacts.cfg'])],
     license=open('LICENSE.txt').read(),
     description=('Homeinfo Terminal Manager')
     )
