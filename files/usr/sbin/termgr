@@ -16,8 +16,8 @@ from docopt import docopt
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.db import Terminal, Class, Domain
+from homeinfo.terminals.config import terminals_config
 from termgr.lib.openvpn import OpenVPNKeyMgr
-from termgr.config import termgr_config
 from termgr.lib.err import KeygenError
 
 options = docopt(__doc__)
@@ -27,9 +27,9 @@ def aftermath():
     """Fix stuff after operations"""
     print('Fixing VPN permissions', end='                  ', flush=True)
     ok = True
-    for file in listdir(termgr_config.openvpn['KEYS_DIR']):
+    for file in listdir(terminals_config.openvpn['KEYS_DIR']):
         try:
-            chmod(join(termgr_config.openvpn['KEYS_DIR'], file), 0o660)
+            chmod(join(terminals_config.openvpn['KEYS_DIR'], file), 0o660)
         except:
             ok = False
     evaluate(ok)
