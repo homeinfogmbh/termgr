@@ -9,16 +9,6 @@ class TermgrConfig(Configuration):
     """Configuration parser enhancement"""
 
     @property
-    def monitoring(self):
-        self.load()
-        return self['monitoring']
-
-    @property
-    def openvpn(self):
-        self.load()
-        return self['openvpn']
-
-    @property
     def pacman(self):
         self.load()
         return self['pacman']
