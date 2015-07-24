@@ -62,7 +62,7 @@ class OpenVPNKeyMgr(TerminalAware):
 
     def generate(self):
         """Generates an OpenVPN key pair for the terminal"""
-        build_script = '/usr/lib/termgr/build-key-terminal'
+        build_script = '/usr/lib/terminals/build-key-terminal'
         key_file_name = '{0}.{1}'.format(
             self.terminal.tid, self.terminal.cid)
         key_file_path = join(terminals_config.openvpn['KEYS_DIR'], key_file_name)
@@ -141,7 +141,7 @@ class OpenVPNConfig(TerminalAware):
 
     def get(self):
         """Get the OpenVPN"""
-        with open('/usr/share/termgr/openvpn.conf.temp', 'r') as temp:
+        with open('/usr/share/terminals/openvpn.conf.temp', 'r') as temp:
             template = temp.read()
         return self._render(template)
 
