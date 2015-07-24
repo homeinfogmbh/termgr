@@ -8,7 +8,6 @@ from homeinfo.lib.system import run
 from homeinfo.terminals.abc import TerminalAware
 from homeinfo.terminals.config import terminals_config
 
-from ..config import termgr_config
 from .err import KeygenError, UnconfiguredError
 
 __all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackager']
@@ -108,7 +107,7 @@ class OpenVPNConfig(TerminalAware):
         return '\n'.join(
             ('remote {0} {1}'.format(
                 s.strip(), terminals_config.openvpn['PORT'])
-             for s in termgr_config.openvpn['SERVERS'].split() if s.strip()))
+             for s in terminals_config.openvpn['SERVERS'].split() if s.strip()))
 
     def _render_caption(self, config, host_name):
         """Renders the openvpn-config file's caption / header"""
