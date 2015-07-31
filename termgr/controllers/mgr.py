@@ -188,10 +188,14 @@ class TerminalManager(WsgiController):
         """Lists all customers"""
         result = dom.terminals()
         classes = {}
-        for terminal in Terminal.select().where(
-                Terminal.customer == cid):
-            if terminal.class_.id not in classes:
-                classes[terminal.class_.id] = terminal.class_
+        if cid:
+            for terminal in Terminal.select().where(
+                    Terminal.customer == cid):
+                if terminal.class_.id not in classes:
+                    classes[terminal.class_.id] = terminal.class_
+        else:
+            for class_ in Class:
+                classes[class_.id] = class_
         for ident in classes:
             class_ = classes[ident]
             result.class_.append(class_)
