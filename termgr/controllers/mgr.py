@@ -234,7 +234,7 @@ class TerminalManager(WsgiController):
                          (Terminal.class_.name == class_name)) &
                         (Terminal.deleted >> None))
         else:
-            if class_id is None:
+            if class_id_or_name is None:
                 if deleted is None:
                     terminals = Terminal.select().where(
                         Terminal.customer == cid)
@@ -247,6 +247,13 @@ class TerminalManager(WsgiController):
                         (Terminal.customer == cid) &
                         (Terminal.deleted >> None))
             else:
+                try:
+                    class_id = int(class_id_or_name)
+                except (TypeError, ValueError):
+                    class_id = -1
+                    class_name = class_id_or_name
+                else:
+                    class_name = '!'
                 if deleted is None:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
