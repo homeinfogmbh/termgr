@@ -50,7 +50,7 @@ class TerminalManager(WsgiController):
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
-                return self._list_terminals(cid, class_id=class_id_or_name)
+                return self._list_terminals(cid, class_id_or_name)
             elif action == 'customers':
                 return self._list_customers()
             elif action == 'classes':
@@ -200,7 +200,7 @@ class TerminalManager(WsgiController):
             result.class_.append(c)
         return OK(result, content_type='application/xml')
 
-    def _list_terminals(self, cid=None, class_id_or_name=None, deleted=None):
+    def _list_terminals(self, cid, class_id_or_name, deleted=None):
         """Lists available terminals"""
         if cid is None:
             if class_id_or_name is None:
