@@ -7,8 +7,8 @@ from peewee import DoesNotExist
 from homeinfo.crm import Address
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
-from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.db import Terminal, Class, Domain
+from hhipster.ctrl import TerminalController
 
 __all__ = ['TerminalManager']
 
@@ -232,14 +232,13 @@ class TerminalManager(WsgiController):
             else:
                 if thumbnail:
                     try:
-                        screenshot = RemoteController(
-                            'heed', terminal).screenshot(thumbnail=10)
+                        screenshot = TerminalController(terminal).screenshot(
+                            thumbnail=True)
                     except:
                         screenshot = None
                 else:
                     try:
-                        screenshot = RemoteController(
-                            'heed', terminal).screenshot(thumbnail=False)
+                        screenshot = TerminalController(terminal).screenshot()
                     except:
                         screenshot = None
                 details = terminal.dom(details=True, screenshot=screenshot)
