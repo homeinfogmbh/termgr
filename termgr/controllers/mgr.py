@@ -32,6 +32,7 @@ class TerminalManager(WsgiController):
         passwd = self.qd.get('passwd')
         if not user_name:
             return Error('No password', status=400)
+        class_id_or_name = self.qd.get('class')
         if Administrator.authenticate(user_name, passwd):
             cid = self.qd.get('cid')
             if cid is not None:
@@ -45,17 +46,11 @@ class TerminalManager(WsgiController):
                     tid = int(tid)
                 except (TypeError, ValueError):
                     return Error('Invalid terminal ID', status=400)
-            class_id = self.qd.get('class_id')
-            if class_id is not None:
-                try:
-                    class_id = int(class_id)
-                except (ValueError, TypeError):
-                    return Error('Invalid class ID', status=400)
             action = self.qd.get('action')
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
-                return self._list_terminals(cid, class_id=class_id)
+                return self._list_terminals(cid, class_id=class_id_or_name)
             elif action == 'customers':
                 return self._list_customers()
             elif action == 'classes':
