@@ -199,7 +199,7 @@ class TerminalManager(WsgiController):
             class_ = classes[ident]
             try:
                 class_, n = class_
-            except ValueError:
+            except TypeError:
                 n = None
             c = dom.Class(class_.name)
             c.full_name = class_.full_name
