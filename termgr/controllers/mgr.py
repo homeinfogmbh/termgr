@@ -4,7 +4,7 @@ from ipaddress import IPv4Address, AddressValueError
 
 from peewee import DoesNotExist
 
-from homeinfo.crm import Address
+from homeinfo.crm import Address, Customer
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
 from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
@@ -54,8 +54,10 @@ class TerminalManager(WsgiController):
             action = self.qd.get('action')
             if action is None:
                 return Error('No action specified', status=400)
-            elif action == 'list':
-                return self._list(cid, class_id=class_id)
+            elif action == 'terminals':
+                return self._list_terminals(cid, class_id=class_id)
+            elif action == 'customers':
+                return self._list_customers()
             elif action == 'details':
                 if cid is None:
                     return Error('No customer ID specified', status=400)
@@ -171,7 +173,16 @@ class TerminalManager(WsgiController):
         revoke_vpn = self.qd.get('revoke_vpn')
         return self._delete_terminal(cid, tid, revoke_vpn)
 
-    def _list(self, cid=None, class_id=None, deleted=None):
+    def _list_customers(self):
+        """Lists all customers"""
+        result = dom.terminals()
+        for customer in Customer:
+            c = dom.Customer(customer.name)
+            c.id = customer.id
+            result.customer.append(c)
+        return result
+
+    def _list_terminals(self, cid=None, class_id=None, deleted=None):
         """Lists available terminals"""
         if cid is None:
             if class_id is None:
