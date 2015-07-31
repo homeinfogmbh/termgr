@@ -8,7 +8,7 @@ from homeinfo.crm import Address
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
 from homeinfo.terminals.db import Terminal, Class, Domain
-from hhipster.ctrl import TerminalController
+from hipster.ctrl import TerminalController
 
 __all__ = ['TerminalManager']
 
