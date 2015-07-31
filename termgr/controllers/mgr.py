@@ -200,6 +200,7 @@ class TerminalManager(WsgiController):
             class_ = classes[ident]
             c = dom.Class(class_.name)
             c.full_name = class_.full_name
+            c.touch = class_.touch
             c.id = class_.id
             result.class_.append(c)
         return OK(result, content_type='application/xml')
