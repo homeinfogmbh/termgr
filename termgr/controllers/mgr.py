@@ -8,9 +8,7 @@ from homeinfo.crm import Address
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
 from homeinfo.terminals.ctrl import RemoteController
-from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
-
-from ..lib.details import TerminalDetails
+from homeinfo.terminals.db import Terminal, Class, Domain
 
 __all__ = ['TerminalManager']
 
@@ -25,59 +23,51 @@ class TerminalManager(WsgiController):
     DEBUG = True
 
     def _run(self):
-        """Runs the terminal manager"""
-        user_name = self.qd.get('user_name')
-        if not user_name:
-            return Error('No user name specified', status=400)
-        passwd = self.qd.get('passwd')
-        if not passwd:
-            return Error('No password specified', status=400)
-        administrator = Administrator.authenticate(user_name, passwd)
-        if administrator:
-            cid = self.qd.get('cid')
-            if cid is not None:
-                try:
-                    cid = int(cid)
-                except (TypeError, ValueError):
-                    return Error('Invalid customer ID', status=400)
-            tid = self.qd.get('tid')
-            if tid is not None:
-                try:
-                    tid = int(tid)
-                except (TypeError, ValueError):
-                    return Error('Invalid terminal ID', status=400)
-            class_id = self.qd.get('class_id')
-            if class_id is not None:
-                try:
-                    class_id = int(class_id)
-                except (ValueError, TypeError):
-                    return Error('Invalid class ID', status=400)
-            action = self.qd.get('action')
-            if action is None:
-                return Error('No action specified', status=400)
-            elif action == 'list':
-                return self._list(cid, class_id=class_id)
-            elif action == 'details':
-                if cid is None:
-                    return Error('No customer ID specified', status=400)
-                elif tid is None:
-                    return Error('No terminal ID specified', status=400)
-                else:
-                    if self.qd.get('thumbnail') is None:
-                        thumbnail = False
-                    else:
-                        thumbnail = True
-                    return self._details(cid, tid, thumbnail=thumbnail)
-            elif action == 'add':
-                return self._add(cid, tid)
-            elif action == 'modify':
-                return self._modify_terminal(cid, tid)
-            elif action == 'delete':
-                return self._delete_terminal(cid, tid)
+        """Runs the terminal manager
+        XXX: Authentication by htpasswd
+        """
+        cid = self.qd.get('cid')
+        if cid is not None:
+            try:
+                cid = int(cid)
+            except (TypeError, ValueError):
+                return Error('Invalid customer ID', status=400)
+        tid = self.qd.get('tid')
+        if tid is not None:
+            try:
+                tid = int(tid)
+            except (TypeError, ValueError):
+                return Error('Invalid terminal ID', status=400)
+        class_id = self.qd.get('class_id')
+        if class_id is not None:
+            try:
+                class_id = int(class_id)
+            except (ValueError, TypeError):
+                return Error('Invalid class ID', status=400)
+        action = self.qd.get('action')
+        if action is None:
+            return Error('No action specified', status=400)
+        elif action == 'list':
+            return self._list(cid, class_id=class_id)
+        elif action == 'details':
+            if cid is None:
+                return Error('No customer ID specified', status=400)
+            elif tid is None:
+                return Error('No terminal ID specified', status=400)
             else:
-                return Error('Invalid action', status=400)
+                if self.qd.get('thumbnail') is None:
+                    thumbnail = False
+                else:
+                    thumbnail = True
+                return self._details(cid, tid, thumbnail=thumbnail)
+        elif action == 'add':
+            return self._add(cid, tid)
+        elif action == 'modify':
+            return self._modify_terminal(cid, tid)
+        elif action == 'delete':
+            return self._delete_terminal(cid, tid)
         else:
-            return Error('Invalid credentials', status=401)
+            return Error('Invalid action', status=400)
 
     def _add(self, cid, tid):
         """Adds entities"""
