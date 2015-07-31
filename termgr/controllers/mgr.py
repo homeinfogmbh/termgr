@@ -232,12 +232,14 @@ class TerminalManager(WsgiController):
             else:
                 if thumbnail:
                     try:
-                        screenshot = RemoteController(terminal).thumbnail
+                        screenshot = RemoteController(
+                            'heed', terminal).screenshot(thumbnail=10)
                     except:
                         screenshot = None
                 else:
                     try:
-                        screenshot = RemoteController(terminal).screenshot
+                        screenshot = RemoteController(
+                            'heed', terminal).screenshot(thumbnail=False)
                     except:
                         screenshot = None
                 details = terminal.dom(details=True, screenshot=screenshot)
