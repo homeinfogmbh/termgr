@@ -55,10 +55,11 @@ class TerminalManager(WsgiController):
             elif tid is None:
                 return Error('No terminal ID specified', status=400)
             else:
-                if self.qd.get('thumbnail') is None:
+                thumbnail = self.qd.get('thumbnail')
+                try:
+                    thumbnail = int(thumbnail)
+                except (ValueError, TypeError):
                     thumbnail = False
-                else:
-                    thumbnail = True
                 return self._details(cid, tid, thumbnail=thumbnail)
         elif action == 'add':
             return self._add(cid, tid)
@@ -233,7 +234,7 @@ class TerminalManager(WsgiController):
                 if thumbnail:
                     try:
                         screenshot = TerminalController(terminal).screenshot(
-                            thumbnail=True)
+                            thumbnail=thumbnail)
                     except Exception as e:
                         return Error(str(e))
                 else:
