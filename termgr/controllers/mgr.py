@@ -226,22 +226,25 @@ class TerminalManager(WsgiController):
             return Error('No terminal ID or customer ID specified', status=400)
         else:
             try:
-                terminal = Terminal.get((Terminal.customer == cid) &
-                                        (Terminal.tid == tid))
+                terminal = Terminal.get(
+                    (Terminal.customer == cid) &
+                    (Terminal.tid == tid))
             except DoesNotExist:
                 return Error('No such terminal', status=400)
             else:
-                if thumbnail:
-                    try:
-                        screenshot = TerminalController(terminal).screenshot(
-                            thumbnail=thumbnail)
-                    except Exception as e:
-                        return Error(str(e))
-                else:
-                    try:
-                        screenshot = TerminalController(terminal).screenshot()
-                    except Exception as e:
-                        return Error(str(e))
+                if terminal.status:
+                    if thumbnail:
+                        try:
+                            screenshot = TerminalController(
+                                terminal).screenshot(thumbnail=thumbnail)
+                        except Exception as e:
+                            return Error(str(e))
+                    else:
+                        try:
+                            screenshot = TerminalController(
+                                terminal).screenshot()
+                        except Exception as e:
+                            return Error(str(e))
                 details = terminal.dom(details=True, screenshot=screenshot)
                 result.details = details
                 return OK(result, content_type='application/xml')
