@@ -223,11 +223,13 @@ class TerminalManager(WsgiController):
                         Terminal.class_ == class_id)
                 elif deleted:
                     terminals = Terminal.select().where(
-                        (Terminal.class_ == class_id) &
+                        ((Terminal.class_ == class_id) |
+                         (Terminal.class_.name == class_id)) &
                         (~(Terminal.deleted >> None)))
                 else:
                     terminals = Terminal.select().where(
-                        (Terminal.class_ == class_id) &
+                        ((Terminal.class_ == class_id) |
+                         (Terminal.class_.name == class_id)) &
                         (Terminal.deleted >> None))
         else:
             if class_id is None:
@@ -246,16 +248,19 @@ class TerminalManager(WsgiController):
                 if deleted is None:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal.class_ == class_id))
+                        ((Terminal.class_ == class_id) |
+                         (Terminal.class_.name == class_id)))
                 elif deleted:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal.class_ == class_id) &
+                        ((Terminal.class_ == class_id) |
+                         (Terminal.class_.name == class_id)) &
                         (~(Terminal.deleted >> None)))
                 else:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal.class_ == class_id) &
+                        ((Terminal.class_ == class_id) |
+                         (Terminal.class_.name == class_id)) &
                         (Terminal.deleted >> None))
         result = dom.terminals()
         for terminal in terminals:
