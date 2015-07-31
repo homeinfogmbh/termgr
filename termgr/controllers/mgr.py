@@ -9,6 +9,7 @@ from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
 from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 from hipster.ctrl import TerminalController
+from multiprocessing.sharedctypes import class_cache
 
 __all__ = ['TerminalManager']
 
@@ -187,16 +188,25 @@ class TerminalManager(WsgiController):
             for terminal in Terminal.select().where(
                     Terminal.customer == cid):
                 if terminal.class_.id not in classes:
-                    classes[terminal.class_.id] = terminal.class_
+                    classes[terminal.class_.id] = (terminal.class_, 1)
+                else:
+                    c, n = classes[terminal.class_.id]
+                    classes[terminal.class_.id] = (c, n+1)
         else:
             for class_ in Class:
                 classes[class_.id] = class_
         for ident in classes:
             class_ = classes[ident]
+            try:
+                class_, n = class_
+            except ValueError:
+                n = None
             c = dom.Class(class_.name)
             c.full_name = class_.full_name
             c.touch = class_.touch
             c.id = class_.id
+            if n is not None:
+                c.amount = n
             result.class_.append(c)
         return OK(result, content_type='application/xml')
 
