@@ -58,6 +58,8 @@ class TerminalManager(WsgiController):
                 return self._list_terminals(cid, class_id=class_id)
             elif action == 'customers':
                 return self._list_customers()
+            elif action == 'classes':
+                return self._list_classes(cid)
             elif action == 'details':
                 if cid is None:
                     return Error('No customer ID specified', status=400)
@@ -180,6 +182,19 @@ class TerminalManager(WsgiController):
             c = dom.Customer(customer.name)
             c.id = customer.id
             result.customer.append(c)
+        return OK(result, content_type='application/xml')
+
+    def _list_classes(self, cid):
+        """Lists all customers"""
+        result = dom.terminals()
+        classes = {}
+        for terminal in Terminal.select().where(
+                Terminal.customer == cid):
+            if terminal.class_.id not in classes:
+                classes[terminal.class_.id] = terminal.class_
+        for ident in classes:
+            class_ = classes[ident]
+            result.class_.append(class_)
         return OK(result, content_type='application/xml')
 
     def _list_terminals(self, cid=None, class_id=None, deleted=None):
