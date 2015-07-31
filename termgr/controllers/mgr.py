@@ -26,7 +26,7 @@ class TerminalManager(WsgiController):
         """Runs the terminal manager
         XXX: Authentication by htpasswd
         """
-        user_name = self.qd.get('user')
+        user_name = self.qd.get('user_name')
         if not user_name:
             return Error('No user name specified', status=400)
         passwd = self.qd.get('passwd')
