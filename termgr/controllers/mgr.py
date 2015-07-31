@@ -61,12 +61,12 @@ class TerminalManager(WsgiController):
                 except (ValueError, TypeError):
                     thumbnail = False
                 return self._details(cid, tid, thumbnail=thumbnail)
-        elif action == 'add':
-            return self._add(cid, tid)
-        elif action == 'modify':
-            return self._modify_terminal(cid, tid)
-        elif action == 'delete':
-            return self._delete_terminal(cid, tid)
+        # elif action == 'add':
+        #     return self._add(cid, tid)
+        # elif action == 'modify':
+        #     return self._modify_terminal(cid, tid)
+        # elif action == 'delete':
+        #     return self._delete_terminal(cid, tid)
         else:
             return Error('Invalid action', status=400)
 
