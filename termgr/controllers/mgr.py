@@ -7,7 +7,7 @@ from peewee import DoesNotExist
 from homeinfo.crm import Address
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
-from homeinfo.terminals.db import Terminal, Class, Domain
+from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 from hipster.ctrl import TerminalController
 
 __all__ = ['TerminalManager']
@@ -26,49 +26,58 @@ class TerminalManager(WsgiController):
         """Runs the terminal manager
         XXX: Authentication by htpasswd
         """
-        cid = self.qd.get('cid')
-        if cid is not None:
-            try:
-                cid = int(cid)
-            except (TypeError, ValueError):
-                return Error('Invalid customer ID', status=400)
-        tid = self.qd.get('tid')
-        if tid is not None:
-            try:
-                tid = int(tid)
-            except (TypeError, ValueError):
-                return Error('Invalid terminal ID', status=400)
-        class_id = self.qd.get('class_id')
-        if class_id is not None:
-            try:
-                class_id = int(class_id)
-            except (ValueError, TypeError):
-                return Error('Invalid class ID', status=400)
-        action = self.qd.get('action')
-        if action is None:
-            return Error('No action specified', status=400)
-        elif action == 'list':
-            return self._list(cid, class_id=class_id)
-        elif action == 'details':
-            if cid is None:
-                return Error('No customer ID specified', status=400)
-            elif tid is None:
-                return Error('No terminal ID specified', status=400)
-            else:
-                thumbnail = self.qd.get('thumbnail')
+        user_name = self.qd.get('user')
+        if not user_name:
+            return Error('No user name specified', status=400)
+        passwd = self.qd.get('passwd')
+        if not user_name:
+            return Error('No password', status=400)
+        if Administrator.authenticate(user_name, passwd):
+            cid = self.qd.get('cid')
+            if cid is not None:
                 try:
-                    thumbnail = int(thumbnail)
+                    cid = int(cid)
+                except (TypeError, ValueError):
+                    return Error('Invalid customer ID', status=400)
+            tid = self.qd.get('tid')
+            if tid is not None:
+                try:
+                    tid = int(tid)
+                except (TypeError, ValueError):
+                    return Error('Invalid terminal ID', status=400)
+            class_id = self.qd.get('class_id')
+            if class_id is not None:
+                try:
+                    class_id = int(class_id)
                 except (ValueError, TypeError):
-                    thumbnail = False
-                return self._details(cid, tid, thumbnail=thumbnail)
-        # elif action == 'add':
-        #     return self._add(cid, tid)
-        # elif action == 'modify':
-        #     return self._modify_terminal(cid, tid)
-        # elif action == 'delete':
-        #     return self._delete_terminal(cid, tid)
+                    return Error('Invalid class ID', status=400)
+            action = self.qd.get('action')
+            if action is None:
+                return Error('No action specified', status=400)
+            elif action == 'list':
+                return self._list(cid, class_id=class_id)
+            elif action == 'details':
+                if cid is None:
+                    return Error('No customer ID specified', status=400)
+                elif tid is None:
+                    return Error('No terminal ID specified', status=400)
+                else:
+                    thumbnail = self.qd.get('thumbnail')
+                    try:
+                        thumbnail = int(thumbnail)
+                    except (ValueError, TypeError):
+                        thumbnail = False
+                    return self._details(cid, tid, thumbnail=thumbnail)
+            # elif action == 'add':
+            #     return self._add(cid, tid)
+            # elif action == 'modify':
+            #     return self._modify_terminal(cid, tid)
+            # elif action == 'delete':
+            #     return self._delete_terminal(cid, tid)
+            else:
+                return Error('Invalid action', status=400)
         else:
-            return Error('Invalid action', status=400)
+            return Error('Not authorized', status=403)
 
     def _add(self, cid, tid):
         """Adds entities"""
