@@ -56,7 +56,7 @@ class TerminalManager(WsgiController):
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'list':
-                return self._list_terminals(cid, class_id=class_id)
+                return self._list(cid, class_id=class_id)
             elif action == 'details':
                 if cid is None:
                     return Error('No customer ID specified', status=400)
@@ -225,13 +225,7 @@ class TerminalManager(WsgiController):
                         (Terminal.deleted >> None))
         result = dom.terminals()
         for terminal in terminals:
-            # tso =
-            # TODO: Implement
-            # lst.terminal.append(tso)
-            pass
-        for terminal in terminals:
-            xml_data = terminal.todom()
-            result.terminal.append(xml_data)
+            result.terminal.append(terminal.dom(details=False))
         return OK(result, content_type='application/xml')
 
     def _details(self, cid, tid, thumbnail=False):
@@ -247,17 +241,17 @@ class TerminalManager(WsgiController):
                 return Error('No such terminal', status=400)
             else:
                 if thumbnail:
-                    screenshot = RemoteController(terminal).thumbnail
+                    try:
+                        screenshot = RemoteController(terminal).thumbnail
+                    except:
+                        screenshot = None
                 else:
-                    screenshot = RemoteController(terminal).screenshot
-                details = TerminalDetails(
-                    status=True,  # TODO: Evaluate this!
-                    uptime=None,  # TODO: Evaluate this!
-                    screenshot=screenshot,
-                    # TODO: Evaluate this!
-                    touch_events=None)
-                terminal_detail = terminal.todom(details=details)
-                result.terminal_detail = terminal_detail
+                    try:
+                        screenshot = RemoteController(terminal).screenshot
+                    except:
+                        screenshot = None
+                details = terminal.dom(details=True, screenshot=screenshot)
+                result.details = details
                 return OK(result, content_type='application/xml')
 
     def _add_terminal(self, cid, tid, location_id, class_id, domain_id,
