@@ -241,7 +241,6 @@ class TerminalManager(WsgiController):
                         screenshot = TerminalController(terminal).screenshot()
                     except Exception as e:
                         return Error(str(e))
-                return OK(str(screenshot))
                 details = terminal.dom(details=True, screenshot=screenshot)
                 result.details = details
                 return OK(result, content_type='application/xml')
