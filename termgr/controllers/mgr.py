@@ -180,7 +180,7 @@ class TerminalManager(WsgiController):
             c = dom.Customer(customer.name)
             c.id = customer.id
             result.customer.append(c)
-        return result
+        return OK(result, content_type='application/xml')
 
     def _list_terminals(self, cid=None, class_id=None, deleted=None):
         """Lists available terminals"""
