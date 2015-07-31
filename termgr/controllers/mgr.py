@@ -198,7 +198,10 @@ class TerminalManager(WsgiController):
                 classes[class_.id] = class_
         for ident in classes:
             class_ = classes[ident]
-            result.class_.append(class_)
+            c = dom.Class(class_.name)
+            c.full_name = class_.full_name
+            c.id = class_.id
+            result.class_.append(c)
         return OK(result, content_type='application/xml')
 
     def _list_terminals(self, cid=None, class_id=None, deleted=None):
