@@ -7,7 +7,7 @@ from peewee import DoesNotExist
 from homeinfo.crm import Address, Customer
 from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
-from hipster.ctrl import TerminalController
+from homeinfo.ctrl import TerminalController
 
 from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
 from ..lib import dom
