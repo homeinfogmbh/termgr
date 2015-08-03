@@ -9,7 +9,9 @@ from homeinfo.lib.wsgi import WsgiController, Error, OK
 from homeinfo.terminals import dom
 from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
 from hipster.ctrl import TerminalController
-from multiprocessing.sharedctypes import class_cache
+
+from ..lib.orm2dom import customer2dom
+from termgr.lib.orm2dom import terminal_info2dom, terminal_details2dom
 
 __all__ = ['TerminalManager']
 
@@ -175,7 +177,7 @@ class TerminalManager(WsgiController):
         """Lists all customers"""
         result = dom.terminals()
         for customer in Customer:
-            c = dom.Customer(customer.name)
+            c = customer2dom(customer.name)
             c.id = customer.id
             result.customer.append(c)
         return OK(result, content_type='application/xml')
@@ -283,7 +285,7 @@ class TerminalManager(WsgiController):
                         (Terminal.deleted >> None))
         result = dom.terminals()
         for terminal in terminals:
-            result.terminal.append(terminal.dom(details=False))
+            result.terminal.append(terminal_info2dom(terminal))
         return OK(result, content_type='application/xml')
 
     def _details(self, cid, tid, thumbnail=False):
@@ -314,7 +316,8 @@ class TerminalManager(WsgiController):
                             return Error(str(e))
                 else:
                     screenshot = None
-                details = terminal.dom(details=True, screenshot=screenshot)
+                details = terminal_details2dom(
+                    terminal, screenshot_data=screenshot)
                 result.details = details
                 return OK(result, content_type='application/xml')
 
