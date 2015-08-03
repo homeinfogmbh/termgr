@@ -6,6 +6,7 @@ from homeinfo.terminals.db import Terminal, SetupOperator
 
 from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
+from termgr.lib.err import UnconfiguredError
 
 __all__ = ['SetupController']
 
@@ -31,7 +32,7 @@ class SetupController(WsgiController):
             else:
                 try:
                     cid = int(cid_str)
-                except:
+                except ValueError:
                     return Error('Invalid customer ID', status=400)
                 tid_str = self.qd.get('tid')
                 if tid_str is None:
@@ -39,7 +40,7 @@ class SetupController(WsgiController):
                 else:
                     try:
                         tid = int(tid_str)
-                    except:
+                    except ValueError:
                         return Error('Invalid terminal ID', status=400)
                     terminal = Terminal.by_ids(cid, tid, deleted=False)
                     if terminal is not None:
@@ -73,31 +74,30 @@ class SetupController(WsgiController):
                 return InternalServerError(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
+            response_body = None
             try:
                 response_body = packager.get()
-            except:
-                response_body = None
-            if response_body is not None:
-                content_type = 'application/x-gzip'
-                charset = None
-            else:
+            except UnconfiguredError:
                 msg = ('No OpenVPN configuration found for terminal: '
                        '{0}'.format(terminal))
-                return InternalServerError(msg)
+            except (FileNotFoundError, PermissionError):
+                msg = 'Unable to read OpenVPN configuration template'
+            else:
+                content_type = 'application/x-gzip'
+                charset = None
+            return InternalServerError(msg)
         elif action == 'repo_config':
             pacman_cfg = PacmanConfig(terminal)
+            result = None
             try:
                 result = pacman_cfg.get()
-            except:
-                result = None
-            if result is not None:
+            except (FileNotFoundError, PermissionError):
+                msg = 'Could not open pacman config template'
+            else:
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 response_body = result.encode(encoding=charset)
-            else:
-                msg = ('No Repository configuration found for terminal: '
-                       '{0}'.format(terminal))
-                return InternalServerError(msg)
+            return InternalServerError(msg)
         else:
             msg = 'Action "{0}" is not implemented'.format(action)
             return Error(msg, status=501)

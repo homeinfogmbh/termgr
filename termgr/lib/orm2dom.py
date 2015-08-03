@@ -1,10 +1,11 @@
 """Converts ORM models to DOM"""
 
+from datetime import datetime
+
 from homeinfo.crm import Address, Customer
+from homeinfo.lib.mime import mimetype
 
 from .dom import TerminalInfo, TerminalDetails, Class, Domain, Screenshot
-from homeinfo.lib.mime import mimetype
-from datetime import datetime
 
 __all__ = ['class2dom', 'domain2dom', 'address2dom', 'terminal_info2dom',
            'screenshot2dom', 'customer2dom', 'terminal_details2dom']
