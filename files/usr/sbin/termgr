@@ -4,26 +4,34 @@
 Usage:
     termgr add <class_id> <cid> <street> <house_number> <zip_code> \
 <city> [--state=<state_iso>] [--tid=<tid>]
+    termgr update <expr>
 
 Options:
     -h --help     Show this screen.
     --version     Show version.
 """
 
-from os import listdir, chmod
+from os import listdir, chmod, system
 from os.path import join
+from sys import stderr
+
 from docopt import docopt
+
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.db import Terminal, Class, Domain
 from homeinfo.terminals.config import terminals_config
+
 from termgr.lib.openvpn import OpenVPNKeyMgr
 from termgr.lib.err import KeygenError
+from termgr.lib.ctrl import RemoteController
+from termgr.lib.lib import TerminalGetter
+from threading import Thread
 
 options = docopt(__doc__)
 
 
-def aftermath():
+def restart_services():
     """Fix stuff after operations"""
     print('Fixing VPN permissions', end='                  ', flush=True)
     ok = True
@@ -41,52 +49,72 @@ def aftermath():
     evaluate(run('/usr/lib/terminals/nagios-config.gen'))
 
 
-if options['add']:
-    class_id_str = options['<class_id>']
-    cid_str = options['<cid>']
-    tid_str = options['--tid']
-    street = options['<street>']
-    house_number = options['<house_number>']
-    zip_code = options['<zip_code>']
-    city = options['<city>']
-    state_iso = options['--state']
-
-    class_id = int(class_id_str)
-    cid = int(cid_str)
-    if tid_str is not None:
-        desired_tid = int(tid_str)
+def upgrade(terminal):
+    """Upgrades a terminal"""
+    rc = RemoteController(terminal)
+    pr = rc.execute('/usr/bin/pacman', '-Syu', '--noconfirm')
+    if pr:
+        print('Upgraded', terminal)
     else:
-        desired_tid = None
-    tid = Terminal.gen_tid(cid, desired=desired_tid)
+        print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
 
-    class_ = Class.get(Class.id == class_id)
-    domain = Domain.get(Domain.id == 1)  # TODO: Make this dynamic
-    if state_iso:
-        state = State.get(State._iso == state_iso)
-    else:
-        state = None
 
-    addr = (street, house_number, zip_code)
-    address = Address.add(city, addr=addr, state=state)
-
-    terminal = Terminal()
-    terminal.customer = cid
-    terminal.tid = tid
-    terminal.class_ = class_
-    terminal.domain = domain
-    terminal.ipv4addr = Terminal.gen_ipv4addr()
-    terminal.virtual_display = None
-    terminal.location = address
-    terminal.deleted = None
-    terminal.save()
-    print('Created terminal record for host name:', terminal.hostname,
-          'with id:', terminal.id)
-    key_manager = OpenVPNKeyMgr(terminal)
-    try:
-        key_manager.generate()
-    except KeygenError:
-        print('OpenVPN keys already present')
-    else:
-        print('OpenVPN keys generated')
-
-aftermath()
+if __name__ == '__main__':
+    if options['add']:
+        class_id_str = options['<class_id>']
+        cid_str = options['<cid>']
+        tid_str = options['--tid']
+        street = options['<street>']
+        house_number = options['<house_number>']
+        zip_code = options['<zip_code>']
+        city = options['<city>']
+        state_iso = options['--state']
+        class_id = int(class_id_str)
+        cid = int(cid_str)
+        if tid_str is not None:
+            desired_tid = int(tid_str)
+        else:
+            desired_tid = None
+        tid = Terminal.gen_tid(cid, desired=desired_tid)
+        class_ = Class.get(Class.id == class_id)
+        domain = Domain.get(Domain.id == 1)  # TODO: Make this dynamic
+        if state_iso:
+            state = State.get(State._iso == state_iso)
+        else:
+            state = None
+        addr = (street, house_number, zip_code)
+        address = Address.add(city, addr=addr, state=state)
+        terminal = Terminal()
+        terminal.customer = cid
+        terminal.tid = tid
+        terminal.class_ = class_
+        terminal.domain = domain
+        terminal.ipv4addr = Terminal.gen_ipv4addr()
+        terminal.virtual_display = None
+        terminal.location = address
+        terminal.deleted = None
+        terminal.save()
+        print('Created terminal record for host name:', terminal.hostname,
+              'with id:', terminal.id)
+        key_manager = OpenVPNKeyMgr(terminal)
+        try:
+            key_manager.generate()
+        except KeygenError:
+            print('OpenVPN keys already present')
+        else:
+            print('OpenVPN keys generated')
+        restart_services()
+    elif options['update']:
+        expr = options['<expr>']
+        threads = []
+        for terminal in TerminalGetter(expr):
+            ping = '/usr/bin/ping -c 1 -W 1 {}'.format(terminal.ipv4addr)
+            if system(ping):
+                print('Updating terminal:', terminal)
+                thread = Thread(target=upgrade, args=[terminal])
+                threads.append(thread)
+                thread.start()
+            else:
+                print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+        for thread in threads:
+            thread.join()
