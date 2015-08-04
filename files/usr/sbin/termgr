@@ -4,7 +4,7 @@
 Usage:
     termgr add <class_id> <cid> <street> <house_number> <zip_code> \
 <city> [--state=<state_iso>] [--tid=<tid>]
-    termgr update <expr>
+    termgr upgrade <expr>
 
 Options:
     -h --help     Show this screen.
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         else:
             print('OpenVPN keys generated')
         restart_services()
-    elif options['update']:
+    elif options['upgrade']:
         expr = options['<expr>']
         threads = []
         for terminal in TerminalGetter(expr):
