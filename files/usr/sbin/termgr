@@ -21,11 +21,11 @@ from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.db import Terminal, Class, Domain
 from homeinfo.terminals.config import terminals_config
+from homeinfo.terminals.ctrl import RemoteController
 
 from termgr.lib.openvpn import OpenVPNKeyMgr
 from termgr.lib.err import KeygenError
-from termgr.lib.ctrl import RemoteController
-from termgr.lib.lib import TerminalGetter
+from termgr.lib.api import TerminalGetter
 from threading import Thread
 
 options = docopt(__doc__)
