@@ -51,19 +51,28 @@ def restart_services():
 
 def upgrade(terminal):
     """Upgrades a terminal"""
-    rc = RemoteController('termgr', terminal)
-    pr = rc.execute('/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
-    if pr:
-        print('Upgraded', terminal)
+    if terminal.status:
+        print('Updating terminal:', terminal)
+        rc = RemoteController('termgr', terminal)
+        pr = rc.execute(
+            '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
+        if pr:
+            print('Upgraded', terminal)
+        else:
+            print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
+            print(pr, file=stderr)
     else:
-        print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
-        print(pr, file=stderr)
+        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
 
 def reboot(terminal):
     """Reboots a terminal"""
-    rc = RemoteController('termgr', terminal)
-    rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
+    if terminal.status:
+        print('Rebooting terminal:', terminal)
+        rc = RemoteController('termgr', terminal)
+        rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
+    else:
+        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
 
 if __name__ == '__main__':
@@ -115,25 +124,17 @@ if __name__ == '__main__':
         expr = options['<expr>']
         threads = []
         for terminal in TerminalGetter(expr):
-            if terminal.status:
-                print('Updating terminal:', terminal)
-                thread = Thread(target=upgrade, args=[terminal])
-                threads.append(thread)
-                thread.start()
-            else:
-                print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+            thread = Thread(target=upgrade, args=[terminal])
+            threads.append(thread)
+            thread.start()
         for thread in threads:
             thread.join()
     elif options['reboot']:
         expr = options['<expr>']
         threads = []
         for terminal in TerminalGetter(expr):
-            if terminal.status:
-                print('Rebooting terminal:', terminal)
-                thread = Thread(target=reboot, args=[terminal])
-                threads.append(thread)
-                thread.start()
-            else:
-                print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+            thread = Thread(target=reboot, args=[terminal])
+            threads.append(thread)
+            thread.start()
         for thread in threads:
             thread.join()
