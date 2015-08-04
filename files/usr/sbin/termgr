@@ -109,8 +109,7 @@ if __name__ == '__main__':
         expr = options['<expr>']
         threads = []
         for terminal in TerminalGetter(expr):
-            ping = '/usr/bin/ping -c 1 -W 1 {}'.format(terminal.ipv4addr)
-            if system(ping):
+            if terminal.status:
                 print('Updating terminal:', terminal)
                 thread = Thread(target=upgrade, args=[terminal])
                 threads.append(thread)
