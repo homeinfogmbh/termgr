@@ -51,7 +51,7 @@ def restart_services():
 
 def upgrade(terminal):
     """Upgrades a terminal"""
-    rc = RemoteController(terminal)
+    rc = RemoteController('termgr', terminal)
     pr = rc.execute('/usr/bin/pacman', '-Syu', '--noconfirm')
     if pr:
         print('Upgraded', terminal)
