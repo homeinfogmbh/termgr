@@ -63,12 +63,7 @@ def upgrade(terminal):
 def reboot(terminal):
     """Reboots a terminal"""
     rc = RemoteController('termgr', terminal)
-    pr = rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
-    if pr:
-        print('Rebooted', terminal)
-    else:
-        print('ERROR:', 'Failed to reboot', terminal, file=stderr)
-        print(pr, file=stderr)
+    rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
 
 
 if __name__ == '__main__':
@@ -134,7 +129,7 @@ if __name__ == '__main__':
         threads = []
         for terminal in TerminalGetter(expr):
             if terminal.status:
-                print('Updating terminal:', terminal)
+                print('Rebooting terminal:', terminal)
                 thread = Thread(target=reboot, args=[terminal])
                 threads.append(thread)
                 thread.start()
