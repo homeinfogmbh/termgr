@@ -57,6 +57,7 @@ def upgrade(terminal):
         print('Upgraded', terminal)
     else:
         print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
+        print(pr)
 
 
 if __name__ == '__main__':
