@@ -16,7 +16,7 @@ setup(
               'termgr.controllers',
               'termgr.lib'],
     data_files=[('/etc', ['files/etc/termgr.conf']),
-                ('/usr/sbin', ['files/usr/sbin/termgr']),
+                ('/usr/bin', ['files/usr/bin/termgr']),
                 ('/usr/share/termgr',
                  ['files/usr/share/termgr/mgr.wsgi',
                   'files/usr/share/termgr/setup.wsgi']),
