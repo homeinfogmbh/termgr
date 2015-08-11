@@ -211,10 +211,18 @@ class TerminalManager(WsgiController):
             result.class_.append(c)
         return OK(result, content_type='application/xml')
 
-    def _list_terminals(self, cid, class_id_or_name, deleted=None):
+    def _list_terminals(self, cid, class_, deleted=None):
         """Lists available terminals"""
+        if class_ is not None:
+            try:
+                class_id = int(class_)
+            except (TypeError, ValueError):
+                class_id = -1
+                class_name = class_
+            else:
+                class_name = '!'
         if cid is None:
-            if class_id_or_name is None:
+            if class_ is None:
                 if deleted is None:
                     terminals = Terminal.select().where(True)
                 elif deleted:
@@ -224,13 +232,6 @@ class TerminalManager(WsgiController):
                     terminals = Terminal.select().where(
                         Terminal.deleted >> None)
             else:
-                try:
-                    class_id = int(class_id_or_name)
-                except (TypeError, ValueError):
-                    class_id = -1
-                    class_name = class_id_or_name
-                else:
-                    class_name = '!'
                 if deleted is None:
                     terminals = Terminal.select().where(
                         Terminal.class_ == class_id)
@@ -245,7 +246,7 @@ class TerminalManager(WsgiController):
                          (Terminal.class_.name == class_name)) &
                         (Terminal.deleted >> None))
         else:
-            if class_id_or_name is None:
+            if class_ is None:
                 if deleted is None:
                     terminals = Terminal.select().where(
                         Terminal.customer == cid)
@@ -258,13 +259,6 @@ class TerminalManager(WsgiController):
                         (Terminal.customer == cid) &
                         (Terminal.deleted >> None))
             else:
-                try:
-                    class_id = int(class_id_or_name)
-                except (TypeError, ValueError):
-                    class_id = -1
-                    class_name = class_id_or_name
-                else:
-                    class_name = '!'
                 if deleted is None:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
