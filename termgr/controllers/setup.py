@@ -80,12 +80,13 @@ class SetupController(WsgiController):
             except UnconfiguredError:
                 msg = ('No OpenVPN configuration found for terminal: '
                        '{0}'.format(terminal))
+                return InternalServerError(msg)
             except (FileNotFoundError, PermissionError):
                 msg = 'Unable to read OpenVPN configuration template'
+                return InternalServerError(msg)
             else:
                 content_type = 'application/x-gzip'
                 charset = None
-            return InternalServerError(msg)
         elif action == 'repo_config':
             pacman_cfg = PacmanConfig(terminal)
             result = None
@@ -93,11 +94,11 @@ class SetupController(WsgiController):
                 result = pacman_cfg.get()
             except (FileNotFoundError, PermissionError):
                 msg = 'Could not open pacman config template'
+                return InternalServerError(msg)
             else:
                 content_type = 'text/plain'
                 charset = 'utf-8'
                 response_body = result.encode(encoding=charset)
-            return InternalServerError(msg)
         else:
             msg = 'Action "{0}" is not implemented'.format(action)
             return Error(msg, status=501)
