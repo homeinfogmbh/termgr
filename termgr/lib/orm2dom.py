@@ -41,8 +41,8 @@ def terminal_info2dom(terminal_orm):
     """Converts the ORM of a terminal into a short info DOM"""
     dom = TerminalInfo()
     dom.cid = terminal_orm.customer.id
-    if terminal_orm.address:
-        dom.location = address2dom(terminal_orm.address)
+    if terminal_orm.location:
+        dom.location = address2dom(terminal_orm.location)
     dom.class_ = terminal_orm.class_.dom
     dom.domain = terminal_orm.domain.dom
     dom.id = terminal_orm.id
@@ -78,8 +78,8 @@ def terminal_details2dom(terminal_orm, screenshot_data=None):
         dom.virtual_display = terminal_orm.virtual_display
     if screenshot_data is not None:
         dom.screenshot = screenshot2dom(screenshot_data)
-    if terminal_orm.address:
-        dom.location = address2dom(terminal_orm.address)
+    if terminal_orm.location:
+        dom.location = address2dom(terminal_orm.location)
     dom.class_ = terminal_orm.class_.dom
     dom.domain = terminal_orm.domain.dom
     dom.id = terminal_orm.id
