@@ -43,8 +43,8 @@ def terminal_info2dom(terminal_orm):
     dom.cid = terminal_orm.customer.id
     if terminal_orm.location:
         dom.location = address2dom(terminal_orm.location)
-    dom.class_ = terminal_orm.class_.dom
-    dom.domain = terminal_orm.domain.dom
+    dom.class_ = class2dom(terminal_orm.class_)
+    dom.domain = domain2dom(terminal_orm.domain)
     dom.id = terminal_orm.id
     dom.tid = terminal_orm.tid
     dom.deleted = terminal_orm.deleted
@@ -80,8 +80,8 @@ def terminal_details2dom(terminal_orm, screenshot_data=None):
         dom.screenshot = screenshot2dom(screenshot_data)
     if terminal_orm.location:
         dom.location = address2dom(terminal_orm.location)
-    dom.class_ = terminal_orm.class_.dom
-    dom.domain = terminal_orm.domain.dom
+    dom.class_ = class2dom(terminal_orm.class_)
+    dom.domain = domain2dom(terminal_orm.domain)
     dom.id = terminal_orm.id
     dom.tid = terminal_orm.tid
     dom.deleted = terminal_orm.deleted
