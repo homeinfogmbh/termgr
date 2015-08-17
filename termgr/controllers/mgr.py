@@ -61,8 +61,11 @@ class TerminalManager(WsgiController):
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
+                deleted = self.cqd.get('deleted')
+                deployed = self.cqd.get('deployed')
                 return self._list_terminals(
-                    cid, class_id=class_id, class_name=class_name)
+                    cid, class_id=class_id, class_name=class_name,
+                    deleted=deleted, deployed=deployed)
             elif action == 'customers':
                 return self._list_customers()
             elif action == 'classes':
@@ -124,8 +127,10 @@ class TerminalManager(WsgiController):
         return OK(result, content_type='application/xml')
 
     def _list_terminals(self, cid, class_id=None, class_name=None,
-                        deleted=None):
-        """Lists available terminals"""
+                        deleted=None, deployed=None):
+        """Lists available terminals
+        XXX: <deployed> is not yet implemented
+        """
         if cid is None:
             if class_id is not None:
                 if deleted is None:
