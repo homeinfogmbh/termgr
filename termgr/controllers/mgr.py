@@ -2,13 +2,15 @@
 
 from peewee import DoesNotExist
 
-from homeinfo.crm import Address, Customer
+from homeinfo.crm import Customer
 from homeinfo.lib.wsgi import WsgiController, Error, OK
-from homeinfo.terminals.db import Terminal, Class, Domain, Administrator
+from homeinfo.terminals.db import Terminal, Class, Administrator
 from homeinfo.terminals.ctrl import TerminalController
 
 from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
 from ..lib import dom
+import thread
+from threading import Thread
 
 __all__ = ['TerminalManager']
 
@@ -202,9 +204,24 @@ class TerminalManager(WsgiController):
                         (Terminal.customer == cid) &
                         (Terminal.deleted >> None))
         result = dom.terminals()
+        processed_terminals = []
+        threads = []
         for terminal in terminals:
-            result.terminal.append(terminal_info2dom(terminal))
+            thread = Thread(
+                target=self._process_terminal,
+                args=[terminal, processed_terminals])
+            threads.append(thread)
+            thread.start()
+        for thread in threads:
+            thread.join()
+        for processed_terminal in processed_terminals:
+            result.terminal.append(processed_terminal)
         return OK(result, content_type='application/xml')
+
+    def _process_terminal(self, terminal, processed_terminals):
+        """Load status of a terminal"""
+        processed_terminal = terminal_info2dom(terminal)
+        processed_terminals.append(processed_terminal)
 
     def _details(self, cid, tid, thumbnail=False):
         """Get details of a certain terminal"""
@@ -238,96 +255,3 @@ class TerminalManager(WsgiController):
                     terminal, screenshot_data=screenshot)
                 result.details = details
                 return OK(result, content_type='application/xml')
-
-    def _add_terminal(self, cid, tid, location_id, class_id, domain_id,
-                      ipv4addr=None, virtual_display=None):
-        """Adds a terminal with the specified configuration"""
-        terminal = Terminal.by_ids(cid, tid)
-        if terminal is None:
-            terminal = Terminal()
-            terminal.customer = cid
-            terminal.tid = Terminal.gen_tid(cid, desired=tid)
-            return self._set_terminal_data(
-                terminal, location_id=location_id,
-                class_id=class_id,
-                domain_id=domain_id,
-                ipv4addr=ipv4addr, vpn_gen=True,
-                virtual_display=virtual_display)
-        else:
-            return Error('Terminal already exists', status=400)
-
-    def _modify_terminal(self, cid, tid, location_id, class_id, domain_id,
-                         virtual_display=None):
-        """Modifies a terminal given by cid and tid"""
-        if cid is None:
-            return Error('No customer ID specified', status=400)
-        elif tid is None:
-            return Error('No terminal ID specified', status=400)
-        else:
-            terminal = Terminal.by_ids(cid, tid)
-            if terminal is None:
-                return Error('No such terminal', status=400)
-            else:
-                return self._set_terminal_data(
-                    terminal,
-                    location_id=location_id,
-                    class_id=class_id,
-                    domain_id=domain_id,
-                    vpn_gen=False,
-                    virtual_display=virtual_display)
-
-    def _set_terminal_data(self, terminal, location_id=None, class_id=None,
-                           domain_id=None, ipv4addr=None, vpn_gen=False,
-                           virtual_display=None):
-        """Sets data on a terminal instance"""
-        if ipv4addr is not None:
-            terminal.ipv4addr = Terminal.gen_ipv4addr(desired=ipv4addr)
-        if location_id is not None:
-            try:
-                location = Address.get(Address.id == location_id)
-            except DoesNotExist:
-                return Error('No such location', status=400)
-            terminal._location = location
-        if class_id is not None:
-            try:
-                class_ = Class.get(Class.id == class_id)
-            except DoesNotExist:
-                return Error('No such class', status=400)
-            Terminal.cls = class_
-        if domain_id is not None:
-            try:
-                domain = Domain.get(Domain.id == domain_id)
-            except DoesNotExist:
-                return Error('No such domain', status=400)
-            terminal._domain = domain
-        if virtual_display is not None:
-            terminal.virtual_display = virtual_display
-        if vpn_gen:
-            okay = terminal.gen_vpn_keys()
-        else:
-            okay = True
-        try:
-            terminal.save()
-        except:
-            return Error('Could not apply changes', status=500)
-        else:
-            xml_data = dom.terminals()
-            xml_data.terminal = [terminal.todom()]
-            if okay:
-                return OK(xml_data, content_type='application/xml')
-            else:
-                return Error(
-                    xml_data, content_type='application/xml', status=500)
-
-    def _delete_terminal(self, cid, tid, revoke_vpn=True):
-        """Delete a terminal from the terminals list"""
-        terminal = Terminal.by_ids(cid, tid, deleted=True)
-        if terminal:
-            if terminal.deleted:
-                return Error('Terminal already deleted', status=200)
-            else:
-                terminal.deleted = True
-                terminal.save()
-                return OK('Terminal deleted')
-        else:
-            return Error('No such terminal', status=400)
