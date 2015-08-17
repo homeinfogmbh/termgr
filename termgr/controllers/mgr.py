@@ -1,7 +1,5 @@
 """Controller for terminal management"""
 
-from ipaddress import IPv4Address, AddressValueError
-
 from peewee import DoesNotExist
 
 from homeinfo.crm import Address, Customer
@@ -25,24 +23,18 @@ class TerminalManager(WsgiController):
     DEBUG = True
 
     def _run(self):
-        """Runs the terminal manager
-        XXX: Authentication by htpasswd
-        """
+        """Runs the terminal manager"""
+        auth = False
         user_name = self.qd.get('user_name')
         if not user_name:
             return Error('No user name specified', status=400)
-        passwd = self.qd.get('passwd')
-        if not user_name:
-            return Error('No password', status=400)
-        class_id_or_name = self.qd.get('class')
-        try:
-            class_id = int(class_id_or_name)
-        except (TypeError, ValueError):
-            class_id = None
-            class_name = class_id_or_name
         else:
-            class_name = None
-        if Administrator.authenticate(user_name, passwd):
+            passwd = self.qd.get('passwd')
+            if not user_name:
+                return Error('No password', status=400)
+            else:
+                auth = Administrator.authenticate(user_name, passwd)
+        if auth:
             cid = self.qd.get('cid')
             if cid is not None:
                 try:
@@ -55,6 +47,14 @@ class TerminalManager(WsgiController):
                     tid = int(tid)
                 except (TypeError, ValueError):
                     return Error('Invalid terminal ID', status=400)
+            class_id_or_name = self.qd.get('class')
+            try:
+                class_id = int(class_id_or_name)
+            except (TypeError, ValueError):
+                class_id = None
+                class_name = class_id_or_name
+            else:
+                class_name = None
             action = self.qd.get('action')
             if action is None:
                 return Error('No action specified', status=400)
@@ -77,108 +77,10 @@ class TerminalManager(WsgiController):
                     except (ValueError, TypeError):
                         thumbnail = False
                     return self._details(cid, tid, thumbnail=thumbnail)
-            # elif action == 'add':
-            #     return self._add(cid, tid)
-            # elif action == 'modify':
-            #     return self._modify_terminal(cid, tid)
-            # elif action == 'delete':
-            #     return self._delete_terminal(cid, tid)
             else:
                 return Error('Invalid action', status=400)
         else:
-            return Error('Not authorized', status=403)
-
-    def _add(self, cid, tid):
-        """Adds entities"""
-        if cid is None:
-            return Error('No customer ID specified', status=400)
-        if tid is None:
-            return Error('No terminal ID specified', status=400)
-        location_id = self.qd.get('location')
-        if location_id is None:
-            return Error('No location specified', status=400)
-        else:
-            try:
-                location_id = int(location_id)
-            except ValueError:
-                Error('location must be an integer', status=400)
-        class_id = self.qd.get('class')
-        if class_id is None:
-            return Error('No class specified', status=400)
-        else:
-            try:
-                class_id = int(class_id)
-            except ValueError:
-                Error('class must be an integer', status=400)
-        domain_id = self.qd.get('domain_id')
-        if domain_id is None:
-            return Error('No domain specified', status=400)
-        else:
-            try:
-                domain_id = int(domain_id)
-            except ValueError:
-                Error('domain must be an integer', status=400)
-        ipv4addr = self.qd.get('ipv4addr')
-        if ipv4addr is not None:
-            try:
-                ipv4addr = IPv4Address(ipv4addr)
-            except AddressValueError:
-                return Error('Invalid IPv4 address', status=400)
-        virtual_display = self.qd.get('virtual_display')
-        return self._add(
-            cid, tid, location_id, class_id,
-            domain_id, ipv4addr=ipv4addr,
-            virtual_display=virtual_display)
-
-    def _modify(self, cid, tid):
-        """Adds entities"""
-        if cid is None:
-            return Error('No customer ID specified', status=400)
-        if tid is None:
-            return Error('No terminal ID specified', status=400)
-        location_id = self.qd.get('location')
-        if location_id is None:
-            return Error('No location specified', status=400)
-        else:
-            try:
-                location_id = int(location_id)
-            except ValueError:
-                Error('location must be an integer', status=400)
-        class_id = self.qd.get('class')
-        if class_id is None:
-            return Error('No class specified', status=400)
-        else:
-            try:
-                class_id = int(class_id)
-            except ValueError:
-                Error('class must be an integer', status=400)
-        domain_id = self.qd.get('domain_id')
-        if domain_id is None:
-            return Error('No domain specified', status=400)
-        else:
-            try:
-                domain_id = int(domain_id)
-            except ValueError:
-                Error('domain must be an integer', status=400)
-        ipv4addr = self.qd.get('ipv4addr')
-        if ipv4addr is not None:
-            try:
-                ipv4addr = IPv4Address(ipv4addr)
-            except AddressValueError:
-                return Error('Invalid IPv4 address', status=400)
-        virtual_display = self.qd.get('virtual_display')
-        return self._modify_terminal(cid, tid, location_id, class_id,
-                                     domain_id,
-                                     virtual_display=virtual_display)
-
-    def _delete(self, cid, tid):
-        """Adds entities"""
-        if cid is None:
-            return Error('No customer ID specified', status=400)
-        if tid is None:
-            return Error('No terminal ID specified', status=400)
-        revoke_vpn = self.qd.get('revoke_vpn')
-        return self._delete_terminal(cid, tid, revoke_vpn)
+            return Error('Not authenticated', status=403)
 
     def _list_customers(self):
         """Lists all customers"""
