@@ -1,5 +1,7 @@
 """Controller for terminal management"""
 
+from threading import Thread
+
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
@@ -9,8 +11,6 @@ from homeinfo.terminals.ctrl import TerminalController
 
 from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
 from ..lib import dom
-import thread
-from threading import Thread
 
 __all__ = ['TerminalManager']
 
