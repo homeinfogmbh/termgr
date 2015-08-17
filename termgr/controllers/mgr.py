@@ -35,6 +35,13 @@ class TerminalManager(WsgiController):
         if not user_name:
             return Error('No password', status=400)
         class_id_or_name = self.qd.get('class')
+        try:
+            class_id = int(class_id_or_name)
+        except (TypeError, ValueError):
+            class_id = None
+            class_name = class_id_or_name
+        else:
+            class_name = None
         if Administrator.authenticate(user_name, passwd):
             cid = self.qd.get('cid')
             if cid is not None:
@@ -52,7 +59,8 @@ class TerminalManager(WsgiController):
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
-                return self._list_terminals(cid, class_id_or_name)
+                return self._list_terminals(
+                    cid, class_id=class_id, class_name=class_name)
             elif action == 'customers':
                 return self._list_customers()
             elif action == 'classes':
@@ -211,18 +219,35 @@ class TerminalManager(WsgiController):
             result.class_.append(c)
         return OK(result, content_type='application/xml')
 
-    def _list_terminals(self, cid, class_, deleted=None):
+    def _list_terminals(self, cid, class_id=None, class_name=None,
+                        deleted=None):
         """Lists available terminals"""
-        if class_ is not None:
-            try:
-                class_id = int(class_)
-            except (TypeError, ValueError):
-                class_id = -1
-                class_name = class_
-            else:
-                class_name = '!'
         if cid is None:
-            if class_ is None:
+            if class_id is not None:
+                if deleted is None:
+                    terminals = Terminal.select().where(
+                        Terminal.class_ == class_id)
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        (Terminal.class_ == class_id) &
+                        (~(Terminal.deleted >> None)))
+                else:
+                    terminals = Terminal.select().where(
+                        (Terminal.class_ == class_id) &
+                        (Terminal.deleted >> None))
+            elif class_name is not None:
+                if deleted is None:
+                    terminals = Terminal.select().where(
+                        Terminal.class_.name == class_name)
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        (Terminal.class_.name == class_name) &
+                        (~(Terminal.deleted >> None)))
+                else:
+                    terminals = Terminal.select().where(
+                        (Terminal.class_.name == class_name) &
+                        (Terminal.deleted >> None))
+            else:
                 if deleted is None:
                     terminals = Terminal.select().where(True)
                 elif deleted:
@@ -231,22 +256,38 @@ class TerminalManager(WsgiController):
                 else:
                     terminals = Terminal.select().where(
                         Terminal.deleted >> None)
-            else:
+        else:
+            if class_id is not None:
                 if deleted is None:
                     terminals = Terminal.select().where(
-                        Terminal.class_ == class_id)
+                        (Terminal.customer == cid) &
+                        (Terminal.class_ == class_id))
                 elif deleted:
                     terminals = Terminal.select().where(
-                        ((Terminal.class_ == class_id) |
-                         (Terminal.class_.name == class_name)) &
+                        (Terminal.customer == cid) &
+                        (Terminal.class_ == class_id) &
                         (~(Terminal.deleted >> None)))
                 else:
                     terminals = Terminal.select().where(
-                        ((Terminal.class_ == class_id) |
-                         (Terminal.class_.name == class_name)) &
+                        (Terminal.customer == cid) &
+                        (Terminal.class_ == class_id) &
                         (Terminal.deleted >> None))
-        else:
-            if class_ is None:
+            elif class_name is not None:
+                if deleted is None:
+                    terminals = Terminal.select().where(
+                        (Terminal.customer == cid) &
+                        (Terminal.class_.name == class_name))
+                elif deleted:
+                    terminals = Terminal.select().where(
+                        (Terminal.customer == cid) &
+                        (Terminal.class_.name == class_name) &
+                        (~(Terminal.deleted >> None)))
+                else:
+                    terminals = Terminal.select().where(
+                        (Terminal.customer == cid) &
+                        (Terminal.class_.name == class_name) &
+                        (Terminal.deleted >> None))
+            else:
                 if deleted is None:
                     terminals = Terminal.select().where(
                         Terminal.customer == cid)
@@ -257,24 +298,6 @@ class TerminalManager(WsgiController):
                 else:
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
-                        (Terminal.deleted >> None))
-            else:
-                if deleted is None:
-                    terminals = Terminal.select().where(
-                        (Terminal.customer == cid) &
-                        ((Terminal.class_ == class_id) |
-                         (Terminal.class_.name == class_name)))
-                elif deleted:
-                    terminals = Terminal.select().where(
-                        (Terminal.customer == cid) &
-                        ((Terminal.class_ == class_id) |
-                         (Terminal.class_.name == class_name)) &
-                        (~(Terminal.deleted >> None)))
-                else:
-                    terminals = Terminal.select().where(
-                        (Terminal.customer == cid) &
-                        ((Terminal.class_ == class_id) |
-                         (Terminal.class_.name == class_id)) &
                         (Terminal.deleted >> None))
         result = dom.terminals()
         for terminal in terminals:
