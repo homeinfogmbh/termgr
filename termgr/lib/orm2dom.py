@@ -49,7 +49,7 @@ def terminal_info2dom(terminal_orm):
     dom.id = terminal_orm.id
     dom.tid = terminal_orm.tid
     dom.deleted = terminal_orm.deleted
-    dom.status = terminal_orm.status
+    dom.status = None
     dom.ipv4addr = str(terminal_orm.ipv4addr)
     return dom
 
