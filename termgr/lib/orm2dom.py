@@ -35,6 +35,7 @@ def address2dom(address_orm):
     dom.city = address_orm.city
     dom.zip_code = address_orm.zip_code
     dom.id = address_orm.id
+    return dom
 
 
 def terminal_info2dom(terminal_orm):
@@ -48,7 +49,7 @@ def terminal_info2dom(terminal_orm):
     dom.id = terminal_orm.id
     dom.tid = terminal_orm.tid
     dom.deleted = terminal_orm.deleted
-    dom.status = True  # self.status
+    dom.status = terminal_orm.status
     dom.ipv4addr = str(terminal_orm.ipv4addr)
     return dom
 
@@ -85,6 +86,6 @@ def terminal_details2dom(terminal_orm, screenshot_data=None):
     dom.id = terminal_orm.id
     dom.tid = terminal_orm.tid
     dom.deleted = terminal_orm.deleted
-    dom.status = True  # self.status
+    dom.status = terminal_orm.status
     dom.ipv4addr = str(terminal_orm.ipv4addr)
     return dom
