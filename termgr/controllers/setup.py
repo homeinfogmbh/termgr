@@ -6,7 +6,7 @@ from homeinfo.terminals.db import Terminal, SetupOperator
 
 from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
-from termgr.lib.err import UnconfiguredError
+from ..lib.err import UnconfiguredError
 
 __all__ = ['SetupController']
 
