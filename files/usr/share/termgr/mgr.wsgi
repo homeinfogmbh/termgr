@@ -19,8 +19,7 @@ __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 
 def application(environ, start_response):
     """Main WSGI method"""
-    ctrl = TerminalManager(environ.get('PATH_INFO', ''),
-                           environ.get('QUERY_STRING', ''))
+    ctrl = TerminalManager(environ)
     status, response_headers, response_body = ctrl.run()
     start_response(status, response_headers)
     return [response_body]

@@ -24,7 +24,7 @@ class TerminalManager(WsgiController):
 
     DEBUG = True
 
-    def _run(self):
+    def get(self):
         """Runs the terminal manager"""
         auth = False
         user_name = self.qd.get('user_name')

@@ -16,7 +16,7 @@ class SetupController(WsgiController):
 
     DEBUG = True
 
-    def _run(self):
+    def get(self):
         """Interpret query dictionary"""
         user_name = self.qd.get('user_name')
         if not user_name:
