@@ -17,10 +17,5 @@ from termgr.controllers.mgr import TerminalManager
 __date__ = "25.03.2015"
 __author__ = "Richard Neumann <r.neumann@homeinfo.de>"
 
-def application(environ, start_response):
-    """Main WSGI method"""
-    ctrl = TerminalManager(environ)
-    status, response_headers, response_body = ctrl.run()
-    start_response(status, response_headers)
-    return [response_body]
+application = TerminalManager()
 
