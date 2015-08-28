@@ -5,7 +5,7 @@ from threading import Thread
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
-from homeinfo.lib.wsgi import WsgiController, Error, OK
+from homeinfo.lib.wsgi import WsgiApp, Error, OK
 from homeinfo.terminals.db import Terminal, Class, Administrator
 from homeinfo.terminals.ctrl import TerminalController
 
@@ -15,7 +15,7 @@ from ..lib import dom
 __all__ = ['TerminalManager']
 
 
-class TerminalManager(WsgiController):
+class TerminalManager(WsgiApp):
     """Lists, adds and removes terminals
 
     The terminal manager is used for

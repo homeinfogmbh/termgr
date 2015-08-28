@@ -1,6 +1,6 @@
 """Controller for terminal setup"""
 
-from homeinfo.lib.wsgi import WsgiController, WsgiResponse, Error,\
+from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
 from homeinfo.terminals.db import Terminal, SetupOperator
 
@@ -11,7 +11,7 @@ from ..lib.err import UnconfiguredError
 __all__ = ['SetupController']
 
 
-class SetupController(WsgiController):
+class SetupController(WsgiApp):
     """Controller for terminal setup automation"""
 
     DEBUG = True
