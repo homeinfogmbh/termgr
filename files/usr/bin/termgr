@@ -52,7 +52,7 @@ def restart_services():
 def upgrade(terminal):
     """Upgrades a terminal"""
     if terminal.status:
-        print('Updating terminal:', terminal)
+        print('Upgrading terminal:', terminal)
         rc = RemoteController('termgr', terminal)
         pr = rc.execute(
             '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
