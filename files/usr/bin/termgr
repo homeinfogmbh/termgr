@@ -31,6 +31,53 @@ from threading import Thread
 options = docopt(__doc__)
 
 
+def add_terminal():
+    """Adds a new terminal"""
+    class_id_str = options['<class_id>']
+    cid_str = options['<cid>']
+    tid_str = options['--tid']
+    street = options['<street>']
+    house_number = options['<house_number>']
+    zip_code = options['<zip_code>']
+    city = options['<city>']
+    state_iso = options['--state']
+    class_id = int(class_id_str)
+    cid = int(cid_str)
+    if tid_str is not None:
+        desired_tid = int(tid_str)
+    else:
+        desired_tid = None
+    tid = Terminal.gen_tid(cid, desired=desired_tid)
+    class_ = Class.get(Class.id == class_id)
+    domain = Domain.get(Domain.id == 1)  # TODO: Make this dynamic
+    if state_iso:
+        state = State.get(State._iso == state_iso)
+    else:
+        state = None
+    addr = (street, house_number, zip_code)
+    address = Address.add(city, addr=addr, state=state)
+    terminal = Terminal()
+    terminal.customer = cid
+    terminal.tid = tid
+    terminal.class_ = class_
+    terminal.domain = domain
+    terminal.ipv4addr = Terminal.gen_ipv4addr()
+    terminal.virtual_display = None
+    terminal.location = address
+    terminal.deleted = None
+    terminal.save()
+    print('Created terminal record for host name:', terminal.hostname,
+          'with id:', terminal.id)
+    key_manager = OpenVPNKeyMgr(terminal)
+    try:
+        key_manager.generate()
+    except KeygenError:
+        print('OpenVPN keys already present')
+    else:
+        print('OpenVPN keys generated')
+    restart_services()
+
+
 def restart_services():
     """Fix stuff after operations"""
     print('Fixing VPN permissions', end='                  ', flush=True)
@@ -77,49 +124,7 @@ def reboot(terminal):
 
 if __name__ == '__main__':
     if options['add']:
-        class_id_str = options['<class_id>']
-        cid_str = options['<cid>']
-        tid_str = options['--tid']
-        street = options['<street>']
-        house_number = options['<house_number>']
-        zip_code = options['<zip_code>']
-        city = options['<city>']
-        state_iso = options['--state']
-        class_id = int(class_id_str)
-        cid = int(cid_str)
-        if tid_str is not None:
-            desired_tid = int(tid_str)
-        else:
-            desired_tid = None
-        tid = Terminal.gen_tid(cid, desired=desired_tid)
-        class_ = Class.get(Class.id == class_id)
-        domain = Domain.get(Domain.id == 1)  # TODO: Make this dynamic
-        if state_iso:
-            state = State.get(State._iso == state_iso)
-        else:
-            state = None
-        addr = (street, house_number, zip_code)
-        address = Address.add(city, addr=addr, state=state)
-        terminal = Terminal()
-        terminal.customer = cid
-        terminal.tid = tid
-        terminal.class_ = class_
-        terminal.domain = domain
-        terminal.ipv4addr = Terminal.gen_ipv4addr()
-        terminal.virtual_display = None
-        terminal.location = address
-        terminal.deleted = None
-        terminal.save()
-        print('Created terminal record for host name:', terminal.hostname,
-              'with id:', terminal.id)
-        key_manager = OpenVPNKeyMgr(terminal)
-        try:
-            key_manager.generate()
-        except KeygenError:
-            print('OpenVPN keys already present')
-        else:
-            print('OpenVPN keys generated')
-        restart_services()
+        add_terminal()
     elif options['upgrade']:
         expr = options['<expr>']
         threads = []
