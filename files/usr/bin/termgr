@@ -19,7 +19,7 @@ from docopt import docopt
 
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
-from homeinfo.terminals.api import TerminalGetter
+from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.config import terminals_config
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.db import Terminal, Class, Domain
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     elif options['upgrade']:
         expr = options['<expr>']
         threads = []
-        for terminal in TerminalGetter(expr):
+        for terminal in TerminalFilter(expr=expr):
             thread = Thread(target=upgrade, args=[terminal])
             threads.append(thread)
             thread.start()
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     elif options['reboot']:
         expr = options['<expr>']
         threads = []
-        for terminal in TerminalGetter(expr):
+        for terminal in TerminalFilter(expr=expr):
             thread = Thread(target=reboot, args=[terminal])
             threads.append(thread)
             thread.start()
