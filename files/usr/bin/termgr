@@ -128,7 +128,7 @@ if __name__ == '__main__':
     elif options['upgrade']:
         expr = options['<expr>']
         threads = []
-        for terminal in TerminalFilter(expr=expr):
+        for terminal in TerminalFilter(expr):
             thread = Thread(target=upgrade, args=[terminal])
             threads.append(thread)
             thread.start()
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     elif options['reboot']:
         expr = options['<expr>']
         threads = []
-        for terminal in TerminalFilter(expr=expr):
+        for terminal in TerminalFilter(expr):
             thread = Thread(target=reboot, args=[terminal])
             threads.append(thread)
             thread.start()
