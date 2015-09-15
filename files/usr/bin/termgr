@@ -4,7 +4,7 @@
 Usage:
     termgr add <class_id> <cid> <street> <house_number> <zip_code> \
 <city> [--state=<state_iso>] [--tid=<tid>]
-    termgr (upgrade | reboot) <expr>
+    termgr (upgrade | reboot | unlock) <expr>
 
 Options:
     -h --help     Show this screen.
@@ -99,7 +99,7 @@ def restart_services():
 def upgrade(terminal):
     """Upgrades a terminal"""
     if terminal.status:
-        print('Upgrading terminal:', terminal)
+        print('Upgrading', terminal)
         rc = RemoteController('termgr', terminal)
         pr = rc.execute(
             '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
@@ -107,6 +107,23 @@ def upgrade(terminal):
             print('Upgraded', terminal)
         else:
             print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
+            print(pr, file=stderr)
+    else:
+        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+
+
+def rm_pacman_lock(terminal):
+    """Removes the pacman lockfile"""
+    if terminal.status:
+        print('Removing pacman lockfile on', terminal)
+        rc = RemoteController('termgr', terminal)
+        pr = rc.execute(
+            '/usr/bin/sudo', '/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
+        if pr:
+            print('Removed pacman lockfile on', terminal)
+        else:
+            print('ERROR:', 'Failed to remove pacman lockfile on',
+                  terminal, file=stderr)
             print(pr, file=stderr)
     else:
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
@@ -122,24 +139,28 @@ def reboot(terminal):
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
 
+def multithread(terminals, target):
+    """Run processes for multiple terminals in parallel"""
+    threads = []
+    for terminal in terminals:
+        thread = Thread(target=target, args=[terminal])
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+
 if __name__ == '__main__':
     if options['add']:
         add_terminal()
-    elif options['upgrade']:
+    else:
         expr = options['<expr>']
-        threads = []
-        for terminal in TerminalFilter(expr):
-            thread = Thread(target=upgrade, args=[terminal])
-            threads.append(thread)
-            thread.start()
-        for thread in threads:
-            thread.join()
-    elif options['reboot']:
-        expr = options['<expr>']
-        threads = []
-        for terminal in TerminalFilter(expr):
-            thread = Thread(target=reboot, args=[terminal])
-            threads.append(thread)
-            thread.start()
-        for thread in threads:
-            thread.join()
+        if options['upgrade']:
+            terminals = TerminalFilter(expr)
+            multithread(terminals, upgrade)
+        elif options['reboot']:
+            terminals = TerminalFilter(expr)
+            multithread(terminals, reboot)
+        elif options['unlock']:
+            terminals = TerminalFilter(expr)
+            multithread(terminals, rm_pacman_lock)
