@@ -24,32 +24,35 @@ class TerminalManager(WsgiApp):
 
     DEBUG = True
 
-    def get(self):
+    def get(self, environ):
         """Runs the terminal manager"""
+        query_string = self.query_string(environ)
+        qd = self.qd(query_string)
+        cqd = self.cqd(qd)
         auth = False
-        user_name = self.qd.get('user_name')
+        user_name = qd.get('user_name')
         if not user_name:
             return Error('No user name specified', status=400)
         else:
-            passwd = self.qd.get('passwd')
+            passwd = qd.get('passwd')
             if not user_name:
                 return Error('No password', status=400)
             else:
                 auth = Administrator.authenticate(user_name, passwd)
         if auth:
-            cid = self.qd.get('cid')
+            cid = qd.get('cid')
             if cid is not None:
                 try:
                     cid = int(cid)
                 except (TypeError, ValueError):
                     return Error('Invalid customer ID', status=400)
-            tid = self.qd.get('tid')
+            tid = qd.get('tid')
             if tid is not None:
                 try:
                     tid = int(tid)
                 except (TypeError, ValueError):
                     return Error('Invalid terminal ID', status=400)
-            class_id_or_name = self.qd.get('class')
+            class_id_or_name = qd.get('class')
             try:
                 class_id = int(class_id_or_name)
             except (TypeError, ValueError):
@@ -57,12 +60,12 @@ class TerminalManager(WsgiApp):
                 class_name = class_id_or_name
             else:
                 class_name = None
-            action = self.qd.get('action')
+            action = qd.get('action')
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
-                deleted = self.cqd.get('deleted')
-                deployed = self.cqd.get('deployed')
+                deleted = cqd.get('deleted')
+                deployed = cqd.get('deployed')
                 return self._list_terminals(
                     cid, class_id=class_id, class_name=class_name,
                     deleted=deleted, deployed=deployed)
@@ -76,7 +79,7 @@ class TerminalManager(WsgiApp):
                 elif tid is None:
                     return Error('No terminal ID specified', status=400)
                 else:
-                    thumbnail = self.qd.get('thumbnail')
+                    thumbnail = qd.get('thumbnail')
                     try:
                         thumbnail = int(thumbnail)
                     except (ValueError, TypeError):

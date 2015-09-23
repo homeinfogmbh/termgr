@@ -16,17 +16,19 @@ class SetupController(WsgiApp):
 
     DEBUG = True
 
-    def get(self):
+    def get(self, environ):
         """Interpret query dictionary"""
-        user_name = self.qd.get('user_name')
+        query_string = self.query_string(environ)
+        qd = self.qd(query_string)
+        user_name = qd.get('user_name')
         if not user_name:
             return Error('No user name specified', status=400)
-        passwd = self.qd.get('passwd')
+        passwd = qd.get('passwd')
         if not passwd:
             return Error('No password specified', status=400)
         operator = SetupOperator.authenticate(user_name, passwd)
         if operator:
-            cid_str = self.qd.get('cid')
+            cid_str = qd.get('cid')
             if cid_str is None:
                 return Error('No customer ID specified', status=400)
             else:
@@ -34,7 +36,7 @@ class SetupController(WsgiApp):
                     cid = int(cid_str)
                 except ValueError:
                     return Error('Invalid customer ID', status=400)
-                tid_str = self.qd.get('tid')
+                tid_str = qd.get('tid')
                 if tid_str is None:
                     return Error('No terminal ID specified', status=400)
                 else:
@@ -45,7 +47,7 @@ class SetupController(WsgiApp):
                     terminal = Terminal.by_ids(cid, tid, deleted=False)
                     if terminal is not None:
                         if operator.authorize(terminal):
-                            action = self.qd.get('action')
+                            action = qd.get('action')
                             if action is None:
                                 return Error('No action specified', status=400)
                             else:
