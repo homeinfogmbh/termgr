@@ -24,6 +24,10 @@ class TerminalManager(WsgiApp):
 
     DEBUG = True
 
+    def __init__(self):
+        """Initialize with CORS enabled"""
+        super().__init__(cors=True)
+
     def get(self, environ):
         """Runs the terminal manager"""
         query_string = self.query_string(environ)
