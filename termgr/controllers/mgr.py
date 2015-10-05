@@ -7,7 +7,6 @@ from peewee import DoesNotExist
 from homeinfo.crm import Customer
 from homeinfo.lib.wsgi import WsgiApp, Error, OK
 from homeinfo.terminals.db import Terminal, Class, Administrator
-from homeinfo.terminals.ctrl import TerminalController
 
 from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
 from ..lib import dom
@@ -250,17 +249,9 @@ class TerminalManager(WsgiApp):
             else:
                 if terminal.status:
                     if thumbnail:
-                        try:
-                            screenshot = TerminalController(
-                                terminal).screenshot(thumbnail=thumbnail)
-                        except Exception as e:
-                            return Error(str(e))
+                        raise NotImplementedError()
                     else:
-                        try:
-                            screenshot = TerminalController(
-                                terminal).screenshot()
-                        except Exception as e:
-                            return Error(str(e))
+                        raise NotImplementedError()
                 else:
                     screenshot = None
                 details = terminal_details2dom(
