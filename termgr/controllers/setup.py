@@ -59,7 +59,7 @@ class SetupController(WsgiApp):
                         else:
                             return Error('Unauthorized', status=401)
                     else:
-                        return Error('No such terminal', status=404)
+                        return Error('No such terminal', status=400)
         else:
             return Error('Invalid credentials', status=401)
 
