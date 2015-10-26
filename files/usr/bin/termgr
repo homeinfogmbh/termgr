@@ -88,8 +88,8 @@ def restart_services():
         except:
             ok = False
     evaluate(ok)
-    print('Generating /etc/hosts', end='                   ', flush=True)
-    evaluate(run('/usr/lib/terminals/hosts.gen'))
+    print('Generating bind9 configuration', end='          ', flush=True)
+    evaluate(run('/usr/lib/terminals/bind.gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/lib/terminals/openvpn-client-config.gen'))
     print('Creating Nagios3 configurations', end='         ', flush=True)
