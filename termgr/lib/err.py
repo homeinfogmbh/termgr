@@ -1,9 +1,9 @@
 """Library for terminal configuration errors"""
 
-__all__ = ['KeyExist', 'KeygenError', 'UnconfiguredError']
+__all__ = ['KeyExists', 'KeygenError', 'UnconfiguredError']
 
 
-class KeyExist(Exception):
+class KeyExists(Exception):
     """Indicates that a key already exists"""
     pass
 
