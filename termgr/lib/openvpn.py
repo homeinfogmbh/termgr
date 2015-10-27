@@ -10,7 +10,7 @@ from homeinfo.lib.system import run
 from homeinfo.terminals.abc import TerminalAware
 from homeinfo.terminals.config import terminals_config
 
-from .err import KeyExist, KeygenError, UnconfiguredError
+from .err import KeyExists, KeygenError, UnconfiguredError
 
 __all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackager']
 
@@ -72,7 +72,7 @@ class OpenVPNKeyMgr(TerminalAware):
             terminals_config.openvpn['KEYS_DIR'],
             key_file_name)
         if isfile(key_file_path):
-            raise KeyExist()
+            raise KeyExists()
         else:
             result = run(
                 [build_script, terminals_config.openvpn['EASY_RSA_DIR'],
