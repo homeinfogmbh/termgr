@@ -2,8 +2,8 @@
 """Command line tool to administer HOMEINFO terminals
 
 Usage:
-    termgr add <class_id> <cid> <street> <house_number> <zip_code> \
-<city> [--state=<state_iso>] [--tid=<tid>]
+    termgr add <class_id> <cid> [<street> <house_number> <zip_code> \
+<city> [--state=<state_iso>]] [--tid=<tid>]
     termgr (upgrade | reboot | unlock) <expr>
 
 Options:
@@ -14,6 +14,8 @@ Options:
 from os import listdir, chmod, geteuid
 from os.path import join
 from sys import stderr
+from threading import Thread
+from itertools import chain
 
 from docopt import docopt
 
@@ -25,13 +27,10 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.db import Terminal, Class, Domain
 
 from termgr.lib.openvpn import OpenVPNKeyMgr
-from termgr.lib.err import KeygenError
-from threading import Thread
-
-options = docopt(__doc__)
+from termgr.lib.err import KeyExists, KeygenError
 
 
-def add_terminal():
+def add_terminal(options):
     """Adds a new terminal"""
     class_id_str = options['<class_id>']
     cid_str = options['<cid>']
@@ -55,7 +54,10 @@ def add_terminal():
     else:
         state = None
     addr = (street, house_number, zip_code)
-    address = Address.add(city, addr=addr, state=state)
+    if None not in chain([city], addr):
+        address = Address.add(city, addr=addr, state=state)
+    else:
+        address = None
     terminal = Terminal()
     terminal.customer = cid
     terminal.tid = tid
@@ -65,16 +67,19 @@ def add_terminal():
     terminal.virtual_display = None
     terminal.location = address
     terminal.deleted = None
-    terminal.save()
     print('Created terminal record for host name:', terminal.hostname,
           'with id:', terminal.id)
     key_manager = OpenVPNKeyMgr(terminal)
     try:
-        key_manager.generate()
-    except KeygenError:
+        key_name = key_manager.generate()
+    except KeyExists:
         print('OpenVPN keys already present')
+    except KeygenError:
+        print('Could not generate new OpenVPN Key')
     else:
         print('OpenVPN keys generated')
+    terminal.vpn_key = key_name
+    terminal.save()
     restart_services()
 
 
@@ -151,9 +156,10 @@ def multithread(terminals, target):
 
 
 if __name__ == '__main__':
+    options = docopt(__doc__)
     if options['add']:
         if geteuid() == 0:
-            add_terminal()
+            add_terminal(options)
         else:
             print('You must be root to add new terminals')
             exit(3)
