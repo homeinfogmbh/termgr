@@ -11,7 +11,7 @@ Options:
     --version     Show version.
 """
 
-from os import listdir, chmod
+from os import listdir, chmod, geteuid
 from os.path import join
 from sys import stderr
 
@@ -152,7 +152,11 @@ def multithread(terminals, target):
 
 if __name__ == '__main__':
     if options['add']:
-        add_terminal()
+        if geteuid() == 0:
+            add_terminal()
+        else:
+            print('You must be root to add new terminals')
+            exit(3)
     else:
         expr = options['<expr>']
         if options['upgrade']:
