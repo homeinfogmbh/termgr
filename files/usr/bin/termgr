@@ -3,7 +3,7 @@
 
 Usage:
     termgr add <class_id> <cid> [<street> <house_number> <zip_code> \
-<city> [--state=<state_iso>]] [--tid=<tid>]
+<city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>]
     termgr (upgrade | reboot | unlock) <expr>
 
 Options:
@@ -26,9 +26,6 @@ from homeinfo.terminals.config import terminals_config
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.db import Terminal, Class, Domain
 
-from termgr.lib.openvpn import OpenVPNKeyMgr
-from termgr.lib.err import KeyExists, KeygenError
-
 
 def add_terminal(options):
     """Adds a new terminal"""
@@ -40,6 +37,7 @@ def add_terminal(options):
     zip_code = options['<zip_code>']
     city = options['<city>']
     state_iso = options['--state']
+    vpn_key = options['--key']
     class_id = int(class_id_str)
     cid = int(cid_str)
     if tid_str is not None:
@@ -69,16 +67,10 @@ def add_terminal(options):
     terminal.deleted = None
     print('Created terminal record for host name:', terminal.hostname,
           'with id:', terminal.id)
-    key_manager = OpenVPNKeyMgr(terminal)
-    try:
-        key_name = key_manager.generate()
-    except KeyExists:
-        print('OpenVPN keys already present')
-    except KeygenError:
-        print('Could not generate new OpenVPN Key')
+    if vpn_key is None:
+        print('Warning: No OpenVPN key was specified!')
     else:
-        print('OpenVPN keys generated')
-    terminal.vpn_key = key_name
+        terminal.vpn_key = vpn_key
     terminal.save()
     restart_services()
 

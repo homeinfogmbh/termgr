@@ -4,9 +4,8 @@ from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
 from homeinfo.terminals.db import Terminal, SetupOperator
 
-from ..lib.openvpn import OpenVPNPackager
+from ..lib.openvpn import UnconfiguredError, OpenVPNPackager
 from ..lib.pacman import PacmanConfig
-from ..lib.err import UnconfiguredError
 
 __all__ = ['SetupController']
 

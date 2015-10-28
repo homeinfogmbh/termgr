@@ -2,17 +2,21 @@
 
 from posixpath import join, isfile, basename
 from tempfile import NamedTemporaryFile
-from uuid import uuid4
 
 import tarfile
 
-from homeinfo.lib.system import run
 from homeinfo.terminals.abc import TerminalAware
 from homeinfo.terminals.config import terminals_config
 
-from .err import KeyExists, KeygenError, UnconfiguredError
+from .err import UnconfiguredError
 
-__all__ = ['OpenVPNKeyMgr', 'OpenVPNConfig', 'OpenVPNPackager']
+__all__ = ['UnconfiguredError', 'OpenVPNKeyMgr',
+           'OpenVPNConfig', 'OpenVPNPackager']
+
+
+class UnconfiguredError(Exception):
+    """Indicates error in key generation"""
+    pass
 
 
 class OpenVPNKeyMgr(TerminalAware):
@@ -55,38 +59,6 @@ class OpenVPNKeyMgr(TerminalAware):
     def key_path(self):
         """Returns the full path to the client's key file"""
         return join(self.key_dir, self.key_file)
-
-    @property
-    def _key_exists(self):
-        """Checks if keys have already been generated"""
-        if isfile(self.crt_path) and isfile(self.key_path):
-            return True
-        else:
-            return False
-
-    def generate(self):
-        """Generates an OpenVPN key pair for the terminal"""
-        build_script = '/usr/lib/terminals/build-key-terminal'
-        key_file_name = str(uuid4())
-        key_file_path = join(
-            terminals_config.openvpn['KEYS_DIR'],
-            key_file_name)
-        if isfile(key_file_path):
-            raise KeyExists()
-        else:
-            result = run(
-                [build_script, terminals_config.openvpn['EASY_RSA_DIR'],
-                 key_file_name])
-            if result:
-                return key_file_name
-            else:
-                raise KeygenError(
-                    'Could not create new key\n{0}'.format(result))
-
-    def revoke(self):
-        """Revokes a terminal's key"""
-        if self._key_exists:
-            pass    # TODO: implement
 
     def get(self):
         """Returns the public / private key pair"""

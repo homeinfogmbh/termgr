@@ -1,21 +1,6 @@
 #! /usr/bin/env python3
-"""Terminal controller interface
-
-XXX: Please note:
-
-    * This web service must be run as a special user,
-      allowed to create and read OpenVPN certs.
-      (Do NOT run this as root!)
-
-    * This web service must be HTTPS-Password
-      protected by the web server, since it does
-      not provide authentication by itself
-"""
+"""Terminal controller interface"""
 
 from termgr.controllers.mgr import TerminalManager
 
-__date__ = "25.03.2015"
-__author__ = "Richard Neumann <r.neumann@homeinfo.de>"
-
 application = TerminalManager()
-
