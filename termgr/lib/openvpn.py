@@ -1,131 +1,17 @@
 """Library for terminal OpenVPN management"""
 
-from posixpath import join, isfile, basename
-from tempfile import NamedTemporaryFile
-
-import tarfile
+from os.path import join
 
 from homeinfo.terminals.abc import TerminalAware
-from homeinfo.terminals.config import terminals_config
 
 from .err import UnconfiguredError
 
-__all__ = ['UnconfiguredError', 'OpenVPNKeyMgr',
-           'OpenVPNConfig', 'OpenVPNPackager']
+__all__ = ['UnconfiguredError', 'OpenVPNPackager']
 
 
 class UnconfiguredError(Exception):
     """Indicates error in key generation"""
     pass
-
-
-class OpenVPNKeyMgr(TerminalAware):
-    """Manages OpenVPN keys and configuration"""
-
-    @property
-    def key_name(self):
-        """Returns the appropriate key name"""
-        if self.terminal.vpn_key is None:
-            return '{0}.{1}'.format(self.terminal.tid, self.terminal.cid)
-        else:
-            return self.terminal.vpn_key
-
-    @property
-    def key_dir(self):
-        """Returns the VPN keys' directory"""
-        return terminals_config.openvpn['KEYS_DIR']
-
-    @property
-    def crt_file(self):
-        """Returns the client certificate's file name"""
-        return '{0}.crt'.format(self.key_name)
-
-    @property
-    def key_file(self):
-        """Returns the key file's name"""
-        return '{0}.key'.format(self.key_name)
-
-    @property
-    def ca_path(self):
-        """Returns the full path to the CA's file"""
-        return join(self.key_dir, terminals_config.openvpn['CA_FILE'])
-
-    @property
-    def crt_path(self):
-        """Returns the full path to the client's certificate file"""
-        return join(self.key_dir, self.crt_file)
-
-    @property
-    def key_path(self):
-        """Returns the full path to the client's key file"""
-        return join(self.key_dir, self.key_file)
-
-    def get(self):
-        """Returns the public / private key pair"""
-        if isfile(self.ca_path):
-            if isfile(self.key_path):
-                if isfile(self.crt_path):
-                    return (self.ca_path, self.key_path, self.crt_path)
-                else:
-                    raise UnconfiguredError(
-                        'Missing client certificate: {0}'.format(
-                            self.crt_path))
-            else:
-                raise UnconfiguredError(
-                    'Missing client key: {0}'.format(self.key_path))
-        else:
-            raise UnconfiguredError(
-                'Missing CA certificate: {0}'.format(self.ca_path))
-
-
-class OpenVPNConfig(TerminalAware):
-    """Class that renders an OpenVPN configuration
-    for the respective terminal
-    """
-
-    @property
-    def servers(self):
-        """List of remote servers"""
-        return '\n'.join(
-            ('remote {0} {1}'.format(
-                s.strip(), terminals_config.openvpn['PORT'])
-             for s in terminals_config.openvpn['SERVERS'].split() if
-             s.strip()))
-
-    def _render_caption(self, config, host_name):
-        """Renders the openvpn-config file's caption / header"""
-        template_caption = '(template)'
-        host_name_caption = ''.join(['(', host_name, ')'])
-        len_diff = len(host_name_caption) - len(template_caption)
-        if len_diff > 0:
-            search_fill = ''.join((' ' for _ in range(0, len_diff)))
-            replace_fill = ''
-        elif len_diff < 0:
-            search_fill = ''
-            replace_fill = ''.join((' ' for _ in range(0, -len_diff)))
-        else:
-            search_fill = ''
-            replace_fill = ''
-        config = config.replace(
-            template_caption + search_fill, host_name_caption + replace_fill)
-        config = config.replace('<servers>', self.servers)
-        return config
-
-    def _render(self, config):
-        """Returns the rendered configuration file"""
-        host_name = self.idstr
-        config = self._render_caption(config, host_name)
-        config = config.replace('<ca>', terminals_config.openvpn['CA_FILE'])
-        config = config.replace('<host_name>', host_name)
-        config = config.replace('<cipher>', terminals_config.openvpn['CIPHER'])
-        config = config.replace('<auth>', terminals_config.openvpn['AUTH'])
-        return config
-
-    def get(self):
-        """Get the OpenVPN"""
-        with open('/usr/share/terminals/openvpn.conf.temp', 'r') as temp:
-            template = temp.read()
-        return self._render(template)
 
 
 class OpenVPNPackager(TerminalAware):
@@ -134,37 +20,17 @@ class OpenVPNPackager(TerminalAware):
     certificates, as well as its configuration
     """
 
-    def _pack(self, files):
-        """Packs a tar.gz file"""
-        config_name = '{0}.conf'.format(
-            terminals_config.openvpn['CONFIG_NAME'])
-        with NamedTemporaryFile('w+b', suffix='.tar.gz') as tmp:
-            with tarfile.open(mode='w:gz', fileobj=tmp) as tar:
-                tar.add(files['ca'], basename(files['ca']))
-                tar.add(files['key'], basename(files['key']))
-                tar.add(files['crt'], basename(files['crt']))
-                tar.add(files['cfg'], config_name)
-            tmp.seek(0)
-            tar_data = tmp.read()
-        return tar_data
+    ARCDIR = '/usr/lib/terminals/keys'
 
-    def get(self):
+    def __call__(self):
         """Packs the key into a ZIP compressed file"""
-        keymgr = OpenVPNKeyMgr(self.terminal)
-        configmgr = OpenVPNConfig(self.terminal)
+        keyname = self.terminal.vpn_key or str(self.terminal)
+        tarname = '{0}.tar'.format(keyname)
+        tarpath = join(self.ARCDIR, tarname)
         try:
-            ca_path, key_path, crt_path = keymgr.get()
-        except UnconfiguredError:
+            with open(tarpath, 'rb') as tar_file:
+                tar_data = tar_file.read()
+        except FileNotFoundError:
             raise UnconfiguredError('OpenVPN key setup incomplete')
         else:
-            config = configmgr.get()
-            with NamedTemporaryFile('w+') as cfg:
-                cfg.write(config)
-                cfg.seek(0)  # Read file from beginning
-                files = {
-                    'ca': ca_path,
-                    'key': key_path,
-                    'crt': crt_path,
-                    'cfg': cfg.name}
-                tar_data = self._pack(files)
             return tar_data

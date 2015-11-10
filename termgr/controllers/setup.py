@@ -81,7 +81,7 @@ class SetupController(WsgiApp):
             packager = OpenVPNPackager(terminal)
             response_body = None
             try:
-                response_body = packager.get()
+                response_body = packager()
             except UnconfiguredError:
                 msg = ('No OpenVPN configuration found for terminal: '
                        '{0}'.format(terminal))
