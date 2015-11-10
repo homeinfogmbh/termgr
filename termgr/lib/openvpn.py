@@ -31,6 +31,6 @@ class OpenVPNPackager(TerminalAware):
             with open(tarpath, 'rb') as tar_file:
                 tar_data = tar_file.read()
         except FileNotFoundError:
-            raise UnconfiguredError('OpenVPN key setup incomplete')
+            raise UnconfiguredError(tarpath)
         else:
             return tar_data
