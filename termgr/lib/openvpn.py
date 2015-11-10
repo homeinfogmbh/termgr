@@ -4,14 +4,7 @@ from os.path import join
 
 from homeinfo.terminals.abc import TerminalAware
 
-from .err import UnconfiguredError
-
 __all__ = ['UnconfiguredError', 'OpenVPNPackager']
-
-
-class UnconfiguredError(Exception):
-    """Indicates error in key generation"""
-    pass
 
 
 class OpenVPNPackager(TerminalAware):
@@ -27,10 +20,5 @@ class OpenVPNPackager(TerminalAware):
         keyname = self.terminal.vpn_key or str(self.terminal)
         tarname = '{0}.tar'.format(keyname)
         tarpath = join(self.ARCDIR, tarname)
-        try:
-            with open(tarpath, 'rb') as tar_file:
-                tar_data = tar_file.read()
-        except FileNotFoundError:
-            raise UnconfiguredError(tarpath)
-        else:
-            return tar_data
+        with open(tarpath, 'rb') as tar_file:
+            return tar_file.read()

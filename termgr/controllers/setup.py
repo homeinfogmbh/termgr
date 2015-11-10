@@ -4,7 +4,7 @@ from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
 from homeinfo.terminals.db import Terminal, SetupOperator
 
-from ..lib.openvpn import UnconfiguredError, OpenVPNPackager
+from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
 
 __all__ = ['SetupController']
@@ -82,12 +82,6 @@ class SetupController(WsgiApp):
             response_body = None
             try:
                 response_body = packager()
-            except UnconfiguredError as ue:
-                msg = ('No OpenVPN configuration found for terminal: '
-                       '{0}'.format(terminal))
-                if self.debug:
-                    msg += '\n{0}'.format(str(ue))
-                return InternalServerError(msg)
             except FileNotFoundError:
                 msg = 'OpenVPN configuration template file not found'
                 return InternalServerError(msg)
