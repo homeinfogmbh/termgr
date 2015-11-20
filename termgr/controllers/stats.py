@@ -14,6 +14,8 @@ class StatsController(WsgiApp):
     def __init__(self):
         """Initialize with CORS enabled"""
         super().__init__(cors=True)
+        with open('/etc/termstats.token', 'r') as token:
+            self._token = token.read().strip()
 
     def post(self, environ):
         """Interpret query dictionary"""
