@@ -19,10 +19,12 @@ setup(
                 ('/usr/bin', ['files/usr/bin/termgr']),
                 ('/usr/share/termgr',
                  ['files/usr/share/termgr/mgr.wsgi',
-                  'files/usr/share/termgr/setup.wsgi']),
+                  'files/usr/share/termgr/setup.wsgi',
+                  'files/usr/share/termgr/stats.wsgi']),
                 ('/etc/uwsgi/apps-available',
-                 ['files/etc/uwsgi/apps-available/termgr-mgr.ini',
-                  'files/etc/uwsgi/apps-available/termgr-setup.ini'])],
+                 ['files/etc/uwsgi/apps-available/termgr.ini',
+                  'files/etc/uwsgi/apps-available/termsetup.ini',
+                  'files/etc/uwsgi/apps-available/termstats.ini'])],
     license=open('LICENSE.txt').read(),
     description=('Homeinfo Terminal Manager')
     )
