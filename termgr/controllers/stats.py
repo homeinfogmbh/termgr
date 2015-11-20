@@ -47,5 +47,3 @@ class StatsController(WsgiApp):
                 return InternalServerError('Could not add statistics record')
         else:
             return Error('Not authenticated', status=401)
-
-    get = post
