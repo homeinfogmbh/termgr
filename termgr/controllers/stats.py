@@ -19,28 +19,28 @@ class StatsController(WsgiApp):
         """Interpret query dictionary"""
         query_string = self.query_string(environ)
         qd = self.qd(query_string)
-        cid_str = qd.get('cid')
-        try:
-            cid = int(cid_str)
-        except (TypeError, ValueError):
-            return Error('Invalid customer ID', status=400)
-        tid_str = qd.get('tid')
-        if tid_str is None:
-            tid = None
-        else:
-            try:
-                tid = int(tid_str)
-            except (TypeError, ValueError):
-                return Error('Invalid terminal ID', status=400)
-        vid_str = qd.get('vid')
-        try:
-            vid = int(vid_str)
-        except (TypeError, ValueError):
-            return Error('Invalid virtual ID', status=400)
-        document = qd.get('document')
         token = qd.get('token')
         # Authenticate
         if token is not None and token == self._token:
+            cid_str = qd.get('cid')
+            try:
+                cid = int(cid_str)
+            except (TypeError, ValueError):
+                return Error('Invalid customer ID', status=400)
+            tid_str = qd.get('tid')
+            if tid_str is None:
+                tid = None
+            else:
+                try:
+                    tid = int(tid_str)
+                except (TypeError, ValueError):
+                    return Error('Invalid terminal ID', status=400)
+            vid_str = qd.get('vid')
+            try:
+                vid = int(vid_str)
+            except (TypeError, ValueError):
+                return Error('Invalid virtual ID', status=400)
+            document = qd.get('document')
             if AccessStats.add(cid, vid, document, tid=tid):
                 return OK('Statistics entry added')
             else:
