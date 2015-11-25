@@ -3,8 +3,6 @@
 from homeinfo.terminals.db import Terminal, Class
 from homeinfo.terminals.ctrl import RemoteController
 
-from .lib.openvpn import OpenVPNKeyMgr
-
 
 __all__ = ['OfflineError', 'TerminalManager']
 
@@ -45,8 +43,6 @@ class TerminalManager(RemoteController):
         terminal.location = address
         terminal.deleted = None
         terminal.save()
-        key_manager = OpenVPNKeyMgr(terminal)
-        key_manager.generate()
 
     def upgrade(self):
         """Upgrades the respective terminal"""
