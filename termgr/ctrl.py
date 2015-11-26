@@ -31,12 +31,10 @@ class TerminalManager(RemoteController):
     @classmethod
     def add(cls, cid, class_, address=None, tid=None, domain=None):
         """Adds a terminal with optional pre-configured address and TID"""
-        tid = Terminal.gen_tid(cid, desired=tid)
-        class_ = Class.get(Class.id == class_)
         terminal = Terminal()
         terminal.customer = cid
-        terminal.tid = tid
-        terminal.class_ = class_
+        terminal.tid = Terminal.gen_tid(cid, desired=tid)
+        terminal.class_ = Class.get(Class.id == class_)
         terminal.domain = domain if domain is not None else 1
         terminal.ipv4addr = Terminal.gen_ipv4addr()
         terminal.virtual_display = None
