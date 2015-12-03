@@ -3,7 +3,7 @@
 
 Usage:
     termgr add <class_id> <cid> [<street> <house_number> <zip_code> \
-<city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>]
+<city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>] [--no-restart]
     termgr (upgrade | reboot | unlock) <expr>
 
 Options:
@@ -11,8 +11,7 @@ Options:
     --version     Show version.
 """
 
-from os import listdir, chmod, geteuid
-from os.path import join
+from os import geteuid
 from sys import stderr
 from threading import Thread
 from itertools import chain
@@ -22,7 +21,6 @@ from docopt import docopt
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.filter import TerminalFilter
-from homeinfo.terminals.config import terminals_config
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.db import Terminal, Class, Domain
 
@@ -38,6 +36,7 @@ def add_terminal(options):
     city = options['<city>']
     state_iso = options['--state']
     vpn_key = options['--key']
+    restart = not options['--no-restart']
     class_id = int(class_id_str)
     cid = int(cid_str)
     if tid_str is not None:
@@ -72,19 +71,12 @@ def add_terminal(options):
     else:
         terminal.vpn_key = vpn_key
     terminal.save()
-    restart_services()
+    if restart:
+        restart_services()
 
 
 def restart_services():
     """Fix stuff after operations"""
-    print('Fixing VPN permissions', end='                  ', flush=True)
-    ok = True
-    for file in listdir(terminals_config.openvpn['KEYS_DIR']):
-        try:
-            chmod(join(terminals_config.openvpn['KEYS_DIR'], file), 0o660)
-        except:
-            ok = False
-    evaluate(ok)
     print('Generating bind9 configuration', end='          ', flush=True)
     evaluate(run('/usr/lib/terminals/bind.gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
