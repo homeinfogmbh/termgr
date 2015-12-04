@@ -9,6 +9,8 @@ __all__ = ['StatsController']
 class StatsController(WsgiApp):
     """Controller for terminal statistics"""
 
+    DEBUG = True
+
     def __init__(self):
         """Initialize with CORS enabled"""
         super().__init__(cors=True)
@@ -46,6 +48,10 @@ class StatsController(WsgiApp):
             else:
                 return InternalServerError('Could not add statistics record')
         else:
-            return Error('Not authenticated', status=401)
+            return Error(
+                'Not authenticated\n\nExpected token: "{0}" '
+                'but got "{1}"\n'.format(self._token, token),
+                status=401
+            )
 
     get = post  # TODO: Remove after testing
