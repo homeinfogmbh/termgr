@@ -15,7 +15,7 @@ class StatsController(WsgiApp):
         with open('/etc/termstats.token', 'r') as token:
             self._token = token.read().strip()
 
-    def post(self, environ):
+    def get(self, environ):
         """Interpret query dictionary"""
         query_string = self.query_string(environ)
         qd = self.qd(query_string)
