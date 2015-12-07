@@ -43,10 +43,15 @@ class StatsController(WsgiApp):
             except (TypeError, ValueError):
                 return Error('Invalid virtual ID', status=400)
             document = qd.get('document')
-            if AccessStats.add(cid, vid, document, tid=tid):
-                return OK('Statistics entry added')
+            if document is not None:
+                if AccessStats.add(cid, vid, document, tid=tid):
+                    return OK('Statistics entry added')
+                else:
+                    return InternalServerError(
+                        'Could not add statistics record'
+                    )
             else:
-                return InternalServerError('Could not add statistics record')
+                return Error('No document specified', status=400)
         else:
             return Error(
                 'Not authenticated\n\nExpected token: "{0}" '
