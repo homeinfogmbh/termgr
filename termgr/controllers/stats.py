@@ -12,8 +12,18 @@ class StatsController(WsgiApp):
     def __init__(self):
         """Initialize with CORS enabled"""
         super().__init__(cors=True)
-        with open('/etc/termstats.token', 'r') as token:
-            self._token = token.read().strip()
+        self._tokens = []
+        with open('/etc/termstats.tokens', 'r') as tokens:
+            for line in tokens:
+                line = line.strip()
+                if not line:
+                    # Skip empty lines
+                    continue
+                elif line.startswith('#'):
+                    # Skip comments
+                    continue
+                else:
+                    self._tokens.append(line)
 
     def get(self, environ):
         """Interpret query dictionary"""
@@ -21,7 +31,7 @@ class StatsController(WsgiApp):
         qd = self.qd(query_string)
         token = qd.get('token')
         # Authenticate
-        if token is not None and token == self._token:
+        if token is not None and token in self._tokens:
             cid_str = qd.get('cid')
             try:
                 cid = int(cid_str)
