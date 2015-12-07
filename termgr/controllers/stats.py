@@ -51,8 +51,4 @@ class StatsController(WsgiApp):
             else:
                 return Error('No document specified', status=400)
         else:
-            return Error(
-                'Not authenticated\n\nExpected token: "{0}" '
-                'but got "{1}"\n'.format(self._token, token),
-                status=401
-            )
+            return Error('Not authenticated', status=401)
