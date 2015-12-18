@@ -2,7 +2,6 @@
 """Command line tool to manage HOMEINFO terminals
 
 Usage:
-    termgr list (terminals [<expr>] | class | os | domains)
     termgr (upgrade | reboot | unlock) <expr>
 
 Options:
@@ -19,31 +18,6 @@ from homeinfo.lib.system import parallelize
 
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.ctrl import RemoteController
-from homeinfo.terminals.orm import Class, Domain, OS, VPN, Terminal
-
-
-def list_terminals(expr):
-    """Lists terminal records"""
-    if expr:
-        terminals = TerminalFilter(expr)
-    else:
-        terminals = Terminal.select().where(True)
-    for terminal in terminals:
-        print(terminal.id, terminal.tid, terminal.customer.id, terminal.vid,
-              terminal.ipv4addr, terminal.deployed, terminal.testing,
-              terminal.address, sep='\t')
-
-
-def list_class():
-    """Lists available classes"""
-    for cls in Class.select().where(True):
-        print(cls.id, cls.name, cls.full_name, cls.touch, sep='\t')
-
-
-def list_os():
-    """Lists available classes"""
-    for os in OS.select().where(True):
-        print(os.id, os.family, os.name, os.version, sep='\t')
 
 
 def upgrade(terminal):
@@ -96,18 +70,10 @@ if __name__ == '__main__':
         exit(3)
     else:
         expr = options['<expr>']
-        if options['list']:
-            if options['terminals']:
-                list_terminals(expr)
-            elif options['class']:
-                list_class()
-            elif options['os']:
-                list_os()
-        else:
-            terminals_args = [[t] for t in TerminalFilter(expr)]
-            if options['upgrade']:
-                parallelize(target=upgrade, args=terminals_args)
-            elif options['reboot']:
-                parallelize(target=reboot, args=terminals_args)
-            elif options['unlock']:
-                parallelize(target=rm_pacman_lock, args=terminals_args)
+        terminals_args = [[t] for t in TerminalFilter(expr)]
+        if options['upgrade']:
+            parallelize(target=upgrade, args=terminals_args)
+        elif options['reboot']:
+            parallelize(target=reboot, args=terminals_args)
+        elif options['unlock']:
+            parallelize(target=rm_pacman_lock, args=terminals_args)
