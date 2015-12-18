@@ -2,7 +2,7 @@
 """Command line tool to manage HOMEINFO terminals
 
 Usage:
-    termgr (upgrade | reboot | unlock) <expr>
+    termgr (upgrade | reboot | unlock | chkres) <expr>
 
 Options:
     -h --help     Show this screen.
@@ -11,13 +11,17 @@ Options:
 
 from os import geteuid
 from sys import stderr
+from getpass import getuser
 
 from docopt import docopt
 
 from homeinfo.lib.system import parallelize
 
-from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.ctrl import RemoteController
+from homeinfo.terminals.filter import TerminalFilter
+from homeinfo.terminals.orm import Terminal
+
+USER = 'termgr'
 
 
 def upgrade(terminal):
@@ -32,6 +36,16 @@ def upgrade(terminal):
         else:
             print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
             print(pr, file=stderr)
+    else:
+        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+
+
+def reboot(terminal):
+    """Reboots a terminal"""
+    if terminal.status:
+        print('Rebooting terminal:', terminal)
+        rc = RemoteController('termgr', terminal)
+        rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
     else:
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
@@ -53,14 +67,25 @@ def rm_pacman_lock(terminal):
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
 
-def reboot(terminal):
-    """Reboots a terminal"""
-    if terminal.status:
-        print('Rebooting terminal:', terminal)
-        rc = RemoteController('termgr', terminal)
-        rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
+def chkres(options):
+    """Checks terminal screen resolutions"""
+    expr = options['<expr>']
+    if expr is None:
+        terminals = Terminal.select().where(
+            ~(Terminal.deployed >> None) &
+            (Terminal.testing == 0))
     else:
-        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+        terminals = TerminalFilter(expr)
+    for terminal in terminals:
+        ctrl = RemoteController(USER, terminal)
+        remote_cmd = 'export DISPLAY=:0 \; xrandr | grep " connected"'
+        pr = ctrl.execute(remote_cmd)
+        if pr:
+            print('Resolution on: ', terminal, '\t',
+                  pr.stdout.decode().strip(), sep='')
+        else:
+            print('Could not determine resolution on: ', terminal,
+                  ':\n', pr.stderr.decode().strip(), sep='', file=stderr)
 
 
 if __name__ == '__main__':
@@ -68,6 +93,8 @@ if __name__ == '__main__':
     if geteuid() == 0:
         print('Refusing to run as root')
         exit(3)
+    elif getuser() != USER:
+            print('You must be {0} to check the resolution'.format(USER))
     else:
         expr = options['<expr>']
         terminals_args = [[t] for t in TerminalFilter(expr)]
@@ -77,3 +104,5 @@ if __name__ == '__main__':
             parallelize(target=reboot, args=terminals_args)
         elif options['unlock']:
             parallelize(target=rm_pacman_lock, args=terminals_args)
+        elif options['chkres']:
+            chkres(options)
