@@ -2,7 +2,7 @@
 
 from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
-from homeinfo.terminals.db import Terminal, SetupOperator
+from homeinfo.terminals.orm import Terminal, Operator
 
 from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
@@ -29,7 +29,7 @@ class SetupController(WsgiApp):
         passwd = qd.get('passwd')
         if not passwd:
             return Error('No password specified', status=400)
-        operator = SetupOperator.authenticate(user_name, passwd)
+        operator = Operator.authenticate(user_name, passwd)
         if operator:
             cid_str = qd.get('cid')
             if cid_str is None:

@@ -6,7 +6,7 @@ from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from homeinfo.lib.wsgi import WsgiApp, Error, OK
-from homeinfo.terminals.db import Terminal, Class, Administrator
+from homeinfo.terminals.orm import Terminal, Class, Administrator
 
 from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
 from ..lib import dom

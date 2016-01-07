@@ -1,7 +1,7 @@
 """Controller for terminal setup"""
 
 from homeinfo.lib.wsgi import WsgiApp, Error, OK, InternalServerError
-from homeinfo.terminals.db import AccessStats
+from homeinfo.terminals.orm import AccessStats
 
 __all__ = ['StatsController']
 
