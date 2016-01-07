@@ -17,10 +17,9 @@ class PacmanConfig(TerminalAware):
         """Returns the rendered configuration file"""
         with open('/usr/share/terminals/pacman.conf.temp', 'r') as temp:
             pacman_conf = temp.read()
-        pacman_conf = pacman_conf.replace(
-            '<addr>', terminals_config.net['IPV4ADDR'])
-        pacman_conf = pacman_conf.replace(
-            '<port>', terminals_config.net['HTTP_PRIV_PORT'])
+        pacman_conf = pacman_conf.format(
+            addr=terminals_config.net['IPV4ADDR'],
+            port=terminals_config.net['HTTP_PRIV_PORT'])
         return pacman_conf
 
 
