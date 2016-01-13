@@ -2,7 +2,7 @@
 
 from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
-from homeinfo.terminals.orm import Terminal, Operator
+from homeinfo.terminals.orm import Terminal, Operator, AddressUnconfiguredError
 
 from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
@@ -68,14 +68,18 @@ class SetupController(WsgiApp):
         """
         status = 200
         if action == 'location':
-            location = terminal.address
-            if location is None:
-                location = '!!! UNCONFIGURED !!!'
-            content_type = 'text/plain'
-            charset = 'utf-8'
-            response_body = location.encode(encoding=charset)
-            msg = 'No location configured for terminal: {0}'.format(
-                terminal)
+            try:
+                location = terminal.address
+            except AddressUnconfiguredError:
+                location = '!!! LOCATION UNCONFIGURED !!!'
+            if location is not None:
+                content_type = 'text/plain'
+                charset = 'utf-8'
+                response_body = location.encode(encoding=charset)
+            else:
+                msg = 'No location configured for terminal: {0}'.format(
+                    terminal)
+                return InternalServerError(msg)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
             response_body = None
