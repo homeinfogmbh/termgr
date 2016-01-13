@@ -64,13 +64,13 @@ def add_terminal(options):
     terminal.deleted = None
     terminal.testing = False
     terminal.annotation = annotation
-    print('Created terminal record for host name:', terminal.hostname,
-          'with id:', terminal.id)
     if vpn_key is None:
         print('Warning: No OpenVPN key was specified!')
     else:
         terminal.vpn_key = vpn_key
     terminal.save()
+    print('Created terminal record for host name:', terminal.hostname,
+          'with id:', terminal.id)
     if restart:
         restart_services()
 
