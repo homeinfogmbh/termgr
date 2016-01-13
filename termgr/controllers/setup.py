@@ -69,14 +69,13 @@ class SetupController(WsgiApp):
         status = 200
         if action == 'location':
             location = terminal.address
-            if location is not None:
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                response_body = location.encode(encoding=charset)
-            else:
-                msg = 'No location configured for terminal: {0}'.format(
-                    terminal)
-                return InternalServerError(msg)
+            if location is None:
+                location = '!!! UNCONFIGURED !!!'
+            content_type = 'text/plain'
+            charset = 'utf-8'
+            response_body = location.encode(encoding=charset)
+            msg = 'No location configured for terminal: {0}'.format(
+                terminal)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
             response_body = None
