@@ -71,7 +71,7 @@ class SetupController(WsgiApp):
             try:
                 location = terminal.address
             except AddressUnconfiguredError:
-                location = '!!! LOCATION UNCONFIGURED !!!'
+                location = '{0} {0}, {0} {0}'.format('!!! UNCONFIGURED !!!')
             if location is not None:
                 content_type = 'text/plain'
                 charset = 'utf-8'
