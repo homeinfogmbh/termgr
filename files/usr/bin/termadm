@@ -27,7 +27,7 @@ def add_terminal(options):
     class_id = (options['<class_id>'])
     cid = int(options['<cid>'])
     tid = int(options['--tid']) if options['--tid'] else None
-    os_id = int(options['os'])
+    os_id = int(options['<os>'])
     # Optional address
     street = options['<street>']
     house_number = options['<house_number>']
