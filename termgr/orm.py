@@ -30,8 +30,7 @@ class ConsoleHistory(TerminalModel):
         db_table = 'console_history'
 
     terminal = ForeignKeyField(
-        Terminal, db_column='terminal', related_name='console_log'
-    )
+        Terminal, db_column='terminal', related_name='console_log')
     timestamp = DateTimeField(default=datetime.now())
     command = CharField(255)
     stdout = BlobField()

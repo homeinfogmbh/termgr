@@ -56,8 +56,7 @@ class StatsController(WsgiApp):
                     return OK('Statistics entry added')
                 else:
                     return InternalServerError(
-                        'Could not add statistics record'
-                    )
+                        'Could not add statistics record')
             else:
                 return Error('No document specified', status=400)
         else:

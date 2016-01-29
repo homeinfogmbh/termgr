@@ -3,7 +3,7 @@
 
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
-<city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>]
+<city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>] \
 [--annotation=<annotation>] [--no-restart]
 
 Options:

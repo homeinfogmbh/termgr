@@ -46,8 +46,7 @@ class TerminalManager(RemoteController):
         """Upgrades the respective terminal"""
         if self:
             return self.execute(
-                '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm'
-            )
+                '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
         else:
             raise OfflineError(self.terminal)
 
@@ -55,8 +54,7 @@ class TerminalManager(RemoteController):
         """Removes pacman's database lockfile"""
         if self:
             return self.execute(
-                '/usr/bin/sudo', '/usr/bin/rm', '-f', '/var/lib/pacman/db.lck'
-            )
+                '/usr/bin/sudo', '/usr/bin/rm', '-f', '/var/lib/pacman/db.lck')
         else:
             raise OfflineError(self.terminal)
 
