@@ -1,6 +1,6 @@
 """Remote terminal controller"""
 
-from homeinfo.terminals.db import Terminal, Class
+from homeinfo.terminals.orm import Terminal, Class
 from homeinfo.terminals.ctrl import RemoteController
 
 
