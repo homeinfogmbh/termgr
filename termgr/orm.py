@@ -6,7 +6,7 @@ from peewee import ForeignKeyField, IntegerField, CharField, BlobField,\
     DateTimeField
 
 from homeinfo.peewee import create
-from homeinfo.terminals.db import TerminalModel, Terminal
+from homeinfo.terminals.orm import TerminalModel, Terminal
 
 __all__ = ['Screenshot', 'ConsoleHistory']
 
