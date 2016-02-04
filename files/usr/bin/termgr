@@ -94,7 +94,8 @@ if __name__ == '__main__':
         print('Refusing to run as root')
         exit(3)
     elif getuser() != USER:
-            print('You must be {0} to run {1}'.format(USER, __file__))
+        print('You must be {0} to run {1}'.format(USER, __file__))
+        exit(2)
     else:
         expr = options['<expr>']
         terminals_args = [[t] for t in TerminalFilter(expr)]
