@@ -93,7 +93,7 @@ def deploy_terminal(terminal):
 def undeploy_terminal(terminal):
     """Sets terminals to NOT deployed"""
     if terminal.deployed is None:
-        print('Terminal {0} is not deployed')
+        print('Terminal {0} is not deployed'.format(terminal))
     else:
         print('Undeploying terminal {0} from {1}'.format(
             terminal, terminal.deployed))
