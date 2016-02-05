@@ -104,9 +104,10 @@ if __name__ == '__main__':
         if options['add']:
             add_terminal(options)
         elif options['deploy']:
-            expr = options['<expr>']
-            for terminal in TerminalFilter(expr):
-                deploy_terminals(terminal)
+            exprs = options['<expr>']
+            for expr in exprs:
+                for terminal in TerminalFilter(expr):
+                    deploy_terminals(terminal)
             generate_nagios()
     else:
         print('You must be root to add new terminals')
