@@ -82,7 +82,7 @@ def deploy_terminal(terminal):
     """Sets terminals to deployed"""
     if terminal.deployed is None:
         now = datetime.now()
-        print('Deploying terminal {0} in {1}'.format(terminal, now))
+        print('Deploying terminal {0} on {1}'.format(terminal, now))
         terminal.deployed = now
         terminal.save()
     else:
