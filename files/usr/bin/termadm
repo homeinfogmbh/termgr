@@ -5,7 +5,7 @@ Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>] \
 [--annotation=<annotation>] [--no-restart]
-    termadm deploy <expr>...
+    termadm (deploy | undeploy) <expr>...
 
 Options:
     -h --help     Show this screen.
@@ -90,6 +90,17 @@ def deploy_terminal(terminal):
             terminal, terminal.deployed))
 
 
+def undeploy_terminal(terminal):
+    """Sets terminals to NOT deployed"""
+    if terminal.deployed is None:
+        print('Terminal {0} is not deployed')
+    else:
+        print('Undeploying terminal {0} from {1}'.format(
+            terminal, terminal.deployed))
+        terminal.deployed = None
+        terminal.save()
+
+
 def generate_nagios():
     """Generates the Nagios3 configuration"""
     print('Creating Nagios3 configurations', end='         ', flush=True)
@@ -114,6 +125,12 @@ if __name__ == '__main__':
             for expr in exprs:
                 for terminal in TerminalFilter(expr):
                     deploy_terminal(terminal)
+            generate_nagios()
+        elif options['undeploy']:
+            exprs = options['<expr>']
+            for expr in exprs:
+                for terminal in TerminalFilter(expr):
+                    undeploy_terminal(terminal)
             generate_nagios()
     else:
         print('You must be root to add new terminals')
