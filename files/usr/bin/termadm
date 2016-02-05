@@ -80,8 +80,14 @@ def add_terminal(options):
 
 def deploy_terminal(terminal):
     """Sets terminals to deployed"""
-    terminal.deployed = datetime.now()
-    terminal.save()
+    if terminal.deployed is None:
+        now = datetime.now()
+        print('Deploying terminal {0} in {1}'.format(terminal, now))
+        terminal.deployed = now
+        terminal.save()
+    else:
+        print('Terminal {0} has already been deployed on {1}'.format(
+            terminal, terminal.deployed))
 
 
 def generate_nagios():
