@@ -5,6 +5,7 @@ Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>] \
 [--annotation=<annotation>] [--no-restart]
+    termadm deploy <expr>...
 
 Options:
     -h --help     Show this screen.
@@ -13,12 +14,14 @@ Options:
 
 from os import geteuid
 from itertools import chain
+from datetime import datetime
 
 from docopt import docopt
 
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Terminal
+from homeinfo.terminals.filter import TerminalFilter
 
 
 def add_terminal(options):
@@ -75,21 +78,36 @@ def add_terminal(options):
         restart_services()
 
 
+def deploy_terminal(terminal):
+    """Sets terminals to deployed"""
+    terminal.deployed = datetime.now()
+    terminal.save()
+
+
+def generate_nagios():
+    """Generates the Nagios3 configuration"""
+    print('Creating Nagios3 configurations', end='         ', flush=True)
+    evaluate(run('/usr/lib/terminals/nagios-config.gen'))
+
+
 def restart_services():
     """Fix stuff after operations"""
     print('Generating bind9 configuration', end='          ', flush=True)
     evaluate(run('/usr/lib/terminals/bind.gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/lib/terminals/openvpn-client-config.gen'))
-    print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run('/usr/lib/terminals/nagios-config.gen'))
-
+    generate_nagios()
 
 if __name__ == '__main__':
     options = docopt(__doc__)
-    if options['add']:
-        if geteuid() == 0:
+    if geteuid() == 0:
+        if options['add']:
             add_terminal(options)
-        else:
-            print('You must be root to add new terminals')
-            exit(3)
+        elif options['deploy']:
+            expr = options['<expr>']
+            for terminal in TerminalFilter(expr):
+                deploy_terminals(terminal)
+            generate_nagios()
+    else:
+        print('You must be root to add new terminals')
+        exit(3)
