@@ -6,6 +6,7 @@ Usage:
 <city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>] \
 [--annotation=<annotation>] [--no-restart]
     termadm (deploy | undeploy) <expr>...
+    termadm (grant | revoke) <operator> <expr>
 
 Options:
     -h --help     Show this screen.
@@ -20,7 +21,8 @@ from docopt import docopt
 
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
-from homeinfo.terminals.orm import Class, Domain, OS, VPN, Terminal
+from homeinfo.terminals.orm import Class, Domain, OS, VPN, Terminal, Operator,\
+    OperatorTerminals
 from homeinfo.terminals.filter import TerminalFilter
 
 
@@ -101,6 +103,39 @@ def undeploy_terminal(terminal):
         terminal.save()
 
 
+def grant_setup(operator, terminals):
+    """Grant an operator permission to set up certain terminals"""
+    for terminal in terminals:
+        permission = OperatorTerminals()
+        permission.operator = operator
+        permission.terminal = terminal
+        print(
+            'Granting setup permission of terminal '
+            '{0} to operator {1}'.format(
+                str(terminal), str(operator)), end='\t')
+        if permission.save():
+            print('[   ok   ]', flush=True)
+        else:
+            print('[ failed ]', flush=True)
+
+
+def revoke_setup(operator, terminals):
+    """Revoke an operator permission to set up certain terminals"""
+    for terminal in terminals:
+        print(
+            'Revoking setup permission of terminal '
+            '{0} to operator {1}:'.format(
+                str(terminal), str(operator)))
+        for permission in OperatorTerminals.select().where(
+                (OperatorTerminals.operator == operator) &
+                (OperatorTerminals.terminal == terminal)):
+            print('\t', permission.id, end='\t')
+            if permission.delete_instance():
+                print('[   ok   ]', flush=True)
+            else:
+                print('[ failed ]', flush=True)
+
+
 def generate_nagios():
     """Generates the Nagios3 configuration"""
     print('Creating Nagios3 configurations', end='         ', flush=True)
@@ -132,6 +167,14 @@ if __name__ == '__main__':
                 for terminal in TerminalFilter(expr):
                     undeploy_terminal(terminal)
             generate_nagios()
+        elif options['grant']:
+            operator = Operator.get(Operator.name == options['<operator>'])
+            terminals = TerminalFilter(options['<expr>'])
+            grant_setup(operator, terminals)
+        elif options['revoke']:
+            operator = Operator.get(Operator.name == options['<operator>'])
+            terminals = TerminalFilter(options['<expr>'])
+            revoke_setup(operator, terminals)
     else:
         print('You must be root to add new terminals')
         exit(3)
