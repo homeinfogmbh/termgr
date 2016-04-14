@@ -3,14 +3,19 @@
 
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
-<city> [--state=<state_iso>]] [--tid=<tid>] [--key=<key>] \
-[--annotation=<annotation>] [--no-restart]
+<city> [--state=<state_iso>]] [options]
     termadm (deploy | undeploy) <expr>...
     termadm (grant | revoke) <operator> <expr>
 
 Options:
-    -h --help     Show this screen.
-    --version     Show version.
+    -h --help                   Show this screen.
+    --version                   Show version.
+    --domain=<domain>           Specify the domain [default: 1].
+    --connection=<connection>   Specify connection type [default: 1].
+    --tid=<tid>                 Explicitly select a TID (not recommended!).
+    --key=<key>                 Explicitly specify an OpenVPN key to be used.
+    --annotation=<annotation>   Specify an annotation for this terminal.
+    --no-restart                Do not restart related system services.
 """
 
 from os import geteuid
@@ -21,18 +26,18 @@ from docopt import docopt
 
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
-from homeinfo.terminals.orm import Class, Domain, OS, VPN, Terminal, Operator,\
-    OperatorTerminals
+from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
+    Terminal, Operator, OperatorTerminals
 from homeinfo.terminals.filter import TerminalFilter
 
 
 def add_terminal(options):
     """Adds a new terminal"""
     # Required options
-    class_id = (options['<class_id>'])
+    class_ = Class.get(Class.id == int(options['<class_id>']))
     cid = int(options['<cid>'])
     tid = int(options['--tid']) if options['--tid'] else None
-    os_id = int(options['<os>'])
+    os = OS.get(OS.id == int(options['<os>']))
     # Optional address
     street = options['<street>']
     house_number = options['<house_number>']
@@ -43,10 +48,9 @@ def add_terminal(options):
     vpn_key = options['--key']
     annotation = options['--annotation']
     restart = not options['--no-restart']
+    connection = Connection.get(Connecion.id == int(options['--connection']))
+    domain = Domain.get(Domain.id == int(options['--domain']))
     tid = Terminal.gen_tid(cid, desired=tid)
-    class_ = Class.get(Class.id == class_id)
-    os = OS.get(OS.id == os_id)
-    domain = Domain.get(Domain.id == 1)  # TODO: Make this dynamic
     if state_iso:
         state = State.get(State._iso == state_iso)
     else:
@@ -61,6 +65,7 @@ def add_terminal(options):
     terminal.customer = cid
     terminal.class_ = class_
     terminal.os = os
+    terminal.connection = connection
     terminal.vpn = VPN.add(key=vpn_key)
     terminal.domain = domain
     terminal.location = address
