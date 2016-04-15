@@ -18,7 +18,6 @@ Options:
     --verbose       Be gassy.
     --undeployed    Also handle undeployed terminals.
     --user=<user>   Specify user account for SSH connections.
-    --shell         Run remote commands in shell mode (INSECURE!).
 """
 
 from os import geteuid
@@ -35,7 +34,6 @@ from homeinfo.terminals.orm import Terminal
 
 USER = 'termgr'
 VERBOSE = False
-SHELL = False
 
 
 def deployed(terminals):
@@ -68,7 +66,7 @@ def upgrade(terminal):
         print('Upgrading', terminal, file=stderr)
         rc = RemoteController('termgr', terminal)
         cmd = ('/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
-        pr = rc.execute(*cmd, shell=SHELL)
+        pr = rc.execute(*cmd)
         if pr:
             print('Upgraded', terminal)
         else:
@@ -85,7 +83,7 @@ def reboot(terminal):
         print('Rebooting terminal:', terminal, file=stderr)
         rc = RemoteController('termgr', terminal)
         cmd = ('/usr/bin/sudo', '/usr/bin/reboot')
-        rc.execute(*cmd, shell=SHELL)
+        rc.execute(*cmd)
     else:
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
@@ -96,7 +94,7 @@ def rm_pacman_lock(terminal):
         print('Removing pacman lockfile on', terminal, file=stderr)
         rc = RemoteController('termgr', terminal)
         cmd = ('/usr/bin/sudo', '/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
-        pr = rc.execute(*cmd, shell=SHELL)
+        pr = rc.execute(*cmd)
         if pr:
             print('Removed pacman lockfile on', terminal)
         else:
@@ -112,7 +110,7 @@ def chkres(terminal):
     """Checks terminal screen resolutions"""
     cmd = 'export DISPLAY=:0 \; xrandr | grep " connected"'
     rc = RemoteController(USER, terminal)
-    pr = rc.execute(cmd, shell=SHELL)
+    pr = rc.execute(cmd)
     if pr:
         print('Resolution on: ', terminal, '\t',
               pr.stdout.decode().strip(), sep='')
@@ -130,7 +128,7 @@ def fixpkg(terminal, packages=None):
         packages, ['--asexplicit'])
     rc = RemoteController(USER, terminal)
     print('Explicitly installing', ' '.join(packages), 'on:', terminal)
-    pr = rc.execute(*cmd, shell=SHELL)
+    pr = rc.execute(*cmd)
     if pr:
         print('Resolution on: ', terminal, '\t',
               pr.stdout.decode().strip(), sep='')
@@ -146,15 +144,15 @@ def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
     rc = RemoteController('termgr', terminal)
     if modules:
         cmd = ('/usr/bin/grep', '^MODULES=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(*cmd, shell=SHELL)
+        pr = rc.execute(*cmd)
         print(pr.stdout.decode(), end='')
     if hooks:
         cmd = ('/usr/bin/grep', '^HOOKS=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(*cmd, shell=SHELL)
+        pr = rc.execute(*cmd)
         print(pr.stdout.decode(), end='')
     if compression:
         cmd = ('/usr/bin/grep', '^COMPRESSION=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(*cmd, shell=SHELL)
+        pr = rc.execute(*cmd)
         print(pr.stdout.decode(), end='')
 
 
@@ -164,7 +162,7 @@ def chkpacman(terminal, siglevel=False):
     rc = RemoteController('termgr', terminal)
     if siglevel:
         cmd = ('/usr/bin/grep', '^SigLevel', '/etc/pacman.conf')
-        pr = rc.execute(*cmd, shell=SHELL)
+        pr = rc.execute(*cmd)
         print(pr.stdout.decode(), end='')
 
 
@@ -179,7 +177,6 @@ if __name__ == '__main__':
     else:
         USER = options['--user'] if options['--user'] else USER
         VERBOSE = options['--verbose']
-        SHELL = options['--shell']
         # Get terminals generator
         if not options['<expr>']:
             terminals = Terminal.select().where(
