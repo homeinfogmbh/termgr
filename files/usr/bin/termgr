@@ -146,15 +146,15 @@ def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
     rc = RemoteController('termgr', terminal)
     if modules:
         cmd = ('/usr/bin/grep', '^MODULES=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(cmd, shell=SHELL)
+        pr = rc.execute(*cmd, shell=SHELL)
         print(pr.stdout.decode(), end='')
     if hooks:
         cmd = ('/usr/bin/grep', '^HOOKS=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(cmd, shell=SHELL)
+        pr = rc.execute(*cmd, shell=SHELL)
         print(pr.stdout.decode(), end='')
     if compression:
         cmd = ('/usr/bin/grep', '^COMPRESSION=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(cmd, shell=SHELL)
+        pr = rc.execute(*cmd, shell=SHELL)
         print(pr.stdout.decode(), end='')
 
 
@@ -164,7 +164,7 @@ def chkpacman(terminal, siglevel=False):
     rc = RemoteController('termgr', terminal)
     if siglevel:
         cmd = ('/usr/bin/grep', '^SigLevel', '/etc/pacman.conf')
-        pr = rc.execute(cmd, shell=SHELL)
+        pr = rc.execute(*cmd, shell=SHELL)
         print(pr.stdout.decode(), end='')
 
 
