@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
 """Command line tool to manage HOMEINFO terminals
 
+  (C) 2015-2016: HOMEINFO - Digitale Informationssysteme GmbH
+
+  Maintainer:  Richard Neumann <r.neumann@homeinfo.de>
+
 Usage:
     termgr (upgrade | reboot | unlock | chkres) <expr> [options]
     termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
@@ -131,7 +135,7 @@ def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
 
 def chkpacman(terminal, siglevel=False):
     """Print certain settings of the /etc/pacman.conf"""
-    print('Checking /etc/mkinitcpio.conf on', terminal, file=stderr)
+    print('Checking /etc/pacman.conf on', terminal, file=stderr)
     rc = RemoteController('termgr', terminal)
     if siglevel:
         pr = rc.execute(
