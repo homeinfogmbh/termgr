@@ -7,9 +7,11 @@ Usage:
     termgr chkpacman <expr> [--siglevel] [options]
 
 Options:
-    -h --help     Show this screen.
-    --version     Show version.
-    --undeployed  Also handle undeployed terminals.
+    -h --help       Show this screen.
+    --version       Show version.
+    --undeployed    Also handle undeployed terminals.
+    --verbose       Be gassy.
+    --user=<user>   Specify user account for SSH connections.
 """
 
 from os import geteuid
@@ -25,6 +27,7 @@ from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
 USER = 'termgr'
+VERBOSE = False
 
 
 def deployed(terminals):
@@ -56,7 +59,8 @@ def upgrade(terminal):
             print('Upgraded', terminal)
         else:
             print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
-            print(pr, file=stderr)
+            if VERBOSE:
+                print(pr, file=stderr)
     else:
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
@@ -83,7 +87,8 @@ def rm_pacman_lock(terminal):
         else:
             print('ERROR:', 'Failed to remove pacman lockfile on',
                   terminal, file=stderr)
-            print(pr, file=stderr)
+            if VERBOSE:
+                print(pr, file=stderr)
     else:
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
@@ -91,14 +96,14 @@ def rm_pacman_lock(terminal):
 def chkres(terminal):
     """Checks terminal screen resolutions"""
     ctrl = RemoteController(USER, terminal)
-    remote_cmd = 'export DISPLAY=:0 \; xrandr | grep " connected"'
-    pr = ctrl.execute(remote_cmd)
+    pr = ctrl.execute('export DISPLAY=:0 \; xrandr | grep " connected"')
     if pr:
         print('Resolution on: ', terminal, '\t',
               pr.stdout.decode().strip(), sep='')
     else:
-        print('Could not determine resolution on: ', terminal,
-              ':\n', pr.stderr.decode().strip(), sep='', file=stderr)
+        print('Could not determine resolution on:', terminal, file=stderr)
+        if VERBOSE:
+            print(pr, file=stderr)
 
 
 def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
@@ -108,15 +113,15 @@ def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
     if modules:
         pr = rc.execute(
             '/usr/bin/grep', '^MODULES=', '/etc/mkinitcpio.conf')
-        print(pr.stdout.decode().strip())
+        print(pr.stdout.decode(), end='')
     if hooks:
         pr = rc.execute(
             '/usr/bin/grep', '^HOOKS=', '/etc/mkinitcpio.conf')
-        print(pr.stdout.decode().strip())
+        print(pr.stdout.decode(), end='')
     if compression:
         pr = rc.execute(
             '/usr/bin/grep', '^COMPRESSION=', '/etc/mkinitcpio.conf')
-        print(pr.stdout.decode().strip())
+        print(pr.stdout.decode(), end='')
 
 
 def chkpacman(terminal, siglevel=False):
@@ -126,7 +131,7 @@ def chkpacman(terminal, siglevel=False):
     if siglvl:
         pr = rc.execute(
             '/usr/bin/grep', '^SigLevel=', '/etc/pacman.conf')
-        print(pr.stdout.decode().strip())
+        print(pr.stdout.decode(), end='')
 
 
 if __name__ == '__main__':
@@ -138,6 +143,9 @@ if __name__ == '__main__':
         print('You must be {0} to run {1}'.format(USER, __file__), file=stderr)
         exit(2)
     else:
+        global USER, VERBOSE
+        USER = options['--user'] if options['--user'] else USER
+        VERBOSE = options['--verbose']
         terminals_args = [[t] for t in TerminalFilter(options['<expr>'])]
         if options['upgrade']:
             parallelize(target=upgrade, args=terminals_args)
@@ -168,7 +176,7 @@ if __name__ == '__main__':
                     chkinitcpio(
                         terminal, modules=modules, hooks=hooks,
                         compression=compression)
-            elif options['chkpacmanconf']:
+            elif options['chkpacman']:
                 siglevel = options['--siglevel']
                 for terminal in online(terminals):
-                    chkpacmanconf(terminal, siglevel=siglevel)
+                    chkpacman(terminal, siglevel=siglevel)
