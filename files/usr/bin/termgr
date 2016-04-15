@@ -96,20 +96,17 @@ def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
     print('Checking /etc/mkinitcpio.conf on', terminal)
     rc = RemoteController('termgr', terminal)
     if modules:
-        print('###   Listing modules   ###')
         pr = rc.execute(
             '/usr/bin/grep', '^MODULES=', '/etc/mkinitcpio.conf')
-        print(pr.stdout.decode())
+        print(pr.stdout.decode().strip())
     if hooks:
-        print('###    Listing hooks    ###')
         pr = rc.execute(
             '/usr/bin/grep', '^HOOKS=', '/etc/mkinitcpio.conf')
-        print(pr.stdout.decode())
+        print(pr.stdout.decode().strip())
     if compression:
-        print('### Listing compression ###')
         pr = rc.execute(
             '/usr/bin/grep', '^COMPRESSION=', '/etc/mkinitcpio.conf')
-        print(pr.stdout.decode())
+        print(pr.stdout.decode().strip())
 
 
 def chkpacman(terminal, siglevel=False):
@@ -117,10 +114,9 @@ def chkpacman(terminal, siglevel=False):
     print('Checking /etc/mkinitcpio.conf on', terminal)
     rc = RemoteController('termgr', terminal)
     if siglvl:
-        print('###  Checking SigLevel  ###')
         pr = rc.execute(
             '/usr/bin/grep', '^SigLevel=', '/etc/pacman.conf')
-        print(pr.stdout.decode())
+        print(pr.stdout.decode().strip())
 
 
 if __name__ == '__main__':
