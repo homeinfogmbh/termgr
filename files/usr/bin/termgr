@@ -153,8 +153,8 @@ if __name__ == '__main__':
                     (Terminal.testing == 0))
             else:
                 terminals = TerminalFilter(options['<expr>'])
-            # Conditionally filter undeployed terminals
-            if not undeployed:
+            # Filter out undeployed terminals
+            if not options['--undeployed']:
                 terminals = deployed(terminals)
             # Check other options
             if options['chkres']:
