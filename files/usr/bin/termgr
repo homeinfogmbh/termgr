@@ -9,8 +9,8 @@ Usage:
 Options:
     -h --help       Show this screen.
     --version       Show version.
-    --undeployed    Also handle undeployed terminals.
     --verbose       Be gassy.
+    --undeployed    Also handle undeployed terminals.
     --user=<user>   Specify user account for SSH connections.
 """
 
