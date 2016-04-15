@@ -160,7 +160,7 @@ if __name__ == '__main__':
                 modules = options['--modules']
                 hooks = options['--hooks']
                 compression = options['--compression']
-                for terminal in _online_terminals(terminals):
+                for terminal in online(deployed(terminals)):
                     chkinitcpio(
                         terminal, modules=modules, hooks=hooks,
                         compression=compression)
