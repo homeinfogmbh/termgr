@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
 """Command line tool to manage HOMEINFO terminals
 
-  (C) 2015-2016: HOMEINFO - Digitale Informationssysteme GmbH
+  (C) 2015-2016:  HOMEINFO - Digitale Informationssysteme GmbH
 
-  Maintainer:  Richard Neumann <r.neumann@homeinfo.de>
+  Maintainer:     Richard Neumann <r.neumann@homeinfo.de>
+
 
 Usage:
     termgr (upgrade | reboot | unlock | chkres) <expr> [options]
+    termgr fixpkg <expr> <pkgs>...
     termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
     termgr chkpacman <expr> [--siglevel] [options]
 
@@ -104,8 +106,25 @@ def rm_pacman_lock(terminal):
 
 def chkres(terminal):
     """Checks terminal screen resolutions"""
-    ctrl = RemoteController(USER, terminal)
-    pr = ctrl.execute('export DISPLAY=:0 \; xrandr | grep " connected"')
+    rc = RemoteController(USER, terminal)
+    pr = rc.execute('export DISPLAY=:0 \; xrandr | grep " connected"')
+    if pr:
+        print('Resolution on: ', terminal, '\t',
+              pr.stdout.decode().strip(), sep='')
+    else:
+        print('Could not determine resolution on:', terminal, file=stderr)
+        if VERBOSE:
+            print(pr, file=stderr)
+
+
+def fixpkg(terminal, packages=None):
+    """Make packages explicitly installed"""
+    packages = packages or []
+    rc = RemoteController(USER, terminal)
+    print('Explicitly installing', *packages, 'on:', terminal)
+    pr = rc.execute(
+        '/usr/bin/sudo', '/usr/bin/pacman', '-S',
+        *packages, '--asexplicit')
     if pr:
         print('Resolution on: ', terminal, '\t',
               pr.stdout.decode().strip(), sep='')
@@ -173,6 +192,10 @@ if __name__ == '__main__':
         elif options['chkres']:
             for terminal in online(terminals):
                 chkres(terminal)
+        elif options['fixpkg']:
+            packages = options['<pkgs>']
+            for terminal in online(terminals):
+                fixpkg(terminal, packages=packages)
         elif options['chkinitcpio']:
             modules = options['--modules']
             hooks = options['--hooks']
