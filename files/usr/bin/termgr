@@ -38,7 +38,7 @@ def _online_terminals(terminals):
 def upgrade(terminal):
     """Upgrades a terminal"""
     if terminal.status:
-        print('Upgrading', terminal)
+        print('Upgrading', terminal, file=stderr)
         rc = RemoteController('termgr', terminal)
         pr = rc.execute(
             '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
@@ -54,7 +54,7 @@ def upgrade(terminal):
 def reboot(terminal):
     """Reboots a terminal"""
     if terminal.status:
-        print('Rebooting terminal:', terminal)
+        print('Rebooting terminal:', terminal, file=stderr)
         rc = RemoteController('termgr', terminal)
         rc.execute('/usr/bin/sudo', '/usr/bin/reboot')
     else:
@@ -64,7 +64,7 @@ def reboot(terminal):
 def rm_pacman_lock(terminal):
     """Removes the pacman lockfile"""
     if terminal.status:
-        print('Removing pacman lockfile on', terminal)
+        print('Removing pacman lockfile on', terminal, file=stderr)
         rc = RemoteController('termgr', terminal)
         pr = rc.execute(
             '/usr/bin/sudo', '/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
@@ -93,7 +93,7 @@ def chkres(terminal):
 
 def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
     """Print certain settings of the /etc/initcpio.conf"""
-    print('Checking /etc/mkinitcpio.conf on', terminal)
+    print('Checking /etc/mkinitcpio.conf on', terminal, file=stderr)
     rc = RemoteController('termgr', terminal)
     if modules:
         pr = rc.execute(
@@ -111,7 +111,7 @@ def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
 
 def chkpacman(terminal, siglevel=False):
     """Print certain settings of the /etc/pacman.conf"""
-    print('Checking /etc/mkinitcpio.conf on', terminal)
+    print('Checking /etc/mkinitcpio.conf on', terminal, file=stderr)
     rc = RemoteController('termgr', terminal)
     if siglvl:
         pr = rc.execute(
@@ -125,7 +125,7 @@ if __name__ == '__main__':
         print('Refusing to run as root')
         exit(3)
     elif getuser() != USER:
-        print('You must be {0} to run {1}'.format(USER, __file__))
+        print('You must be {0} to run {1}'.format(USER, __file__), file=stderr)
         exit(2)
     else:
         terminals_args = [[t] for t in TerminalFilter(options['<expr>'])]
