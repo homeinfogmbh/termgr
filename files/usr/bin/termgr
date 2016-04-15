@@ -2,7 +2,7 @@
 """Command line tool to manage HOMEINFO terminals
 
 Usage:
-    termgr (upgrade | reboot | unlock | chkres) <expr>
+    termgr (upgrade | reboot | unlock | chkres) <expr> [options]
     termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
     termgr chkpacman <expr> [--siglevel] [options]
 
@@ -46,6 +46,11 @@ def online(terminals):
             yield terminal
         else:
             print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+
+
+def itemize(terminals):
+    """Returns a list of listed terminals for parallel processing"""
+    return [[terminal] for terminal in terminals]
 
 
 def upgrade(terminal):
@@ -145,37 +150,34 @@ if __name__ == '__main__':
     else:
         USER = options['--user'] if options['--user'] else USER
         VERBOSE = options['--verbose']
-        terminals_args = [[t] for t in TerminalFilter(options['<expr>'])]
-        if options['upgrade']:
-            parallelize(target=upgrade, args=terminals_args)
-        elif options['reboot']:
-            parallelize(target=reboot, args=terminals_args)
-        elif options['unlock']:
-            parallelize(target=rm_pacman_lock, args=terminals_args)
+        # Get terminals generator
+        if not options['<expr>']:
+            terminals = Terminal.select().where(
+                ~(Terminal.deployed >> None) &
+                (Terminal.testing == 0))
         else:
-            # Get terminals generator
-            if not options['<expr>']:
-                terminals = Terminal.select().where(
-                    ~(Terminal.deployed >> None) &
-                    (Terminal.testing == 0))
-            else:
-                terminals = TerminalFilter(options['<expr>'])
-            # Filter out undeployed terminals
-            if not options['--undeployed']:
-                terminals = deployed(terminals)
-            # Check other options
-            if options['chkres']:
-                for terminal in online(terminals):
-                    chkres(terminal)
-            elif options['chkinitcpio']:
-                modules = options['--modules']
-                hooks = options['--hooks']
-                compression = options['--compression']
-                for terminal in online(terminals):
-                    chkinitcpio(
-                        terminal, modules=modules, hooks=hooks,
-                        compression=compression)
-            elif options['chkpacman']:
-                siglevel = options['--siglevel']
-                for terminal in online(terminals):
-                    chkpacman(terminal, siglevel=siglevel)
+            terminals = TerminalFilter(options['<expr>'])
+        # Filter out undeployed terminals
+        if not options['--undeployed']:
+            terminals = deployed(terminals)
+        if options['upgrade']:
+            parallelize(target=upgrade, args=itemize(terminals))
+        elif options['reboot']:
+            parallelize(target=reboot, args=itemize(terminals))
+        elif options['unlock']:
+            parallelize(target=rm_pacman_lock, args=itemize(terminals))
+        elif options['chkres']:
+            for terminal in online(terminals):
+                chkres(terminal)
+        elif options['chkinitcpio']:
+            modules = options['--modules']
+            hooks = options['--hooks']
+            compression = options['--compression']
+            for terminal in online(terminals):
+                chkinitcpio(
+                    terminal, modules=modules, hooks=hooks,
+                    compression=compression)
+        elif options['chkpacman']:
+            siglevel = options['--siglevel']
+            for terminal in online(terminals):
+                chkpacman(terminal, siglevel=siglevel)
