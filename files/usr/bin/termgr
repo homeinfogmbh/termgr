@@ -3,12 +3,13 @@
 
 Usage:
     termgr (upgrade | reboot | unlock | chkres) <expr>
-    termgr chkinitcpio [--modules] [--hooks] [--compression] <expr>
-    termgr chkpacman [--siglevel] <expr>
+    termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
+    termgr chkpacman <expr> [--siglevel] [options]
 
 Options:
     -h --help     Show this screen.
     --version     Show version.
+    --undeployed  Also handle undeployed terminals.
 """
 
 from os import geteuid
@@ -152,19 +153,22 @@ if __name__ == '__main__':
                     (Terminal.testing == 0))
             else:
                 terminals = TerminalFilter(options['<expr>'])
+            # Conditionally filter undeployed terminals
+            if not undeployed:
+                terminals = deployed(terminals)
             # Check other options
             if options['chkres']:
-                for terminal in online(deployed(terminals)):
+                for terminal in online(terminals):
                     chkres(terminal)
             elif options['chkinitcpio']:
                 modules = options['--modules']
                 hooks = options['--hooks']
                 compression = options['--compression']
-                for terminal in online(deployed(terminals)):
+                for terminal in online(terminals):
                     chkinitcpio(
                         terminal, modules=modules, hooks=hooks,
                         compression=compression)
             elif options['chkpacmanconf']:
                 siglevel = options['--siglevel']
-                for terminal in online(deployed(terminals)):
+                for terminal in online(terminals):
                     chkpacmanconf(terminal, siglevel=siglevel)
