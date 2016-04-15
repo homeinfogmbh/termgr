@@ -135,7 +135,7 @@ def chkpacman(terminal, siglevel=False):
     rc = RemoteController('termgr', terminal)
     if siglevel:
         pr = rc.execute(
-            '/usr/bin/grep', '^SigLevel=', '/etc/pacman.conf')
+            '/usr/bin/grep', '^SigLevel', '/etc/pacman.conf')
         print(pr.stdout.decode(), end='')
 
 
