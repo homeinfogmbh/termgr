@@ -26,7 +26,16 @@ from homeinfo.terminals.orm import Terminal
 USER = 'termgr'
 
 
-def _online_terminals(terminals):
+def deployed(terminals):
+    """Yields deployed terminals"""
+    for terminal in terminals:
+        if terminal.deployed:
+            yield terminal
+        else:
+            print('WARNING: Terminal', terminal, 'is not deployed', file=stderr)
+
+
+def online(terminals):
     """Yields online terminals"""
     for terminal in terminals:
         if terminal.status:
@@ -145,7 +154,7 @@ if __name__ == '__main__':
                 terminals = TerminalFilter(options['<expr>'])
             # Check other options
             if options['chkres']:
-                for terminal in _online_terminals(terminals):
+                for terminal in online(deployed(terminals)):
                     chkres(terminal)
             elif options['chkinitcpio']:
                 modules = options['--modules']
@@ -157,5 +166,5 @@ if __name__ == '__main__':
                         compression=compression)
             elif options['chkpacmanconf']:
                 siglevel = options['--siglevel']
-                for terminal in _online_terminals(terminals):
+                for terminal in online(deployed(terminals)):
                     chkpacmanconf(terminal, siglevel=siglevel)
