@@ -133,7 +133,7 @@ def chkpacman(terminal, siglevel=False):
     """Print certain settings of the /etc/pacman.conf"""
     print('Checking /etc/mkinitcpio.conf on', terminal, file=stderr)
     rc = RemoteController('termgr', terminal)
-    if siglvl:
+    if siglevel:
         pr = rc.execute(
             '/usr/bin/grep', '^SigLevel=', '/etc/pacman.conf')
         print(pr.stdout.decode(), end='')
