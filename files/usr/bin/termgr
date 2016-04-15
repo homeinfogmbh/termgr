@@ -143,7 +143,6 @@ if __name__ == '__main__':
         print('You must be {0} to run {1}'.format(USER, __file__), file=stderr)
         exit(2)
     else:
-        global USER, VERBOSE
         USER = options['--user'] if options['--user'] else USER
         VERBOSE = options['--verbose']
         terminals_args = [[t] for t in TerminalFilter(options['<expr>'])]
