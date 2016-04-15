@@ -3,6 +3,8 @@
 
 Usage:
     termgr (upgrade | reboot | unlock | chkres) <expr>
+    termgr chkinitcpio [--modules] [--hooks] [--compression] <expr>
+    termgr chkpacman [--siglevel] <expr>
 
 Options:
     -h --help     Show this screen.
@@ -22,6 +24,15 @@ from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
 USER = 'termgr'
+
+
+def _online_terminals(terminals):
+    """Yields online terminals"""
+    for terminal in terminals:
+        if terminal.status:
+            yield terminal
+        else:
+            print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
 
 def upgrade(terminal):
@@ -67,25 +78,45 @@ def rm_pacman_lock(terminal):
         print('WARNING: Terminal', terminal, 'is offline', file=stderr)
 
 
-def chkres(options):
+def chkres(terminal):
     """Checks terminal screen resolutions"""
-    expr = options['<expr>']
-    if expr is None:
-        terminals = Terminal.select().where(
-            ~(Terminal.deployed >> None) &
-            (Terminal.testing == 0))
+    ctrl = RemoteController(USER, terminal)
+    remote_cmd = 'export DISPLAY=:0 \; xrandr | grep " connected"'
+    pr = ctrl.execute(remote_cmd)
+    if pr:
+        print('Resolution on: ', terminal, '\t',
+              pr.stdout.decode().strip(), sep='')
     else:
-        terminals = TerminalFilter(expr)
-    for terminal in terminals:
-        ctrl = RemoteController(USER, terminal)
-        remote_cmd = 'export DISPLAY=:0 \; xrandr | grep " connected"'
-        pr = ctrl.execute(remote_cmd)
-        if pr:
-            print('Resolution on: ', terminal, '\t',
-                  pr.stdout.decode().strip(), sep='')
-        else:
-            print('Could not determine resolution on: ', terminal,
-                  ':\n', pr.stderr.decode().strip(), sep='', file=stderr)
+        print('Could not determine resolution on: ', terminal,
+              ':\n', pr.stderr.decode().strip(), sep='', file=stderr)
+
+
+def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
+    """Print certain settings of the /etc/initcpio.conf"""
+    print('Checking /etc/mkinitcpio.conf on', terminal)
+    rc = RemoteController('termgr', terminal)
+    if modules:
+        pr = rc.execute(
+            '/usr/bin/grep', '^MODULES=', '/etc/mkinitcpio.conf')
+        print(pr)
+    if hooks:
+        pr = rc.execute(
+            '/usr/bin/grep', '^HOOKS=', '/etc/mkinitcpio.conf')
+        print(pr)
+    if compression:
+        pr = rc.execute(
+            '/usr/bin/grep', '^COMPRESSION=', '/etc/mkinitcpio.conf')
+        print(pr)
+
+
+def chkpacman(terminal, siglevel=False):
+    """Print certain settings of the /etc/pacman.conf"""
+    print('Checking /etc/mkinitcpio.conf on', terminal)
+    rc = RemoteController('termgr', terminal)
+    if siglvl:
+        pr = rc.execute(
+            '/usr/bin/grep', '^SigLevel=', '/etc/pacman.conf')
+        print(pr)
 
 
 if __name__ == '__main__':
@@ -97,13 +128,34 @@ if __name__ == '__main__':
         print('You must be {0} to run {1}'.format(USER, __file__))
         exit(2)
     else:
-        expr = options['<expr>']
-        terminals_args = [[t] for t in TerminalFilter(expr)]
+        terminals_args = [[t] for t in TerminalFilter(options['<expr>'])]
         if options['upgrade']:
             parallelize(target=upgrade, args=terminals_args)
         elif options['reboot']:
             parallelize(target=reboot, args=terminals_args)
         elif options['unlock']:
             parallelize(target=rm_pacman_lock, args=terminals_args)
-        elif options['chkres']:
-            chkres(options)
+        else:
+            # Get terminals generator
+            if not options['<expr>']:
+                terminals = Terminal.select().where(
+                    ~(Terminal.deployed >> None) &
+                    (Terminal.testing == 0))
+            else:
+                terminals = TerminalFilter(options['<expr>'])
+            # Check other options
+            if options['chkres']:
+                for terminal in _online_terminals(terminals):
+                    chkres(terminal)
+            elif options['chkinitcpio']:
+                modules = options['--modules']
+                hooks = options['--hooks']
+                compression = options['--compression']
+                for terminal in _online_terminals(terminals):
+                    chkinitcpio(
+                        terminal, modules=modules, hooks=hooks,
+                        compression=compression)
+            elif options['chkpacmanconf']:
+                siglevel = options['--siglevel']
+                for terminal in _online_terminals(terminals):
+                    chkpacmanconf(terminal, siglevel=siglevel)
