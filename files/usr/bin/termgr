@@ -180,7 +180,7 @@ if __name__ == '__main__':
 
         # Filter out undeployed terminals
         if not options['--undeployed']:
-            terminals = deployed(terminals)
+            terminals = (t for t in terminals if t.deployed is not None)
 
         # Perform selected operation
         if options['upgrade']:
