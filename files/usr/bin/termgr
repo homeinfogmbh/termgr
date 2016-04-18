@@ -200,9 +200,8 @@ if __name__ == '__main__':
             with Parallelization(Upgrade()) as para:
                 para.run(terminals, single=True)
                 while para.running:
-                    doggy = Watchdog(para.threads)
-                    doggy.start()
-                    doggy.wait()
+                    with Watchdog(para.threads) as doggy
+                        doggy.wait()
         elif options['reboot']:
             parallelize(target=reboot, args=itemize(terminals))
         elif options['unlock']:
