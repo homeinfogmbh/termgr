@@ -26,7 +26,7 @@ from getpass import getuser
 
 from docopt import docopt
 
-from homeinfo.lib.system import Parallelization
+from homeinfo.lib.system import Parallelization, Watchdog
 
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
@@ -180,7 +180,6 @@ if __name__ == '__main__':
 
         # Filter out undeployed terminals
         if not options['--undeployed']:
-            handler = CommandHandler(SUDO, PACMAN, '-Syu', '--noconfirm')
             terminals = deployed(terminals)
 
         # Perform selected operation
