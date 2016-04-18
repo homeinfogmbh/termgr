@@ -26,7 +26,7 @@ from getpass import getuser
 
 from docopt import docopt
 
-from homeinfo.lib.system import parallelize
+from homeinfo.lib.system import Parallelization
 
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
@@ -35,135 +35,127 @@ from homeinfo.terminals.orm import Terminal
 USER = 'termgr'
 VERBOSE = False
 
-
-def deployed(terminals):
-    """Yields deployed terminals"""
-    for terminal in terminals:
-        if terminal.deployed:
-            yield terminal
-        else:
-            print('WARNING: Terminal', terminal,
-                  'is not deployed', file=stderr)
+SUDO = '/usr/bin/sudo'
+PACMAN = '/usr/bin/pacman'
+REBOOT = '/usr/bin/reboot'
+REMOVE = '/usr/bin/rm'
+GREP = '/usr/bin/grep'
 
 
-def online(terminals):
-    """Yields online terminals"""
-    for terminal in terminals:
-        if terminal.status:
-            yield terminal
-        else:
-            print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+def headline(*args):
+    """Prints headline"""
+    print(*args, end='\t')
 
 
-def itemize(terminals):
-    """Returns a list of listed terminals for parallel processing"""
-    return [[terminal] for terminal in terminals]
+def evaluate(result):
+    """Prints an evaluation of a boolean value"""
+    if result:
+        print('[   ok   ]', flush=True)
+    else:
+        print('[ failed ]', flush=True)
+        if VERBOSE:
+            print(result, file=stderr, flush=True)
 
 
-def upgrade(terminal):
+class TerminalCommand():
+    """Execute command on terminal"""
+
+    def __init__(self, cmd, *args, user=None):
+        self.cmd = cmd
+        self.args = args
+        self.user = 'termgr' if user is None else user
+
+    def __call__(self, terminal, user=None):
+        user = self.user if user is None else user
+        remote_controller = RemoteController(user, terminal)
+        return remote_controller.execute(self.cmd, *self.args)
+
+    def __iter__(self):
+        yield self.cmd
+        for arg in self.args:
+            yield arg
+
+    def __repr__(self):
+        return ' '.join(self)
+
+
+class Upgrade(TerminalCommand):
     """Upgrades a terminal"""
-    if terminal.status:
-        print('Upgrading', terminal, file=stderr)
-        rc = RemoteController('termgr', terminal)
-        cmd = ('/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
-        pr = rc.execute(*cmd)
-        if pr:
-            print('Upgraded', terminal)
-        else:
-            print('ERROR:', 'Failed to upgrade', terminal, file=stderr)
-            if VERBOSE:
-                print(pr, file=stderr)
-    else:
-        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+
+    def __init__(self):
+        super().__init__(SUDO, PACMAN, '-Syu', '--noconfirm')
 
 
-def reboot(terminal):
+class Reboot(TerminalCommand):
     """Reboots a terminal"""
-    if terminal.status:
-        print('Rebooting terminal:', terminal, file=stderr)
-        rc = RemoteController('termgr', terminal)
-        cmd = ('/usr/bin/sudo', '/usr/bin/reboot')
-        rc.execute(*cmd)
-    else:
-        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+
+    def __init__(self):
+        super().__init__(SUDO, REBOOT)
 
 
-def rm_pacman_lock(terminal):
-    """Removes the pacman lockfile"""
-    if terminal.status:
-        print('Removing pacman lockfile on', terminal, file=stderr)
-        rc = RemoteController('termgr', terminal)
-        cmd = ('/usr/bin/sudo', '/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
-        pr = rc.execute(*cmd)
-        if pr:
-            print('Removed pacman lockfile on', terminal)
-        else:
-            print('ERROR:', 'Failed to remove pacman lockfile on',
-                  terminal, file=stderr)
-            if VERBOSE:
-                print(pr, file=stderr)
-    else:
-        print('WARNING: Terminal', terminal, 'is offline', file=stderr)
+class UnlockPacman(TerminalCommand):
+    """Removes the pacaman lock on a terminal"""
+
+    def __init__(self):
+        super().__init__(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
 
 
-def chkres(terminal):
-    """Checks terminal screen resolutions"""
-    cmd = 'export DISPLAY=:0 \; xrandr | grep " connected"'
-    rc = RemoteController(USER, terminal)
-    pr = rc.execute(cmd)
-    if pr:
-        print('Resolution on: ', terminal, '\t',
-              pr.stdout.decode().strip(), sep='')
-    else:
-        print('Could not determine resolution on:', terminal, file=stderr)
-        if VERBOSE:
-            print(pr, file=stderr)
+class CheckResolution(TerminalCommand):
+    """Checks a terminal's display resolution"""
+
+    def __init__(self):
+        super().__init__('export DISPLAY=:0 \; xrandr | grep " connected"')
 
 
-def fixpkg(terminal, packages=None):
-    """Make packages explicitly installed"""
-    packages = packages or []
-    cmd = chain(
-        ['/usr/bin/sudo', '/usr/bin/pacman', '-S'],
-        packages, ['--asexplicit'])
-    rc = RemoteController(USER, terminal)
-    print('Explicitly installing', ' '.join(packages), 'on:', terminal)
-    pr = rc.execute(*cmd)
-    if pr:
-        print('Resolution on: ', terminal, '\t',
-              pr.stdout.decode().strip(), sep='')
-    else:
-        print('Could not determine resolution on:', terminal, file=stderr)
-        if VERBOSE:
-            print(pr, file=stderr)
+class FixPackages(TerminalCommand):
+    """(Re-)Installs packages as explicit"""
+
+    def __init__(self, packages):
+        super().__init__(SUDO, PACMAN, '-S', '--asexplicit')
+        self.packages = packages
+
+    @property
+    def args(self):
+        return chain(self.args, self.packages)
+
+    @property
+    def __str__(self):
+        return ' '.join(self.packages)
 
 
-def chkinitcpio(terminal, modules=False, hooks=False, compression=False):
-    """Print certain settings of the /etc/initcpio.conf"""
-    print('Checking /etc/mkinitcpio.conf on', terminal, file=stderr)
-    rc = RemoteController('termgr', terminal)
-    if modules:
-        cmd = ('/usr/bin/grep', '^MODULES=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(*cmd)
-        print(pr.stdout.decode(), end='')
-    if hooks:
-        cmd = ('/usr/bin/grep', '^HOOKS=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(*cmd)
-        print(pr.stdout.decode(), end='')
-    if compression:
-        cmd = ('/usr/bin/grep', '^COMPRESSION=', '/etc/mkinitcpio.conf')
-        pr = rc.execute(*cmd)
-        print(pr.stdout.decode(), end='')
+class CheckInitcpioConfig():
+    """Checks settings inside the /etc/mkinitcpio.conf"""
+
+    MODULES = TerminalCommand(GREP, '^MODULES=', '/etc/mkinitcpio.conf')
+    HOOKS = TerminalCommand(GREP, '^HOOKS=', '/etc/mkinitcpio.conf')
+    COMPRESSION = TerminalCommand(
+        GREP, '^COMPRESSION=', '/etc/mkinitcpio.conf')
+
+    def __init__(self, modules=False, hooks=False, compression=False):
+        self.modules = modules
+        self.hooks = hooks
+        self.compression = compression
+
+    def __call__(self, terminal, user=None):
+        if self.modules:
+            self.MODULES(terminal, user=user)
+        if self.hooks:
+            self.HOOKS(terminal, user=user)
+        if self.compression:
+            self.COMPRESSION(terminal, user=user)
 
 
-def chkpacman(terminal, siglevel=False):
-    """Print certain settings of the /etc/pacman.conf"""
-    print('Checking /etc/pacman.conf on', terminal, file=stderr)
-    rc = RemoteController('termgr', terminal)
-    if siglevel:
-        cmd = ('/usr/bin/grep', '^SigLevel', '/etc/pacman.conf')
-        pr = rc.execute(*cmd)
-        print(pr.stdout.decode(), end='')
+class CheckPacmanConf():
+    """Checks settings inside the /etc/pacman.conf"""
+
+    SIG_LEVEL = TerminalCommand(GREP, '^SigLevel', '/etc/pacman.conf')
+
+    def __init__(self, siglevel=False):
+        self.siglevel = siglevel
+
+    def __call__(self, terminal, user=None):
+        if self.siglevel:
+            self.SIG_LEVEL(terminal, user=user)
 
 
 if __name__ == '__main__':
@@ -177,6 +169,7 @@ if __name__ == '__main__':
     else:
         USER = options['--user'] if options['--user'] else USER
         VERBOSE = options['--verbose']
+
         # Get terminals generator
         if not options['<expr>']:
             terminals = Terminal.select().where(
@@ -184,11 +177,19 @@ if __name__ == '__main__':
                 (Terminal.testing == 0))
         else:
             terminals = TerminalFilter(options['<expr>'])
+
         # Filter out undeployed terminals
         if not options['--undeployed']:
+            handler = CommandHandler(SUDO, PACMAN, '-Syu', '--noconfirm')
             terminals = deployed(terminals)
+
+        # Perform selected operation
         if options['upgrade']:
-            parallelize(target=upgrade, args=itemize(terminals))
+            with Parallelization(Upgrade()) as para:
+                para.run(terminals)
+                while para.running:
+                    doggy = Watchdog(para.threads)
+                    doggy.start()
         elif options['reboot']:
             parallelize(target=reboot, args=itemize(terminals))
         elif options['unlock']:

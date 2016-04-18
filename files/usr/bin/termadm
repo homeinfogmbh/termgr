@@ -111,17 +111,23 @@ def undeploy_terminal(terminal):
 def grant_setup(operator, terminals):
     """Grant an operator permission to set up certain terminals"""
     for terminal in terminals:
-        permission = OperatorTerminals()
-        permission.operator = operator
-        permission.terminal = terminal
-        print(
-            'Granting setup permission of terminal '
-            '{0} to operator {1}'.format(
+        print('Granting setup permission of terminal '
+              '{0} to operator {1}'.format(
                 str(terminal), str(operator)), end='\t')
-        if permission.save():
-            print('[   ok   ]', flush=True)
+        try:
+            OperatorTerminals.get(
+                (OperatorTerminals.operator == operator) &
+                (OperatorTerminals.terminal == terminal))
+        except DoesNotExist:
+            permission = OperatorTerminals()
+            permission.operator = operator
+            permission.terminal = terminal
+            if permission.save():
+                print('[   ok   ]', flush=True)
+            else:
+                print('[ failed ]', flush=True)
         else:
-            print('[ failed ]', flush=True)
+            print('[ exists ]', flush=True)
 
 
 def revoke_setup(operator, terminals):
