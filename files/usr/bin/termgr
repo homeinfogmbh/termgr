@@ -197,11 +197,11 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['upgrade']:
-            with Parallelization(Upgrade()) as para:
+            with Parallelization(Upgrade(), blocking=False) as para:
                 para.run(terminals, single=True)
                 while para.running:
                     with Watchdog(para.threads) as doggy:
-                        doggy.wait()
+                        doggy.start()
         elif options['reboot']:
             parallelize(target=reboot, args=itemize(terminals))
         elif options['unlock']:
