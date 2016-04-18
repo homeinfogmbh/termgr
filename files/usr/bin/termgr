@@ -63,7 +63,7 @@ def deployed(terminals):
         if terminal.deployed is None:
             print('WARNING: Terminal', terminal,
                   'is not deployed', file=stderr)
-        elif terminal.deployed - datetime.now() < timedelta(0):
+        elif terminal.deployed - datetime.now() > timedelta(0):
             print('WARNING: Terminal', terminal,
                   'is not yet deployed', file=stderr)
         else:
