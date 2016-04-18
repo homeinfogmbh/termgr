@@ -23,6 +23,7 @@ Options:
 from os import geteuid
 from sys import stderr
 from getpass import getuser
+from datetime import datetime, timedelta
 
 from docopt import docopt
 
@@ -55,6 +56,18 @@ def evaluate(result):
         print('[ failed ]', flush=True)
         if VERBOSE:
             print(result, file=stderr, flush=True)
+
+
+def deployed(terminals):
+    for terminal in terminals:
+        if terminal.deployed is None:
+            print('WARNING: Terminal', terminal,
+                  'is not deployed', file=stderr)
+        elif terminal.deployed - datetime.now() < timedelta(0):
+            print('WARNING: Terminal', terminal,
+                  'is not yet deployed', file=stderr)
+        else:
+            yield terminal
 
 
 class TerminalCommand():
@@ -180,7 +193,7 @@ if __name__ == '__main__':
 
         # Filter out undeployed terminals
         if not options['--undeployed']:
-            terminals = (t for t in terminals if t.deployed is not None)
+            terminals = deployed(terminals)
 
         # Perform selected operation
         if options['upgrade']:
