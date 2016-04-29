@@ -20,6 +20,7 @@ Options:
 """
 
 from os import geteuid
+from sys import stderr
 from itertools import chain
 from datetime import datetime
 
@@ -90,11 +91,13 @@ def add_terminal(options):
     if simulate:
         print('Just simulating. Period.')
     else:
-        terminal.save()
-        print('Created terminal record for host name:', terminal.hostname,
-              'with id:', terminal.id)
-        if restart:
-            restart_services()
+        if terminal.save():
+            print('Created terminal record for host name:', terminal.hostname,
+                  'with id:', terminal.id)
+            if restart:
+                restart_services()
+        else:
+            print('Terminal could not be created', file=stderr)
 
 
 def deploy_terminal(terminal):
