@@ -165,15 +165,15 @@ def revoke_setup(operator, terminals):
 def generate_nagios():
     """Generates the Nagios3 configuration"""
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run('/usr/lib/terminals/nagios-config.gen'))
+    evaluate(run('/usr/lib/terminals/nagios-gen'))
 
 
 def restart_services():
     """Fix stuff after operations"""
     print('Generating bind9 configuration', end='          ', flush=True)
-    evaluate(run('/usr/lib/terminals/bind.gen'))
+    evaluate(run('/usr/lib/terminals/bind-gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    evaluate(run('/usr/lib/terminals/openvpn-client-config.gen'))
+    evaluate(run('/usr/lib/terminals/openvpn-gen'))
     generate_nagios()
 
 if __name__ == '__main__':
