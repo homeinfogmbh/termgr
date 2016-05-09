@@ -210,7 +210,7 @@ if __name__ == '__main__':
                     doggy.start(para.threads)
         elif options['chkres']:
             for terminal in online(terminals):
-                CHKRES(terminal)
+                print(terminal, CHKRES(terminal), sep=': ')
         elif options['fixpkg']:
             packages = options['<pkgs>'] or BASE_PKGS
             FIXPKGS = PackageManagerCommand(packages, '--asexplicit', '-S')
@@ -227,9 +227,9 @@ if __name__ == '__main__':
                 hooks=hooks,
                 compression=compression)
             for terminal in online(terminals):
-                CHK_INITCPIO(terminal)
+                print(terminal, CHK_INITCPIO(terminal), sep=': ')
         elif options['chkpacman']:
             siglevel = options['--siglevel']
             CHKPACMAN = CheckPacmanConf(siglevel=siglevel)
             for terminal in online(terminals):
-                CHKPACMAN(terminal)
+                print(terminal, CHKPACMAN(terminal), sep=': ')
