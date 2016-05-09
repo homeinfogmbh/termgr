@@ -174,17 +174,10 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['upgrade']:
-            print('DEBUG1', flush=True)
             with Parallelization(UPGRADE, blocking=False) as para:
-                print('DEBUG2', flush=True)
                 with Watchdog(para.threads) as doggy:
-                    print('DEBUG3', flush=True)
                     para.start(terminals, single=True)
-                    print('DEBUG4', flush=True)
                     doggy.start()
-                    print('DEBUG5', flush=True)
-                print('DEBUG6', flush=True)
-            print('DEBUG7', flush=True)
         elif options['reboot']:
             parallelize(target=reboot, args=itemize(terminals))
         elif options['unlock']:
