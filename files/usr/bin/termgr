@@ -95,7 +95,7 @@ class RebootCommand(TerminalCommand):
     """Controller to reboot terminal"""
 
     def __init__(self):
-        super.__init__(SUDO, REBOOT)
+        super().__init__(SUDO, REBOOT)
 
     def __call__(self, terminal, user=None):
         user = self.user if user is None else user
