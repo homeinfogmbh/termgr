@@ -42,6 +42,8 @@ REBOOT = '/usr/bin/reboot'
 REMOVE = '/usr/bin/rm'
 GREP = '/usr/bin/grep'
 
+BASE_PKGS = ['openvpn', 'openssh', 'wget', 'beep']
+
 
 def headline(*args):
     """Prints headline"""
@@ -92,48 +94,28 @@ class TerminalCommand():
         return ' '.join(self)
 
 
-class Upgrade(TerminalCommand):
-    """Upgrades a terminal"""
+class PackageManagerCommand(TerminalCommand):
+    """Automatically uses the package manager"""
 
-    def __init__(self):
-        super().__init__(SUDO, PACMAN, '-Syu', '--noconfirm')
-
-
-class Reboot(TerminalCommand):
-    """Reboots a terminal"""
-
-    def __init__(self):
-        super().__init__(SUDO, REBOOT)
-
-
-class UnlockPacman(TerminalCommand):
-    """Removes the pacaman lock on a terminal"""
-
-    def __init__(self):
-        super().__init__(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
-
-
-class CheckResolution(TerminalCommand):
-    """Checks a terminal's display resolution"""
-
-    def __init__(self):
-        super().__init__('export DISPLAY=:0 \; xrandr | grep " connected"')
-
-
-class FixPackages(TerminalCommand):
-    """(Re-)Installs packages as explicit"""
-
-    def __init__(self, packages):
-        super().__init__(SUDO, PACMAN, '-S', '--asexplicit')
+    def __init__(self, packages, *args, user=None):
+        super().__init__(SUDO, PACMAN, '--noconfirm', *args, user=user)
+        self._args = args
         self.packages = packages
 
     @property
     def args(self):
-        return chain(self.args, self.packages)
+        return chain(self._args, self.packages)
 
     @property
     def __str__(self):
         return ' '.join(self.packages)
+
+
+UPGRADE = TerminalCommand(SUDO, PACMAN, '-Syu', '--noconfirm')
+REBOOT = TerminalCommand(SUDO, REBOOT)
+UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
+CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
+FIXPKGS = PackageManagerCommand(BASE_PKGS, '--asexplicit', '-S')
 
 
 class CheckInitcpioConfig():
