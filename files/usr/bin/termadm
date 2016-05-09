@@ -191,7 +191,7 @@ if __name__ == '__main__':
     basicConfig(level=INFO)
 
     reload = not options['--no-reload']
-    simulate = options['--simulate'] or options['-s']
+    simulate = options['--simulate']
 
     # Bail out iff restart of services
     # is wanted, but we are not root.
