@@ -91,6 +91,21 @@ class TerminalCommand():
         return ' '.join(self)
 
 
+class RebootCommand(TerminalCommand):
+    """Controller to reboot terminal"""
+
+    def __init__(self):
+        super.__init__(SUDO, REBOOT)
+
+    def __call__(self, terminal, user=None):
+        user = self.user if user is None else user
+        remote_controller = RemoteController(user, terminal)
+        remote_controller.ssh_custom_opts = {
+            'ServerAliveInterval': 1,
+            'ServerAliveCountMax': 5}
+        return remote_controller.execute(self.cmd, *self.args)
+
+
 class PackageManagerCommand(TerminalCommand):
     """Automatically uses the package manager"""
 
@@ -110,7 +125,6 @@ class PackageManagerCommand(TerminalCommand):
 
 
 UPGRADE = TerminalCommand(SUDO, PACMAN, '-Syu', '--noconfirm')
-REBOOT = TerminalCommand(SUDO, REBOOT)
 UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
 CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
 
@@ -184,7 +198,7 @@ if __name__ == '__main__':
                 with Watchdog(para.threads) as doggy:
                     doggy.start()
         elif options['reboot']:
-            with Parallelization(REBOOT, blocking=False) as para:
+            with Parallelization(RebootCommand(), blocking=False) as para:
                 para.start(terminals, single=True)
                 with Watchdog(para.threads) as doggy:
                     doggy.start()
