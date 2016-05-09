@@ -51,22 +51,14 @@ def deployed(terminals):
     """Filters only deployed terminals"""
 
     NULL = timedelta(0)
-    undeployed = []
-    not_yet_deployed = []
 
     for terminal in terminals:
         if terminal.deployed is None:
-            undeployed.append(terminal)
+            logger.warning('Terminal {0} is not deployed'.format(terminal))
         elif terminal.deployed - datetime.now() > NULL:
-            not_yet_deployed.append(terminal)
+            logger.warning('Terminal {0} is not yet deployed'.format(terminal))
         else:
             yield terminal
-
-    # Finally print error messages
-    for terminal in undeployed:
-        logger.warning('Terminal {0} is not deployed'.format(terminal))
-    for terminal in not_yet_deployed:
-        logger.warning('Terminal {0} is not yet deployed'.format(terminal))
 
 
 class TerminalCommand():
