@@ -179,7 +179,7 @@ if __name__ == '__main__':
                 print('DEBUG2', flush=True)
                 with Watchdog(para.threads) as doggy:
                     print('DEBUG3', flush=True)
-                    para.run(terminals, single=True)
+                    para.start(terminals, single=True)
                     print('DEBUG4', flush=True)
                     doggy.start()
                     print('DEBUG5', flush=True)
