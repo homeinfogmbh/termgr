@@ -174,8 +174,8 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['upgrade']:
-            with Parallelization(UPGRADE, blocking=False) as para:
-                with Watchdog(para.threads) as doggy:
+            with Watchdog(para.threads) as doggy:
+                with Parallelization(UPGRADE, blocking=False) as para:
                     para.run(terminals, single=True)
                     doggy.start()
         elif options['reboot']:
