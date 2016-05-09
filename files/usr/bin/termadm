@@ -42,7 +42,7 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
     tid = Terminal.gen_tid(cid, desired=tid)
     class_ = Class.get(Class.id == class_id)
     os = OS.get(OS.id == os_id)
-    connection = Connection.get(Connecion.id == connection_id)
+    connection = Connection.get(Connection.id == connection_id)
     domain = Domain.get(Domain.id == int(options['--domain']))
 
     if state_iso:
