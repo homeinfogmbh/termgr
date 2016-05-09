@@ -45,29 +45,18 @@ GREP = '/usr/bin/grep'
 BASE_PKGS = ['openvpn', 'openssh', 'wget', 'beep']
 
 
-def headline(*args):
-    """Prints headline"""
-    print(*args, end='\t')
-
-
-def evaluate(result):
-    """Prints an evaluation of a boolean value"""
-    if result:
-        print('[   ok   ]', flush=True)
-    else:
-        print('[ failed ]', flush=True)
-        if VERBOSE:
-            print(result, file=stderr, flush=True)
-
-
 def deployed(terminals):
+    """Filters only deployed terminals"""
+
+    NULL = timedelta(0)
+
     for terminal in terminals:
         if terminal.deployed is None:
-            print('WARNING: Terminal', terminal,
-                  'is not deployed', file=stderr)
-        elif terminal.deployed - datetime.now() > timedelta(0):
-            print('WARNING: Terminal', terminal,
-                  'is not yet deployed', file=stderr)
+            logger.warning('Terminal {0} is not deployed'.format(terminal))
+        elif terminal.deployed - datetime.now() > NULL:
+            logger.warning(
+                'Terminal {0} is not yets deployed'.format(
+                    terminal))
         else:
             yield terminal
 
@@ -180,7 +169,7 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['upgrade']:
-            with Parallelization(Upgrade(), blocking=False) as para:
+            with Parallelization(UPGRADE, blocking=False) as para:
                 para.run(terminals, single=True)
                 while para.running:
                     with Watchdog(para.threads) as doggy:
