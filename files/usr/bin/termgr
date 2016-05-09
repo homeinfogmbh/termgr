@@ -157,7 +157,7 @@ if __name__ == '__main__':
         print('You must be {0} to run {1}'.format(TERMGR_USER, __file__), file=stderr)
         exit(2)
     else:
-        USER = options['--user'] if options['--user'] else USER
+        USER = options['--user'] if options['--user'] else TERMGR_USER
         VERBOSE = options['--verbose']
 
         # Get terminals generator
