@@ -178,8 +178,10 @@ if __name__ == '__main__':
                 para.start(terminals, single=True)
                 print('DEBUG1', flush=True)
                 with Watchdog(para.threads, interval=3, gracetime=2) as doggy:
+                    print('DEBUG2', flush=True)
                     doggy.start()
-                print('DEBUG2', flush=True)
+                    print('DEBUG3', flush=True)
+                print('DEBUG4', flush=True)
         elif options['reboot']:
             parallelize(target=reboot, args=itemize(terminals))
         elif options['unlock']:
