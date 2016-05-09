@@ -4,7 +4,7 @@
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>]] [options]
-    termadm (deploy | undeploy) <expr>... [--no-restart] [--force]
+    termadm (deploy | undeploy) <expr>... [--no-reload] [--force]
     termadm (grant | revoke) <operator> <expr>
 
 Options:
@@ -104,8 +104,8 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
             logger.info('Created terminal record for host name "{0}"'
                 ' with record ID: {1}'.format(
                     terminal.hostname, terminal.id))
-            if restart:
-                restart_services()
+            if reload:
+                reload_services()
             return True
 
 
@@ -177,7 +177,7 @@ def generate_nagios():
     evaluate(run('/usr/lib/terminals/nagios-config.gen'))
 
 
-def restart_services():
+def reload_services():
     """Fix stuff after operations"""
     print('Generating bind9 configuration', end='          ', flush=True)
     evaluate(run('/usr/lib/terminals/bind.gen'))
@@ -193,11 +193,11 @@ if __name__ == '__main__':
     reload = not options['--no-reload']
     simulate = options['--simulate']
 
-    # Bail out iff restart of services
+    # Bail out iff reload of services
     # is wanted, but we are not root.
-    if restart:
+    if reload:
         if geteuid() != 0:
-            print('You must be root to restart the services')
+            print('You must be root to reload the services')
             exit(3)
 
     # Parse operation modes
