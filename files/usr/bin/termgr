@@ -173,7 +173,8 @@ if __name__ == '__main__':
         print('Refusing to run as root')
         exit(3)
     elif getuser() != TERMGR_USER:
-        print('You must be {0} to run {1}'.format(TERMGR_USER, __file__), file=stderr)
+        print('You must be {0} to run {1}'.format(
+            TERMGR_USER, __file__), file=stderr)
         exit(2)
     else:
         USER = options['--user'] if options['--user'] else TERMGR_USER
@@ -229,6 +230,6 @@ if __name__ == '__main__':
                 CHK_INITCPIO(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
-            CHKPACMAN = CheckPacmanConf(siglevel = siglevel)
+            CHKPACMAN = CheckPacmanConf(siglevel=siglevel)
             for terminal in online(terminals):
                 CHKPACMAN(terminal)
