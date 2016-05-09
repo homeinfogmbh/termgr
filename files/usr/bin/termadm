@@ -16,11 +16,15 @@ Options:
     --key=<key>                 Explicitly specify an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload related system services.
+    --simulate -s               Simulate. Don't actually alter database.
 """
 
 from os import geteuid
+from sys import stderr
+from os.path import basename
 from itertools import chain
 from datetime import datetime
+from logging import INFO, getLogger, basicConfig
 
 from docopt import docopt
 
@@ -39,10 +43,12 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
     os = OS.get(OS.id == os_id)
     connection = Connection.get(Connecion.id == connection_id)
     domain = Domain.get(Domain.id == int(options['--domain']))
+
     if state_iso:
         state = State.get(State._iso == state_iso)
     else:
         state = None
+
     if address is not None:
         try:
             street, house_number, zip_code, city, state_iso = address
@@ -56,9 +62,16 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
         else:
             addr = (street, house_number, zip_code, city)
             address = Address.add(city, addr=addr, state=state_iso)
+
+        if address is not None:
+            if simulate:
+                address = None
+                print('Just simulating. Period.')
+            else:
+                address = Address.add(city, addr=addr, state=state)
     else:
         logger.warning('No address specified')
-        address = None
+
     terminal = Terminal()
     terminal.tid = tid
     terminal.customer = cid
@@ -75,22 +88,24 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
     terminal.annotation = annotation
     if vpn_key is not None:
         logger.warning(
-            'Divergent OpenVPN key specified: "{0}""!'.format(vpn_key))
-        terminal.vpn_key = vpn_key
+            'Divergent OpenVPN key specified: "{0}"!'.format(vpn_key))
+    terminal.vpn_key = vpn_key
+
+    if simulate:
+        logger.info('Just simulating. Period.')
     else:
-        terminal.vpn_key = None
-    try:
-        terminal.save()
-    except Exception as e:
-        logger.critical('Could not add new terminal record to database')
-        if VERBOSE:
-            logger.critical(str(e))
-    else:
-        logger.info('Created terminal record for host name\n\t"{0}"'
-                    '\nwith record ID:\n\t{1}'.format(
-                        terminal.hostname, terminal.id))
-    if restart:
-        restart_services()
+        try:
+            terminal.save()
+        except Exception as e:
+            logger.critical('Could not add new terminal record to database')
+            return False
+        else:
+            logger.info('Created terminal record for host name "{0}"'
+                ' with record ID: {1}'.format(
+                    terminal.hostname, terminal.id))
+            if restart:
+                restart_services()
+            return True
 
 
 def deploy_terminal(terminal):
@@ -171,6 +186,9 @@ def restart_services():
 
 if __name__ == '__main__':
     options = docopt(__doc__)
+    logger = getLogger(basename(__file__))
+    basicConfig(level=INFO)
+
     reload = not options['--no-reload']
 
     # Bail out iff restart of services
