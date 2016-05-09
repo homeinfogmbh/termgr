@@ -102,7 +102,7 @@ class RebootCommand(TerminalCommand):
         remote_controller = RemoteController(user, terminal)
         remote_controller.ssh_custom_opts = {
             'ServerAliveInterval': 1,
-            'ServerAliveCountMax': 5}
+            'ServerAliveCountMax': 2}
         return remote_controller.execute(self.cmd, *self.args)
 
 
