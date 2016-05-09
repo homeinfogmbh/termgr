@@ -196,18 +196,18 @@ if __name__ == '__main__':
         if options['upgrade']:
             with Parallelization(UPGRADE, blocking=False) as para:
                 para.start(terminals, single=True)
-                with Watchdog(para.threads) as doggy:
-                    doggy.start()
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['reboot']:
             with Parallelization(RebootCommand(), blocking=False) as para:
                 para.start(terminals, single=True)
-                with Watchdog(para.threads) as doggy:
-                    doggy.start()
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['unlock']:
             with Parallelization(UNLOCK, blocking=False) as para:
                 para.start(terminals, single=True)
-                with Watchdog(para.threads) as doggy:
-                    doggy.start()
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['chkres']:
             for terminal in online(terminals):
                 CHKRES(terminal)
@@ -216,8 +216,8 @@ if __name__ == '__main__':
             FIXPKGS = PackageManagerCommand(packages, '--asexplicit', '-S')
             with Parallelization(FIXPKGS, blocking=False) as para:
                 para.start(terminals, single=True)
-                with Watchdog(para.threads) as doggy:
-                    doggy.start()
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['chkinitcpio']:
             modules = options['--modules']
             hooks = options['--hooks']
