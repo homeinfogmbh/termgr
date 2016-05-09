@@ -177,7 +177,7 @@ if __name__ == '__main__':
             with Parallelization(UPGRADE, blocking=False) as para:
                 para.start(terminals, single=True)
                 print('DEBUG1', flush=True)
-                with Watchdog(para.threads) as doggy:
+                with Watchdog(para.threads, interval=3, gracetime=2) as doggy:
                     doggy.start()
                 print('DEBUG2', flush=True)
         elif options['reboot']:
