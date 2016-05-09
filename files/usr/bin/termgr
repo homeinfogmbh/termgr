@@ -155,11 +155,11 @@ class CheckInitcpioConfig():
 
     def __call__(self, terminal, user=None):
         if self.modules:
-            self.MODULES(terminal, user=user)
+            printterm(terminal, self.MODULES(terminal, user=user))
         if self.hooks:
-            self.HOOKS(terminal, user=user)
+            printterm(terminal, self.HOOKS(terminal, user=user))
         if self.compression:
-            self.COMPRESSION(terminal, user=user)
+            printterm(terminal, self.COMPRESSION(terminal, user=user))
 
 
 class CheckPacmanConf():
@@ -172,7 +172,7 @@ class CheckPacmanConf():
 
     def __call__(self, terminal, user=None):
         if self.siglevel:
-            self.SIG_LEVEL(terminal, user=user)
+            printterm(terminal, self.SIG_LEVEL(terminal, user=user))
 
 
 if __name__ == '__main__':
@@ -238,9 +238,9 @@ if __name__ == '__main__':
                 hooks=hooks,
                 compression=compression)
             for terminal in online(terminals):
-                printterm(terminal, CHK_INITCPIO(terminal))
+                CHK_INITCPIO(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
             CHKPACMAN = CheckPacmanConf(siglevel=siglevel)
             for terminal in online(terminals):
-                printterm(terminal, CHKPACMAN(terminal))
+                CHKPACMAN(terminal)
