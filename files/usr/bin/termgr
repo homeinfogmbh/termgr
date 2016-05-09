@@ -99,12 +99,13 @@ class PackageManagerCommand(TerminalCommand):
 
     def __init__(self, packages, *args, user=None):
         super().__init__(SUDO, PACMAN, '--noconfirm', *args, user=user)
-        self._args = args
         self.packages = packages
 
-    @property
-    def args(self):
-        return chain(self._args, self.packages)
+    def __call__(self, terminal, user=None):
+        user = self.user if user is None else user
+        remote_controller = RemoteController(user, terminal)
+        return remote_controller.execute(
+            self.cmd, *chain(self.args, self.packages))
 
     @property
     def __str__(self):
