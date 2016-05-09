@@ -24,6 +24,8 @@ from os import geteuid
 from sys import stderr
 from getpass import getuser
 from datetime import datetime, timedelta
+from logging import INFO, getLogger, basicConfig
+from os.path import basename
 
 from docopt import docopt
 
@@ -33,7 +35,7 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
-USER = 'termgr'
+TERMGR_USER = 'termgr'
 VERBOSE = False
 
 SUDO = '/usr/bin/sudo'
@@ -145,11 +147,14 @@ class CheckPacmanConf():
 
 if __name__ == '__main__':
     options = docopt(__doc__)
+    logger = getLogger(basename(__file__))
+    basicConfig(level=INFO)
+
     if geteuid() == 0:
         print('Refusing to run as root')
         exit(3)
-    elif getuser() != USER:
-        print('You must be {0} to run {1}'.format(USER, __file__), file=stderr)
+    elif getuser() != TERMGR_USER:
+        print('You must be {0} to run {1}'.format(TERMGR_USER, __file__), file=stderr)
         exit(2)
     else:
         USER = options['--user'] if options['--user'] else USER
@@ -170,10 +175,9 @@ if __name__ == '__main__':
         # Perform selected operation
         if options['upgrade']:
             with Parallelization(UPGRADE, blocking=False) as para:
-                para.run(terminals, single=True)
-                while para.running:
-                    with Watchdog(para.threads) as doggy:
-                        doggy.start()
+                with Watchdog(para.threads) as doggy:
+                    para.run(terminals, single=True)
+                    doggy.start()
         elif options['reboot']:
             parallelize(target=reboot, args=itemize(terminals))
         elif options['unlock']:
