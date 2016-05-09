@@ -45,11 +45,7 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
     connection = Connection.get(Connection.id == connection_id)
     domain = Domain.get(Domain.id == int(options['--domain']))
 
-    if state_iso:
-        state = State.get(State._iso == state_iso)
-    else:
-        state = None
-
+    # Retrieve or add address record
     if address is not None:
         try:
             street, house_number, zip_code, city, state_iso = address
@@ -59,10 +55,35 @@ def add_terminal(tid, cid, class_id, os_id, connection_id,
             except (TypeError, ValueError, DoesNotExist):
                 logger.error(
                     "Address is neither a valid tuple, nor a record's ID")
-                address = None
+                return False
         else:
-            addr = (street, house_number, zip_code, city)
-            address = Address.add(city, addr=addr, state=state_iso)
+            if state_iso:
+                try:
+                    state = State.get(State._iso == state_iso)
+                except DoesNotExist:
+                    logger.error('No such state: {0}'.format(state_iso))
+                    return False
+                else:
+                    try:
+                        address = Address.get(
+                            (Address.street == street) &
+                            (Address.house_number == house_number) &
+                            (Address.zip_code == zip_code) &
+                            (Address.city == city) &
+                            (Address.state == state))
+                    except DoesNotExist:
+                        addr = (street, house_number, zip_code)
+                        address = Address.add(city, addr=addr, state=state)
+            else:
+                try:
+                    address = Address.get(
+                        (Address.street == street) &
+                        (Address.house_number == house_number) &
+                        (Address.zip_code == zip_code) &
+                        (Address.city == city))
+                except DoesNotExist:
+                    addr = (street, house_number, zip_code)
+                    address = Address.add(city, addr=addr)
 
         if address is not None:
             if simulate:
