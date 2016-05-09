@@ -61,6 +61,14 @@ def deployed(terminals):
             yield terminal
 
 
+def online(terminals):
+    """Yields terminals that are online"""
+
+    for terminal in terminals:
+        if terminal.status:
+            yield terminal
+
+
 class TerminalCommand():
     """Execute command on terminal"""
 
@@ -105,7 +113,6 @@ UPGRADE = TerminalCommand(SUDO, PACMAN, '-Syu', '--noconfirm')
 REBOOT = TerminalCommand(SUDO, REBOOT)
 UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
 CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
-FIXPKGS = PackageManagerCommand(BASE_PKGS, '--asexplicit', '-S')
 
 
 class CheckInitcpioConfig():
@@ -177,25 +184,37 @@ if __name__ == '__main__':
                 with Watchdog(para.threads) as doggy:
                     doggy.start()
         elif options['reboot']:
-            parallelize(target=reboot, args=itemize(terminals))
+            with Parallelization(REBOOT, blocking=False) as para:
+                para.start(terminals, single=True)
+                with Watchdog(para.threads) as doggy:
+                    doggy.start()
         elif options['unlock']:
-            parallelize(target=rm_pacman_lock, args=itemize(terminals))
+            with Parallelization(UNLOCK, blocking=False) as para:
+                para.start(terminals, single=True)
+                with Watchdog(para.threads) as doggy:
+                    doggy.start()
         elif options['chkres']:
             for terminal in online(terminals):
-                chkres(terminal)
+                CHKRES(terminal)
         elif options['fixpkg']:
-            packages = options['<pkgs>']
-            for terminal in online(terminals):
-                fixpkg(terminal, packages=packages)
+            packages = options['<pkgs>'] or BASE_PKGS
+            FIXPKGS = PackageManagerCommand(packages, '--asexplicit', '-S')
+            with Parallelization(FIXPKGS, blocking=False) as para:
+                para.start(terminals, single=True)
+                with Watchdog(para.threads) as doggy:
+                    doggy.start()
         elif options['chkinitcpio']:
             modules = options['--modules']
             hooks = options['--hooks']
             compression = options['--compression']
+            CHK_INITCPIO = CheckInitcpioConfig(
+                modules=modules,
+                hooks=hooks,
+                compression=compression)
             for terminal in online(terminals):
-                chkinitcpio(
-                    terminal, modules=modules, hooks=hooks,
-                    compression=compression)
+                CHK_INITCPIO(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
+            CHKPACMAN = CheckPacmanConf(siglevel = siglevel)
             for terminal in online(terminals):
-                chkpacman(terminal, siglevel=siglevel)
+                CHKPACMAN(terminal)
