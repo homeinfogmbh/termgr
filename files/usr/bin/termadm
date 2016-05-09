@@ -16,7 +16,8 @@ Options:
     --key=<key>                 Explicitly specify an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload related system services.
-    --simulate -s               Simulate. Don't actually alter database.
+    --simulate -s               Simulate. Don't actually alter database \
+(works in "add" mode, only!).
 """
 
 from os import geteuid
@@ -190,6 +191,7 @@ if __name__ == '__main__':
     basicConfig(level=INFO)
 
     reload = not options['--no-reload']
+    simulate = options['--simulate'] or options['-s']
 
     # Bail out iff restart of services
     # is wanted, but we are not root.
