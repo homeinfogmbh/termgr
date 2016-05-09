@@ -51,14 +51,14 @@ def deployed(terminals):
     """Filters only deployed terminals"""
 
     NULL = timedelta(0)
-    undeployed = set()
-    not_yet_deployed = set()
+    undeployed = []
+    not_yet_deployed = []
 
     for terminal in terminals:
         if terminal.deployed is None:
-            undeployed.add(terminal)
+            undeployed.append(terminal)
         elif terminal.deployed - datetime.now() > NULL:
-            not_yet_deployed.add(terminal)
+            not_yet_deployed.append(terminal)
         else:
             yield terminal
 
