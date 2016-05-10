@@ -4,7 +4,7 @@
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>]] [options]
-    termadm (deploy | undeploy) <expr>... [--no-reload] [--force]
+    termadm (deploy | undeploy) <expr>... [--force]
     termadm (grant | revoke) <operator> <expr>
 
 Options:
@@ -15,9 +15,6 @@ Options:
     --tid=<tid>                 Explicitly select a TID (not recommended!).
     --key=<key>                 Explicitly specify an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
-    --no-reload                 Do not reload related system services.
-    --simulate -s               Simulate. Don't actually alter database \
-(works in "add" mode, only!).
 """
 
 from os import geteuid
@@ -36,189 +33,38 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
 from homeinfo.terminals.filter import TerminalFilter
 
 
-def add_terminal(tid, cid, class_id, os_id, connection_id,
-                 address=None, vpn_key=None, annotation=None):
-    """Adds a new terminal"""
-    tid = Terminal.gen_tid(cid, desired=tid)
-    class_ = Class.get(Class.id == class_id)
-    os = OS.get(OS.id == os_id)
-    connection = Connection.get(Connection.id == connection_id)
-    domain = Domain.get(Domain.id == int(options['--domain']))
-
-    # Retrieve or add address record
-    if address is not None:
-        try:
-            street, house_number, zip_code, city, state_iso = address
-        except ValueError:
-            try:
-                address = Address.get(Address.id == int(address))
-            except (TypeError, ValueError, DoesNotExist):
-                logger.error(
-                    "Address is neither a valid tuple, nor a record's ID")
-                return False
-        else:
-            if state_iso:
-                try:
-                    state = State.get(State._iso == state_iso)
-                except DoesNotExist:
-                    logger.error('No such state: {0}'.format(state_iso))
-                    return False
-                else:
-                    try:
-                        address = Address.get(
-                            (Address.street == street) &
-                            (Address.house_number == house_number) &
-                            (Address.zip_code == zip_code) &
-                            (Address.city == city) &
-                            (Address.state == state))
-                    except DoesNotExist:
-                        addr = (street, house_number, zip_code)
-                        address = Address.add(city, addr=addr, state=state)
-            else:
-                try:
-                    address = Address.get(
-                        (Address.street == street) &
-                        (Address.house_number == house_number) &
-                        (Address.zip_code == zip_code) &
-                        (Address.city == city))
-                except DoesNotExist:
-                    addr = (street, house_number, zip_code)
-                    address = Address.add(city, addr=addr)
-
-        if address is not None:
-            if simulate:
-                address = None
-                print('Just simulating. Period.')
-            else:
-                address = Address.add(city, addr=addr, state=state)
-    else:
-        logger.warning('No address specified')
-
-    terminal = Terminal()
-    terminal.tid = tid
-    terminal.customer = cid
-    terminal.class_ = class_
-    terminal.os = os
-    terminal.connection = connection
-    terminal.vpn = VPN.add(key=vpn_key)
-    terminal.domain = domain
-    terminal.location = address
-    terminal.vid = None
-    terminal.deployed = None
-    terminal.deleted = None
-    terminal.testing = False
-    terminal.annotation = annotation
-    if vpn_key is not None:
-        logger.warning(
-            'Divergent OpenVPN key specified: "{0}"!'.format(vpn_key))
-    terminal.vpn_key = vpn_key
-
-    if simulate:
-        logger.info('Just simulating. Period.')
-    else:
-        try:
-            terminal.save()
-        except Exception as e:
-            logger.critical('Could not add new terminal record to database')
-            return False
-        else:
-            logger.info('Created terminal record for host name "{0}"'
-                ' with record ID: {1}'.format(
-                    terminal.hostname, terminal.id))
-            if reload:
-                reload_services()
-            return True
-
-
-def deploy_terminal(terminal):
-    """Sets terminals to deployed"""
-    if terminal.deployed is None:
-        now = datetime.now()
-        print('Deploying terminal {0} on {1}'.format(terminal, now))
-        terminal.deployed = now
-        terminal.save()
-    else:
-        print('Terminal {0} has already been deployed on {1}'.format(
-            terminal, terminal.deployed))
-
-
-def undeploy_terminal(terminal):
-    """Sets terminals to NOT deployed"""
-    if terminal.deployed is None:
-        print('Terminal {0} is not deployed'.format(terminal))
-    else:
-        print('Undeploying terminal {0} from {1}'.format(
-            terminal, terminal.deployed))
-        terminal.deployed = None
-        terminal.save()
-
-
-def grant_setup(operator, terminals):
-    """Grant an operator permission to set up certain terminals"""
-    for terminal in terminals:
-        print('Granting setup permission of terminal '
-              '{0} to operator {1}'.format(
-                str(terminal), str(operator)), end='\t')
-        try:
-            OperatorTerminals.get(
-                (OperatorTerminals.operator == operator) &
-                (OperatorTerminals.terminal == terminal))
-        except DoesNotExist:
-            permission = OperatorTerminals()
-            permission.operator = operator
-            permission.terminal = terminal
-            if permission.save():
-                print('[   ok   ]', flush=True)
-            else:
-                print('[ failed ]', flush=True)
-        else:
-            print('[ exists ]', flush=True)
-
-
-def revoke_setup(operator, terminals):
-    """Revoke an operator permission to set up certain terminals"""
-    for terminal in terminals:
-        print(
-            'Revoking setup permission of terminal '
-            '{0} to operator {1}:'.format(
-                str(terminal), str(operator)))
-        for permission in OperatorTerminals.select().where(
-                (OperatorTerminals.operator == operator) &
-                (OperatorTerminals.terminal == terminal)):
-            print('\t', permission.id, end='\t')
-            if permission.delete_instance():
-                print('[   ok   ]', flush=True)
-            else:
-                print('[ failed ]', flush=True)
-
-
-def generate_nagios():
+def update_nagios():
     """Generates the Nagios3 configuration"""
     print('Creating Nagios3 configurations', end='         ', flush=True)
     evaluate(run('/usr/lib/terminals/nagios-config.gen'))
 
 
-def reload_services():
+def update_config():
     """Fix stuff after operations"""
     print('Generating bind9 configuration', end='          ', flush=True)
     evaluate(run('/usr/lib/terminals/bind.gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/lib/terminals/openvpn-client-config.gen'))
-    generate_nagios()
+    update_nagios()
+
 
 if __name__ == '__main__':
     options = docopt(__doc__)
     logger = getLogger(basename(__file__))
     basicConfig(level=INFO)
 
-    reload = not options['--no-reload']
+    try:
+        reload = not options['--no-reload']
+    except KeyError:
+        reload = False
+
     simulate = options['--simulate']
 
     # Bail out iff reload of services
-    # is wanted, but we are not root.
-    if reload:
+    # is required, but we are not root.
+    if options['add'] or options['deploy'] or options['undeploy']:
         if geteuid() != 0:
-            print('You must be root to reload the services')
+            print('You must be root to update the related services')
             exit(3)
 
     # Parse operation modes
@@ -245,24 +91,32 @@ if __name__ == '__main__':
         vpn_key = options['--key'] or None
         annotation = options['--annotation'] or None
 
-        add_terminal(tid, cid, class_id, os_id, connection_id,
-                     address=address, vpn_key=vpn_key, annotation=annotation)
+        # Add new terminal
+        Terminal.add(
+            cid, class_id, os_id, connection_id,
+            address=address, vpn_key=vpn_key,
+            annotation=annotation, tid=tid)
+        update_config()
+
     elif options['deploy']:
         exprs = options['<expr>']
         for expr in exprs:
             for terminal in TerminalFilter(expr):
                 deploy_terminal(terminal)
-        generate_nagios()
+        update_nagios()
+
     elif options['undeploy']:
         exprs = options['<expr>']
         for expr in exprs:
             for terminal in TerminalFilter(expr):
                 undeploy_terminal(terminal)
-        generate_nagios()
+        update_nagios()
+
     elif options['grant']:
         operator = Operator.get(Operator.name == options['<operator>'])
         terminals = TerminalFilter(options['<expr>'])
         grant_setup(operator, terminals)
+
     elif options['revoke']:
         operator = Operator.get(Operator.name == options['<operator>'])
         terminals = TerminalFilter(options['<expr>'])
