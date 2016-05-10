@@ -205,18 +205,27 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['upgrade']:
-            with Parallelization(UPGRADE, blocking=False) as para:
-                para.start(terminals, single=True)
+            with Parallelization(
+                    UPGRADE,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
         elif options['reboot']:
-            with Parallelization(RebootCommand(), blocking=False) as para:
-                para.start(terminals, single=True)
+            with Parallelization(
+                    RebootCommand(),
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
         elif options['unlock']:
-            with Parallelization(UNLOCK, blocking=False) as para:
-                para.start(terminals, single=True)
+            with Parallelization(
+                    UNLOCK,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
         elif options['chkres']:
@@ -225,8 +234,11 @@ if __name__ == '__main__':
         elif options['fixpkg']:
             packages = options['<pkgs>'] or BASE_PKGS
             FIXPKGS = PackageManagerCommand(packages, '--asexplicit', '-S')
-            with Parallelization(FIXPKGS, blocking=False) as para:
-                para.start(terminals, single=True)
+            with Parallelization(
+                    FIXPKGS,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
         elif options['chkinitcpio']:
