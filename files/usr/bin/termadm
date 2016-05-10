@@ -4,7 +4,9 @@
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>]] [options]
-    termadm (deploy | undeploy) <expr>... [--force]
+    termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
+[--force]
+    termadm undeploy <expr>...
     termadm (grant | revoke) <operator> <expr>
 
 Options:
@@ -35,12 +37,14 @@ from homeinfo.terminals.filter import TerminalFilter
 
 def update_nagios():
     """Generates the Nagios3 configuration"""
+
     print('Creating Nagios3 configurations', end='         ', flush=True)
     evaluate(run('/usr/lib/terminals/nagios-config.gen'))
 
 
 def update_config():
     """Fix stuff after operations"""
+
     print('Generating bind9 configuration', end='          ', flush=True)
     evaluate(run('/usr/lib/terminals/bind.gen'))
     print('Generating OpenVPN host configurations', end='  ', flush=True)
@@ -49,8 +53,9 @@ def update_config():
 
 
 if __name__ == '__main__':
-    options = docopt(__doc__)
     logger = getLogger(basename(__file__))
+    options = docopt(__doc__)
+
     basicConfig(level=INFO)
 
     try:
@@ -100,24 +105,40 @@ if __name__ == '__main__':
 
     elif options['deploy']:
         exprs = options['<expr>']
+        date_string = options['--date']
+        force = options['--force']
+
+        if date_string:
+            date_format = options['--format'] or '%Y-%m-%d'
+            try:
+                date_time = datetime.strptime(date_string, date_format)
+            except ValueError:
+                logger.error(
+                    'Invalid date time value ({0}) or format ({0})'.format(
+                        date_string, date_format))
+                exit(4)
+        else:
+            date_time = None
+
         for expr in exprs:
             for terminal in TerminalFilter(expr):
-                deploy_terminal(terminal)
+                terminal.deploy(date_time=dat_time)
+
         update_nagios()
 
     elif options['undeploy']:
         exprs = options['<expr>']
         for expr in exprs:
             for terminal in TerminalFilter(expr):
-                undeploy_terminal(terminal)
+                terminal.undeploy()
         update_nagios()
 
     elif options['grant']:
         operator = Operator.get(Operator.name == options['<operator>'])
-        terminals = TerminalFilter(options['<expr>'])
-        grant_setup(operator, terminals)
+        for terminal in TerminalFilter(options['<expr>']):
+            operator.grant(terminal)
 
     elif options['revoke']:
         operator = Operator.get(Operator.name == options['<operator>'])
-        terminals = TerminalFilter(options['<expr>'])
-        revoke_setup(operator, terminals)
+        for terminal in TerminalFilter(options['<expr>']):
+            operator.revoke(terminal)
