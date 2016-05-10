@@ -3,8 +3,9 @@
 from os.path import join
 
 from homeinfo.terminals.abc import TerminalAware
+from homeinfo.terminals.orm import VPNUnconfiguredError
 
-__all__ = ['UnconfiguredError', 'OpenVPNPackager']
+__all__ = ['OpenVPNPackager']
 
 
 class OpenVPNPackager(TerminalAware):
@@ -15,10 +16,15 @@ class OpenVPNPackager(TerminalAware):
 
     ARCDIR = '/usr/lib/terminals/keys'
 
-    def __call__(self):
+    def package(self):
         """Packs the key into a ZIP compressed file"""
-        keyname = self.terminal.vpn.key or str(self.terminal)
-        tarname = '{0}.tar'.format(keyname)
-        tarpath = join(self.ARCDIR, tarname)
-        with open(tarpath, 'rb') as tar_file:
-            return tar_file.read()
+        if self.terminal.vpn is not None:
+            keyname = self.terminal.vpn.key or str(self.terminal)
+            tarname = '{0}.tar'.format(keyname)
+            tarpath = join(self.ARCDIR, tarname)
+            with open(tarpath, 'rb') as tar_file:
+                return tar_file.read()
+        else:
+            raise VPNUnconfiguredError(str(terminal))
+
+    __call__ = package

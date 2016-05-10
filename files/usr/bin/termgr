@@ -35,16 +35,11 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
-TERMGR_USER = 'termgr'
+from termgr.lib.cmds import TERMGR_USER, RebootCommand, PackageManagerCommand,\
+    CheckInitcpioConfig, CheckPacmanConfig, Commands
+
+
 VERBOSE = False
-
-SUDO = '/usr/bin/sudo'
-PACMAN = '/usr/bin/pacman'
-REBOOT = '/usr/bin/reboot'
-REMOVE = '/usr/bin/rm'
-GREP = '/usr/bin/grep'
-
-BASE_PKGS = ['openvpn', 'openssh', 'wget', 'beep']
 
 
 def deployed(terminals):
@@ -80,101 +75,6 @@ def printterm(terminal, process_result):
     print(terminal, msg, sep=': ')
 
 
-class TerminalCommand():
-    """Execute command on terminal"""
-
-    def __init__(self, cmd, *args, user=None):
-        self.cmd = cmd
-        self.args = args
-        self.user = 'termgr' if user is None else user
-
-    def __call__(self, terminal, user=None):
-        user = self.user if user is None else user
-        remote_controller = RemoteController(user, terminal)
-        return remote_controller.execute(self.cmd, *self.args)
-
-    def __iter__(self):
-        yield self.cmd
-        for arg in self.args:
-            yield arg
-
-    def __repr__(self):
-        return ' '.join(self)
-
-
-class RebootCommand(TerminalCommand):
-    """Controller to reboot terminal"""
-
-    def __init__(self):
-        super().__init__(SUDO, REBOOT)
-
-    def __call__(self, terminal, user=None):
-        user = self.user if user is None else user
-        remote_controller = RemoteController(user, terminal)
-        remote_controller.ssh_custom_opts = {
-            'ServerAliveInterval': 1,
-            'ServerAliveCountMax': 2}
-        return remote_controller.execute(self.cmd, *self.args)
-
-
-class PackageManagerCommand(TerminalCommand):
-    """Automatically uses the package manager"""
-
-    def __init__(self, packages, *args, user=None):
-        super().__init__(SUDO, PACMAN, '--noconfirm', *args, user=user)
-        self.packages = packages
-
-    def __call__(self, terminal, user=None):
-        user = self.user if user is None else user
-        remote_controller = RemoteController(user, terminal)
-        return remote_controller.execute(
-            self.cmd, *chain(self.args, self.packages))
-
-    @property
-    def __str__(self):
-        return ' '.join(self.packages)
-
-
-UPGRADE = TerminalCommand(SUDO, PACMAN, '-Syu', '--noconfirm')
-UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
-CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
-
-
-class CheckInitcpioConfig():
-    """Checks settings inside the /etc/mkinitcpio.conf"""
-
-    MODULES = TerminalCommand(GREP, '^MODULES=', '/etc/mkinitcpio.conf')
-    HOOKS = TerminalCommand(GREP, '^HOOKS=', '/etc/mkinitcpio.conf')
-    COMPRESSION = TerminalCommand(
-        GREP, '^COMPRESSION=', '/etc/mkinitcpio.conf')
-
-    def __init__(self, modules=False, hooks=False, compression=False):
-        self.modules = modules
-        self.hooks = hooks
-        self.compression = compression
-
-    def __call__(self, terminal, user=None):
-        if self.modules:
-            printterm(terminal, self.MODULES(terminal, user=user))
-        if self.hooks:
-            printterm(terminal, self.HOOKS(terminal, user=user))
-        if self.compression:
-            printterm(terminal, self.COMPRESSION(terminal, user=user))
-
-
-class CheckPacmanConf():
-    """Checks settings inside the /etc/pacman.conf"""
-
-    SIG_LEVEL = TerminalCommand(GREP, '^SigLevel', '/etc/pacman.conf')
-
-    def __init__(self, siglevel=False):
-        self.siglevel = siglevel
-
-    def __call__(self, terminal, user=None):
-        if self.siglevel:
-            printterm(terminal, self.SIG_LEVEL(terminal, user=user))
-
-
 if __name__ == '__main__':
     options = docopt(__doc__)
     logger = getLogger(basename(__file__))
@@ -206,7 +106,7 @@ if __name__ == '__main__':
         # Perform selected operation
         if options['upgrade']:
             with Parallelization(
-                    UPGRADE,
+                    Commands.UPGRADE,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -222,7 +122,7 @@ if __name__ == '__main__':
                     doggy.start(para.threads)
         elif options['unlock']:
             with Parallelization(
-                    UNLOCK,
+                    Commands.UNLOCK,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -230,12 +130,13 @@ if __name__ == '__main__':
                     doggy.start(para.threads)
         elif options['chkres']:
             for terminal in online(terminals):
-                printterm(terminal, CHKRES(terminal))
+                printterm(terminal, Commands.CHKRES(terminal))
         elif options['fixpkg']:
-            packages = options['<pkgs>'] or BASE_PKGS
-            FIXPKGS = PackageManagerCommand(packages, '--asexplicit', '-S')
+            packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
+            fix_packages = PackageManagerCommand(
+                packages, '--asexplicit', '-S')
             with Parallelization(
-                    FIXPKGS,
+                    fix_packages,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -245,14 +146,14 @@ if __name__ == '__main__':
             modules = options['--modules']
             hooks = options['--hooks']
             compression = options['--compression']
-            CHK_INITCPIO = CheckInitcpioConfig(
+            chk_initcpio = CheckInitcpioConfig(
                 modules=modules,
                 hooks=hooks,
                 compression=compression)
             for terminal in online(terminals):
-                CHK_INITCPIO(terminal)
+                chk_initcpio(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
-            CHKPACMAN = CheckPacmanConf(siglevel=siglevel)
+            chk_pacman = CheckPacmanConfig(siglevel=siglevel)
             for terminal in online(terminals):
-                CHKPACMAN(terminal)
+                chk_pacman(terminal)
