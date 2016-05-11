@@ -1,7 +1,6 @@
 """Terminal query web service"""
 
-from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
-    InternalServerError
+from homeinfo.lib.wsgi import WsgiApp, Error, OK
 from homeinfo.terminals.orm import Terminal, Operator, AddressUnconfiguredError
 
 from ..lib import dom
@@ -45,7 +44,7 @@ class TerminalQuery(WsgiApp):
                 terminal_dom = self.term2dom(terminal)
                 terminals_dom.terminal.append(terminal_dom)
 
-            return OK(terminals_dom)
+            return OK(terminals_dom, content_type='application/xml')
         else:
             return Error('Invalid credentials', status=401)
 
