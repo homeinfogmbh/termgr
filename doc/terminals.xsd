@@ -46,24 +46,17 @@
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="location" type="Address">
+            <xs:element name="location" type="Address" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
                         The terminal's location
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="class" type="Class">
+            <xs:element name="annotation" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
-                        The terminal's class
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="domain" type="Domain">
-                <xs:annotation>
-                    <xs:documentation xml:lang="en">
-                        The terminal's domain
+                        An optional annotation
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -79,6 +72,13 @@
             <xs:annotation>
                 <xs:documentation xml:lang="en">
                     The terminal identifier
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="deployed" type="xs:dateTime">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    Date and time when the terminal was deployed.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -138,6 +138,20 @@
             <xs:extension base="TerminalData">
                 <xs:sequence>
                     <xs:element name="customer" type="Customer"/>
+                    <xs:element name="class" type="Class">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en">
+                                The terminal's class
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="domain" type="Domain">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en">
+                                The terminal's domain
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
                     <xs:element name="uptime" type="xs:unsignedLong"/>
                     <xs:element name="virtual_display" type="xs:integer" minOccurs="0"/>
                     <xs:element name="screenshot" type="Screenshot" minOccurs="0"/>
