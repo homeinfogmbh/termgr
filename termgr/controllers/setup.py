@@ -1,5 +1,7 @@
 """Controller for terminal setup"""
 
+from peewee import DoesNotExist
+
 from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
 from homeinfo.terminals.orm import Terminal, Operator, AddressUnconfiguredError
@@ -47,8 +49,11 @@ class SetupController(WsgiApp):
                         tid = int(tid_str)
                     except ValueError:
                         return Error('Invalid terminal ID', status=400)
-                    terminal = Terminal.by_ids(cid, tid, deleted=False)
-                    if terminal is not None:
+                    try:
+                        terminal = Terminal.by_ids(cid, tid, deleted=False)
+                    except DoesNotExist:
+                        return Error('No such terminal', status=400)
+                    else:
                         if operator.authorize(terminal):
                             action = qd.get('action')
                             if action is None:
@@ -57,8 +62,6 @@ class SetupController(WsgiApp):
                                 return self._handle(terminal, action)
                         else:
                             return Error('Unauthorized', status=401)
-                    else:
-                        return Error('No such terminal', status=400)
         else:
             return Error('Invalid credentials', status=401)
 
