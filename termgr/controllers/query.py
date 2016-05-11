@@ -52,10 +52,13 @@ class TerminalQuery(WsgiApp):
         """List terminals of customer with CID"""
         if cid is None:
             for terminal in Terminal:
-                if operator.authorize(terminal):
-                    yield terminal
+                if not terminal.testing:
+                    if operator.authorize(terminal):
+                        yield terminal
         else:
-            for terminal in Terminal.select().where(Terminal.customer == cid):
+            for terminal in Terminal.select().where(
+                    (Terminal.customer == cid) & ~
+                    (Terminal.testing == 0)):
                 if operator.authorize(terminal):
                     yield terminal
 
