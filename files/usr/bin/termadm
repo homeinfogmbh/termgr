@@ -63,8 +63,6 @@ if __name__ == '__main__':
     except KeyError:
         reload = False
 
-    simulate = options['--simulate']
-
     # Bail out iff reload of services
     # is required, but we are not root.
     if options['add'] or options['deploy'] or options['undeploy']:
