@@ -89,14 +89,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="status" type="xs:boolean" use="required">
+        <xs:attribute name="status" type="xs:boolean">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
                     The terminal's current status
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="ipv4addr" type="IPv4Address" use="required">
+        <xs:attribute name="ipv4addr" type="IPv4Address">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
                     The terminal's IPv4 address identifier

@@ -1,7 +1,7 @@
 # ./terminals.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2016-05-11 17:54:40.462044 by PyXB version 1.2.5-DEV using Python 3.5.1.final.0
+# Generated 2016-05-11 18:08:49.411917 by PyXB version 1.2.5-DEV using Python 3.5.1.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:aba41cb8-1790-11e6-93f5-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:a5a72b50-1792-11e6-80ac-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -768,7 +768,7 @@ class TerminalData (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Attribute status uses Python identifier status
-    __status = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'status'), 'status', '__httpxml_homeinfo_deschematerminallib_TerminalData_status', pyxb.binding.datatypes.boolean, required=True)
+    __status = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'status'), 'status', '__httpxml_homeinfo_deschematerminallib_TerminalData_status', pyxb.binding.datatypes.boolean)
     __status._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/terminals.xsd', 92, 8)
     __status._UseLocation = pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/terminals.xsd', 92, 8)
     
@@ -776,7 +776,7 @@ class TerminalData (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Attribute ipv4addr uses Python identifier ipv4addr
-    __ipv4addr = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'ipv4addr'), 'ipv4addr', '__httpxml_homeinfo_deschematerminallib_TerminalData_ipv4addr', _module_typeBindings.IPv4Address, required=True)
+    __ipv4addr = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'ipv4addr'), 'ipv4addr', '__httpxml_homeinfo_deschematerminallib_TerminalData_ipv4addr', _module_typeBindings.IPv4Address)
     __ipv4addr._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/terminals.xsd', 99, 8)
     __ipv4addr._UseLocation = pyxb.utils.utility.Location('/home/rne/Dokumente/Programmierung/python/termgr/doc/terminals.xsd', 99, 8)
     
