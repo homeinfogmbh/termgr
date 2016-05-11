@@ -41,13 +41,24 @@ class TerminalQuery(WsgiApp):
 
             terminals_dom = dom.terminals()
 
-            for terminal in self.terminals(cid):
+            for terminal in self.terminals(cid, operator):
                 terminal_dom = self.term2dom(terminal)
                 terminals_dom.terminal.append(terminal_dom)
 
             return OK(terminals_dom)
         else:
             return Error('Invalid credentials', status=401)
+
+    def terminals(self, cid, operator):
+        """List terminals of customer with CID"""
+        if cid is None:
+            for terminal in Terminal:
+                if operator.authorize(terminal):
+                    yield terminal
+        else:
+            for terminal in Terminal.select().where(Terminal.customer == cid):
+                if operator.authorize(terminal):
+                    yield terminal
 
     def term2dom(self, terminal):
         """Formats a terminal to a DOM"""
@@ -70,14 +81,3 @@ class TerminalQuery(WsgiApp):
         terminal_dom.cid = terminal.customer.id
 
         return terminal_dom
-
-    def terminals(self, cid):
-        """List terminals of customer with CID"""
-        if cid is None:
-            for terminal in Terminal:
-                if operator.authorize(terminal):
-                    yield terminal
-        else:
-            for terminal in Terminal.select().where(Terminal.customer == cid):
-                if operator.authorize(terminal):
-                    yield terminal
