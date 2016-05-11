@@ -57,7 +57,7 @@ class TerminalQuery(WsgiApp):
                         yield terminal
         else:
             for terminal in Terminal.select().where(
-                    (Terminal.customer == cid) & ~
+                    (Terminal.customer == cid) &
                     (Terminal.testing == 0)):
                 if operator.authorize(terminal):
                     yield terminal
@@ -79,7 +79,7 @@ class TerminalQuery(WsgiApp):
         terminal_dom.annotation = terminal.annotation
         terminal_dom.tid = terminal.tid
         terminal_dom.deployed = terminal.deployed
-        terminal_dom.status = terminal.status
+        # terminal_dom.status = terminal.status  # This is slow!
         terminal_dom.cid = terminal.customer.id
 
         return terminal_dom
