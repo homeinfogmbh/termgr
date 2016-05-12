@@ -22,14 +22,20 @@ class TerminalQuery(WsgiApp):
         query_string = self.query_string(environ)
         qd = self.qd(query_string)
         user_name = qd.get('user_name')
+
         if not user_name:
             return Error('No user name specified', status=400)
+
         passwd = qd.get('passwd')
+
         if not passwd:
             return Error('No password specified', status=400)
+
         operator = Operator.authenticate(user_name, passwd)
+
         if operator:
             cid_str = qd.get('cid')
+
             try:
                 cid = int(cid_str)
             except ValueError:
