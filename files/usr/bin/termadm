@@ -96,10 +96,16 @@ if __name__ == '__main__':
         annotation = options['--annotation'] or None
 
         # Add new terminal
-        Terminal.add(
+        terminal = Terminal.add(
             cid, class_id, os_id, connection_id, domain_id,
             address=address, vpn_key=vpn_key,
             annotation=annotation, tid=tid)
+
+        if terminal:
+            logger.info('Added terminal {0}'.format(terminal))
+        else:
+            logger.error('Failed to add terminal')
+
         update_config()
 
     elif options['deploy']:
