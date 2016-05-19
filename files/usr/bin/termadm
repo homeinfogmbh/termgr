@@ -7,7 +7,7 @@ Usage:
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force]
     termadm undeploy <expr>...
-    termadm (grant | revoke) <operator> <expr>
+    termadm (grant | revoke) <operator> <expr>...
 
 Options:
     -h --help                   Show this screen.
@@ -109,12 +109,12 @@ if __name__ == '__main__':
         update_config()
 
     elif options['deploy']:
-        exprs = options['<expr>']
         date_string = options['--date']
         force = options['--force']
 
         if date_string:
             date_format = options['--format'] or '%Y-%m-%d'
+
             try:
                 date_time = datetime.strptime(date_string, date_format)
             except ValueError:
@@ -125,25 +125,29 @@ if __name__ == '__main__':
         else:
             date_time = None
 
-        for expr in exprs:
+        for expr in options['<expr>']:
             for terminal in TerminalFilter(expr):
-                terminal.deploy(date_time=date_time)
+                terminal.deploy(date_time=date_time, force=force)
 
         update_nagios()
 
     elif options['undeploy']:
-        exprs = options['<expr>']
-        for expr in exprs:
+        for expr in options['<expr>']:
             for terminal in TerminalFilter(expr):
-                terminal.undeploy()
+                terminal.undeploy(force=force)
+
         update_nagios()
 
     elif options['grant']:
         operator = Operator.get(Operator.name == options['<operator>'])
-        for terminal in TerminalFilter(options['<expr>']):
-            operator.grant(terminal)
+
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                operator.grant(terminal)
 
     elif options['revoke']:
         operator = Operator.get(Operator.name == options['<operator>'])
-        for terminal in TerminalFilter(options['<expr>']):
-            operator.revoke(terminal)
+
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                operator.revoke(terminal)
