@@ -78,6 +78,7 @@ if __name__ == '__main__':
         class_id = int(options['<class_id>'])
         os_id = int(options['<os>'])
         connection_id = int(options['--connection'])
+        domain_id = int(options['--domain'])
 
         # Optional address
         street = options['<street>']
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 
         # Add new terminal
         Terminal.add(
-            cid, class_id, os_id, connection_id,
+            cid, class_id, os_id, connection_id, domain_id,
             address=address, vpn_key=vpn_key,
             annotation=annotation, tid=tid)
         update_config()
