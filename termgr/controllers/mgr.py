@@ -34,28 +34,35 @@ class TerminalManager(WsgiApp):
         cqd = self.cqd(qd)
         auth = False
         user_name = qd.get('user_name')
+
         if not user_name:
             return Error('No user name specified', status=400)
         else:
             passwd = qd.get('passwd')
+
             if not user_name:
                 return Error('No password', status=400)
             else:
                 auth = Administrator.authenticate(user_name, passwd)
         if auth:
             cid = qd.get('cid')
+
             if cid is not None:
                 try:
                     cid = int(cid)
                 except (TypeError, ValueError):
                     return Error('Invalid customer ID', status=400)
+
             tid = qd.get('tid')
+
             if tid is not None:
                 try:
                     tid = int(tid)
                 except (TypeError, ValueError):
                     return Error('Invalid terminal ID', status=400)
+
             class_id_or_name = qd.get('class')
+
             try:
                 class_id = int(class_id_or_name)
             except (TypeError, ValueError):
@@ -63,12 +70,15 @@ class TerminalManager(WsgiApp):
                 class_name = class_id_or_name
             else:
                 class_name = None
+
             action = qd.get('action')
+
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
                 deleted = cqd.get('deleted')
                 deployed = cqd.get('deployed')
+
                 return self._list_terminals(
                     cid, class_id=class_id, class_name=class_name,
                     deleted=deleted, deployed=deployed)
@@ -87,6 +97,7 @@ class TerminalManager(WsgiApp):
                         thumbnail = int(thumbnail)
                     except (ValueError, TypeError):
                         thumbnail = False
+
                     return self._details(cid, tid, thumbnail=thumbnail)
             else:
                 return Error('Invalid action', status=400)
@@ -96,16 +107,19 @@ class TerminalManager(WsgiApp):
     def _list_customers(self):
         """Lists all customers"""
         result = dom.terminals()
+
         for customer in Customer:
             c = customer2dom(customer.name)
             c.id = customer.id
             result.customer.append(c)
+
         return OK(result, content_type='application/xml')
 
     def _list_classes(self, cid):
         """Lists all customers"""
         result = dom.terminals()
         classes = {}
+
         if cid:
             for terminal in Terminal.select().where(
                     Terminal.customer == cid):
@@ -119,17 +133,22 @@ class TerminalManager(WsgiApp):
                 classes[class_.id] = class_
         for ident in classes:
             class_ = classes[ident]
+
             try:
                 class_, n = class_
             except TypeError:
                 n = None
+
             c = dom.Class(class_.name)
             c.full_name = class_.full_name
             c.touch = class_.touch
             c.id = class_.id
+
             if n is not None:
                 c.amount = n
+
             result.class_.append(c)
+
         return OK(result, content_type='application/xml')
 
     def _list_terminals(self, cid, class_id=None, class_name=None,
@@ -214,19 +233,24 @@ class TerminalManager(WsgiApp):
                     terminals = Terminal.select().where(
                         (Terminal.customer == cid) &
                         (Terminal.deleted >> None))
+
         result = dom.terminals()
         processed_terminals = []
         threads = []
+
         for terminal in terminals:
             thread = Thread(
                 target=self._process_terminal,
                 args=[terminal, processed_terminals])
             threads.append(thread)
             thread.start()
+
         for thread in threads:
             thread.join()
+
         for processed_terminal in processed_terminals:
             result.terminal.append(processed_terminal)
+
         return OK(result, content_type='application/xml')
 
     def _process_terminal(self, terminal, processed_terminals):
@@ -237,6 +261,7 @@ class TerminalManager(WsgiApp):
     def _details(self, cid, tid, thumbnail=False):
         """Get details of a certain terminal"""
         result = dom.terminals()
+
         if cid is None or tid is None:
             return Error('No terminal ID or customer ID specified', status=400)
         else:
@@ -254,7 +279,9 @@ class TerminalManager(WsgiApp):
                         raise NotImplementedError()
                 else:
                     screenshot = None
+
                 details = terminal_details2dom(
                     terminal, screenshot_data=screenshot)
                 result.details = details
+
                 return OK(result, content_type='application/xml')

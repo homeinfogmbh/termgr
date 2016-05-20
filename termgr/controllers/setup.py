@@ -1,5 +1,7 @@
 """Controller for terminal setup"""
 
+from peewee import DoesNotExist
+
 from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
 from homeinfo.terminals.orm import Terminal, Operator, AddressUnconfiguredError
@@ -13,8 +15,6 @@ __all__ = ['SetupController']
 class SetupController(WsgiApp):
     """Controller for terminal setup automation"""
 
-    DEBUG = True
-
     def __init__(self):
         """Initialize with CORS enabled"""
         super().__init__(cors=True)
@@ -24,14 +24,20 @@ class SetupController(WsgiApp):
         query_string = self.query_string(environ)
         qd = self.qd(query_string)
         user_name = qd.get('user_name')
+
         if not user_name:
             return Error('No user name specified', status=400)
+
         passwd = qd.get('passwd')
+
         if not passwd:
             return Error('No password specified', status=400)
+
         operator = Operator.authenticate(user_name, passwd)
+
         if operator:
             cid_str = qd.get('cid')
+
             if cid_str is None:
                 return Error('No customer ID specified', status=400)
             else:
@@ -39,7 +45,9 @@ class SetupController(WsgiApp):
                     cid = int(cid_str)
                 except ValueError:
                     return Error('Invalid customer ID', status=400)
+
                 tid_str = qd.get('tid')
+
                 if tid_str is None:
                     return Error('No terminal ID specified', status=400)
                 else:
@@ -47,8 +55,12 @@ class SetupController(WsgiApp):
                         tid = int(tid_str)
                     except ValueError:
                         return Error('Invalid terminal ID', status=400)
-                    terminal = Terminal.by_ids(cid, tid, deleted=False)
-                    if terminal is not None:
+
+                    try:
+                        terminal = Terminal.by_ids(cid, tid, deleted=False)
+                    except DoesNotExist:
+                        return Error('No such terminal', status=400)
+                    else:
                         if operator.authorize(terminal):
                             action = qd.get('action')
                             if action is None:
@@ -57,8 +69,6 @@ class SetupController(WsgiApp):
                                 return self._handle(terminal, action)
                         else:
                             return Error('Unauthorized', status=401)
-                    else:
-                        return Error('No such terminal', status=400)
         else:
             return Error('Invalid credentials', status=401)
 
@@ -67,11 +77,13 @@ class SetupController(WsgiApp):
         customer id, terminal id and action
         """
         status = 200
+
         if action == 'location':
             try:
                 location = terminal.address
             except AddressUnconfiguredError:
                 location = '{0} {0}, {0} {0}'.format('!!!UNCONFIGURED!!!')
+
             if location is not None:
                 content_type = 'text/plain'
                 charset = 'utf-8'
@@ -83,6 +95,7 @@ class SetupController(WsgiApp):
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
             response_body = None
+
             try:
                 response_body = packager()
             except FileNotFoundError:
@@ -97,6 +110,7 @@ class SetupController(WsgiApp):
         elif action == 'repo_config':
             pacman_cfg = PacmanConfig(terminal)
             result = None
+
             try:
                 result = pacman_cfg.get()
             except FileNotFoundError:
@@ -112,5 +126,6 @@ class SetupController(WsgiApp):
         else:
             msg = 'Action "{0}" is not implemented'.format(action)
             return Error(msg, status=501)
+
         return WsgiResponse(
             status, content_type, response_body, charset=charset, cors=True)

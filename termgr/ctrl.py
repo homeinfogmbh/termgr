@@ -41,26 +41,3 @@ class TerminalManager(RemoteController):
         terminal.location = address
         terminal.deleted = None
         terminal.save()
-
-    def upgrade(self):
-        """Upgrades the respective terminal"""
-        if self:
-            return self.execute(
-                '/usr/bin/sudo', '/usr/bin/pacman', '-Syu', '--noconfirm')
-        else:
-            raise OfflineError(self.terminal)
-
-    def unlock_pacman_db(self):
-        """Removes pacman's database lockfile"""
-        if self:
-            return self.execute(
-                '/usr/bin/sudo', '/usr/bin/rm', '-f', '/var/lib/pacman/db.lck')
-        else:
-            raise OfflineError(self.terminal)
-
-    def reboot(self):
-        """Reboots the terminal"""
-        if self:
-            return self.execute('/usr/bin/sudo', '/usr/bin/reboot')
-        else:
-            raise OfflineError(self.terminal)

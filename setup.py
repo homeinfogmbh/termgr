@@ -24,10 +24,12 @@ setup(
             'files/usr/bin/termadm']),
         ('/usr/share/termgr', [
             'files/usr/share/termgr/mgr.wsgi',
+            'files/usr/share/termgr/query.wsgi',
             'files/usr/share/termgr/setup.wsgi',
             'files/usr/share/termgr/stats.wsgi']),
         ('/etc/uwsgi/apps-available', [
             'files/etc/uwsgi/apps-available/termgr.ini',
+            'files/etc/uwsgi/apps-available/termquery.ini',
             'files/etc/uwsgi/apps-available/termsetup.ini',
             'files/etc/uwsgi/apps-available/termstats.ini'])],
     description=('Homeinfo Terminal Manager'))

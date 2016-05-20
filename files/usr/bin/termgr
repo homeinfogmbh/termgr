@@ -24,6 +24,8 @@ from os import geteuid
 from sys import stderr
 from getpass import getuser
 from datetime import datetime, timedelta
+from logging import INFO, getLogger, basicConfig
+from os.path import basename
 
 from docopt import docopt
 
@@ -33,154 +35,60 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
-USER = 'termgr'
+from termgr.lib.cmds import TERMGR_USER, RebootCommand, PackageManagerCommand,\
+    CheckInitcpioConfig, CheckPacmanConfig, Commands
+
+
 VERBOSE = False
-
-SUDO = '/usr/bin/sudo'
-PACMAN = '/usr/bin/pacman'
-REBOOT = '/usr/bin/reboot'
-REMOVE = '/usr/bin/rm'
-GREP = '/usr/bin/grep'
-
-
-def headline(*args):
-    """Prints headline"""
-    print(*args, end='\t')
-
-
-def evaluate(result):
-    """Prints an evaluation of a boolean value"""
-    if result:
-        print('[   ok   ]', flush=True)
-    else:
-        print('[ failed ]', flush=True)
-        if VERBOSE:
-            print(result, file=stderr, flush=True)
 
 
 def deployed(terminals):
+    """Filters only deployed terminals"""
+
+    NULL = timedelta(0)
+
     for terminal in terminals:
         if terminal.deployed is None:
-            print('WARNING: Terminal', terminal,
-                  'is not deployed', file=stderr)
-        elif terminal.deployed - datetime.now() > timedelta(0):
-            print('WARNING: Terminal', terminal,
-                  'is not yet deployed', file=stderr)
+            logger.warning('Terminal {0} is not deployed'.format(terminal))
+        elif terminal.deployed - datetime.now() > NULL:
+            logger.warning('Terminal {0} is not yet deployed'.format(terminal))
         else:
             yield terminal
 
 
-class TerminalCommand():
-    """Execute command on terminal"""
+def online(terminals):
+    """Yields terminals that are online"""
 
-    def __init__(self, cmd, *args, user=None):
-        self.cmd = cmd
-        self.args = args
-        self.user = 'termgr' if user is None else user
-
-    def __call__(self, terminal, user=None):
-        user = self.user if user is None else user
-        remote_controller = RemoteController(user, terminal)
-        return remote_controller.execute(self.cmd, *self.args)
-
-    def __iter__(self):
-        yield self.cmd
-        for arg in self.args:
-            yield arg
-
-    def __repr__(self):
-        return ' '.join(self)
+    for terminal in terminals:
+        if terminal.status:
+            yield terminal
 
 
-class Upgrade(TerminalCommand):
-    """Upgrades a terminal"""
+def printterm(terminal, process_result):
+    """Prints a process result"""
 
-    def __init__(self):
-        super().__init__(SUDO, PACMAN, '-Syu', '--noconfirm')
+    try:
+        msg = process_result.stdout.decode().strip()
+    except (TypeError, ValueError, AttributeError):
+        msg = process_result.stdout
 
-
-class Reboot(TerminalCommand):
-    """Reboots a terminal"""
-
-    def __init__(self):
-        super().__init__(SUDO, REBOOT)
-
-
-class UnlockPacman(TerminalCommand):
-    """Removes the pacaman lock on a terminal"""
-
-    def __init__(self):
-        super().__init__(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
-
-
-class CheckResolution(TerminalCommand):
-    """Checks a terminal's display resolution"""
-
-    def __init__(self):
-        super().__init__('export DISPLAY=:0 \; xrandr | grep " connected"')
-
-
-class FixPackages(TerminalCommand):
-    """(Re-)Installs packages as explicit"""
-
-    def __init__(self, packages):
-        super().__init__(SUDO, PACMAN, '-S', '--asexplicit')
-        self.packages = packages
-
-    @property
-    def args(self):
-        return chain(self.args, self.packages)
-
-    @property
-    def __str__(self):
-        return ' '.join(self.packages)
-
-
-class CheckInitcpioConfig():
-    """Checks settings inside the /etc/mkinitcpio.conf"""
-
-    MODULES = TerminalCommand(GREP, '^MODULES=', '/etc/mkinitcpio.conf')
-    HOOKS = TerminalCommand(GREP, '^HOOKS=', '/etc/mkinitcpio.conf')
-    COMPRESSION = TerminalCommand(
-        GREP, '^COMPRESSION=', '/etc/mkinitcpio.conf')
-
-    def __init__(self, modules=False, hooks=False, compression=False):
-        self.modules = modules
-        self.hooks = hooks
-        self.compression = compression
-
-    def __call__(self, terminal, user=None):
-        if self.modules:
-            self.MODULES(terminal, user=user)
-        if self.hooks:
-            self.HOOKS(terminal, user=user)
-        if self.compression:
-            self.COMPRESSION(terminal, user=user)
-
-
-class CheckPacmanConf():
-    """Checks settings inside the /etc/pacman.conf"""
-
-    SIG_LEVEL = TerminalCommand(GREP, '^SigLevel', '/etc/pacman.conf')
-
-    def __init__(self, siglevel=False):
-        self.siglevel = siglevel
-
-    def __call__(self, terminal, user=None):
-        if self.siglevel:
-            self.SIG_LEVEL(terminal, user=user)
+    print(terminal, msg, sep=': ')
 
 
 if __name__ == '__main__':
     options = docopt(__doc__)
+    logger = getLogger(basename(__file__))
+    basicConfig(level=INFO)
+
     if geteuid() == 0:
         print('Refusing to run as root')
         exit(3)
-    elif getuser() != USER:
-        print('You must be {0} to run {1}'.format(USER, __file__), file=stderr)
+    elif getuser() != TERMGR_USER:
+        print('You must be {0} to run {1}'.format(
+            TERMGR_USER, __file__), file=stderr)
         exit(2)
     else:
-        USER = options['--user'] if options['--user'] else USER
+        USER = options['--user'] if options['--user'] else TERMGR_USER
         VERBOSE = options['--verbose']
 
         # Get terminals generator
@@ -197,31 +105,55 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['upgrade']:
-            with Parallelization(Upgrade(), blocking=False) as para:
-                para.run(terminals, single=True)
-                while para.running:
-                    with Watchdog(para.threads) as doggy:
-                        doggy.start()
+            with Parallelization(
+                    Commands.UPGRADE,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['reboot']:
-            parallelize(target=reboot, args=itemize(terminals))
+            with Parallelization(
+                    RebootCommand(),
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['unlock']:
-            parallelize(target=rm_pacman_lock, args=itemize(terminals))
+            with Parallelization(
+                    Commands.UNLOCK,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['chkres']:
             for terminal in online(terminals):
-                chkres(terminal)
+                printterm(terminal, Commands.CHKRES(terminal))
         elif options['fixpkg']:
-            packages = options['<pkgs>']
-            for terminal in online(terminals):
-                fixpkg(terminal, packages=packages)
+            packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
+            fix_packages = PackageManagerCommand(
+                packages, '--asexplicit', '-S')
+            with Parallelization(
+                    fix_packages,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         elif options['chkinitcpio']:
             modules = options['--modules']
             hooks = options['--hooks']
             compression = options['--compression']
+            chk_initcpio = CheckInitcpioConfig(
+                modules=modules,
+                hooks=hooks,
+                compression=compression)
             for terminal in online(terminals):
-                chkinitcpio(
-                    terminal, modules=modules, hooks=hooks,
-                    compression=compression)
+                chk_initcpio(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
+            chk_pacman = CheckPacmanConfig(siglevel=siglevel)
             for terminal in online(terminals):
-                chkpacman(terminal, siglevel=siglevel)
+                chk_pacman(terminal)

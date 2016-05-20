@@ -4,8 +4,10 @@
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>]] [options]
-    termadm (deploy | undeploy) <expr>...
-    termadm (grant | revoke) <operator> <expr>
+    termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
+[--force]
+    termadm undeploy <expr>...
+    termadm (grant | revoke) <operator> <expr>...
 
 Options:
     -h --help                   Show this screen.
@@ -15,14 +17,14 @@ Options:
     --tid=<tid>                 Explicitly select a TID (not recommended!).
     --key=<key>                 Explicitly specify an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
-    --no-restart                Do not restart related system services.
-    --simulate -s               Simulate. Don't actually alter database.
 """
 
 from os import geteuid
 from sys import stderr
+from os.path import basename
 from itertools import chain
 from datetime import datetime
+from logging import INFO, getLogger, basicConfig
 
 from docopt import docopt
 
@@ -33,174 +35,120 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
 from homeinfo.terminals.filter import TerminalFilter
 
 
-def add_terminal(options):
-    """Adds a new terminal"""
-    # Required options
-    class_ = Class.get(Class.id == int(options['<class_id>']))
-    cid = int(options['<cid>'])
-    tid = int(options['--tid']) if options['--tid'] else None
-    os = OS.get(OS.id == int(options['<os>']))
-    # Optional address
-    street = options['<street>']
-    house_number = options['<house_number>']
-    zip_code = options['<zip_code>']
-    city = options['<city>']
-    state_iso = options['--state']
-    # Optional options
-    vpn_key = options['--key']
-    annotation = options['--annotation']
-    restart = not options['--no-restart']
-    simulate = options['--simulate']
-
-    connection = Connection.get(Connection.id == int(options['--connection']))
-    domain = Domain.get(Domain.id == int(options['--domain']))
-    tid = Terminal.gen_tid(cid, desired=tid)
-    if state_iso:
-        state = State.get(State._iso == state_iso)
-    else:
-        state = None
-    addr = (street, house_number, zip_code)
-    if None not in chain([city], addr):
-        if simulate:
-            address = None
-            print('Just simulating. Period.')
-        else:
-            address = Address.add(city, addr=addr, state=state)
-    else:
-        address = None
-
-    terminal = Terminal()
-    terminal.tid = tid
-    terminal.customer = cid
-    terminal.class_ = class_
-    terminal.os = os
-    terminal.connection = connection
-    terminal.vpn = VPN.add(key=vpn_key)
-    terminal.domain = domain
-    terminal.location = address
-    terminal.vid = None
-    terminal.deployed = None
-    terminal.deleted = None
-    terminal.testing = False
-    terminal.annotation = annotation
-    if vpn_key is None:
-        print('Warning: No OpenVPN key was specified!')
-    else:
-        terminal.vpn_key = vpn_key
-
-    if simulate:
-        print('Just simulating. Period.')
-    else:
-        if terminal.save():
-            print('Created terminal record for host name:', terminal.hostname,
-                  'with id:', terminal.id)
-            if restart:
-                restart_services()
-        else:
-            print('Terminal could not be created', file=stderr)
-
-
-def deploy_terminal(terminal):
-    """Sets terminals to deployed"""
-    if terminal.deployed is None:
-        now = datetime.now()
-        print('Deploying terminal {0} on {1}'.format(terminal, now))
-        terminal.deployed = now
-        terminal.save()
-    else:
-        print('Terminal {0} has already been deployed on {1}'.format(
-            terminal, terminal.deployed))
-
-
-def undeploy_terminal(terminal):
-    """Sets terminals to NOT deployed"""
-    if terminal.deployed is None:
-        print('Terminal {0} is not deployed'.format(terminal))
-    else:
-        print('Undeploying terminal {0} from {1}'.format(
-            terminal, terminal.deployed))
-        terminal.deployed = None
-        terminal.save()
-
-
-def grant_setup(operator, terminals):
-    """Grant an operator permission to set up certain terminals"""
-    for terminal in terminals:
-        print('Granting setup permission of terminal '
-              '{0} to operator {1}'.format(
-                str(terminal), str(operator)), end='\t')
-        try:
-            OperatorTerminals.get(
-                (OperatorTerminals.operator == operator) &
-                (OperatorTerminals.terminal == terminal))
-        except DoesNotExist:
-            permission = OperatorTerminals()
-            permission.operator = operator
-            permission.terminal = terminal
-            if permission.save():
-                print('[   ok   ]', flush=True)
-            else:
-                print('[ failed ]', flush=True)
-        else:
-            print('[ exists ]', flush=True)
-
-
-def revoke_setup(operator, terminals):
-    """Revoke an operator permission to set up certain terminals"""
-    for terminal in terminals:
-        print(
-            'Revoking setup permission of terminal '
-            '{0} to operator {1}:'.format(
-                str(terminal), str(operator)))
-        for permission in OperatorTerminals.select().where(
-                (OperatorTerminals.operator == operator) &
-                (OperatorTerminals.terminal == terminal)):
-            print('\t', permission.id, end='\t')
-            if permission.delete_instance():
-                print('[   ok   ]', flush=True)
-            else:
-                print('[ failed ]', flush=True)
-
-
-def generate_nagios():
+def update_nagios():
     """Generates the Nagios3 configuration"""
+
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run('/usr/lib/terminals/nagios-gen'))
+    evaluate(run('/usr/lib/terminals/nagioscfg-gen'))
 
 
-def restart_services():
+def update_config():
     """Fix stuff after operations"""
+
     print('Generating bind9 configuration', end='          ', flush=True)
-    evaluate(run('/usr/lib/terminals/bind-gen'))
+    evaluate(run('/usr/lib/terminals/bindcfg-gen'))
+
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    evaluate(run('/usr/lib/terminals/openvpn-gen'))
-    generate_nagios()
+    evaluate(run('/usr/lib/terminals/openvpncfg-gen'))
+    update_nagios()
+
 
 if __name__ == '__main__':
+    logger = getLogger(basename(__file__))
     options = docopt(__doc__)
-    if geteuid() == 0:
-        if options['add']:
-            add_terminal(options)
-        elif options['deploy']:
-            exprs = options['<expr>']
-            for expr in exprs:
-                for terminal in TerminalFilter(expr):
-                    deploy_terminal(terminal)
-            generate_nagios()
-        elif options['undeploy']:
-            exprs = options['<expr>']
-            for expr in exprs:
-                for terminal in TerminalFilter(expr):
-                    undeploy_terminal(terminal)
-            generate_nagios()
-        elif options['grant']:
-            operator = Operator.get(Operator.name == options['<operator>'])
-            terminals = TerminalFilter(options['<expr>'])
-            grant_setup(operator, terminals)
-        elif options['revoke']:
-            operator = Operator.get(Operator.name == options['<operator>'])
-            terminals = TerminalFilter(options['<expr>'])
-            revoke_setup(operator, terminals)
-    else:
-        print('You must be root to add new terminals')
-        exit(3)
+
+    basicConfig(level=INFO)
+
+    try:
+        reload = not options['--no-reload']
+    except KeyError:
+        reload = False
+
+    # Bail out iff reload of services
+    # is required, but we are not root.
+    if options['add'] or options['deploy'] or options['undeploy']:
+        if geteuid() != 0:
+            print('You must be root to update the related services')
+            exit(3)
+
+    # Parse operation modes
+    if options['add']:
+        # Required options
+        tid = int(options['--tid']) if options['--tid'] else None
+        cid = int(options['<cid>'])
+        class_id = int(options['<class_id>'])
+        os_id = int(options['<os>'])
+        connection_id = int(options['--connection'])
+        domain_id = int(options['--domain'])
+
+        # Optional address
+        street = options['<street>']
+        house_number = options['<house_number>']
+        zip_code = options['<zip_code>']
+        city = options['<city>']
+        state_iso = options['--state']
+        if street:
+            address = (street, house_number, zip_code, city, state_iso)
+        else:
+            address = None
+
+        # Optional parameters
+        vpn_key = options['--key'] or None
+        annotation = options['--annotation'] or None
+
+        # Add new terminal
+        terminal = Terminal.add(
+            cid, class_id, os_id, connection_id, domain_id,
+            address=address, vpn_key=vpn_key,
+            annotation=annotation, tid=tid)
+
+        if terminal:
+            logger.info('Added terminal {0}'.format(terminal))
+        else:
+            logger.error('Failed to add terminal')
+
+        update_config()
+
+    elif options['deploy']:
+        date_string = options['--date']
+        force = options['--force']
+
+        if date_string:
+            date_format = options['--format'] or '%Y-%m-%d'
+
+            try:
+                date_time = datetime.strptime(date_string, date_format)
+            except ValueError:
+                logger.error(
+                    'Invalid date time value ({0}) or format ({0})'.format(
+                        date_string, date_format))
+                exit(4)
+        else:
+            date_time = None
+
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                terminal.deploy(date_time=date_time, force=force)
+
+        update_nagios()
+
+    elif options['undeploy']:
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                terminal.undeploy(force=force)
+
+        update_nagios()
+
+    elif options['grant']:
+        operator = Operator.get(Operator.name == options['<operator>'])
+
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                operator.grant(terminal)
+
+    elif options['revoke']:
+        operator = Operator.get(Operator.name == options['<operator>'])
+
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                operator.revoke(terminal)
