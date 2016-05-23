@@ -72,13 +72,13 @@ def permissions(s):
         try:
             permissions = int(s)
         except ValueError:
-            alter = None
+            revoke = None
 
             if s.startswith('+'):
-                alter = True
+                revoke = False
                 permissions = s[1:]
             elif s.startswith('-'):
-                alter = False
+                revoke = True
                 permissions = s[1:]
             else:
                 permissions = s
@@ -87,7 +87,7 @@ def permissions(s):
                 permission = permission.lower()
 
                 # Alter permissions
-                if alter is None:
+                if revoke is None:
                     read = False
                     administer = False
                     setup = False
@@ -98,11 +98,11 @@ def permissions(s):
                     setup = None
 
                 if permission == 'r':
-                    read = True if alter is None else alter
+                    read = not revoke
                 elif permission == 'a':
-                    administer = True if alter is None else alter
+                    administer = not revoke
                 elif permission == 's':
-                    setup = True if alter is None else alter
+                    setup = not revoke
                 else:
                     raise PermissionError(
                         'Invalid permission: {}'.format(permission))
