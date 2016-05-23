@@ -151,9 +151,6 @@ class User(TermgrModel):
 class Permissions(TermgrModel):
     """Many-to-many mapping in-between administrators and terminals"""
 
-    class Meta:
-        db_table = 'terminal_admins'
-
     user = ForeignKeyField(User, db_column='administrator')
 
     # Actual privileges
