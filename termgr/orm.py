@@ -101,28 +101,28 @@ class User(TermgrModel):
             raise PermissionError('Cannot set permissions for root users')
         elif read is False and administer is False and setup is False:
             # Remove all permissions
-            for permission in Permissions.select().where(
+            for permissions in Permissions.select().where(
                     (Permissions.user == self) &
                     (Permissions.terminal == terminal)):
-                permission.delete_instance()
+                permissions.delete_instance()
         else:
             try:
-                permission = self.permissions(terminal)
+                permissions = self.permissions(terminal)
             except DoesNotExist:
-                permission = Permissions()
-                permission.user = self
-                permission.terminal = terminal
+                permissions = Permissions()
+                permissions.user = self
+                permissions.terminal = terminal
 
             if read is not None:
-                permission.read = read
+                permissions.read = read
 
             if administer is not None:
-                permission.administer = administer
+                permissions.administer = administer
 
             if setup is not None:
-                permission.setup = setup
+                permissions.setup = setup
 
-            permission.save()
+            permissions.save()
 
     def authorize(self, terminal, read=False, administer=None, setup=None):
         """Validate permissions"""
@@ -132,20 +132,20 @@ class User(TermgrModel):
             return True
         else:
             try:
-                permission = self.permissions(terminal)
+                permissions = self.permissions(terminal)
             except DoesNotExist:
                 return False
             else:
                 if read is not None:
-                    if permission.read != read:
+                    if permissions.read != read:
                         return False
 
                 if administer is not None:
-                    if permission.administer != administer:
+                    if permissions.administer != administer:
                         return False
 
                 if setup is not None:
-                    if permission.setup != setup:
+                    if permissions.setup != setup:
                         return False
 
                 return True
