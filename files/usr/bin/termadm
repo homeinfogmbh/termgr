@@ -104,7 +104,7 @@ def permissions(s):
                         'Invalid permission: {}'.format(permission))
 
         else:
-            permissions = bin(permissions)[2:]
+            permissions = '{0:0>3}'.format(bin(permissions)[2:])
             binary = True
 
     if binary:
