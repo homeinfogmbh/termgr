@@ -3,11 +3,12 @@
 
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
-<city> [--state=<state_iso>]] [options]
+<city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
+[options]
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force]
     termadm undeploy <expr>...
-    termadm (grant | revoke) <operator> <expr>...
+    termadm permit <permissions> <user> <expr>...
 
 Options:
     -h --help                   Show this screen.
@@ -31,8 +32,10 @@ from docopt import docopt
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
-    Terminal, Operator, OperatorTerminals
+    Terminal
 from homeinfo.terminals.filter import TerminalFilter
+
+from termgr.orm import User
 
 
 def update_nagios():
@@ -70,7 +73,7 @@ if __name__ == '__main__':
             print('You must be root to update the related services')
             exit(3)
 
-    # Parse operation modes
+    # Add new terminal
     if options['add']:
         # Required options
         tid = int(options['--tid']) if options['--tid'] else None
@@ -86,10 +89,13 @@ if __name__ == '__main__':
         zip_code = options['<zip_code>']
         city = options['<city>']
         state_iso = options['--state']
+
         if street:
             address = (street, house_number, zip_code, city, state_iso)
         else:
             address = None
+
+        address_annotation = options['--address-annotation']
 
         # Optional parameters
         vpn_key = options['--key'] or None
@@ -99,7 +105,7 @@ if __name__ == '__main__':
         terminal = Terminal.add(
             cid, class_id, os_id, connection_id, domain_id,
             address=address, vpn_key=vpn_key,
-            annotation=annotation, tid=tid)
+            address_annotation=address_annotation, tid=tid)
 
         if terminal:
             logger.info('Added terminal {0}'.format(terminal))
@@ -108,6 +114,7 @@ if __name__ == '__main__':
 
         update_config()
 
+    # Deploy terminal
     elif options['deploy']:
         date_string = options['--date']
         force = options['--force']
@@ -131,6 +138,7 @@ if __name__ == '__main__':
 
         update_nagios()
 
+    # Undeploy terminal
     elif options['undeploy']:
         for expr in options['<expr>']:
             for terminal in TerminalFilter(expr):
@@ -138,16 +146,35 @@ if __name__ == '__main__':
 
         update_nagios()
 
-    elif options['grant']:
-        operator = Operator.get(Operator.name == options['<operator>'])
+    # Set user permissions
+    elif options['permit']:
+        for char in permissions:
+            if char not in ['0', '1']:
+                binary = False
+                break
+        else:
+            binary = True
 
-        for expr in options['<expr>']:
-            for terminal in TerminalFilter(expr):
-                operator.grant(terminal)
+        if not binary:
+            permissions = bin(int(options['<permissions>']))[2:]
 
-    elif options['revoke']:
-        operator = Operator.get(Operator.name == options['<operator>'])
+        if len(permissions) != 3:
+            logger.error('Invalid permission value')
+            exit(4)
+        else:
+            read = permissions[0] == '1'
+            administer = permissions[1] == '1'
+            setup = permissions[2] == '1'
 
-        for expr in options['<expr>']:
-            for terminal in TerminalFilter(expr):
-                operator.revoke(terminal)
+            user = User.get(User.name == options['<user>'])
+
+            for expr in options['<expr>']:
+                for terminal in TerminalFilter(expr):
+                    try:
+                        user.permit(
+                            terminal,
+                            read=read,
+                            administer=administer,
+                            setup=setup)
+                    except PermissionError as pe:
+                        logger.warning(pe.msg)

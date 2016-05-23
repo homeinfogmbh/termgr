@@ -6,10 +6,11 @@ from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from homeinfo.lib.wsgi import WsgiApp, Error, OK
-from homeinfo.terminals.orm import Terminal, Class, Administrator
+from homeinfo.terminals.orm import Terminal, Class
 
-from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
 from ..lib import dom
+from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
+from ..orm import User
 
 __all__ = ['TerminalManager']
 
@@ -43,7 +44,8 @@ class TerminalManager(WsgiApp):
             if not user_name:
                 return Error('No password', status=400)
             else:
-                auth = Administrator.authenticate(user_name, passwd)
+                auth = User.authenticate(user_name, passwd)
+
         if auth:
             cid = qd.get('cid')
 

@@ -2,11 +2,16 @@
 
 from homeinfo.lib.config import Configuration
 
-__all__ = ['TermgrConfig']
+__all__ = ['CONFIG']
 
 
 class TermgrConfig(Configuration):
     """Configuration parser enhancement"""
+
+    @property
+    def db(self):
+        self.load()
+        return self['db']
 
     @property
     def pacman(self):
@@ -23,4 +28,5 @@ class TermgrConfig(Configuration):
         self.load()
         return self['screenshot']
 
-termgr_config = TermgrConfig('/etc/termgr.conf')
+
+CONFIG = TermgrConfig('/etc/termgr.conf')

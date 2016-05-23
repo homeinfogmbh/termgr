@@ -35,6 +35,7 @@ class TerminalCommand():
 
     def __iter__(self):
         yield self.cmd
+
         for arg in self.args:
             yield arg
 
@@ -77,10 +78,12 @@ class PackageManagerCommand(TerminalCommand):
     def __call__(self, terminal, user=None):
         user = self.user if user is None else user
         remote_controller = RemoteController(user, terminal)
+
         if self.packages:
             args = chain(self.args, self.packages)
         else:
             args = self.args
+
         return remote_controller.execute(self.cmd, *args)
 
     @property
@@ -104,8 +107,10 @@ class CheckInitcpioConfig():
     def __call__(self, terminal, user=None):
         if self.modules:
             printterm(terminal, self.MODULES(terminal, user=user))
+
         if self.hooks:
             printterm(terminal, self.HOOKS(terminal, user=user))
+
         if self.compression:
             printterm(terminal, self.COMPRESSION(terminal, user=user))
 

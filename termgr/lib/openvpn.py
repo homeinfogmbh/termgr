@@ -22,9 +22,8 @@ class OpenVPNPackager(TerminalAware):
             keyname = self.terminal.vpn.key or str(self.terminal)
             tarname = '{0}.tar'.format(keyname)
             tarpath = join(self.ARCDIR, tarname)
+
             with open(tarpath, 'rb') as tar_file:
                 return tar_file.read()
         else:
             raise VPNUnconfiguredError(str(terminal))
-
-    __call__ = package

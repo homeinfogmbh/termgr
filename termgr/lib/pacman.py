@@ -4,7 +4,7 @@ from homeinfo.terminals.config import terminals_config
 from homeinfo.terminals.abc import TerminalAware
 from homeinfo.terminals.ctrl import RemoteController
 
-from ..config import termgr_config
+from ..config import CONFIG
 
 
 __all__ = ['PacmanConfig']
@@ -17,9 +17,11 @@ class PacmanConfig(TerminalAware):
         """Returns the rendered configuration file"""
         with open('/usr/share/terminals/pacman.conf.temp', 'r') as temp:
             pacman_conf = temp.read()
+
         pacman_conf = pacman_conf.format(
             addr=terminals_config.net['IPV4ADDR'],
             port=terminals_config.net['HTTP_PRIV_PORT'])
+
         return pacman_conf
 
 
@@ -34,14 +36,14 @@ class Pacman(TerminalAware):
     @property
     def _refresh_cmd(self):
         """Returns the refresh command"""
-        return [termgr_config.pacman['BINARY'],
-                termgr_config.pacman['REFRESH_CMD']]
+        return [CONFIG.pacman['BINARY'],
+                CONFIG.pacman['REFRESH_CMD']]
 
     @property
     def _update_cmd(self):
         """Returns the refresh command"""
-        return [termgr_config.pacman['BINARY'],
-                termgr_config.pacman['UPDATE_CMD']]
+        return [CONFIG.pacman['BINARY'],
+                CONFIG.pacman['UPDATE_CMD']]
 
     def refresh(self):
         """Refresh repository"""
@@ -52,6 +54,7 @@ class Pacman(TerminalAware):
     def updates(self):
         """Yields available updates"""
         stdout, stderr, exit_code = self._remote.execute(self._update_cmd)
+
         if exit_code == 0:
             try:
                 out_str = stdout.decode()
@@ -60,12 +63,14 @@ class Pacman(TerminalAware):
             else:
                 for line in out_str.split('\n'):
                     line = line.strip()
+
                     try:
                         pkg, old_ver, _, new_ver = line.split(' ')
                     except ValueError:
                         continue
                     else:
                         yield (pkg, old_ver, new_ver)
+
         elif exit_code == 1:
             pass    # TODO: No updates available
         else:

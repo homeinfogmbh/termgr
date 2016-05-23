@@ -4,10 +4,11 @@ from peewee import DoesNotExist
 
 from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
     InternalServerError
-from homeinfo.terminals.orm import Terminal, Operator, AddressUnconfiguredError
+from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
 from ..lib.openvpn import OpenVPNPackager
 from ..lib.pacman import PacmanConfig
+from ..orm import User
 
 __all__ = ['SetupController']
 
@@ -33,9 +34,9 @@ class SetupController(WsgiApp):
         if not passwd:
             return Error('No password specified', status=400)
 
-        operator = Operator.authenticate(user_name, passwd)
+        user = User.authenticate(user_name, passwd)
 
-        if operator:
+        if user:
             cid_str = qd.get('cid')
 
             if cid_str is None:
@@ -61,8 +62,9 @@ class SetupController(WsgiApp):
                     except DoesNotExist:
                         return Error('No such terminal', status=400)
                     else:
-                        if operator.authorize(terminal):
+                        if user.authorize(terminal, setup=True):
                             action = qd.get('action')
+
                             if action is None:
                                 return Error('No action specified', status=400)
                             else:

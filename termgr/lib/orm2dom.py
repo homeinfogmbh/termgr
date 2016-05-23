@@ -72,15 +72,21 @@ def customer2dom(customer_orm):
 def terminal_details2dom(terminal_orm, screenshot_data=None):
     """Converts the ORM of a terminal into a full info DOM"""
     dom = TerminalDetails()
+
     if terminal_orm.customer:
         dom.customer = customer2dom(terminal_orm.customer)
+
     dom.uptime = 0
+
     if terminal_orm.virtual_display:
         dom.virtual_display = terminal_orm.virtual_display
+
     if screenshot_data is not None:
         dom.screenshot = screenshot2dom(screenshot_data)
+
     if terminal_orm.location:
         dom.location = address2dom(terminal_orm.location)
+
     dom.class_ = class2dom(terminal_orm.class_)
     dom.domain = domain2dom(terminal_orm.domain)
     dom.id = terminal_orm.id
@@ -88,4 +94,5 @@ def terminal_details2dom(terminal_orm, screenshot_data=None):
     dom.deleted = terminal_orm.deleted
     dom.status = terminal_orm.status
     dom.ipv4addr = str(terminal_orm.ipv4addr)
+
     return dom

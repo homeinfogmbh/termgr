@@ -1,9 +1,10 @@
 """Terminal query web service"""
 
 from homeinfo.lib.wsgi import WsgiApp, Error, OK
-from homeinfo.terminals.orm import Terminal, Operator, AddressUnconfiguredError
+from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
 from ..lib import dom
+from ..orm import User
 
 __all__ = ['TerminalQuery']
 
@@ -31,9 +32,9 @@ class TerminalQuery(WsgiApp):
         if not passwd:
             return Error('No password specified', status=400)
 
-        operator = Operator.authenticate(user_name, passwd)
+        user = User.authenticate(user_name, passwd)
 
-        if operator:
+        if user:
             cid_str = qd.get('cid')
 
             try:
@@ -46,7 +47,7 @@ class TerminalQuery(WsgiApp):
 
             terminals_dom = dom.terminals()
 
-            for terminal in self.terminals(cid, operator):
+            for terminal in self.terminals(cid, user):
                 terminal_dom = self.term2dom(terminal)
                 terminals_dom.terminal.append(terminal_dom)
 
@@ -54,21 +55,21 @@ class TerminalQuery(WsgiApp):
         else:
             return Error('Invalid credentials', status=401)
 
-    def terminals(self, cid, operator):
+    def terminals(self, cid, user):
         """List terminals of customer with CID"""
         if cid is None:
             for terminal in Terminal:
                 if not terminal.testing:
-                    if operator.authorize(terminal):
+                    if user.authorize(terminal, read=True):
                         yield terminal
         else:
             for terminal in Terminal.select().where(
                     (Terminal.customer == cid) &
                     (Terminal.testing == 0)):
-                if operator.authorize(terminal):
+                if user.authorize(terminal, read=True):
                     yield terminal
 
-    def term2dom(self, terminal):
+    def term2dom(self, terminal, status=False):
         """Formats a terminal to a DOM"""
         terminal_dom = dom.TerminalInfo()
 
@@ -85,7 +86,11 @@ class TerminalQuery(WsgiApp):
         terminal_dom.annotation = terminal.annotation
         terminal_dom.tid = terminal.tid
         terminal_dom.deployed = terminal.deployed
-        # terminal_dom.status = terminal.status  # This is slow!
+
+        if status:
+            # This is slow!
+            terminal_dom.status = terminal.status
+
         terminal_dom.cid = terminal.customer.id
 
         return terminal_dom
