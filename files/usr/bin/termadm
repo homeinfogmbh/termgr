@@ -67,7 +67,7 @@ def permissions(s):
                 break
         else:
             binary = True
-            permission = s
+            permissions = s
 
     if not binary:
         try:
