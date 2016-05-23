@@ -35,7 +35,7 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Terminal
 from homeinfo.terminals.filter import TerminalFilter
 
-from termgr.orm import User
+from termgr.orm import PermissionError, User
 
 
 def update_nagios():
@@ -54,6 +54,65 @@ def update_config():
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/lib/terminals/openvpncfg-gen'))
     update_nagios()
+
+
+def permissions(s):
+    """Parse permissions"""
+    binary = False
+
+    # Check for binary string
+    if len(s) == 3:
+        for char in s:
+            if char not in ['0', '1']:
+                break
+        else:
+            binary = True
+
+    if not binary:
+        try:
+            permissions = int(permissions)
+        except ValueError:
+            alter = None
+
+            if permissions.startswith('+'):
+                alter = True
+                permissions = permissions[1:]
+            elif permissions.startswith('-'):
+                alter = False
+                permissions = permissions[1:]
+
+            for permission in permissions:
+                permission = permission.lower()
+
+                # Alter permissions
+                if alter is None:
+                    read = False
+                    administer = False
+                    setup = False
+                # Set permissions
+                else:
+                    read = None
+                    administer = None
+                    setup = None
+
+                if permission == 'r':
+                    read = alter
+                elif permission == 'a':
+                    administer = alter
+                elif permission == 's':
+                    setup = alter
+                else:
+                    raise PermissionError(
+                        'Invalid permission: {}'.format(permission))
+
+        else:
+            permissions = bin(permissions)[2:]
+            binary = True
+
+    if binary:
+        read = permissions[0] == '1'
+        administer = permissions[1] == '1'
+        setup = permissions[2] == '1'
 
 
 if __name__ == '__main__':
@@ -92,9 +151,9 @@ if __name__ == '__main__':
         state_iso = options['--state']
 
         if street:
-            address = (street, house_number, zip_code, city, state_iso)
+            addr = (street, house_number, zip_code)
         else:
-            address = None
+            addr = None
 
         address_annotation = options['--address-annotation']
 
@@ -102,11 +161,23 @@ if __name__ == '__main__':
         vpn_key = options['--key'] or None
         annotation = options['--annotation'] or None
 
+        # Get related ORM instances
+        class_ = Class.get(Class.id == class_id)
+        os = OS.get(OS.id == os_id)
+        connection = Connection.get(Connection.id == connection_id)
+        vpn = VPN.add(key=vpn_key)
+        domain = Domain.get(Domain.id == domain_id)
+
+        if addr is not None:
+            address = Address.add(cls, city, addr=addr, state=None)
+            location = Location.add(address, annotation=address_annotation)
+        else:
+            location = None
+
         # Add new terminal
         terminal = Terminal.add(
-            cid, class_id, os_id, connection_id, domain_id,
-            address=address, vpn_key=vpn_key,
-            address_annotation=address_annotation, tid=tid)
+            cid, class_, os, connection, vpn, domain
+            location=location, tid=tid)
 
         if terminal:
             logger.info('Added terminal {0}'.format(terminal))
@@ -151,33 +222,15 @@ if __name__ == '__main__':
     elif options['permit']:
         permissions = options['<permissions>']
 
-        for char in permissions:
-            if char not in ['0', '1']:
-                binary = False
-                break
-        else:
-            binary = True
+        user = User.get(User.name == options['<user>'])
 
-        if not binary:
-            permissions = bin(int(permissions))[2:]
-
-        if len(permissions) != 3:
-            logger.error('Invalid permission value')
-            exit(4)
-        else:
-            read = permissions[0] == '1'
-            administer = permissions[1] == '1'
-            setup = permissions[2] == '1'
-
-            user = User.get(User.name == options['<user>'])
-
-            for expr in options['<expr>']:
-                for terminal in TerminalFilter(expr):
-                    try:
-                        user.permit(
-                            terminal,
-                            read=read,
-                            administer=administer,
-                            setup=setup)
-                    except PermissionError as pe:
-                        logger.warning(pe.msg)
+        for expr in options['<expr>']:
+            for terminal in TerminalFilter(expr):
+                try:
+                    user.permit(
+                        terminal,
+                        read=read,
+                        administer=administer,
+                        setup=setup)
+                except PermissionError as pe:
+                    logger.warning(pe.msg)
