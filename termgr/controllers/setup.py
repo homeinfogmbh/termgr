@@ -16,6 +16,8 @@ __all__ = ['SetupController']
 class SetupController(WsgiApp):
     """Controller for terminal setup automation"""
 
+    DEBUG = True
+
     def __init__(self):
         """Initialize with CORS enabled"""
         super().__init__(cors=True)
