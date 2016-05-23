@@ -103,9 +103,7 @@ class User(TermgrModel):
               (administer is not None and not administer) and
               (setup is not None and not setup)):
             # Remove all permissions
-            for permissions in Permissions.select().where(
-                    (Permissions.user == self) &
-                    (Permissions.terminal == terminal)):
+            for permissions in self.permissions(terminal):
                 permissions.delete_instance()
         else:
             try:
