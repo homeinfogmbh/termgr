@@ -101,7 +101,7 @@ class SetupController(WsgiApp):
             response_body = None
 
             try:
-                response_body = packager()
+                response_body = packager.package()
             except FileNotFoundError:
                 msg = 'OpenVPN configuration template file not found'
                 return InternalServerError(msg)
