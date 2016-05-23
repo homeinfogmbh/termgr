@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     # Set user permissions
     elif options['permit']:
-        options['<permissions>']
+        permissions = options['<permissions>']
 
         for char in permissions:
             if char not in ['0', '1']:
