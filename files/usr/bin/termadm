@@ -50,6 +50,7 @@ def update_config():
 
     print('Generating bind9 configuration', end='          ', flush=True)
     evaluate(run('/usr/lib/terminals/bindcfg-gen'))
+
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/lib/terminals/openvpncfg-gen'))
     update_nagios()
