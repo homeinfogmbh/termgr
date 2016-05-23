@@ -98,11 +98,11 @@ def permissions(s):
                     setup = None
 
                 if permission == 'r':
-                    read = alter
+                    read = True if alter is None else alter
                 elif permission == 'a':
-                    administer = alter
+                    administer = True if alter is None else alter
                 elif permission == 's':
-                    setup = alter
+                    setup = True if alter is None else alter
                 else:
                     raise PermissionError(
                         'Invalid permission: {}'.format(permission))
