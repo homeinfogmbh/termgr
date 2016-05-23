@@ -93,7 +93,7 @@ class User(TermgrModel):
         """Set permissions"""
         if self.root:
             raise PermissionError('Cannot set permissions for root users')
-        elif read is False administer is False and setup is False:
+        elif read is False and administer is False and setup is False:
             # Remove all permissions
             for permission in Permissions.select().where(
                     (Permissions.user == self) &
@@ -120,7 +120,7 @@ class User(TermgrModel):
 
     def authorize(self, terminal, read=False, administer=None, setup=None):
         """Validate permissions"""
-        if read is None administer is None and setup is None:
+        if read is None and administer is None and setup is None:
             raise PermissionError('No permissions selected')
         elif self.root:
             return True
