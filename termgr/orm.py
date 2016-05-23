@@ -134,18 +134,22 @@ class User(TermgrModel):
             try:
                 permissions = self.permissions(terminal)
             except DoesNotExist:
+                raise Exception('DEBUG1')
                 return False
             else:
                 if read is not None:
                     if permissions.read != read:
+                        raise Exception('DEBUG2')
                         return False
 
                 if administer is not None:
                     if permissions.administer != administer:
+                        raise Exception('DEBUG3')
                         return False
 
                 if setup is not None:
                     if permissions.setup != setup:
+                        raise Exception('DEBUG4')
                         return False
 
                 return True
