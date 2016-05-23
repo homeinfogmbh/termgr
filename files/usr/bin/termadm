@@ -223,8 +223,6 @@ if __name__ == '__main__':
         read, administer, setup = permissions(options['<permissions>'])
         user = User.get(User.name == options['<user>'])
 
-        print('DEBUG:', read, administer, setup)
-
         for expr in options['<expr>']:
             for terminal in TerminalFilter(expr):
                 try:

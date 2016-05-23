@@ -99,12 +99,6 @@ class User(TermgrModel):
         """Set permissions"""
         if self.root:
             raise PermissionError('Cannot set permissions for root users')
-        elif ((read is not None and not read) and
-              (administer is not None and not administer) and
-              (setup is not None and not setup)):
-            # Remove all permissions
-            for permissions in self.permissions(terminal):
-                permissions.delete_instance()
         else:
             try:
                 permissions = self.permissions(terminal)
@@ -122,7 +116,10 @@ class User(TermgrModel):
             if setup is not None:
                 permissions.setup = setup
 
-            permissions.save()
+            if permissions.read or permissions.dminister or permissions.setup:
+                permissions.save()
+            else:
+                permissions.delete_instance()
 
     def authorize(self, terminal, read=None, administer=None, setup=None):
         """Validate permissions"""
