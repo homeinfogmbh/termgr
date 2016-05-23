@@ -1,5 +1,8 @@
 """ORM models for termgr"""
 
+from hashlib import sha256
+from uuid import uuid4
+
 from peewee import DoesNotExist, Model, PrimaryKeyField, CharField,\
 BooleanField, ForeignKeyField
 
