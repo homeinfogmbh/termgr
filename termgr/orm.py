@@ -99,7 +99,9 @@ class User(TermgrModel):
         """Set permissions"""
         if self.root:
             raise PermissionError('Cannot set permissions for root users')
-        elif read is False and administer is False and setup is False:
+        elif ((read is not None and not read) and
+              (administer is not None and not administer) and
+              (setup is not None and not setup)):
             # Remove all permissions
             for permissions in Permissions.select().where(
                     (Permissions.user == self) &
