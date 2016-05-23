@@ -70,16 +70,18 @@ def permissions(s):
 
     if not binary:
         try:
-            permissions = int(permissions)
+            permissions = int(s)
         except ValueError:
             alter = None
 
-            if permissions.startswith('+'):
+            if s.startswith('+'):
                 alter = True
-                permissions = permissions[1:]
-            elif permissions.startswith('-'):
+                permissions = s[1:]
+            elif s.startswith('-'):
                 alter = False
-                permissions = permissions[1:]
+                permissions = s[1:]
+            else:
+                permissions = s
 
             for permission in permissions:
                 permission = permission.lower()
@@ -113,6 +115,8 @@ def permissions(s):
         read = permissions[0] == '1'
         administer = permissions[1] == '1'
         setup = permissions[2] == '1'
+
+    return (read, administer, setup)
 
 
 if __name__ == '__main__':
@@ -220,8 +224,7 @@ if __name__ == '__main__':
 
     # Set user permissions
     elif options['permit']:
-        permissions = options['<permissions>']
-
+        read, administer, setup = permissions(options['<permissions>'])
         user = User.get(User.name == options['<user>'])
 
         for expr in options['<expr>']:
