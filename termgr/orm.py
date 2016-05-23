@@ -60,6 +60,7 @@ class User(TermgrModel):
                 if user.passwd and passwd:
                     pwstr = passwd + user.salt
                     pwhash = sha256(pwstr.encode()).hexdigest()
+
                     if user.pwhash == pwhash:
                         if user.enabled:
                             return user
