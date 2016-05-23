@@ -3,7 +3,7 @@
 from peewee import Model, PrimaryKeyField, CharField, BooleanField,\
 ForeignKeyField
 
-from homeinfo.peewee import MySQLDatabase
+from homeinfo.peewee import DoesNotExist, MySQLDatabase
 
 from homeinfo.terminals.orm import Terminal
 
