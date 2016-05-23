@@ -4,7 +4,7 @@ from hashlib import sha256
 from uuid import uuid4
 
 from peewee import DoesNotExist, Model, PrimaryKeyField, CharField,\
-BooleanField, ForeignKeyField
+    BooleanField, ForeignKeyField
 
 from homeinfo.peewee import MySQLDatabase
 
@@ -125,6 +125,8 @@ class User(TermgrModel):
         """Validate permissions"""
         if read is None and administer is None and setup is None:
             raise PermissionError('No permissions selected')
+        elif not self.enabled:
+            return False
         elif self.root:
             return True
         else:
