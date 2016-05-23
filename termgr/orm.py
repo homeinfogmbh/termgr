@@ -116,7 +116,7 @@ class User(TermgrModel):
             if setup is not None:
                 permissions.setup = setup
 
-            if permissions.read or permissions.dminister or permissions.setup:
+            if permissions.read or permissions.administer or permissions.setup:
                 permissions.save()
             else:
                 permissions.delete_instance()
