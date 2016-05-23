@@ -1,6 +1,7 @@
 """ORM models for termgr"""
 
-from peewee import Model, CharField, BooleanField, ForeignKeyField
+from peewee import Model, PrimaryKeyField, CharField, BooleanField,\
+ForeignKeyField
 
 from homeinfo.peewee import MySQLDatabase
 
