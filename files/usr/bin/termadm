@@ -74,6 +74,10 @@ def permissions(s):
         except ValueError:
             revoke = None
 
+            read = None
+            administer = None
+            setup = None
+
             if s.startswith('+'):
                 revoke = False
                 permissions = s[1:]
@@ -82,20 +86,12 @@ def permissions(s):
                 permissions = s[1:]
             else:
                 permissions = s
+                read = False
+                administer = False
+                setup = False
 
             for permission in permissions:
                 permission = permission.lower()
-
-                # Alter permissions
-                if revoke is None:
-                    read = False
-                    administer = False
-                    setup = False
-                # Set permissions
-                else:
-                    read = None
-                    administer = None
-                    setup = None
 
                 if permission == 'r':
                     read = not revoke
