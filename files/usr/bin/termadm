@@ -81,7 +81,7 @@ def permissions(s):
             if s.startswith('+'):
                 revoke = False
                 permissions = s[1:]
-            elif s.startswith('-'):
+            elif s.startswith('–'):  # [AltGr] + [-]
                 revoke = True
                 permissions = s[1:]
             else:
