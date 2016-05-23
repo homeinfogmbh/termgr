@@ -106,7 +106,7 @@ class User(TermgrModel):
             try:
                 permission = self.permissions(terminal)
             except DoesNotExist:
-                permission = Permission()
+                permission = Permissions()
                 permission.user = self
                 permission.terminal = terminal
 
