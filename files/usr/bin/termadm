@@ -149,6 +149,8 @@ if __name__ == '__main__':
 
     # Set user permissions
     elif options['permit']:
+        options['<permissions>']
+
         for char in permissions:
             if char not in ['0', '1']:
                 binary = False
@@ -157,7 +159,7 @@ if __name__ == '__main__':
             binary = True
 
         if not binary:
-            permissions = bin(int(options['<permissions>']))[2:]
+            permissions = bin(int(permissions))[2:]
 
         if len(permissions) != 3:
             logger.error('Invalid permission value')
