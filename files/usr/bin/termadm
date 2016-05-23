@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
         # Add new terminal
         terminal = Terminal.add(
-            cid, class_, os, connection, vpn, domain
+            cid, class_, os, connection, vpn, domain,
             location=location, tid=tid)
 
         if terminal:
