@@ -84,7 +84,7 @@ class SetupController(WsgiApp):
 
         if action == 'location':
             if terminal.location is not None:
-                location = repr(terminal.location)
+                location = str(terminal.location)
             else:
                 location = '!!!UNCONFIGURED!!!'
 
