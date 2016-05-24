@@ -83,10 +83,10 @@ class SetupController(WsgiApp):
         status = 200
 
         if action == 'location':
-            try:
-                location = terminal.address
-            except AddressUnconfiguredError:
-                location = '{0} {0}, {0} {0}'.format('!!!UNCONFIGURED!!!')
+            if terminal.location is not None:
+                location = repr(terminal.location)
+            else:
+                location = '!!!UNCONFIGURED!!!'
 
             if location is not None:
                 content_type = 'text/plain'
