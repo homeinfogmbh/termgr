@@ -36,6 +36,7 @@ class StatsController(WsgiApp):
         # Authenticate
         if token is not None and token in self._tokens:
             cid_str = qd.get('cid')
+
             try:
                 cid = int(cid_str)
             except (TypeError, ValueError):

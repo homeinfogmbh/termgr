@@ -170,7 +170,7 @@ if __name__ == '__main__':
         domain = Domain.get(Domain.id == domain_id)
 
         if addr is not None:
-            address = Address.add(cls, city, addr=addr, state=None)
+            address = Address.add(city, addr=addr, state=None)
             location = Location.add(address, annotation=address_annotation)
         else:
             location = None
