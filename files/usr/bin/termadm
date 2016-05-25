@@ -166,6 +166,11 @@ if __name__ == '__main__':
         class_ = Class.get(Class.id == class_id)
         os = OS.get(OS.id == os_id)
         connection = Connection.get(Connection.id == connection_id)
+
+        if vpn_key is not None:
+            cls.logger.warning(
+                'Divergent OpenVPN key specified: "{0}"!'.format(vpn_key))
+
         vpn = VPN.add(key=vpn_key)
         domain = Domain.get(Domain.id == domain_id)
 
