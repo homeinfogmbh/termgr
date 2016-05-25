@@ -32,7 +32,7 @@ from docopt import docopt
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
-    Terminal
+    Location, Terminal
 from homeinfo.terminals.filter import TerminalFilter
 
 from termgr.orm import PermissionError, User
