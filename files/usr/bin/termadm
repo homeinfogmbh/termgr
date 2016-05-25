@@ -6,8 +6,8 @@ Usage:
 <city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
 [options]
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
-[--force]
-    termadm undeploy <expr>...
+[--force] [--no-reload]
+    termadm undeploy <expr>... [--no-reload]
     termadm permit <permissions> <user> <expr>...
 
 Options:
@@ -18,6 +18,7 @@ Options:
     --tid=<tid>                 Explicitly select a TID (not recommended!).
     --key=<key>                 Explicitly specify an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
+    --no-reload                 Do not reload services after terminal creation.
 """
 
 from os import geteuid
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     # Bail out iff reload of services
     # is required, but we are not root.
     if options['add'] or options['deploy'] or options['undeploy']:
-        if geteuid() != 0:
+        if reload and geteuid() != 0:
             print('You must be root to update the related services')
             exit(3)
 
@@ -141,6 +142,8 @@ if __name__ == '__main__':
         cid = int(options['<cid>'])
         class_id = int(options['<class_id>'])
         os_id = int(options['<os>'])
+
+        # Optional settings
         connection_id = int(options['--connection'])
         domain_id = int(options['--domain'])
 
@@ -190,7 +193,8 @@ if __name__ == '__main__':
         else:
             logger.error('Failed to add terminal')
 
-        update_config()
+        if reload:
+            update_config()
 
     # Deploy terminal
     elif options['deploy']:
@@ -214,7 +218,8 @@ if __name__ == '__main__':
             for terminal in TerminalFilter(expr):
                 terminal.deploy(date_time=date_time, force=force)
 
-        update_nagios()
+        if reload:
+            update_nagios()
 
     # Undeploy terminal
     elif options['undeploy']:
@@ -222,7 +227,8 @@ if __name__ == '__main__':
             for terminal in TerminalFilter(expr):
                 terminal.undeploy(force=force)
 
-        update_nagios()
+        if reload:
+            update_nagios()
 
     # Set user permissions
     elif options['permit']:
