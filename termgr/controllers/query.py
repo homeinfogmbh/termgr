@@ -75,10 +75,10 @@ class TerminalQuery(WsgiApp):
 
         if terminal.location is not None:
             address_dom = dom.Address()
-            address_dom.street = terminal.location.street
-            address_dom.house_number = terminal.location.house_number
-            address_dom.city = terminal.location.city
-            address_dom.zip_code = terminal.location.zip_code
+            address_dom.street = terminal.location.address.street
+            address_dom.house_number = terminal.location.address.house_number
+            address_dom.city = terminal.location.address.city
+            address_dom.zip_code = terminal.location.address.zip_code
             terminal_dom.location = address_dom
         else:
             terminal_dom.location = None
