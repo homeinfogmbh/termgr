@@ -32,7 +32,6 @@ class TerminalManager(WsgiApp):
         """Runs the terminal manager"""
         query_string = self.query_string(environ)
         qd = self.qd(query_string)
-        cqd = self.cqd(qd)
         auth = False
         user_name = qd.get('user_name')
 
@@ -78,8 +77,8 @@ class TerminalManager(WsgiApp):
             if action is None:
                 return Error('No action specified', status=400)
             elif action == 'terminals':
-                deleted = cqd.get('deleted')
-                deployed = cqd.get('deployed')
+                deleted = True if qd.get('deleted') else False
+                deployed = True if qd.get('deployed') else False
 
                 return self._list_terminals(
                     cid, class_id=class_id, class_name=class_name,
