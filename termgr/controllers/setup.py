@@ -128,7 +128,7 @@ class SetupControllerRequestHandler(RequestHandler):
             status, content_type, response_body, charset=charset, cors=True)
 
 
-@handler(RequestHandler)
+@handler(SetupControllerRequestHandler)
 class SetupController(WsgiApp):
     """Controller for terminal setup automation"""
 
