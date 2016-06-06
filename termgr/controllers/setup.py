@@ -2,8 +2,8 @@
 
 from peewee import DoesNotExist
 
-from homeinfo.lib.wsgi import WsgiApp, WsgiResponse, Error,\
-    InternalServerError
+from homeinfo.lib.wsgi import WsgiResponse, Error, InternalServerError, \
+    handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
 from ..lib.openvpn import OpenVPNPackager
@@ -13,19 +13,12 @@ from ..orm import User
 __all__ = ['SetupController']
 
 
-class SetupController(WsgiApp):
-    """Controller for terminal setup automation"""
+class SetupControllerRequestHandler(RequestHandler):
+    """Handles requests for the SetupController"""
 
-    DEBUG = True
-
-    def __init__(self):
-        """Initialize with CORS enabled"""
-        super().__init__(cors=True)
-
-    def get(self, environ):
+    def get(self):
         """Interpret query dictionary"""
-        query_string = self.query_string(environ)
-        qd = self.qd(query_string)
+        qd = self.query_dict
         user_name = qd.get('user_name')
 
         if not user_name:
@@ -133,3 +126,14 @@ class SetupController(WsgiApp):
 
         return WsgiResponse(
             status, content_type, response_body, charset=charset, cors=True)
+
+
+@handler(RequestHandler)
+class SetupController(WsgiApp):
+    """Controller for terminal setup automation"""
+
+    DEBUG = True
+
+    def __init__(self):
+        """Initialize with CORS enabled"""
+        super().__init__(cors=True)

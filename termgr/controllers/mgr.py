@@ -5,7 +5,7 @@ from threading import Thread
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
-from homeinfo.lib.wsgi import WsgiApp, Error, OK
+from homeinfo.lib.wsgi import Error, OK, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, Class
 
 from ..lib import dom
@@ -15,23 +15,12 @@ from ..orm import User
 __all__ = ['TerminalManager']
 
 
-class TerminalManager(WsgiApp):
-    """Lists, adds and removes terminals
+class TerminalManagerRequestHandler(RequestHandler):
+    """Handles requests for the TerminalManager"""
 
-    The terminal manager is used for
-    internal terminal management
-    """
-
-    DEBUG = True
-
-    def __init__(self):
-        """Initialize with CORS enabled"""
-        super().__init__(cors=True)
-
-    def get(self, environ):
+    def get(self):
         """Runs the terminal manager"""
-        query_string = self.query_string(environ)
-        qd = self.qd(query_string)
+        qd = self.query_dict
         auth = False
         user_name = qd.get('user_name')
 
@@ -286,3 +275,18 @@ class TerminalManager(WsgiApp):
                 result.details = details
 
                 return OK(result, content_type='application/xml')
+
+
+@handler(TerminalManagerRequestHandler)
+class TerminalManager(WsgiApp):
+    """Lists, adds and removes terminals
+
+    The terminal manager is used for
+    internal terminal management
+    """
+
+    DEBUG = True
+
+    def __init__(self):
+        """Initialize with CORS enabled"""
+        super().__init__(cors=True)
