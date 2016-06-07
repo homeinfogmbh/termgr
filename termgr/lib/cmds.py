@@ -136,3 +136,4 @@ class Commands():
     UPGRADE = PackageManagerCommand(None, '-Syu')
     UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
     CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
+    REBOOT = RebootCommand()
