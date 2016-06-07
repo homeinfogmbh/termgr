@@ -33,7 +33,7 @@ class TerminalCommand():
     def __call__(self, terminal, user=None):
         user = self.user if user is None else user
         remote_controller = self.remote_controller(user, terminal)
-        return self.remote_controller.execute(self.cmd, *self.args)
+        return remote_controller.execute(self.cmd, *self.args)
 
     def __iter__(self):
         yield self.cmd
