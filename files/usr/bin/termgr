@@ -37,46 +37,15 @@ from homeinfo.terminals.orm import Terminal
 
 from termgr.lib.cmds import TERMGR_USER, RebootCommand, PackageManagerCommand,\
     CheckInitcpioConfig, CheckPacmanConfig, Commands
+from termgr.lib.filter import deployed, online
+from termgr.lib.tui import printterm
 
 
 VERBOSE = False
 
 
-def deployed(terminals):
-    """Filters only deployed terminals"""
-
-    NULL = timedelta(0)
-
-    for terminal in terminals:
-        if terminal.deployed is None:
-            logger.warning('Terminal {0} is not deployed'.format(terminal))
-        elif terminal.deployed - datetime.now() > NULL:
-            logger.warning('Terminal {0} is not yet deployed'.format(terminal))
-        else:
-            yield terminal
-
-
-def online(terminals):
-    """Yields terminals that are online"""
-
-    for terminal in terminals:
-        if terminal.status:
-            yield terminal
-
-
-def printterm(terminal, process_result):
-    """Prints a process result"""
-
-    try:
-        msg = process_result.stdout.decode().strip()
-    except (TypeError, ValueError, AttributeError):
-        msg = process_result.stdout
-
-    print(terminal, msg, sep=': ')
-
-
 # ### Command wrappers ### #
-def _upgrade(terminal):
+def upgrade(terminal):
     """Upgrades a terminal"""
 
     logger.info('Upgrading: {}'.format(terminal))
@@ -88,10 +57,10 @@ def _upgrade(terminal):
         logger.error('Upgrade failed: {}'.format(terminal))
 
         if VERBOSE:
-            logger.debug(str(result))
+            printterm(terminal, result)
 
 
-def _reboot(terminal):
+def reboot(terminal):
     """Reboots a terminal"""
 
     logger.info('Rebooting: {}'.format(terminal))
@@ -129,7 +98,7 @@ if __name__ == '__main__':
         # Perform selected operation
         if options['upgrade']:
             with Parallelization(
-                    _upgrade,
+                    upgrade,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -137,7 +106,7 @@ if __name__ == '__main__':
                     doggy.start(para.threads)
         elif options['reboot']:
             with Parallelization(
-                    _reboot,
+                    reboot,
                     terminals,
                     blocking=False,
                     single=True) as para:
