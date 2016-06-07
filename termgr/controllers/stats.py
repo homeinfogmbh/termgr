@@ -1,17 +1,17 @@
 """Controller for terminal setup"""
 
-from homeinfo.lib.wsgi import WsgiApp, Error, OK, InternalServerError
+from homeinfo.lib.wsgi import Error, OK, InternalServerError, handler, \
+    RequestHandler, WsgiApp
 from homeinfo.terminals.orm import AccessStats
 
 __all__ = ['StatsController']
 
 
-class StatsController(WsgiApp):
-    """Controller for terminal statistics"""
+class StatsControllerRequestHandler(RequestHandler):
+    """Handles requests for the StatsController"""
 
-    def __init__(self):
-        """Initialize with CORS enabled"""
-        super().__init__(cors=True)
+    def __init__(self, environ):
+        super().__init__(environ)
         self._tokens = []
 
         with open('/etc/termstats.tokens', 'r') as tokens:
@@ -27,10 +27,9 @@ class StatsController(WsgiApp):
                 else:
                     self._tokens.append(line)
 
-    def get(self, environ):
+    def get(self):
         """Interpret query dictionary"""
-        query_string = self.query_string(environ)
-        qd = self.qd(query_string)
+        qd = self.query_dict
         token = qd.get('token')
 
         # Authenticate
@@ -71,3 +70,12 @@ class StatsController(WsgiApp):
                 return Error('No document specified', status=400)
         else:
             return Error('Not authenticated', status=401)
+
+
+@handler(StatsControllerRequestHandler)
+class StatsController(WsgiApp):
+    """Controller for terminal statistics"""
+
+    def __init__(self):
+        """Initialize with CORS enabled"""
+        super().__init__(cors=True)
