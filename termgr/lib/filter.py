@@ -1,14 +1,21 @@
 """Terminal filtering"""
 
 from datetime import datetime, timedelta
+from logging import getLogger
 
 __all__ = ['deployed', 'online']
 
 
-def deployed(terminals):
+def deployed(terminals, logger=None):
     """Filters only deployed terminals"""
 
+    NAME = 'Deployment filter'
     NULL = timedelta(0)
+
+    if logger is None:
+        logger = getLogger(NAME)
+    else:
+        logger = logger.getChild(NAME)
 
     for terminal in terminals:
         if terminal.deployed is None:
