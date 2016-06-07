@@ -2,6 +2,8 @@
 
 from homeinfo.terminals.ctrl import RemoteController
 
+from .tui import printterm
+
 __all__ = [
     'TerminalCommand',
     'RebootCommand',
