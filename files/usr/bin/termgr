@@ -23,11 +23,8 @@ Options:
 from os import geteuid
 from sys import stderr
 from getpass import getuser
-from datetime import datetime, timedelta
 from logging import INFO, getLogger, basicConfig
 from os.path import basename
-
-from docopt import docopt
 
 from homeinfo.lib.system import Parallelization, Watchdog
 
@@ -68,6 +65,8 @@ def reboot(terminal):
 
 
 if __name__ == '__main__':
+    from docopt import docopt
+
     options = docopt(__doc__)
     logger = getLogger(basename(__file__))
     basicConfig(level=INFO)

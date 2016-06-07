@@ -1,5 +1,7 @@
 """Terminal filtering"""
 
+from datetime import datetime, timedelta
+
 __all__ = ['deployed', 'online']
 
 
