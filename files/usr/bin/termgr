@@ -75,6 +75,29 @@ def printterm(terminal, process_result):
     print(terminal, msg, sep=': ')
 
 
+# ### Command wrappers ### #
+def _upgrade(terminal):
+    """Upgrades a terminal"""
+
+    logger.info('Upgrading: {}'.format(terminal))
+    result = Commands.UPGRADE(terminal)
+
+    if result:
+        logger.debug('Upgraded: {}'.format(terminal))
+    else:
+        logger.error('Upgrade failed: {}'.format(terminal))
+
+        if VERBOSE:
+            logger.debug(str(result))
+
+
+def _reboot(terminal):
+    """Reboots a terminal"""
+
+    logger.info('Rebooting: {}'.format(terminal))
+    Commands.RebootCommand()(terminal)
+
+
 if __name__ == '__main__':
     options = docopt(__doc__)
     logger = getLogger(basename(__file__))
@@ -106,7 +129,7 @@ if __name__ == '__main__':
         # Perform selected operation
         if options['upgrade']:
             with Parallelization(
-                    Commands.UPGRADE,
+                    _upgrade,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -114,7 +137,7 @@ if __name__ == '__main__':
                     doggy.start(para.threads)
         elif options['reboot']:
             with Parallelization(
-                    RebootCommand(),
+                    _reboot,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -135,6 +158,7 @@ if __name__ == '__main__':
             packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
             fix_packages = PackageManagerCommand(
                 packages, '--asexplicit', '-S')
+
             with Parallelization(
                     fix_packages,
                     terminals,
@@ -150,10 +174,12 @@ if __name__ == '__main__':
                 modules=modules,
                 hooks=hooks,
                 compression=compression)
+
             for terminal in online(terminals):
                 chk_initcpio(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
             chk_pacman = CheckPacmanConfig(siglevel=siglevel)
+
             for terminal in online(terminals):
                 chk_pacman(terminal)
