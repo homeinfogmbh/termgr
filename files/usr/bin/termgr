@@ -35,7 +35,7 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
-from termgr.lib.cmds import TERMGR_USER, RebootCommand, PackageManagerCommand,\
+from termgr.lib.cmds import TERMGR_USER, PackageManagerCommand,\
     CheckInitcpioConfig, CheckPacmanConfig, Commands
 from termgr.lib.filter import deployed, online
 from termgr.lib.tui import printterm
@@ -64,7 +64,7 @@ def reboot(terminal):
     """Reboots a terminal"""
 
     logger.info('Rebooting: {}'.format(terminal))
-    Commands.RebootCommand()(terminal)
+    Commands.REBOOT(terminal)
 
 
 if __name__ == '__main__':
