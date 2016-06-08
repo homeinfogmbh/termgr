@@ -45,9 +45,13 @@ class TerminalCheckerRequestHandler(RequestHandler):
                     for terminal in Terminal:
                         if user.authorize(terminal, read=True):
                             try:
-                                terminals = d[terminal.customer.id]
+                                customer = d[terminal.customer.id]
                             except KeyError:
-                                terminals = d[terminal.customer.id] = {}
+                                customer = d[terminal.customer.id] = {}
+                                customer['name'] = terminal.customer.name
+                                terminals = customer['terminals'] = {}
+                            else:
+                                terminals = customer['terminals']
 
                             terminals[terminal.tid] = repr(terminal.location)
 
