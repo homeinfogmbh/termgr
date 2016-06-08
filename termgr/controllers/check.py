@@ -43,7 +43,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                              user.authorize(terminal, read=True)]
                     text = '\n'.join(lines)
                     return OK(lines)
-                elif action == 'identify'
+                elif action == 'identify':
                     try:
                         tid = qd['tid']
                     except KeyError:
