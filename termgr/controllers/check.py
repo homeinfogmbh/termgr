@@ -39,7 +39,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                     lines = [template.format(
                                 id=str(terminal),
                                 addr=repr(terminal.location)) for
-                             terminal in Terminals if
+                             terminal in Terminal if
                              user.authorize(terminal, read=True)]
                     text = '\n'.join(lines)
                     return OK(lines)
