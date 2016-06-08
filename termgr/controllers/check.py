@@ -57,7 +57,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
 
                     # Build JSON dict from grouped terminals
                     customers_json = []
-                    json = {'customers': customers}
+                    json = {'customers': customers_json}
 
                     for cid in customer_terminals:
                         customer, terminals = customer_terminals[cid]
