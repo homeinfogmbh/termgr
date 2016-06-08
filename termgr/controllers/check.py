@@ -2,8 +2,8 @@
 
 from peewee import DoesNotExist
 
-from homeinfo.terminal.orm import Terminal
-from homeinfo.terminal.ctrl import RemoteController
+from homeinfo.terminals.orm import Terminal
+from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.lib.wsgi import Error, OK, handler, RequestHandler, WsgiApp
 
 from .orm import User
