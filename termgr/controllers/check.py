@@ -44,7 +44,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                              terminal in Terminal if
                              user.authorize(terminal, read=True)]
                     text = '\n'.join(lines)
-                    return OK(lines)
+                    return OK(text)
                 elif action == 'identify':
                     try:
                         tid = qd['tid']
