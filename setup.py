@@ -23,11 +23,13 @@ setup(
             'files/usr/bin/termgr',
             'files/usr/bin/termadm']),
         ('/usr/share/termgr', [
+            'files/usr/share/termgr/check.wsgi',
             'files/usr/share/termgr/mgr.wsgi',
             'files/usr/share/termgr/query.wsgi',
             'files/usr/share/termgr/setup.wsgi',
             'files/usr/share/termgr/stats.wsgi']),
         ('/etc/uwsgi/apps-available', [
+            'files/etc/uwsgi/apps-available/check.ini',
             'files/etc/uwsgi/apps-available/termgr.ini',
             'files/etc/uwsgi/apps-available/termquery.ini',
             'files/etc/uwsgi/apps-available/termsetup.ini',
