@@ -86,7 +86,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                                 'Could not get display to beep')
                     else:
                         return Error('You are not authorized to identify '
-                                     'this terminal', error=400)
+                                     'this terminal', status=400)
                 else:
                     return Error('Invalid action: {}'.format(action),
                                  status=400)
