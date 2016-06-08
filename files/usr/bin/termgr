@@ -23,11 +23,8 @@ Options:
 from os import geteuid
 from sys import stderr
 from getpass import getuser
-from datetime import datetime, timedelta
 from logging import INFO, getLogger, basicConfig
 from os.path import basename
-
-from docopt import docopt
 
 from homeinfo.lib.system import Parallelization, Watchdog
 
@@ -35,47 +32,41 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
-from termgr.lib.cmds import TERMGR_USER, RebootCommand, PackageManagerCommand,\
+from termgr.lib.cmds import TERMGR_USER, PackageManagerCommand,\
     CheckInitcpioConfig, CheckPacmanConfig, Commands
+from termgr.lib.filter import deployed, online
+from termgr.lib.tui import printterm
 
 
 VERBOSE = False
 
 
-def deployed(terminals):
-    """Filters only deployed terminals"""
+# ### Command wrappers ### #
+def upgrade(terminal):
+    """Upgrades a terminal"""
 
-    NULL = timedelta(0)
+    logger.info('Upgrading: {}'.format(terminal))
+    result = Commands.UPGRADE(terminal)
 
-    for terminal in terminals:
-        if terminal.deployed is None:
-            logger.warning('Terminal {0} is not deployed'.format(terminal))
-        elif terminal.deployed - datetime.now() > NULL:
-            logger.warning('Terminal {0} is not yet deployed'.format(terminal))
-        else:
-            yield terminal
+    if result:
+        logger.debug('Upgraded: {}'.format(terminal))
+    else:
+        logger.error('Upgrade failed: {}'.format(terminal))
 
-
-def online(terminals):
-    """Yields terminals that are online"""
-
-    for terminal in terminals:
-        if terminal.status:
-            yield terminal
+        if VERBOSE:
+            printterm(terminal, result)
 
 
-def printterm(terminal, process_result):
-    """Prints a process result"""
+def reboot(terminal):
+    """Reboots a terminal"""
 
-    try:
-        msg = process_result.stdout.decode().strip()
-    except (TypeError, ValueError, AttributeError):
-        msg = process_result.stdout
-
-    print(terminal, msg, sep=': ')
+    logger.info('Rebooting: {}'.format(terminal))
+    Commands.REBOOT(terminal)
 
 
 if __name__ == '__main__':
+    from docopt import docopt
+
     options = docopt(__doc__)
     logger = getLogger(basename(__file__))
     basicConfig(level=INFO)
@@ -101,12 +92,12 @@ if __name__ == '__main__':
 
         # Filter out undeployed terminals
         if not options['--undeployed']:
-            terminals = deployed(terminals)
+            terminals = deployed(terminals, logger=logger)
 
         # Perform selected operation
         if options['upgrade']:
             with Parallelization(
-                    Commands.UPGRADE,
+                    upgrade,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -114,7 +105,7 @@ if __name__ == '__main__':
                     doggy.start(para.threads)
         elif options['reboot']:
             with Parallelization(
-                    RebootCommand(),
+                    reboot,
                     terminals,
                     blocking=False,
                     single=True) as para:
@@ -135,6 +126,7 @@ if __name__ == '__main__':
             packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
             fix_packages = PackageManagerCommand(
                 packages, '--asexplicit', '-S')
+
             with Parallelization(
                     fix_packages,
                     terminals,
@@ -150,10 +142,12 @@ if __name__ == '__main__':
                 modules=modules,
                 hooks=hooks,
                 compression=compression)
+
             for terminal in online(terminals):
                 chk_initcpio(terminal)
         elif options['chkpacman']:
             siglevel = options['--siglevel']
             chk_pacman = CheckPacmanConfig(siglevel=siglevel)
+
             for terminal in online(terminals):
                 chk_pacman(terminal)

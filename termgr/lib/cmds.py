@@ -2,6 +2,8 @@
 
 from homeinfo.terminals.ctrl import RemoteController
 
+from .tui import printterm
+
 __all__ = [
     'TerminalCommand',
     'RebootCommand',
@@ -31,7 +33,7 @@ class TerminalCommand():
     def __call__(self, terminal, user=None):
         user = self.user if user is None else user
         remote_controller = self.remote_controller(user, terminal)
-        return self.remote_controller.execute(self.cmd, *self.args)
+        return remote_controller.execute(self.cmd, *self.args)
 
     def __iter__(self):
         yield self.cmd
@@ -134,3 +136,4 @@ class Commands():
     UPGRADE = PackageManagerCommand(None, '-Syu')
     UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
     CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
+    REBOOT = RebootCommand()
