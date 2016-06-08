@@ -40,24 +40,44 @@ class TerminalCheckerRequestHandler(RequestHandler):
                 return Error('No action specified', status=400)
             else:
                 if action == 'list':
-                    d = {}
+                    # Group terminals to customers
+                    customer_terminals = {}
 
                     for terminal in Terminal:
                         if user.authorize(terminal, read=True):
                             try:
-                                customer = d[terminal.customer.id]
+                                _, terminals = customer_terminals[
+                                    terminal.customer.id]
                             except KeyError:
-                                customer = d[terminal.customer.id] = {}
-                                customer['name'] = terminal.customer.name
-                                terminals = customer['terminals'] = {}
-                            else:
-                                terminals = customer['terminals']
+                                _, terminals = customer_terminals[
+                                    terminal.customer.id] = (
+                                        terminal.customer, [])
 
-                            terminals[terminal.tid] = repr(terminal.location)
+                            terminals.append(terminal)
 
-                    json = dumps(d)
+                    # Build JSON dict from grouped terminals
+                    customers_json = []
+                    json = {'customers': customers}
 
-                    return OK(json, content_type='application/json')
+                    for cid in customer_terminals:
+                        customer, terminals = customer_terminals[cid]
+                        terminals_json = []
+
+                        for terminal in terminals:
+                            terminal_json = {
+                                'id': terminal.tid,
+                                'location': repr(terminal.location)}
+
+                            terminals_json.append(terminal_json)
+
+                        customer_json = {
+                            'id': customer.id,
+                            'name': customer.name,
+                            'terminals': terminals_json}
+
+                        customers_json.append(customer_json)
+
+                    return OK(dumps(json), content_type='application/json')
                 elif action == 'identify':
                     try:
                         tid = qd['tid']
