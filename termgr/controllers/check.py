@@ -28,7 +28,9 @@ class TerminalCheckerRequestHandler(RequestHandler):
         except KeyError:
             return Error('No password provided', status=400)
 
-        if User.authenticate(user_name, passwd):
+        user = User.authenticate(user_name, passwd)
+
+        if user:
             try:
                 action = qd['action']
             except KeyError:
