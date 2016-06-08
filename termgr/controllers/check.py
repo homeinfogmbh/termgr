@@ -1,5 +1,7 @@
 """Terminal checking web service"""
 
+from json import dumps
+
 from peewee import DoesNotExist
 
 from homeinfo.terminals.orm import Terminal
@@ -38,14 +40,20 @@ class TerminalCheckerRequestHandler(RequestHandler):
                 return Error('No action specified', status=400)
             else:
                 if action == 'list':
-                    template = '{id}\t{addr}'
-                    lines = [template.format(
-                                id=str(terminal),
-                                addr=repr(terminal.location)) for
-                             terminal in Terminal if
-                             user.authorize(terminal, read=True)]
-                    text = '\n'.join(lines)
-                    return OK(text)
+                    d = {}
+
+                    for terminal in Terminal:
+                        if user.authorize(terminal, read=True):
+                            try:
+                                terminals = d[terminal.customer.id]
+                            except KeyError:
+                                terminals = d[terminal.customer.id] = {}
+
+                            terminals[terminal.tid] = repr(terminal.location)
+
+                    json = dumps(d)
+
+                    return OK(json, content_type='application/json')
                 elif action == 'identify':
                     try:
                         tid = qd['tid']
