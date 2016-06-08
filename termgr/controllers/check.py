@@ -107,7 +107,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
         customers_json = []
         json = {'customers': customers_json}
 
-        for cid in customer_terminals:
+        for cid in customers:
             customer, terminals = customer_terminals[cid]
             terminals_json = []
 
