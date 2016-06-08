@@ -78,7 +78,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                         remote_controller = RemoteController(
                             'termgr', terminal)
                         remote_controller.execute(
-                            ['/usr/bin/sudo', '/usr/bin/beep'])
+                            '/usr/bin/sudo /usr/bin/beep')
                     else:
                         return Error('You are not authorized to identify '
                                      'this terminal', error=400)
