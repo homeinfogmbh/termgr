@@ -6,7 +6,7 @@ from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.lib.wsgi import Error, OK, handler, RequestHandler, WsgiApp
 
-from .orm import User
+from termgr.orm import User
 
 __all__ = ['TerminalChecker']
 
