@@ -40,44 +40,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                 return Error('No action specified', status=400)
             else:
                 if action == 'list':
-                    # Group terminals to customers
-                    customer_terminals = {}
-
-                    for terminal in Terminal:
-                        if user.authorize(terminal, read=True):
-                            try:
-                                _, terminals = customer_terminals[
-                                    terminal.customer.id]
-                            except KeyError:
-                                _, terminals = customer_terminals[
-                                    terminal.customer.id] = (
-                                        terminal.customer, [])
-
-                            terminals.append(terminal)
-
-                    # Build JSON dict from grouped terminals
-                    customers_json = []
-                    json = {'customers': customers_json}
-
-                    for cid in customer_terminals:
-                        customer, terminals = customer_terminals[cid]
-                        terminals_json = []
-
-                        for terminal in terminals:
-                            terminal_json = {
-                                'id': terminal.tid,
-                                'location': repr(terminal.location)}
-
-                            terminals_json.append(terminal_json)
-
-                        customer_json = {
-                            'id': customer.id,
-                            'name': customer.name,
-                            'terminals': terminals_json}
-
-                        customers_json.append(customer_json)
-
-                    return OK(dumps(json), content_type='application/json')
+                    return self._list()
                 elif action == 'identify':
                     try:
                         tid = qd['tid']
@@ -124,6 +87,45 @@ class TerminalCheckerRequestHandler(RequestHandler):
                                  status=400)
         else:
             return Error('Invalid credentials', status=400)
+
+    def _list(self):
+        """List customer terminals"""
+        # Group terminals to customers
+        customers = {}
+
+        for terminal in Terminal:
+            if user.authorize(terminal, read=True):
+                try:
+                    _, terminals = customers[terminal.customer.id]
+                except KeyError:
+                    customer, terminals = (terminal.customer, [])
+                    customers[terminal.customer.id] = (customer, terminals)
+
+                terminals.append(terminal)
+
+        # Build JSON dict from grouped terminals
+        customers_json = []
+        json = {'customers': customers_json}
+
+        for cid in customer_terminals:
+            customer, terminals = customer_terminals[cid]
+            terminals_json = []
+
+            for terminal in terminals:
+                terminal_json = {
+                    'id': terminal.tid,
+                    'location': repr(terminal.location)}
+
+                terminals_json.append(terminal_json)
+
+            customer_json = {
+                'id': customer.id,
+                'name': customer.name,
+                'terminals': terminals_json}
+
+            customers_json.append(customer_json)
+
+        return OK(dumps(json), content_type='application/json')
 
 
 @handler(TerminalCheckerRequestHandler)
