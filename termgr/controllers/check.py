@@ -4,7 +4,8 @@ from peewee import DoesNotExist
 
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.ctrl import RemoteController
-from homeinfo.lib.wsgi import Error, OK, handler, RequestHandler, WsgiApp
+from homeinfo.lib.wsgi import Error, InternalServerError, OK, handler, \
+    RequestHandler, WsgiApp
 
 from termgr.orm import User
 
@@ -77,8 +78,12 @@ class TerminalCheckerRequestHandler(RequestHandler):
                     if user.authorize(terminal, read=True):
                         remote_controller = RemoteController(
                             'termgr', terminal)
-                        remote_controller.execute(
-                            '/usr/bin/sudo /usr/bin/beep')
+                        if remote_controller.execute(
+                                '/usr/bin/sudo /usr/bin/beep'):
+                            return OK('Display should have beeped')
+                        else:
+                            return InternalServerError(
+                                'Could not get display to beep')
                     else:
                         return Error('You are not authorized to identify '
                                      'this terminal', error=400)
