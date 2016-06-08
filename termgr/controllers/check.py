@@ -40,7 +40,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                 return Error('No action specified', status=400)
             else:
                 if action == 'list':
-                    return self._list()
+                    return self._list(user)
                 elif action == 'identify':
                     try:
                         tid = qd['tid']
@@ -88,7 +88,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
         else:
             return Error('Invalid credentials', status=400)
 
-    def _list(self):
+    def _list(self, user):
         """List customer terminals"""
         # Group terminals to customers
         customers = {}
