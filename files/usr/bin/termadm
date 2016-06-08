@@ -225,7 +225,7 @@ if __name__ == '__main__':
     elif options['undeploy']:
         for expr in options['<expr>']:
             for terminal in TerminalFilter(expr):
-                terminal.undeploy(force=force)
+                terminal.undeploy()
 
         if reload:
             update_nagios()
