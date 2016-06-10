@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
             if result:
                 with suppress(AttributeError):
-                    print(result.stdout.decode())
+                    print(result.stdout.decode().strip())
 
                 exit(0)
             else:
