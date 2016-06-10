@@ -3,6 +3,8 @@ ECHO = /bin/echo -e
 
 install:
 	@ ./compile.sh files/termexec.py build/termexec
+	@ chown root.root build/termexec
+	@ chmod +s build/termexec
 	@ ./setup.py install --record $(FILE_LIST)
 
 uninstall:
