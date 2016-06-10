@@ -3,7 +3,7 @@ ECHO = /bin/echo -e
 
 install:
 	@ ./compile.sh files/termexec.py files/termexec
-	@ chown root.root files/termexec
+	@ chown termgr.termgr files/termexec
 	@ chmod +s files/termexec
 	@ ./setup.py install --record $(FILE_LIST)
 
