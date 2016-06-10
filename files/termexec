@@ -1,0 +1,37 @@
+#! /usr/bin/env python3
+"""Terminal execitions
+
+Usage:
+    termexec <cmdline> <expr>... [options]
+
+Options:
+    --help          Show this page.
+"""
+from contextlib import suppress
+
+from homeinfo.terminals.filter import TerminalFilter
+from homeinfo.terminals.ctrl import RemoteController
+
+USER = 'termgr'
+
+
+if __name__ == '__main__':
+    from docopt import docopt
+
+    options = docopt(__doc__)
+
+    for expr in options['<expr>']:
+        for terminal in TerminalFilter(expr):
+            rc = RemoteController(USER, terminal)
+            result = rc.execute(options['<cmdline>'])
+
+            if result:
+                with suppress(AttributeError):
+                    print(result.stdout.decode())
+
+                exit(0)
+            else:
+                with suppress(AttributeError):
+                    print(result.sterr.decode())
+
+                exit(2)
