@@ -17,5 +17,5 @@ if [ "$(file -bi ${PYTHON_SCRIPT})" == "text/x-python; charset=us-ascii" ]; then
 	rm ${TMP}
 else
 	echo "Not a python script: ${PYTHON_SCRIPT}" 1>&2
-	return 1
+	exit 1
 fi
