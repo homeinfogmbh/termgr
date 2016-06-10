@@ -31,7 +31,5 @@ if __name__ == '__main__':
 
                 exit(0)
             else:
-                with suppress(AttributeError):
-                    print(result.sterr.decode())
-
+                print(result)
                 exit(2)
