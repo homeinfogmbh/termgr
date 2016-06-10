@@ -2,6 +2,7 @@ FILE_LIST = ./.installed_files.txt
 ECHO = /bin/echo -e
 
 install:
+	@ ./compile.sh files/termexec.py build/termexec
 	@ ./setup.py install --record $(FILE_LIST)
 
 uninstall:
@@ -20,5 +21,3 @@ pull:
 
 push:
 	@ git push
-
-all:	pull uninstall clean install

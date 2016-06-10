@@ -21,7 +21,8 @@ setup(
         ('/etc', ['files/etc/termgr.conf']),
         ('/usr/bin', [
             'files/usr/bin/termgr',
-            'files/usr/bin/termadm']),
+            'files/usr/bin/termadm',
+            'build/termexec']),
         ('/usr/share/termgr', [
             'files/usr/share/termgr/check.wsgi',
             'files/usr/share/termgr/mgr.wsgi',
