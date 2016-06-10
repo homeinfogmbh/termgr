@@ -2,10 +2,11 @@ FILE_LIST = ./.installed_files.txt
 ECHO = /bin/echo -e
 
 install:
+	@ ./setup.py install --record $(FILE_LIST)
 	@ ./compile.sh files/termexec.py files/termexec
 	@ chown termgr.termgr files/termexec
 	@ chmod +s files/termexec
-	@ ./setup.py install --record $(FILE_LIST)
+	@ install files/termexec /usr/bin/termexec
 
 uninstall:
 	@ while read FILE; do
