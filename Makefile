@@ -3,10 +3,9 @@ ECHO = /bin/echo -e
 
 install:
 	@ ./setup.py install --record $(FILE_LIST)
-	@ ./compile.sh files/termexec.py files/termexec
-	@ chown termgr.termgr files/termexec
-	@ chmod +s files/termexec
-	@ install files/termexec /usr/bin/termexec
+	@ ./compile.sh files/termexec.py /usr/bin/termexec
+	@ chown termgr.termgr /usr/bin/termexec
+	@ chmod +s /usr/bin/termexec
 
 uninstall:
 	@ while read FILE; do
