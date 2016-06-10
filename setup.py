@@ -22,7 +22,7 @@ setup(
         ('/usr/bin', [
             'files/usr/bin/termgr',
             'files/usr/bin/termadm',
-            'build/termexec']),
+            'files/termexec']),
         ('/usr/share/termgr', [
             'files/usr/share/termgr/check.wsgi',
             'files/usr/share/termgr/mgr.wsgi',
