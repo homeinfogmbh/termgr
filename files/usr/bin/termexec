@@ -5,10 +5,10 @@ Usage:
     termexec <cmdline> <expr>... [options]
 
 Options:
-    --user=<user>       Set remote user [default: termgr].
+    --user=<user>           Set remote user [default: termgr].
     --keyfile=<key_file>    Set private key file \
 [default: /var/lib/nagios/.ssh/terminals].
-    --help              Show this page.
+    --help                  Show this page.
 """
 from contextlib import suppress
 
