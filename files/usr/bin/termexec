@@ -5,14 +5,15 @@ Usage:
     termexec <cmdline> <expr>... [options]
 
 Options:
-    --help          Show this page.
+    --user=<user>       Set remote user [default: termgr].
+    --keyfile=<key_file>    Set private key file \
+[default: /var/lib/nagios/.ssh/terminals].
+    --help              Show this page.
 """
 from contextlib import suppress
 
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.ctrl import RemoteController
-
-USER = 'termgr'
 
 
 if __name__ == '__main__':
@@ -20,9 +21,12 @@ if __name__ == '__main__':
 
     options = docopt(__doc__)
 
+    user = options['--user']
+    keyfile = options['--keyfile']
+
     for expr in options['<expr>']:
         for terminal in TerminalFilter(expr):
-            rc = RemoteController(USER, terminal)
+            rc = RemoteController(user, terminal, keyfile=keyfile)
             result = rc.execute(options['<cmdline>'])
 
             if result:
