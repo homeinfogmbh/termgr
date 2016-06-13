@@ -142,7 +142,7 @@ if __name__ == '__main__':
                     single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
-        if options['system-upgrade']:
+        elif options['system-upgrade']:
             with Parallelization(
                     upgrade,
                     terminals,
@@ -150,7 +150,7 @@ if __name__ == '__main__':
                     single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
-        if options['upgrade-application']:
+        elif options['upgrade-application']:
             with Parallelization(
                     upgrade_application,
                     terminals,
