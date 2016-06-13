@@ -7,7 +7,7 @@
 
 
 Usage:
-    termgr (update | system-upgrade | upgrade-application <expr> [options]
+    termgr (update | system-upgrade | upgrade-application) <expr> [options]
     termgr (reboot | chkres | unlock) <expr> [options]
     termgr fixpkg <expr> <pkgs>...
     termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
