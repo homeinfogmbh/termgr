@@ -46,16 +46,16 @@ VERBOSE = False
 def update(terminal):
     """Updates a terminal"""
 
-    logger.info('Upgrading: {}'.format(terminal))
+    logger.info('Updating: {}'.format(terminal))
     cleanup = Commands.CLEANUP(terminal)
 
     if cleanup:
         update = Commands.UPDATE(terminal)
 
         if update:
-            logger.debug('Upgraded: {}'.format(terminal))
+            logger.debug('Updated: {}'.format(terminal))
         else:
-            logger.error('Upgrade failed: {}'.format(terminal))
+            logger.error('Update failed: {}'.format(terminal))
 
             if VERBOSE:
                 printterm(terminal, update)
@@ -84,13 +84,13 @@ def upgrade(terminal):
 def upgrade_application(terminal):
     """Upgrades application on a terminal"""
 
-    logger.info('Upgrading: {}'.format(terminal))
+    logger.info('Upgrading application: {}'.format(terminal))
     result = Commands.UPGRADE_PKG('application')(terminal)
 
     if result:
-        logger.debug('Upgraded: {}'.format(terminal))
+        logger.debug('Upgraded application: {}'.format(terminal))
     else:
-        logger.error('Upgrade failed: {}'.format(terminal))
+        logger.error('Application upgrade failed: {}'.format(terminal))
 
         if VERBOSE:
             printterm(terminal, result)
