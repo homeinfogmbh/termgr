@@ -7,7 +7,8 @@
 
 
 Usage:
-    termgr (upgrade | reboot | unlock | chkres) <expr> [options]
+    termgr (update | upgrade | upgrade-application | unlock) <expr> [options]
+    termgr (reboot | chkres) <expr> [options]
     termgr fixpkg <expr> <pkgs>...
     termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
     termgr chkpacman <expr> [--siglevel] [options]
@@ -42,11 +43,49 @@ VERBOSE = False
 
 
 # ### Command wrappers ### #
+def update(terminal):
+    """Updates a terminal"""
+
+    logger.info('Upgrading: {}'.format(terminal))
+    cleanup = Commands.CLEANUP(terminal)
+
+    if cleanup:
+        update = Commands.UPDATE(terminal)
+
+        if update:
+            logger.debug('Upgraded: {}'.format(terminal))
+        else:
+            logger.error('Upgrade failed: {}'.format(terminal))
+
+            if VERBOSE:
+                printterm(terminal, update)
+    else:
+        logger.error('Cleanup of packages failed: {}'.format(terminal))
+
+        if VERBOSE:
+            printterm(terminal, cleanup)
+
+
 def upgrade(terminal):
     """Upgrades a terminal"""
 
     logger.info('Upgrading: {}'.format(terminal))
     result = Commands.UPGRADE(terminal)
+
+    if result:
+        logger.debug('Upgraded: {}'.format(terminal))
+    else:
+        logger.error('Upgrade failed: {}'.format(terminal))
+
+        if VERBOSE:
+            printterm(terminal, result)
+
+
+def upgrade_application(terminal):
+    """Upgrades application on a terminal"""
+
+    logger.info('Upgrading: {}'.format(terminal))
+    result = Commands.UPGRADE_PKG('application')(terminal)
 
     if result:
         logger.debug('Upgraded: {}'.format(terminal))
@@ -95,9 +134,25 @@ if __name__ == '__main__':
             terminals = deployed(terminals, logger=logger)
 
         # Perform selected operation
+        if options['update']:
+            with Parallelization(
+                    update,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
         if options['upgrade']:
             with Parallelization(
                     upgrade,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
+        if options['upgrade-application']:
+            with Parallelization(
+                    upgrade_application,
                     terminals,
                     blocking=False,
                     single=True) as para:
