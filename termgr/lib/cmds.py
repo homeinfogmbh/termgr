@@ -135,7 +135,7 @@ class Commands():
     """Commonly used commands"""
 
     @staticmethod
-    def UPGRADE_PKG(*packages):
+    def INSTALL_PKGS(*packages):
         return PackageManagerCommand(packages, '-S')
 
     CLEANUP = PackageManagerCommand(None, '-Sc')
