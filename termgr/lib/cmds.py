@@ -90,7 +90,6 @@ class PackageManagerCommand(TerminalCommand):
 
         return remote_controller.execute(self.cmd, *args)
 
-    @property
     def __str__(self):
         return ' '.join(self.packages)
 
@@ -136,8 +135,8 @@ class Commands():
     """Commonly used commands"""
 
     @staticmethod
-    def UPGRADE_PKG(package):
-        return PackageManagerCommand(package, '-S')
+    def UPGRADE_PKG(*packages):
+        return PackageManagerCommand(packages, '-S')
 
     CLEANUP = PackageManagerCommand(None, '-Sc')
     UPDATE = PackageManagerCommand(None, '-Syuw')
