@@ -85,7 +85,7 @@ def upgrade_application(terminal):
     """Upgrades application on a terminal"""
 
     logger.info('Upgrading application: {}'.format(terminal))
-    result = Commands.UPGRADE_PKG('application')(terminal)
+    result = Commands.INSTALL_PKGS('application')(terminal)
 
     if result:
         logger.debug('Upgraded application: {}'.format(terminal))
