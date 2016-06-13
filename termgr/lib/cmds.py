@@ -133,7 +133,13 @@ class CheckPacmanConfig():
 class Commands():
     """Commonly used commands"""
 
-    UPGRADE = PackageManagerCommand(None, '-Syu')
+    @staticmethod
+    def UPGRADE_PKG(package):
+        return PackageManagerCommand(package, '-Sc')
+
+    CLEANUP = PackageManagerCommand(None, '-Sc')
+    UPDATE = PackageManagerCommand(None, '-Syuw')
+    UPGRADE = PackageManagerCommand(None, '-Su')
     UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
     CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')
     REBOOT = RebootCommand()
