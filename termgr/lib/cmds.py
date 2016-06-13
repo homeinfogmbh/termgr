@@ -76,22 +76,14 @@ class PackageManagerCommand(TerminalCommand):
     BASE_PKGS = ['openvpn', 'openssh', 'wget', 'beep']
 
     def __init__(self, packages, *args, user=None):
-        super().__init__(SUDO, PACMAN, '--noconfirm', *args, user=user)
         self.packages = packages
 
-    def __call__(self, terminal, user=None):
-        user = self.user if user is None else user
-        remote_controller = RemoteController(user, terminal)
-
-        if self.packages:
-            args = chain(self.args, self.packages)
+        if packages:
+            args = [a for a in chain(args, packages)]
         else:
-            args = self.args
+            args = args
 
-        return remote_controller.execute(self.cmd, *args)
-
-    def __str__(self):
-        return ' '.join(self.packages)
+        super().__init__(SUDO, PACMAN, '--noconfirm', *args, user=user)
 
 
 class CheckInitcpioConfig():
