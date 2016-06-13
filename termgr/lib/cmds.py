@@ -137,7 +137,7 @@ class Commands():
 
     @staticmethod
     def UPGRADE_PKG(package):
-        return PackageManagerCommand(package, '-Sc')
+        return PackageManagerCommand(package, '-S')
 
     CLEANUP = PackageManagerCommand(None, '-Sc')
     UPDATE = PackageManagerCommand(None, '-Syuw')
