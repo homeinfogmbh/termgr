@@ -7,8 +7,8 @@
 
 
 Usage:
-    termgr (update | upgrade | upgrade-application | unlock) <expr> [options]
-    termgr (reboot | chkres) <expr> [options]
+    termgr (update | system-upgrade | upgrade-application <expr> [options]
+    termgr (reboot | chkres | unlock) <expr> [options]
     termgr fixpkg <expr> <pkgs>...
     termgr chkinitcpio <expr> [--modules] [--hooks] [--compression] [options]
     termgr chkpacman <expr> [--siglevel] [options]
@@ -142,7 +142,7 @@ if __name__ == '__main__':
                     single=True) as para:
                 with Watchdog() as doggy:
                     doggy.start(para.threads)
-        if options['upgrade']:
+        if options['system-upgrade']:
             with Parallelization(
                     upgrade,
                     terminals,
