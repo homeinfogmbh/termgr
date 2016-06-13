@@ -1,5 +1,7 @@
 """Terminal controller commands"""
 
+from itertools import chain
+
 from homeinfo.terminals.ctrl import RemoteController
 
 from .tui import printterm
