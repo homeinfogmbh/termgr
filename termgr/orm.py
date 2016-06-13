@@ -6,8 +6,8 @@ from uuid import uuid4
 from peewee import DoesNotExist, Model, PrimaryKeyField, CharField,\
     BooleanField, ForeignKeyField
 
+from homeinfo.crm import Company
 from homeinfo.peewee import MySQLDatabase
-
 from homeinfo.terminals.orm import Terminal
 
 from .config import CONFIG
@@ -41,6 +41,7 @@ class TermgrModel(Model):
 class User(TermgrModel):
     """A generic abstract user"""
 
+    company = ForeignKeyField(Company, db_column='company')
     name = CharField(64)
     pwhash = CharField(64)
     salt = CharField(36)
