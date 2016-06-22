@@ -5,7 +5,7 @@ from threading import Thread
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
-from homeinfo.lib.wsgi import Error, OK, handler, RequestHandler, WsgiApp
+from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, Class
 
 from ..lib import dom
@@ -103,7 +103,7 @@ class TerminalManagerRequestHandler(RequestHandler):
             c.id = customer.id
             result.customer.append(c)
 
-        return OK(result, content_type='application/xml')
+        return XML(result)
 
     def _list_classes(self, cid):
         """Lists all customers"""
@@ -139,7 +139,7 @@ class TerminalManagerRequestHandler(RequestHandler):
 
             result.class_.append(c)
 
-        return OK(result, content_type='application/xml')
+        return XML(result)
 
     def _list_terminals(self, cid, class_id=None, class_name=None,
                         deleted=None, deployed=None):
@@ -241,7 +241,7 @@ class TerminalManagerRequestHandler(RequestHandler):
         for processed_terminal in processed_terminals:
             result.terminal.append(processed_terminal)
 
-        return OK(result, content_type='application/xml')
+        return XML(result)
 
     def _process_terminal(self, terminal, processed_terminals):
         """Load status of a terminal"""
@@ -274,7 +274,7 @@ class TerminalManagerRequestHandler(RequestHandler):
                     terminal, screenshot_data=screenshot)
                 result.details = details
 
-                return OK(result, content_type='application/xml')
+                return XML(result)
 
 
 @handler(TerminalManagerRequestHandler)

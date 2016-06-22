@@ -1,6 +1,6 @@
 """Terminal query web service"""
 
-from homeinfo.lib.wsgi import Error, OK, handler, RequestHandler, WsgiApp
+from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
 from ..lib import dom
@@ -45,7 +45,7 @@ class TerminalQueryRequestHandler(RequestHandler):
                 terminal_dom = self.term2dom(terminal)
                 terminals_dom.terminal.append(terminal_dom)
 
-            return OK(terminals_dom, content_type='application/xml')
+            return XML(terminals_dom)
         else:
             return Error('Invalid credentials', status=401)
 
