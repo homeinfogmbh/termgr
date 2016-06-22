@@ -14,8 +14,8 @@ class TerminalQueryRequestHandler(RequestHandler):
 
     def get(self):
         """Interpret query dictionary"""
-        query_string = self.query_string(environ)
-        qd = self.qd(query_string)
+        qd = self.query_dict
+
         user_name = qd.get('user_name')
 
         if not user_name:
