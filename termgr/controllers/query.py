@@ -12,7 +12,7 @@ __all__ = ['TerminalQuery']
 class TerminalQueryRequestHandler(RequestHandler):
     """Handles requests for the TerminalQuery"""
 
-    def get(self, environ):
+    def get(self):
         """Interpret query dictionary"""
         query_string = self.query_string(environ)
         qd = self.qd(query_string)

@@ -6,7 +6,7 @@ from peewee import DoesNotExist
 
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.ctrl import RemoteController
-from homeinfo.lib.wsgi import Error, InternalServerError, OK, handler, \
+from homeinfo.lib.wsgi import Error, InternalServerError, JSON, OK, handler, \
     RequestHandler, WsgiApp
 
 from termgr.orm import User
@@ -125,7 +125,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
 
             customers_json.append(customer_json)
 
-        return OK(dumps(json), content_type='application/json')
+        return JSON(json)
 
 
 @handler(TerminalCheckerRequestHandler)
