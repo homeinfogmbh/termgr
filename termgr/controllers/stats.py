@@ -10,10 +10,9 @@ __all__ = ['StatsController']
 class StatsControllerRequestHandler(RequestHandler):
     """Handles requests for the StatsController"""
 
-    def __init__(self, environ):
-        super().__init__(environ)
-        self._tokens = []
-
+    @property
+    def _tokens(self):
+        """Yields valid tokens"""
         with open('/etc/termstats.tokens', 'r') as tokens:
             for line in tokens:
                 line = line.strip()
@@ -25,7 +24,7 @@ class StatsControllerRequestHandler(RequestHandler):
                     # Skip comments
                     continue
                 else:
-                    self._tokens.append(line)
+                    yield line
 
     def get(self):
         """Interpret query dictionary"""
