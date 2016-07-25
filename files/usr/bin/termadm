@@ -135,8 +135,8 @@ def permdict(user):
         if permission.setup:
             perms += 1
 
-        cid = terminal.customer.id
-        tid = terminal.tid
+        cid = permission.terminal.customer.id
+        tid = permission.terminal.tid
 
         try:
             tids = permissions[cid]
