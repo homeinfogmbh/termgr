@@ -36,7 +36,7 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 from homeinfo.terminals.filter import TerminalFilter
 
-from termgr.orm import PermissionError, User
+from termgr.orm import PermissionError, User, Permissions
 
 
 def update_nagios():
@@ -115,6 +115,51 @@ def permissions(s):
         setup = permissions[2] == '1'
 
     return (read, administer, setup)
+
+
+def permdict(user):
+    """Order permissions of the respective user in a dictionary"""
+
+    permissions = {}
+
+    for permission in Permissions.select().where(Permissions.user == user):
+        perms = 0
+
+        if permission.read:
+            perms += 4
+
+        if permission.administer:
+            perms += 2
+
+        if permission.setup:
+            perms += 1
+
+        cid = terminal.customer.id
+        tid = terminal.tid
+
+        try:
+            tids = permissions[cid]
+        except KeyError:
+            tids = {}
+            permissions[cid] = tids
+
+        try:
+            perms_ = tids[tid]
+        except KeyError:
+            tids[tid] = perms
+        else:
+            if perms > perms_:
+                tids[tid] = perms
+
+    return permissions
+
+
+def group_perms(d):
+    """Groups the respective permissions dictionary"""
+
+    # TODO: Implement
+    return d
+
 
 
 if __name__ == '__main__':
