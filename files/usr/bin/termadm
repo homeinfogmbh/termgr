@@ -8,7 +8,7 @@ Usage:
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force] [--no-reload]
     termadm undeploy <expr>... [--no-reload]
-    termadm permit <permissions> <user> <expr>...
+    termadm permit <user> [<permissions> <expr>...]
 
 Options:
     -h --help                   Show this screen.
@@ -27,6 +27,7 @@ from os.path import basename
 from itertools import chain
 from datetime import datetime
 from logging import INFO, getLogger, basicConfig
+from json import dumps
 
 from docopt import docopt
 
@@ -140,8 +141,7 @@ def permdict(user):
         try:
             tids = permissions[cid]
         except KeyError:
-            tids = {}
-            permissions[cid] = tids
+            permissions[cid] = tids = {}
 
         try:
             perms_ = tids[tid]
@@ -277,16 +277,21 @@ if __name__ == '__main__':
 
     # Set user permissions
     elif options['permit']:
-        read, administer, setup = permissions(options['<permissions>'])
         user = User.get(User.name == options['<user>'])
 
-        for expr in options['<expr>']:
-            for terminal in TerminalFilter(expr):
-                try:
-                    user.permit(
-                        terminal,
-                        read=read,
-                        administer=administer,
-                        setup=setup)
-                except PermissionError as pe:
-                    logger.warning(pe.msg)
+        if options['<permissions>'] is None:
+            permissions = group_perms(permdict(user))
+            print(dumps(permissions))
+        else:
+            read, administer, setup = permissions(options['<permissions>'])
+
+            for expr in options['<expr>']:
+                for terminal in TerminalFilter(expr):
+                    try:
+                        user.permit(
+                            terminal,
+                            read=read,
+                            administer=administer,
+                            setup=setup)
+                    except PermissionError as pe:
+                        logger.warning(pe.msg)
