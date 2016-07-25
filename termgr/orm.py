@@ -163,3 +163,32 @@ class Permissions(TermgrModel):
     setup = BooleanField(default=False)
 
     terminal = ForeignKeyField(Terminal, db_column='terminal')
+
+    def __int__(self):
+        """Returns the permissions value"""
+        return 4 * self.read + 2 * self.administer + 1 * self.setup
+
+    def __repr__(self):
+        """Returns the permissions as a string"""
+        return str(int(self))
+
+    def __str__(self):
+        """Returns the permissions as an alternative string"""
+        s = ''
+
+        if self.read:
+            s += 'r'
+        else:
+            s += '-'
+
+        if self.administer:
+            s += 'a'
+        else:
+            s += '-'
+
+        if self.setup:
+            s += 's'
+        else:
+            s += '-'
+
+        return s
