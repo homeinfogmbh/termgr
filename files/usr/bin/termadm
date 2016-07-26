@@ -153,8 +153,12 @@ def frmt_perms(d, human_readable=True):
     for cid in d:
         tids = d[cid]
 
+        print('CID:', cid, 'TIDs:', tids)
+
         for tid in sorted(tids):
             permission = tids[tid]
+
+            print('CID:', cid, 'TID:', tid, 'Permission:', permission)
 
             try:
                 cids_ = permission_groups[permission]
