@@ -124,16 +124,6 @@ def permdict(user):
     permissions = {}
 
     for permission in Permissions.select().where(Permissions.user == user):
-        perms = 0
-
-        if permission.read:
-            perms += 4
-
-        if permission.administer:
-            perms += 2
-
-        if permission.setup:
-            perms += 1
 
         cid = permission.terminal.customer.id
         tid = permission.terminal.tid
@@ -144,20 +134,31 @@ def permdict(user):
             permissions[cid] = tids = {}
 
         try:
-            perms_ = tids[tid]
+            permission_ = tids[tid]
         except KeyError:
-            tids[tid] = perms
+            tids[tid] = permission
         else:
-            if perms > perms_:
-                tids[tid] = perms
+            if permission > permission_:
+                tids[tid] = permission
 
     return permissions
 
 
-def group_perms(d):
-    """Groups the respective permissions dictionary"""
+def frmt_perms(d, human_readable=True):
+    """Formats the respective permissions dictionary"""
 
-    # TODO: Implement
+    # TODO: Implement grouping
+    for cid in d:
+        tids = d[cid]
+
+        for tid in :
+            permissions = tids[tid]
+
+            if human_readable:
+                tids[tid] = str(permissions)
+            else:
+                tids[tid] = int(permissions)
+
     return d
 
 
@@ -280,7 +281,7 @@ if __name__ == '__main__':
         user = User.get(User.name == options['<user>'])
 
         if options['<permissions>'] is None:
-            permissions = group_perms(permdict(user))
+            permissions = frmt_perms(permdict(user))
             print(dumps(permissions, indent=2))
         else:
             read, administer, setup = permissions(options['<permissions>'])

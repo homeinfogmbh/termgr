@@ -192,3 +192,9 @@ class Permissions(TermgrModel):
             s += '-'
 
         return s
+
+    def __gt__(self, other):
+        return int(self) > int(other)
+
+    def __lt__(self, other):
+        return int(self) < int(other)
