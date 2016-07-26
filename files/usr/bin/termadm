@@ -358,7 +358,7 @@ if __name__ == '__main__':
 
             address = Address.add(city, addr=addr, state=state)
 
-            print('Moved', terminal, 'to', address)
+            print('Moved', terminal, 'to', repr(address))
 
     # Set user permissions
     elif options['permit']:
