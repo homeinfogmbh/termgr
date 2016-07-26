@@ -174,9 +174,6 @@ def frmt_perms(d, human_readable=True):
             # Derive TID ranges like [<start>, <end>]
             for tid_range in tid_ranges:
                 if tid_range[-1] == tid - 1:
-                    if len(tid_range) > 1:
-                        tid_range.pop()
-
                     tid_range.append(tid)
                     break
             else:
@@ -206,7 +203,7 @@ def frmt_perms(d, human_readable=True):
                 for tid_range in tid_ranges:
                     if len(tid_range) == 2:
                         str_range = '{start}-{end}'.format(
-                            start=tid_range[0], end=tid_range[1])
+                            start=tid_range[0], end=tid_range[-1])
                     elif len(tid_range) == 1:
                         str_range = str(tid_range[0])
                     else:
