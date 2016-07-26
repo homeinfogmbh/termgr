@@ -147,20 +147,67 @@ def permdict(user):
 def frmt_perms(d, human_readable=True):
     """Formats the respective permissions dictionary"""
 
-    # TODO: Implement grouping
+    permission_groups = {}
+
+    # Group by permissions
     for cid in d:
         tids = d[cid]
 
-        for tid in tids:
+        for tid in sorted(tids):
             permissions = tids[tid]
 
-            if human_readable:
-                tids[tid] = str(permissions)
+            try:
+                cids_ = permission_groups[permissions]
+            except KeyError:
+                cids_ = permission_groups[permissions] = {}
+
+            try:
+                tid_ranges = cids_[cid]
+            except KeyError:
+                tid_ranges = cids_[cid] = []
+
+            # Derive TID ranges like [<start>, <end>]
+            for tid_range in tid_ranges:
+                if tid_range[-1] == tid - 1:
+                    tid_range.pop()
+                    tid_range.append(tid)
+                    break
             else:
-                tids[tid] = int(permissions)
+                tid_range = [tid]
+                tid_ranges.append(tid)
 
-    return d
+    permissions = {}
 
+    # Format permissions
+    for permission in permission_groups:
+        if human_readable:
+            permissions[str(permission)] = permission_groups[permission]
+        else:
+            permissions[int(permission)] = permission_groups[permission]
+
+    # Format TID ranges
+    for permission in permissions:
+        cids = permissions[permission]
+
+        for cid in cids:
+            tid_ranges = cids[cid]
+            str_ranges = []
+
+            for tid_range in tid_ranges:
+                if len(tid_range) == 2:
+                    str_range = '{start}-{end}'.format(
+                        start=tid_range[0], end=tid_range[1])
+                elif len(tid_range) == 1:
+                    str_range = str(tid_range[0])
+                else:
+                    raise ValueError(
+                        'Unexpected TID range: {}'.format(tid_range))
+
+                str_ranges.append(str_range)
+
+            cids[tid] = str_ranges
+
+    return permissions
 
 
 if __name__ == '__main__':
