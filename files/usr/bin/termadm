@@ -8,7 +8,7 @@ Usage:
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force] [--no-reload]
     termadm undeploy <expr>... [--no-reload]
-    termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
+    termadm relocate <expr> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>] [--no-reload]
     termadm permit <user> [<permissions> <expr>...]
 
