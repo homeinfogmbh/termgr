@@ -8,7 +8,7 @@ Usage:
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force] [--no-reload]
     termadm undeploy <expr>... [--no-reload]
-    termadm relocate <expr> <street> <house_number> <zip_code> <city> \
+    termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>] [--no-reload]
     termadm permit <user> [<permissions> <expr>...]
 
@@ -330,7 +330,7 @@ if __name__ == '__main__':
 
     # Relocate a terminal
     elif options['relocate']:
-        terminals = [t for t in TerminalFilter(options['<expr>'])]
+        terminals = [t for t in TerminalFilter(options['<terminal>'])]
 
         if len(terminals) != 1:
             raise ValueError('Can only relocate one terminal at a time')
