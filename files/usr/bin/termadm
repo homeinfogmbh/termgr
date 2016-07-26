@@ -357,8 +357,13 @@ if __name__ == '__main__':
                 state = None
 
             address = Address.add(city, addr=addr, state=state)
+            terminal.location.address = address
 
-            print('Moved', terminal, 'to', repr(address))
+            if terminal.location.save():
+                print('Moved', terminal, 'to', repr(address))
+            else:
+                print('Failed to move', terminal, 'to', repr(address))
+                exit(1)
 
     # Set user permissions
     elif options['permit']:
