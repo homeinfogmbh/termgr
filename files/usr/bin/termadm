@@ -204,7 +204,7 @@ def frmt_perms(d, human_readable=True):
 
                 str_ranges.append(str_range)
 
-            cids[tid] = str_ranges
+            cids[cid] = str_ranges
 
     return permissions
 
