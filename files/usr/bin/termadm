@@ -158,14 +158,19 @@ def frmt_perms(d, human_readable=True):
         for tid in sorted(tids):
             permission = tids[tid]
 
-            print('CID:', cid, 'TID:', tid, 'Permission:', permission)
+            if human_readable:
+                perm = str(permission)
+            else:
+                perm = repr(permission)
+
+            print('CID:', cid, 'TID:', tid, 'Permission:', perm)
 
             try:
-                cids_ = permission_groups[permission]
+                cids_ = permission_groups[perm]
             except KeyError:
-                cids_ = permission_groups[permission] = {}
+                cids_ = permission_groups[perm] = {}
 
-            print('CID:', cid, 'TID:', tid, 'Permission:', permission)
+            print('CID:', cid, 'TID:', tid, 'Permission:', perm)
             print('CID:', cid, 'TID:', tid, 'CIDs:', cids_)
 
             try:
