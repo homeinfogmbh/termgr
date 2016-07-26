@@ -154,12 +154,12 @@ def frmt_perms(d, human_readable=True):
         tids = d[cid]
 
         for tid in sorted(tids):
-            permissions = tids[tid]
+            permission = tids[tid]
 
             try:
-                cids_ = permission_groups[permissions]
+                cids_ = permission_groups[permission]
             except KeyError:
-                cids_ = permission_groups[permissions] = {}
+                cids_ = permission_groups[permission] = {}
 
             try:
                 tid_ranges = cids_[cid]
@@ -177,14 +177,14 @@ def frmt_perms(d, human_readable=True):
 
     permissions = {}
 
+    return permissions
+
     # Format permissions
     for permission in permission_groups:
         if human_readable:
             permissions[str(permission)] = permission_groups[permission]
         else:
             permissions[int(permission)] = permission_groups[permission]
-
-    return permissions
 
     # Format TID ranges
     for permission in permissions:
