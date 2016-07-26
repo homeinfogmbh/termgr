@@ -341,6 +341,7 @@ if __name__ == '__main__':
             street = options['<street>']
             house_number = options['<house_number>']
             zip_code = options['<zip_code>']
+            city = options['<city>']
             state_iso = options['--state']
 
             addr = street, house_number, zip_code
