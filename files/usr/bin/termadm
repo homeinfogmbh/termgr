@@ -330,7 +330,7 @@ if __name__ == '__main__':
 
     # Relocate a terminal
     elif options['relocate']:
-        terminals = [terminal for terminal in TerminalFilter(expr)]
+        terminals = [t for t in TerminalFilter(options['<expr>'])]
 
         if len(terminals) != 1:
             raise ValueError('Can only relocate one terminal at a time')
