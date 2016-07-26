@@ -163,16 +163,15 @@ def frmt_perms(d, human_readable=True):
             try:
                 cids_ = permission_groups[permission]
             except KeyError:
-                cids_ = {}
-                permission_groups[permission] = cids_
+                cids_ = permission_groups[permission] = {}
 
+            print('CID:', cid, 'TID:', tid, 'Permission:', permission)
             print('CID:', cid, 'TID:', tid, 'CIDs:', cids_)
 
             try:
                 tid_ranges = cids_[cid]
             except KeyError:
-                tid_ranges = []
-                cids_[cid] = tid_ranges
+                tid_ranges = cids_[cid] = []
 
             print('CID:', cid, 'TID:', tid, 'Ranges:', tid_ranges)
 
@@ -186,6 +185,8 @@ def frmt_perms(d, human_readable=True):
                     print('TID[-1]:', tid_range[-1], 'TID-1:', tid - 1)
             else:
                 tid_ranges.append([tid, tid])
+
+            print('CID:', cid, 'TID:', tid, 'CIDs:', cids_)
 
     print('Permission groups:', permission_groups, sep='\n')
 
