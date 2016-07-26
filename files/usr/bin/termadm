@@ -175,9 +175,9 @@ def frmt_perms(d, human_readable=True):
             else:
                 tid_ranges.append([tid])
 
-    permissions = {}
-
     return permissions
+
+    permissions = {}
 
     # Format permissions
     for permission in permission_groups:
