@@ -172,6 +172,8 @@ def frmt_perms(d, human_readable=True):
                     tid_range.pop()
                     tid_range.append(tid)
                     break
+                else:
+                    print('TID[-1]:', tid_range[-1], 'TID-1:', tid - 1)
             else:
                 tid_ranges.append([tid])
 
