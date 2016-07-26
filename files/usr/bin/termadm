@@ -191,10 +191,6 @@ def frmt_perms(d, human_readable=True):
                 Terminal.select().where(Terminal.customer == cid))
             my_tids = set(chain(*tid_ranges))
 
-            print('CID:', cid)
-            print('All TIDs:', all_tids, sep='\n')
-            print('My TIDs:', my_tids, sep='\n')
-
             if all_tids == my_tids:
                 str_ranges = 'all'
             else:
