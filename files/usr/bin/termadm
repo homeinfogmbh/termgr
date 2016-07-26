@@ -184,6 +184,8 @@ def frmt_perms(d, human_readable=True):
         else:
             permissions[int(permission)] = permission_groups[permission]
 
+    return permissions
+
     # Format TID ranges
     for permission in permissions:
         cids = permissions[permission]
