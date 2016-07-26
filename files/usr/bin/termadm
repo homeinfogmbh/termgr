@@ -166,6 +166,8 @@ def frmt_perms(d, human_readable=True):
             except KeyError:
                 tid_ranges = cids_[cid] = []
 
+            print('CID:', cid, 'TID:', tid, 'Ranges:', tid_ranges)
+
             # Derive TID ranges like [<start>, <end>]
             for tid_range in tid_ranges:
                 if tid_range[-1] == tid - 1:
