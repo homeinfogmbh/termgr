@@ -161,6 +161,8 @@ def frmt_perms(d, human_readable=True):
             except KeyError:
                 cids_ = permission_groups[permission] = {}
 
+            print('CID:', cid, 'TID:', tid, 'CIDs:', cids_)
+
             try:
                 tid_ranges = cids_[cid]
             except KeyError:
