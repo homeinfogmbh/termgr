@@ -333,7 +333,8 @@ if __name__ == '__main__':
         terminals = [t for t in TerminalFilter(options['<terminal>'])]
 
         if len(terminals) != 1:
-            raise ValueError('Can only relocate one terminal at a time')
+            print('Can only relocate one terminal at a time')
+            exit(1)
         else:
             terminal = terminals[0]
 
