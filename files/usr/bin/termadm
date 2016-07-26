@@ -8,6 +8,8 @@ Usage:
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force] [--no-reload]
     termadm undeploy <expr>... [--no-reload]
+    termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
+[--state=<state_iso>] [--no-reload]
     termadm permit <user> [<permissions> <expr>...]
 
 Options:
@@ -325,6 +327,36 @@ if __name__ == '__main__':
 
         if reload:
             update_nagios()
+
+    # Relocate a terminal
+    elif options['relocate']:
+        terminals = [terminal for terminal in TerminalFilter(expr)]
+
+        if len(terminals) != 1:
+            raise ValueError('Can only relocate one terminal at a time')
+        else:
+            terminal = terminals[0]
+
+            street = options['<street>']
+            house_number = options['<house_number>']
+            zip_code = options['<zip_code>']
+            state_iso = options['--state']
+
+            addr = street, house_number, zip_code
+
+            # Get state
+            if state_iso:
+                try:
+                    state = State.get(State._iso == state_iso)
+                except DoesNotExist:
+                    print('No such state:', state_iso)
+                    exit(1)
+            else:
+                state = None
+
+            address = Address.add(city, addr=addr, state=state)
+
+            print('Moved', terminal, 'to', address)
 
     # Set user permissions
     elif options['permit']:
