@@ -281,7 +281,7 @@ if __name__ == '__main__':
 
         if options['<permissions>'] is None:
             permissions = group_perms(permdict(user))
-            print(dumps(permissions))
+            print(dumps(permissions, indent=2))
         else:
             read, administer, setup = permissions(options['<permissions>'])
 
