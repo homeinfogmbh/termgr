@@ -187,6 +187,9 @@ def frmt_perms(d, human_readable=True):
                 tid_ranges.append([tid, tid])
 
             print('CID:', cid, 'TID:', tid, 'CIDs:', cids_)
+            print('Permission groups:', permission_groups, sep='\n')
+
+        print('Permission groups:', permission_groups, sep='\n')
 
     print('Permission groups:', permission_groups, sep='\n')
 
