@@ -131,7 +131,8 @@ class Commands():
         return PackageManagerCommand(packages, '-S')
 
     CLEANUP = PackageManagerCommand(None, '-Sc')
-    UPDATE = PackageManagerCommand(None, '-Syuw')
+    UPDATE = PackageManagerCommand(None, '-Sy')
+    STAGE = PackageManagerCommand(None, '-Syuw')
     UPGRADE = PackageManagerCommand(None, '-Su')
     UNLOCK = TerminalCommand(SUDO, REMOVE, '-f ', '/var/lib/pacman/db.lck')
     CHKRES = TerminalCommand('export DISPLAY=:0 \; xrandr | grep " connected"')

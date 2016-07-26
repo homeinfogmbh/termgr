@@ -8,6 +8,7 @@
 
 Usage:
     termgr update <expr> [options]
+    termgr stage <expr> [options]
     termgr upgrade <package> <expr> [options]
     termgr system-upgrade <expr> [options]
     termgr (reboot | chkres | unlock) <expr> [options]
@@ -50,14 +51,30 @@ def update(terminal):
 
     logger.info('Updating: {}'.format(terminal))
     cleanup = Commands.CLEANUP(terminal)
+    update = Commands.UPDATE(terminal)
+
+    if update:
+        logger.debug('Updated: {}'.format(terminal))
+    else:
+        logger.error('Update failed: {}'.format(terminal))
+
+        if VERBOSE:
+            printterm(terminal, update)
+
+
+def stage(terminal):
+    """Stage updates on a terminal"""
+
+    logger.info('Staging: {}'.format(terminal))
+    cleanup = Commands.CLEANUP(terminal)
 
     if cleanup:
         update = Commands.UPDATE(terminal)
 
         if update:
-            logger.debug('Updated: {}'.format(terminal))
+            logger.debug('Staged: {}'.format(terminal))
         else:
-            logger.error('Update failed: {}'.format(terminal))
+            logger.error('Staging failed: {}'.format(terminal))
 
             if VERBOSE:
                 printterm(terminal, update)
@@ -145,6 +162,14 @@ if __name__ == '__main__':
         if options['update']:
             with Parallelization(
                     update,
+                    terminals,
+                    blocking=False,
+                    single=True) as para:
+                with Watchdog() as doggy:
+                    doggy.start(para.threads)
+        elif options['stage']:
+            with Parallelization(
+                    stage,
                     terminals,
                     blocking=False,
                     single=True) as para:
