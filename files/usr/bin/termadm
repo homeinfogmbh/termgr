@@ -34,6 +34,7 @@ from json import dumps
 from docopt import docopt
 
 from homeinfo.lib.system import run, evaluate
+from homeinfo.lib.permissions import parse
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
@@ -60,64 +61,7 @@ def update_config():
     update_nagios()
 
 
-def permissions(s):
-    """Parse permissions"""
-    binary = False
 
-    # Check for binary string
-    if len(s) == 3:
-        for char in s:
-            if char not in ['0', '1']:
-                break
-        else:
-            binary = True
-            permissions = s
-
-    if not binary:
-        try:
-            permissions = int(s)
-        except ValueError:
-            revoke = None
-
-            read = None
-            administer = None
-            setup = None
-
-            if s.startswith('+'):
-                revoke = False
-                permissions = s[1:]
-            elif s.startswith('–'):  # [AltGr] + [-]
-                revoke = True
-                permissions = s[1:]
-            else:
-                permissions = s
-                read = False
-                administer = False
-                setup = False
-
-            for permission in permissions:
-                permission = permission.lower()
-
-                if permission == 'r':
-                    read = not revoke
-                elif permission == 'a':
-                    administer = not revoke
-                elif permission == 's':
-                    setup = not revoke
-                else:
-                    raise PermissionError(
-                        'Invalid permission: {}'.format(permission))
-
-        else:
-            permissions = '{0:0>3}'.format(bin(permissions)[2:])
-            binary = True
-
-    if binary:
-        read = permissions[0] == '1'
-        administer = permissions[1] == '1'
-        setup = permissions[2] == '1'
-
-    return (read, administer, setup)
 
 
 def permdict(user):
@@ -270,7 +214,7 @@ if __name__ == '__main__':
 
         if vpn_key is not None:
             cls.logger.warning(
-                'Divergent OpenVPN key specified: "{0}"!'.format(vpn_key))
+                'Divergent OpenVPN key specified: "{}"!'.format(vpn_key))
 
         vpn = VPN.add(key=vpn_key)
         domain = Domain.get(Domain.id == domain_id)
@@ -376,7 +320,7 @@ if __name__ == '__main__':
             permissions = frmt_perms(permdict(user))
             print(dumps(permissions, indent=2))
         else:
-            read, administer, setup = permissions(options['<permissions>'])
+            read, administer, setup = parse(options['<permissions>'])
 
             for expr in options['<expr>']:
                 for terminal in TerminalFilter(expr):

@@ -1,7 +1,7 @@
 """Library for terminal pacman.conf management"""
 
-from homeinfo.terminals.config import terminals_config
 from homeinfo.terminals.abc import TerminalAware
+from homeinfo.terminals.config import config
 from homeinfo.terminals.ctrl import RemoteController
 
 from ..config import CONFIG
@@ -19,8 +19,8 @@ class PacmanConfig(TerminalAware):
             pacman_conf = temp.read()
 
         pacman_conf = pacman_conf.format(
-            addr=terminals_config.net['IPV4ADDR'],
-            port=terminals_config.net['HTTP_PRIV_PORT'])
+            addr=config.net['IPV4ADDR'],
+            port=config.net['HTTP_PRIV_PORT'])
 
         return pacman_conf
 
