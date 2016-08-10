@@ -2,39 +2,13 @@
 
 from json import dumps
 
-__all__ = ['Permissions', 'UserPermissions']
+__all__ = ['PermissionsParser', 'UserPermissions']
 
 
-class Permissions():
+class PermissionsParser():
     """Manages permissions on terminals"""
 
-    def __init__(self, read, administer, setup):
-        """Sets the permissions"""
-        self.read = read
-        self.administer = administer
-        self.setup = setup
-
-    def __iter__(self):
-        """Yields the permissions fields"""
-        yield self.read
-        yield self.administer
-        yield self.setup
-
-    def __getitem__(self, index):
-        """Returns the permissions field at index"""
-        if index == 0:
-            return self.read
-        elif index == 1:
-            return self.administer
-        elif index == 2:
-            return self.setup
-        elif index == 3:
-            raise KeyError('No 3rd permission field')
-        else:
-            raise KeyError('No {}th permission field'.format(index))
-
-    @classmethod
-    def parse(cls, s):
+    def __init__(self, s):
         """Parse permissions string"""
         binary = False
 
@@ -91,7 +65,28 @@ class Permissions():
             administer = permissions[1] == '1'
             setup = permissions[2] == '1'
 
-        return cls(read, administer, setup)
+        self.read = read
+        self.administer = administer
+        self.setup = setup
+
+    def __iter__(self):
+        """Yields the permissions fields"""
+        yield self.read
+        yield self.administer
+        yield self.setup
+
+    def __getitem__(self, index):
+        """Returns the permissions field at index"""
+        if index == 0:
+            return self.read
+        elif index == 1:
+            return self.administer
+        elif index == 2:
+            return self.setup
+        elif index == 3:
+            raise KeyError('No 3rd permission field')
+        else:
+            raise KeyError('No {}th permission field'.format(index))
 
 
 class UserPermissions():

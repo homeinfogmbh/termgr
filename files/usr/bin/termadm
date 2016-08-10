@@ -36,7 +36,7 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 from homeinfo.terminals.filter import TerminalFilter
 
-from termgr.lib.permissions import Permissions, UserPermissions
+from termgr.lib.permissions import PermissionsParser, UserPermissions
 from termgr.orm import PermissionError, User, Permissions
 
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
             permissions = UserPermissions(user)
             print(permissions)
         else:
-            permissions = Permissions.parse(options['<permissions>'])
+            permissions = PermissionsParser(options['<permissions>'])
 
             for expr in options['<expr>']:
                 for terminal in TerminalFilter(expr):
