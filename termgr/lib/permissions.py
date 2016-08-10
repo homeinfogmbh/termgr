@@ -2,6 +2,8 @@
 
 from json import dumps
 
+from homeinfo.terminals.orm import Terminal
+
 from termgr.orm import Permissions
 
 __all__ = ['PermissionsParser', 'UserPermissions']
