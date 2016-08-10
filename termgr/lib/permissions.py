@@ -2,6 +2,8 @@
 
 from json import dumps
 
+from termgr.orm import Permissions
+
 __all__ = ['PermissionsParser', 'UserPermissions']
 
 
