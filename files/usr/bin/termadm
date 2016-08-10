@@ -34,12 +34,12 @@ from json import dumps
 from docopt import docopt
 
 from homeinfo.lib.system import run, evaluate
-from homeinfo.lib.permissions import parse
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 from homeinfo.terminals.filter import TerminalFilter
 
+from termgr.lib.permissions import parse
 from termgr.orm import PermissionError, User, Permissions
 
 
