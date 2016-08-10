@@ -100,13 +100,13 @@ class UserPermissions():
         """Returns an unambiguous representation
         of the user's permissions
         """
-        return dumps(self.permissions_groups(human_readable=False))
+        return dumps(self.permission_groups(human_readable=False))
 
     def __str__(self):
         """Returns a human readable representation
         of the user's permissions
         """
-        return dumps(self.permissions_groups(human_readable=True))
+        return dumps(self.permission_groups(human_readable=True))
 
     @property
     def permissions(self):
@@ -134,9 +134,9 @@ class UserPermissions():
 
         return permissions
 
-    def permissions_groups(self, human_readable=True):
+    def permission_groups(self, human_readable=True):
         """Formats the respective permissions dictionary"""
-        d = self.dict
+        d = self.permissions
         permission_groups = {}
 
         # Group by permissions
