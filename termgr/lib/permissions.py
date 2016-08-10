@@ -33,7 +33,7 @@ class Permissions():
         else:
             raise KeyError('No {}th permission field'.format(index))
 
-    @cassmethod
+    @classmethod
     def parse(cls, s):
         """Parse permissions string"""
         binary = False
