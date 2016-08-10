@@ -1,6 +1,7 @@
 """Permissions and access control handling"""
 
 from json import dumps
+from itertools import chain
 
 from homeinfo.terminals.orm import Terminal
 
