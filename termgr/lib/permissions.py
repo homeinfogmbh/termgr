@@ -111,7 +111,7 @@ class UserPermissions():
         """Returns a human readable representation
         of the user's permissions
         """
-        return dumps(self.permission_groups(human_readable=True))
+        return dumps(self.permission_groups(human_readable=True), indent=2)
 
     @property
     def permissions(self):
