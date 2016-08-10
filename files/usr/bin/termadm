@@ -59,7 +59,7 @@ def update_config():
 
 
 if __name__ == '__main__':
-    from docopt import docop
+    from docopt import docopt
 
     logger = getLogger(basename(__file__))
     options = docopt(__doc__)
