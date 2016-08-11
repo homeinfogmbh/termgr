@@ -4,7 +4,7 @@ from homeinfo.terminals.abc import TerminalAware
 from homeinfo.terminals.config import config
 from homeinfo.terminals.ctrl import RemoteController
 
-from ..config import CONFIG
+from termgr.config import CONFIG
 
 
 __all__ = ['PacmanConfig']

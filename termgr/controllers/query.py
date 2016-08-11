@@ -3,8 +3,8 @@
 from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
-from ..lib import dom
-from ..orm import User
+from termgr import dom
+from termgr.orm import User
 
 __all__ = ['TerminalQuery']
 

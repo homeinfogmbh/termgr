@@ -6,9 +6,9 @@ from homeinfo.lib.wsgi import WsgiResponse, Error, InternalServerError, \
     handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
-from ..lib.openvpn import OpenVPNPackager
-from ..lib.pacman import PacmanConfig
-from ..orm import User
+from termgr.lib.openvpn import OpenVPNPackager
+from termgr.lib.pacman import PacmanConfig
+from termgr.orm import User
 
 __all__ = ['SetupController']
 

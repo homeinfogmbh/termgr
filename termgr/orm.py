@@ -10,7 +10,7 @@ from homeinfo.crm import Company
 from homeinfo.peewee import MySQLDatabase
 from homeinfo.terminals.orm import Terminal
 
-from .config import CONFIG
+from termgr.config import CONFIG
 
 __all__ = ['PermissionError', 'User', 'Permissions']
 

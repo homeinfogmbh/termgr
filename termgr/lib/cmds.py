@@ -4,7 +4,7 @@ from itertools import chain
 
 from homeinfo.terminals.ctrl import RemoteController
 
-from .tui import printterm
+from termgr.lib.tui import printterm
 
 __all__ = [
     'TerminalCommand',

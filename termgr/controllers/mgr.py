@@ -8,9 +8,10 @@ from homeinfo.crm import Customer
 from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, Class
 
-from ..lib import dom
-from ..lib.orm2dom import customer2dom, terminal_info2dom, terminal_details2dom
-from ..orm import User
+from termgr.lib import dom
+from termgr.lib.orm2dom import customer2dom, terminal_info2dom, \
+    terminal_details2dom
+from termgr.orm import User
 
 __all__ = ['TerminalManager']
 
