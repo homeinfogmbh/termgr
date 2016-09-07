@@ -84,7 +84,7 @@ def parse_address(string, sep=' '):
     except ValueError:
         raise ValueError('Not an address: {}'.format(string))
     else:
-        return (sep.join(street), (house_number, zip_code, city))
+        return (city, (sep.join(street), house_number, zip_code))
 
 
 if __name__ == '__main__':
