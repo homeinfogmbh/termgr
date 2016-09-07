@@ -83,7 +83,7 @@ def parse_address(string, sep=' '):
     except ValueError:
         raise ValueError('Not an address: {}'.format(string))
     else:
-        return (sep.join(street), house_number, zip_code, city)
+        return (sep.join(street), (house_number, zip_code, city))
 
 
 if __name__ == '__main__':
@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
         for line in read_file(path):
             try:
-                addr = parse_address(line)
+                city, addr = parse_address(line)
             except ValueError:
                 logger.error('Not an address: {}'.format(line))
             else:
@@ -196,7 +196,7 @@ if __name__ == '__main__':
                 # Add new terminal
                 terminal = Terminal.add(
                     cid, class_, os, connection, vpn, domain,
-                    location=location, tid=tid)
+                    location=location)
 
                 if terminal:
                     logger.info('Added terminal {}'.format(terminal))
