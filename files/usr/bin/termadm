@@ -180,7 +180,6 @@ if __name__ == '__main__':
         class_ = Class.get(Class.id == class_id)
         os = OS.get(OS.id == os_id)
         connection = Connection.get(Connection.id == connection_id)
-        vpn = VPN.add()
         domain = Domain.get(Domain.id == domain_id)
 
         for line in read_file(path):
@@ -189,6 +188,9 @@ if __name__ == '__main__':
             except ValueError:
                 logger.error('Not an address: {}'.format(line))
             else:
+                # Generate unique VPN connection
+                vpn = VPN.add()
+
                 # Add location
                 address = Address.add(city, addr=addr, state=None)
                 location = Location.add(address)
