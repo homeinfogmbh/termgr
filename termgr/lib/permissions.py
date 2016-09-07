@@ -169,7 +169,11 @@ class UserPermissions():
                 # Derive TID ranges like [<start>, <end>]
                 for tid_range in tid_ranges:
                     if tid_range[-1] == tid - 1:
-                        tid_range.append(tid)
+                        if len(tid_range) == 1:
+                            tid_range.append(tid)
+                        else:
+                            tid_range[-1] = tid
+
                         break
                 else:
                     tid_ranges.append([tid])
