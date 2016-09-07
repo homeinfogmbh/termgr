@@ -23,7 +23,7 @@ Options:
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload services after terminal creation.
     --class=<class>             Specifies the termianl class [default: 3].
-    --os=<os>                   Specifies the termianl class [default: 3].
+    --os=<os>                   Specifies the termianl class [default: 1].
 """
 
 from os import geteuid
