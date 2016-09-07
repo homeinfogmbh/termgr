@@ -118,7 +118,7 @@ if __name__ == '__main__':
         # Optional settings
         connection_id = int(options['--connection'])
         domain_id = int(options['--domain'])
-        weather = options['--weather']
+        weather = options['--weather'] or None
 
         # Optional address
         street = options['<street>']
@@ -177,7 +177,7 @@ if __name__ == '__main__':
         os_id = int(options['--os'])
         connection_id = int(options['--connection'])
         domain_id = int(options['--domain'])
-        weather = options['--weather']
+        weather = options['--weather'] or None
 
         # Get ORM references
         class_ = Class.get(Class.id == class_id)
