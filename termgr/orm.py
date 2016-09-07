@@ -180,7 +180,7 @@ class Permissions(TermgrModel):
         return ''.join((
             'r' if self.read else '-',
             'a' if self.administer else '-',
-            's' if self.administer else '-'))
+            's' if self.setup else '-'))
 
     def __gt__(self, other):
         return int(self) > int(other)
