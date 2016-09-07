@@ -124,7 +124,10 @@ class User(TermgrModel):
                 permissions.delete_instance()
 
     def authorize(self, terminal, read=None, administer=None, setup=None):
-        """Validate permissions"""
+        """Validate permissions
+
+        XXX: None means "don't care"!
+        """
         if read is None and administer is None and setup is None:
             raise PermissionError('No permissions selected')
         elif not self.enabled:
@@ -166,7 +169,7 @@ class Permissions(TermgrModel):
 
     def __int__(self):
         """Returns the permissions value"""
-        return 4 * self.read + 2 * self.administer + 1 * self.setup
+        return 4 * self.read + 2 * self.administer + self.setup
 
     def __repr__(self):
         """Returns the permissions as a string"""
@@ -174,24 +177,10 @@ class Permissions(TermgrModel):
 
     def __str__(self):
         """Returns the permissions as an alternative string"""
-        s = ''
-
-        if self.read:
-            s += 'r'
-        else:
-            s += '-'
-
-        if self.administer:
-            s += 'a'
-        else:
-            s += '-'
-
-        if self.setup:
-            s += 's'
-        else:
-            s += '-'
-
-        return s
+        return ''.join((
+            'r' if self.read else '-',
+            'a' if self.administer else '-',
+            's' if self.administer else '-'))
 
     def __gt__(self, other):
         return int(self) > int(other)
