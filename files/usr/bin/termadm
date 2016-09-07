@@ -24,6 +24,7 @@ Options:
     --no-reload                 Do not reload services after terminal creation.
     --class=<class>             Specifies the termianl class [default: 3].
     --os=<os>                   Specifies the termianl class [default: 1].
+    --weather=<weather>         Specifies the weather to use.
 """
 
 from os import geteuid
@@ -117,6 +118,7 @@ if __name__ == '__main__':
         # Optional settings
         connection_id = int(options['--connection'])
         domain_id = int(options['--domain'])
+        weather = options['--weather']
 
         # Optional address
         street = options['<street>']
@@ -156,7 +158,7 @@ if __name__ == '__main__':
         # Add new terminal
         terminal = Terminal.add(
             cid, class_, os, connection, vpn, domain,
-            location=location, tid=tid)
+            location=location, weather=weather, tid=tid)
 
         if terminal:
             logger.info('Added terminal {}'.format(terminal))
@@ -175,6 +177,7 @@ if __name__ == '__main__':
         os_id = int(options['--os'])
         connection_id = int(options['--connection'])
         domain_id = int(options['--domain'])
+        weather = options['--weather']
 
         # Get ORM references
         class_ = Class.get(Class.id == class_id)
@@ -198,7 +201,7 @@ if __name__ == '__main__':
                 # Add new terminal
                 terminal = Terminal.add(
                     cid, class_, os, connection, vpn, domain,
-                    location=location)
+                    location=location, weather=weather)
 
                 if terminal:
                     logger.info('Added terminal {}'.format(terminal))
