@@ -5,6 +5,7 @@ Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
 [options]
+    termadm addall <cid> <file> [--class=<class>] [--os=<os>] [options]
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force] [--no-reload]
     termadm undeploy <expr>... [--no-reload]
@@ -21,6 +22,8 @@ Options:
     --key=<key>                 Explicitly specify an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload services after terminal creation.
+    --class=<class>             Specifies the termianl class [default: 3].
+    --os=<os>                   Specifies the termianl class [default: 3].
 """
 
 from os import geteuid
@@ -56,6 +59,31 @@ def update_config():
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     evaluate(run('/usr/bin/openvpncfg-gen'))
     update_nagios()
+
+
+def read_file(path):
+    """Read address information from file"""
+
+    with open(path, 'r') as f:
+        for line in f:
+            sline = line.strip()
+
+            if sline:
+                if not sline.startswith('#'):
+                    yield sline
+
+
+def parse_address(string, sep=' '):
+    """Parses an address from a string"""
+
+    elements = [e for e in string.split(sep) if e]
+
+    try:
+        *street, house_number, zip_code, city = elements
+    except ValueError:
+        raise ValueError('Not an address: {}'.format(string))
+    else:
+        return (sep.join(street), house_number, zip_code, city)
 
 
 if __name__ == '__main__':
@@ -96,13 +124,12 @@ if __name__ == '__main__':
         zip_code = options['<zip_code>']
         city = options['<city>']
         state_iso = options['--state']
+        address_annotation = options['--address-annotation']
 
         if street:
             addr = (street, house_number, zip_code)
         else:
             addr = None
-
-        address_annotation = options['--address-annotation']
 
         # Optional parameters
         vpn_key = options['--key'] or None
@@ -114,7 +141,7 @@ if __name__ == '__main__':
         connection = Connection.get(Connection.id == connection_id)
 
         if vpn_key is not None:
-            cls.logger.warning(
+            logger.warning(
                 'Divergent OpenVPN key specified: "{}"!'.format(vpn_key))
 
         vpn = VPN.add(key=vpn_key)
@@ -138,6 +165,47 @@ if __name__ == '__main__':
 
         if reload:
             update_config()
+
+    # Add new terminal
+    elif options['addall']:
+        # Required options
+        cid = int(options['<cid>'])
+        path = options['<file>']
+        class_id = int(options['--class'])
+        os_id = int(options['--os'])
+        connection_id = int(options['--connection'])
+        domain_id = int(options['--domain'])
+
+        # Get ORM references
+        class_ = Class.get(Class.id == class_id)
+        os = OS.get(OS.id == os_id)
+        connection = Connection.get(Connection.id == connection_id)
+        vpn = VPN.add()
+        domain = Domain.get(Domain.id == domain_id)
+
+        for line in read_file(path):
+            try:
+                addr = parse_address(line)
+            except ValueError:
+                logger.error('Not an address: {}'.format(line))
+            else:
+                # Add location
+                address = Address.add(city, addr=addr, state=None)
+                location = Location.add(address)
+
+                # Add new terminal
+                terminal = Terminal.add(
+                    cid, class_, os, connection, vpn, domain,
+                    location=location, tid=tid)
+
+                if terminal:
+                    logger.info('Added terminal {}'.format(terminal))
+                else:
+                    logger.error('Failed to add terminal')
+
+        if reload:
+            update_config()
+
 
     # Deploy terminal
     elif options['deploy']:
