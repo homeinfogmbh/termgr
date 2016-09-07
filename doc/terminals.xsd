@@ -231,12 +231,10 @@
                 Terminal address
             </xs:documentation>
         </xs:annotation>
-        <xs:sequence>
-            <xs:element name="street" type="xs:string"/>
-            <xs:element name="house_number" type="xs:string"/>
-            <xs:element name="city" type="xs:string"/>
-            <xs:element name="zip_code" type="xs:string"/>
-        </xs:sequence>
+        <xs:attribute name="street" type="xs:string" use="required"/>
+        <xs:attribute name="house_number" type="xs:string" use="required"/>
+        <xs:attribute name="city" type="xs:string" use="required"/>
+        <xs:attribute name="zip_code" type="xs:string" use="required"/>
         <xs:attribute name="id" type="xs:integer">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
@@ -287,8 +285,8 @@
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
-    
-    
+
+
     <!-- Customer data -->
     <xs:complexType name="Customer">
         <xs:annotation>
@@ -308,8 +306,8 @@
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
-    
-    
+
+
     <!-- Web console data -->
     <xs:complexType name="WebConsole">
         <xs:annotation>
@@ -376,8 +374,8 @@
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    
-    
+
+
     <!-- Messages -->
     <xs:complexType name="Message">
         <xs:annotation>
@@ -386,7 +384,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="text" type="Text">
+            <xs:element name="text" type="Text" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
                         The messages' body or content
@@ -402,8 +400,8 @@
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    
-    
+
+
     <!-- Localized message text -->
     <xs:complexType name="Text">
         <xs:annotation>
