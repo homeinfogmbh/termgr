@@ -276,7 +276,11 @@ if __name__ == '__main__':
                 state = None
 
             address = Address.add(city, addr=addr, state=state)
-            if terminal.location.address == address:
+
+            if terminal.location is None:
+                terminal.location = Location.add(address)
+                print('Initially located', terminal, 'at', repr(address))
+            elif terminal.location.address == address:
                 print(terminal, 'is already located at', repr(address))
             else:
                 terminal.location.address = address
