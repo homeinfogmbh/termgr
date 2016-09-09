@@ -75,10 +75,10 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="due" type="xs:dateTime">
+        <xs:attribute name="scheduled" type="xs:dateTime">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
-                    Date and time when the terminal is due for delivery.
+                    Date and time when the terminal is scheduled for delivery.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

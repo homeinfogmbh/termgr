@@ -1,7 +1,7 @@
 # ./terminals.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2016-09-09 10:16:22.945383 by PyXB version 1.2.5-DEV using Python 3.5.2.final.0
+# Generated 2016-09-09 10:27:13.278345 by PyXB version 1.2.5-DEV using Python 3.5.2.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:b1d3f174-7665-11e6-90ac-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:3574f220-7667-11e6-8b66-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.5-DEV'
@@ -756,12 +756,12 @@ class TerminalData (pyxb.binding.basis.complexTypeDefinition):
     tid = property(__tid.value, __tid.set, None, '\n                    The terminal identifier\n                ')
 
     
-    # Attribute due uses Python identifier due
-    __due = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'due'), 'due', '__httpxml_homeinfo_deschematerminallib_TerminalData_due', pyxb.binding.datatypes.dateTime)
-    __due._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 78, 8)
-    __due._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 78, 8)
+    # Attribute scheduled uses Python identifier scheduled
+    __scheduled = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'scheduled'), 'scheduled', '__httpxml_homeinfo_deschematerminallib_TerminalData_scheduled', pyxb.binding.datatypes.dateTime)
+    __scheduled._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 78, 8)
+    __scheduled._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 78, 8)
     
-    due = property(__due.value, __due.set, None, '\n                    Date and time when the terminal is due for delivery.\n                ')
+    scheduled = property(__scheduled.value, __scheduled.set, None, '\n                    Date and time when the terminal is scheduled for delivery.\n                ')
 
     
     # Attribute deployed uses Python identifier deployed
@@ -802,7 +802,7 @@ class TerminalData (pyxb.binding.basis.complexTypeDefinition):
     _AttributeMap.update({
         __id.name() : __id,
         __tid.name() : __tid,
-        __due.name() : __due,
+        __scheduled.name() : __scheduled,
         __deployed.name() : __deployed,
         __deleted.name() : __deleted,
         __status.name() : __status,
@@ -834,7 +834,7 @@ class TerminalInfo (TerminalData):
     
     # Attribute tid inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
     
-    # Attribute due inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
+    # Attribute scheduled inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
     
     # Attribute deployed inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
     
@@ -925,7 +925,7 @@ class TerminalDetails (TerminalData):
     
     # Attribute tid inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
     
-    # Attribute due inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
+    # Attribute scheduled inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
     
     # Attribute deployed inherited from {http://xml.homeinfo.de/schema/terminallib}TerminalData
     
