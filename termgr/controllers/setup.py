@@ -2,7 +2,7 @@
 
 from peewee import DoesNotExist
 
-from homeinfo.lib.wsgi import WsgiResponse, Error, InternalServerError, \
+from homeinfo.lib.wsgi import WsgiResponse, Error, JSON, InternalServerError, \
     handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
@@ -19,6 +19,7 @@ class SetupControllerRequestHandler(RequestHandler):
     def get(self):
         """Interpret query dictionary"""
         qd = self.query_dict
+        client_version = qd.get('client_version')
         user_name = qd.get('user_name')
 
         if not user_name:
@@ -63,32 +64,50 @@ class SetupControllerRequestHandler(RequestHandler):
                             if action is None:
                                 return Error('No action specified', status=400)
                             else:
-                                return self._handle(terminal, action)
+                                return self._handle(
+                                    terminal, action,
+                                    client_version=client_version)
                         else:
                             return Error('Unauthorized', status=401)
         else:
             return Error('Invalid credentials', status=401)
 
-    def _handle(self, terminal, action):
+    def _handle(self, terminal, action, client_version=None):
         """Handles an action for a certain
         customer id, terminal id and action
         """
         status = 200
 
         if action == 'location':
-            if terminal.location is not None:
-                location = str(terminal.location)
-            else:
-                location = '!!!UNCONFIGURED!!!'
+            if client_version is None:
+                if terminal.location is not None:
+                    location = str(terminal.location)
+                else:
+                    location = '!!!UNCONFIGURED!!!'
 
-            if location is not None:
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                response_body = location.encode(encoding=charset)
-            else:
-                msg = 'No location configured for terminal: {0}'.format(
-                    terminal)
-                return InternalServerError(msg)
+                if location is not None:
+                    content_type = 'text/plain'
+                    charset = 'utf-8'
+                    response_body = location.encode(encoding=charset)
+                else:
+                    msg = 'No location configured for terminal: {0}'.format(
+                        terminal)
+                    return InternalServerError(msg)
+            elif client_version == '3.0':
+                location = {}
+
+                if terminal.location is not None:
+                    address = terminal.location.address
+                    annotation = terminal.location.annotation
+                    location['street'] = str(address.street)
+                    location['house_number'] = str(address.house_number)
+                    location['zip_code'] = str(address.zip_code)
+                    location['city'] = str(address.city)
+
+                    if annotation:
+                        location['annotation'] = str(annotation)
+
+                return JSON(location)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
             response_body = None
