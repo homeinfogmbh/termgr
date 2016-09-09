@@ -2,8 +2,8 @@
 
 from peewee import DoesNotExist
 
-from homeinfo.lib.wsgi import WsgiResponse, Error, JSON, InternalServerError, \
-    handler, RequestHandler, WsgiApp
+from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
+InternalServerError, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
 from termgr.lib.openvpn import OpenVPNPackager
@@ -72,83 +72,68 @@ class SetupControllerRequestHandler(RequestHandler):
         else:
             return Error('Invalid credentials', status=401)
 
+    def _legacy_location(self, terminal):
+        """Returns terminal location data for legacy client versions"""
+        if terminal.location is not None:
+            location = str(terminal.location)
+        else:
+            location = '!!!UNCONFIGURED!!!'
+
+        return OK(location)
+
+    def _legacy_location(self, terminal):
+        """Returns terminal location data for
+        new client versions in JSON format
+        """
+        location = {}
+
+        if terminal.location is not None:
+            address = terminal.location.address
+            annotation = terminal.location.annotation
+            location['street'] = str(address.street)
+            location['house_number'] = str(address.house_number)
+            location['zip_code'] = str(address.zip_code)
+            location['city'] = str(address.city)
+
+            if annotation:
+                location['annotation'] = str(annotation)
+
+        return JSON(location)
+
+    def _openvpn_data(self, terminal):
+        """Returns OpenVPN configuration"""
+        packager = OpenVPNPackager(terminal)
+
+        try:
+            response_body = packager.package()
+        except FileNotFoundError:
+            msg = 'OpenVPN configuration template file not found'
+            return InternalServerError(msg)
+        except PermissionError:
+            msg = 'Not allowed to read OpenVPN configuration template file'
+            return InternalServerError(msg)
+        else:
+            return WsgiResponse(
+                200, 'application/x-gzip',
+                response_body, charset=None)
+
     def _handle(self, terminal, action, client_version=None):
         """Handles an action for a certain
         customer id, terminal id and action
         """
-        status = 200
-
         if action == 'location':
             if client_version is None:
-                if terminal.location is not None:
-                    location = str(terminal.location)
-                else:
-                    location = '!!!UNCONFIGURED!!!'
-
-                if location is not None:
-                    content_type = 'text/plain'
-                    charset = 'utf-8'
-                    response_body = location.encode(encoding=charset)
-                else:
-                    msg = 'No location configured for terminal: {0}'.format(
-                        terminal)
-                    return InternalServerError(msg)
+                return self._legacy_location(terminal)
             elif client_version == '3.0':
-                location = {}
-
-                if terminal.location is not None:
-                    address = terminal.location.address
-                    annotation = terminal.location.annotation
-                    location['street'] = str(address.street)
-                    location['house_number'] = str(address.house_number)
-                    location['zip_code'] = str(address.zip_code)
-                    location['city'] = str(address.city)
-
-                    if annotation:
-                        location['annotation'] = str(annotation)
-
-                return JSON(location)
+                return self._json_location(terminal)
             else:
-                return Error(
-                    'Version: {} is not supported.'.format(client_version),
-                    status=400)
+                msg = 'Version: {} is not supported.'.format(client_version)
+                return Error(msg, status=400)
         elif action == 'vpn_data':
-            packager = OpenVPNPackager(terminal)
-            response_body = None
-
-            try:
-                response_body = packager.package()
-            except FileNotFoundError:
-                msg = 'OpenVPN configuration template file not found'
-                return InternalServerError(msg)
-            except PermissionError:
-                msg = 'Not allowed to read OpenVPN configuration template file'
-                return InternalServerError(msg)
-            else:
-                content_type = 'application/x-gzip'
-                charset = None
-        elif action == 'repo_config':
-            pacman_cfg = PacmanConfig(terminal)
-            result = None
-
-            try:
-                result = pacman_cfg.get()
-            except FileNotFoundError:
-                msg = 'Pacman config template file not found'
-                return InternalServerError(msg)
-            except PermissionError:
-                msg = 'Not allowed to read pacman config template file'
-                return InternalServerError(msg)
-            else:
-                content_type = 'text/plain'
-                charset = 'utf-8'
-                response_body = result.encode(encoding=charset)
+            return self._openvpn_data(terminal)
         else:
-            msg = 'Action "{0}" is not implemented'.format(action)
-            return Error(msg, status=501)
-
-        return WsgiResponse(
-            status, content_type, response_body, charset=charset, cors=True)
+            msg = 'Action "{}" is not implemented'.format(action)
+            return Error(msg, status=400)
 
 
 @handler(SetupControllerRequestHandler)
