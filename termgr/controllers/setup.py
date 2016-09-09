@@ -81,7 +81,7 @@ class SetupControllerRequestHandler(RequestHandler):
 
         return OK(location)
 
-    def _legacy_location(self, terminal):
+    def _json_location(self, terminal):
         """Returns terminal location data for
         new client versions in JSON format
         """
