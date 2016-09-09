@@ -3,7 +3,7 @@
 from peewee import DoesNotExist
 
 from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
-InternalServerError, handler, RequestHandler, WsgiApp
+    InternalServerError, handler, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
 
 from termgr.lib.openvpn import OpenVPNPackager
