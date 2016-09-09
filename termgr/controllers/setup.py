@@ -108,6 +108,10 @@ class SetupControllerRequestHandler(RequestHandler):
                         location['annotation'] = str(annotation)
 
                 return JSON(location)
+            else:
+                return Error(
+                    'Version: {} is not supported.'.format(client_version),
+                    status=400)
         elif action == 'vpn_data':
             packager = OpenVPNPackager(terminal)
             response_body = None
