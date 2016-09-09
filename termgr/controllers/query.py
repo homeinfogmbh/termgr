@@ -79,6 +79,7 @@ class TerminalQueryRequestHandler(RequestHandler):
 
         terminal_dom.annotation = terminal.annotation
         terminal_dom.tid = terminal.tid
+        terminal_dom.due = terminal.due
         terminal_dom.deployed = terminal.deployed
 
         if status:
