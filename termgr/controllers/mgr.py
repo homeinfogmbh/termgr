@@ -5,7 +5,8 @@ from threading import Thread
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
-from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
+from homeinfo.lib.rest import ResourceHandler, RestApp
+from homeinfo.lib.wsgi import Error, XML, JSON
 from homeinfo.terminals.orm import Terminal, Class
 
 from termgr.lib import dom
@@ -16,84 +17,91 @@ from termgr.orm import User
 __all__ = ['TerminalManager']
 
 
-class TerminalManagerRequestHandler(RequestHandler):
+class TerminalHandler(ResourceHandler):
     """Handles requests for the TerminalManager"""
+
+    def authenticate(self):
+        """Authenticate the user"""
+        auth = False
+        user_name = self.params.get('user_name')
+
+        if not user_name:
+            raise Errors.NO_USER_NAME_SPECIFIED
+        else:
+            passwd = self.params.get('passwd')
+
+            if not user_name:
+                raise Errors.NO_PASSWORD_SPECIFIED
+            else:
+                return User.authenticate(user_name, passwd)
 
     def get(self):
         """Runs the terminal manager"""
-        qd = self.query_dict
-        auth = False
-        user_name = qd.get('user_name')
+        user = self.authenticate()
 
-        if not user_name:
-            return Error('No user name specified', status=400)
+        if user:
+            # TODO: list terminals or single terminal
+            return self._list()
         else:
-            passwd = qd.get('passwd')
 
-            if not user_name:
-                return Error('No password', status=400)
-            else:
-                auth = User.authenticate(user_name, passwd)
 
-        if auth:
-            cid = qd.get('cid')
-
-            if cid is not None:
-                try:
-                    cid = int(cid)
-                except (TypeError, ValueError):
-                    return Error('Invalid customer ID', status=400)
-
-            tid = qd.get('tid')
-
-            if tid is not None:
-                try:
-                    tid = int(tid)
-                except (TypeError, ValueError):
-                    return Error('Invalid terminal ID', status=400)
-
-            class_id_or_name = qd.get('class')
-
+    def _list(self):
+        if cid is not None:
             try:
-                class_id = int(class_id_or_name)
+                cid = int(cid)
             except (TypeError, ValueError):
-                class_id = None
-                class_name = class_id_or_name
-            else:
-                class_name = None
+                return Error('Invalid customer ID', status=400)
 
-            action = qd.get('action')
+        tid = self.params.get('tid')
 
-            if action is None:
-                return Error('No action specified', status=400)
-            elif action == 'terminals':
-                deleted = True if qd.get('deleted') else False
-                deployed = True if qd.get('deployed') else False
+        if tid is not None:
+            try:
+                tid = int(tid)
+            except (TypeError, ValueError):
+                return Error('Invalid terminal ID', status=400)
 
-                return self._list_terminals(
-                    cid, class_id=class_id, class_name=class_name,
-                    deleted=deleted, deployed=deployed)
-            elif action == 'customers':
-                return self._list_customers()
-            elif action == 'classes':
-                return self._list_classes(cid)
-            elif action == 'details':
-                if cid is None:
-                    return Error('No customer ID specified', status=400)
-                elif tid is None:
-                    return Error('No terminal ID specified', status=400)
-                else:
-                    thumbnail = qd.get('thumbnail')
-                    try:
-                        thumbnail = int(thumbnail)
-                    except (ValueError, TypeError):
-                        thumbnail = False
+        class_id_or_name = self.params.get('class')
 
-                    return self._details(cid, tid, thumbnail=thumbnail)
-            else:
-                return Error('Invalid action', status=400)
+        try:
+            class_id = int(class_id_or_name)
+        except (TypeError, ValueError):
+            class_id = None
+            class_name = class_id_or_name
         else:
-            return Error('Not authenticated', status=403)
+            class_name = None
+
+        action = self.params.get('action')
+
+        if action is None:
+            return Error('No action specified', status=400)
+        elif action == 'terminals':
+            deleted = True if self.params.get('deleted') else False
+            deployed = True if self.params.get('deployed') else False
+
+            return self._list_terminals(
+                cid, class_id=class_id, class_name=class_name,
+                deleted=deleted, deployed=deployed)
+        elif action == 'customers':
+            return self._list_customers()
+        elif action == 'classes':
+            return self._list_classes(cid)
+        elif action == 'details':
+            if cid is None:
+                return Error('No customer ID specified', status=400)
+            elif tid is None:
+                return Error('No terminal ID specified', status=400)
+            else:
+                thumbnail = self.params.get('thumbnail')
+                try:
+                    thumbnail = int(thumbnail)
+                except (ValueError, TypeError):
+                    thumbnail = False
+
+                return self._details(cid, tid, thumbnail=thumbnail)
+        else:
+            return Error('Invalid action', status=400)
+    else:
+        return Error('Not authenticated', status=403)
 
     def _list_customers(self):
         """Lists all customers"""
@@ -278,8 +286,7 @@ class TerminalManagerRequestHandler(RequestHandler):
                 return XML(result)
 
 
-@handler(TerminalManagerRequestHandler)
-class TerminalManager(WsgiApp):
+class TerminalManager(RestApp):
     """Lists, adds and removes terminals
 
     The terminal manager is used for
@@ -287,7 +294,3 @@ class TerminalManager(WsgiApp):
     """
 
     DEBUG = True
-
-    def __init__(self):
-        """Initialize with CORS enabled"""
-        super().__init__(cors=True)
