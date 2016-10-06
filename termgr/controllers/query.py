@@ -1,7 +1,7 @@
 """Terminal query web service"""
 
 from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
-from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
+from homeinfo.terminals.orm import Terminal
 
 from termgr import dom
 from termgr.orm import User

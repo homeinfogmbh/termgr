@@ -6,7 +6,7 @@ from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from homeinfo.lib.rest import ResourceHandler, RestApp
-from homeinfo.lib.wsgi import Error, XML, JSON
+from homeinfo.lib.wsgi import Error, XML
 from homeinfo.terminals.orm import Terminal, Class
 
 from termgr.lib import dom
@@ -17,12 +17,20 @@ from termgr.orm import User
 __all__ = ['TerminalManager']
 
 
+class Errors():
+    """Pre-defined errors"""
+
+    # TODO: implement
+    NO_USER_NAME_SPECIFIED = None
+    NO_PASSWORD_SPECIFIED = None
+
+
 class TerminalHandler(ResourceHandler):
     """Handles requests for the TerminalManager"""
 
     def authenticate(self):
         """Authenticate the user"""
-        auth = False
+        # auth = False
         user_name = self.params.get('user_name')
 
         if not user_name:
@@ -43,9 +51,10 @@ class TerminalHandler(ResourceHandler):
             # TODO: list terminals or single terminal
             return self._list()
         else:
+            # TODO: implement
+            pass
 
-
-    def _list(self):
+    def _list(self, cid=None, tid=None):
         if cid is not None:
             try:
                 cid = int(cid)
@@ -100,8 +109,8 @@ class TerminalHandler(ResourceHandler):
                 return self._details(cid, tid, thumbnail=thumbnail)
         else:
             return Error('Invalid action', status=400)
-    else:
-        return Error('Not authenticated', status=403)
+    # else:
+    #     return Error('Not authenticated', status=403)
 
     def _list_customers(self):
         """Lists all customers"""

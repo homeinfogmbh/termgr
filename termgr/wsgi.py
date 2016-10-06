@@ -2,7 +2,6 @@
 
 # TODO: Migrate to using HIS
 
-from homeinfo.lib.rest import ResourceHandler, RestApp
 from homeinfo.lib.wsgi import JSON
 
 from termgr.orm import User

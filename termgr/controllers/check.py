@@ -1,7 +1,5 @@
 """Terminal checking web service"""
 
-from json import dumps
-
 from peewee import DoesNotExist
 
 from homeinfo.terminals.orm import Terminal

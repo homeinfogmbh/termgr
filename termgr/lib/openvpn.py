@@ -26,4 +26,4 @@ class OpenVPNPackager(TerminalAware):
             with open(tarpath, 'rb') as tar_file:
                 return tar_file.read()
         else:
-            raise VPNUnconfiguredError(str(terminal))
+            raise VPNUnconfiguredError(str(self.terminal))

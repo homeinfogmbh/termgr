@@ -4,10 +4,9 @@ from peewee import DoesNotExist
 
 from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
     InternalServerError, handler, RequestHandler, WsgiApp
-from homeinfo.terminals.orm import Terminal, AddressUnconfiguredError
+from homeinfo.terminals.orm import Terminal
 
 from termgr.lib.openvpn import OpenVPNPackager
-from termgr.lib.pacman import PacmanConfig
 from termgr.orm import User
 
 __all__ = ['SetupController']
