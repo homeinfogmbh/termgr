@@ -1,6 +1,6 @@
 """Terminal query web service"""
 
-from homeinfo.lib.wsgi import Error, XML, handler, RequestHandler, WsgiApp
+from homeinfo.lib.wsgi import Error, XML, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal
 
 from termgr import dom
@@ -91,7 +91,6 @@ class TerminalQueryRequestHandler(RequestHandler):
         return terminal_dom
 
 
-@handler(TerminalQueryRequestHandler)
 class TerminalQuery(WsgiApp):
     """Controller for terminal queries"""
 
@@ -99,4 +98,4 @@ class TerminalQuery(WsgiApp):
 
     def __init__(self):
         """Initialize with CORS enabled"""
-        super().__init__(cors=True)
+        super().__init__(TerminalQueryRequestHandler, cors=True)

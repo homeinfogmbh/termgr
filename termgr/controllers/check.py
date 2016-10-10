@@ -4,7 +4,7 @@ from peewee import DoesNotExist
 
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.ctrl import RemoteController
-from homeinfo.lib.wsgi import Error, InternalServerError, JSON, OK, handler, \
+from homeinfo.lib.wsgi import Error, InternalServerError, JSON, OK, \
     RequestHandler, WsgiApp
 
 from termgr.orm import User
@@ -126,7 +126,6 @@ class TerminalCheckerRequestHandler(RequestHandler):
         return JSON(json)
 
 
-@handler(TerminalCheckerRequestHandler)
 class TerminalChecker(WsgiApp):
     """WSGI app for terminal checking"""
 
@@ -134,4 +133,4 @@ class TerminalChecker(WsgiApp):
 
     def __init__(self):
         """Enable CORS"""
-        super().__init__(cors=True)
+        super().__init__(TerminalCheckerRequestHandler, cors=True)

@@ -3,7 +3,7 @@
 from peewee import DoesNotExist
 
 from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
-    InternalServerError, handler, RequestHandler, WsgiApp
+    InternalServerError, RequestHandler, WsgiApp
 from homeinfo.terminals.orm import Terminal
 
 from termgr.lib.openvpn import OpenVPNPackager
@@ -135,7 +135,6 @@ class SetupControllerRequestHandler(RequestHandler):
             return Error(msg, status=400)
 
 
-@handler(SetupControllerRequestHandler)
 class SetupController(WsgiApp):
     """Controller for terminal setup automation"""
 
@@ -143,4 +142,4 @@ class SetupController(WsgiApp):
 
     def __init__(self):
         """Initialize with CORS enabled"""
-        super().__init__(cors=True)
+        super().__init__(SetupControllerRequestHandler, cors=True)
