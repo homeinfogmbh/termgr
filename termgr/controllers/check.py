@@ -17,15 +17,13 @@ class TerminalCheckerRequestHandler(RequestHandler):
 
     def get(self):
         """Handles GET requests"""
-        qd = self.query_dict
-
         try:
-            user_name = qd['user_name']
+            user_name = self.params['user_name']
         except KeyError:
             return Error('No user name provided', status=400)
 
         try:
-            passwd = qd['passwd']
+            passwd = self.params['passwd']
         except KeyError:
             return Error('No password provided', status=400)
 
@@ -33,7 +31,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
 
         if user:
             try:
-                action = qd['action']
+                action = self.params['action']
             except KeyError:
                 return Error('No action specified', status=400)
             else:
@@ -41,7 +39,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                     return self._list(user)
                 elif action == 'identify':
                     try:
-                        tid = qd['tid']
+                        tid = self.params['tid']
                     except KeyError:
                         return Error('No terminal ID specified', status=400)
                     else:
@@ -52,7 +50,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                                          status=400)
 
                     try:
-                        cid = qd['cid']
+                        cid = self.params['cid']
                     except KeyError:
                         return Error('No customer ID specified', status=400)
                     else:

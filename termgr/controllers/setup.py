@@ -16,15 +16,14 @@ class SetupControllerRequestHandler(RequestHandler):
     """Handles requests for the SetupController"""
 
     def get(self):
-        """Interpret query dictionary"""
-        qd = self.query_dict
-        client_version = qd.get('client_version')
-        user_name = qd.get('user_name')
+        """Process GET request"""
+        client_version = self.params.get('client_version')
+        user_name = self.params.get('user_name')
 
         if not user_name:
             return Error('No user name specified', status=400)
 
-        passwd = qd.get('passwd')
+        passwd = self.params.get('passwd')
 
         if not passwd:
             return Error('No password specified', status=400)
@@ -32,7 +31,7 @@ class SetupControllerRequestHandler(RequestHandler):
         user = User.authenticate(user_name, passwd)
 
         if user:
-            cid_str = qd.get('cid')
+            cid_str = self.params.get('cid')
 
             if cid_str is None:
                 return Error('No customer ID specified', status=400)
@@ -42,7 +41,7 @@ class SetupControllerRequestHandler(RequestHandler):
                 except ValueError:
                     return Error('Invalid customer ID', status=400)
 
-                tid_str = qd.get('tid')
+                tid_str = self.params.get('tid')
 
                 if tid_str is None:
                     return Error('No terminal ID specified', status=400)
@@ -58,7 +57,7 @@ class SetupControllerRequestHandler(RequestHandler):
                         return Error('No such terminal', status=400)
                     else:
                         if user.authorize(terminal, setup=True):
-                            action = qd.get('action')
+                            action = self.params.get('action')
 
                             if action is None:
                                 return Error('No action specified', status=400)

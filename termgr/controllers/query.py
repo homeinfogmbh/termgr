@@ -14,14 +14,12 @@ class TerminalQueryRequestHandler(RequestHandler):
 
     def get(self):
         """Interpret query dictionary"""
-        qd = self.query_dict
-
-        user_name = qd.get('user_name')
+        user_name = self.params.get('user_name')
 
         if not user_name:
             return Error('No user name specified', status=400)
 
-        passwd = qd.get('passwd')
+        passwd = self.params.get('passwd')
 
         if not passwd:
             return Error('No password specified', status=400)
@@ -29,7 +27,7 @@ class TerminalQueryRequestHandler(RequestHandler):
         user = User.authenticate(user_name, passwd)
 
         if user:
-            cid_str = qd.get('cid')
+            cid_str = self.params.get('cid')
 
             try:
                 cid = int(cid_str)
