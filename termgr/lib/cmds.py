@@ -2,6 +2,7 @@
 
 from itertools import chain
 
+from homeinfo.lib.log import Logger, LogLevel
 from homeinfo.terminals.ctrl import RemoteController
 
 from termgr.lib.tui import printterm
@@ -27,10 +28,15 @@ GREP = '/usr/bin/grep'
 class TerminalCommand():
     """Execute command on terminal"""
 
-    def __init__(self, cmd, *args, user=None):
+    def __init__(self, cmd, *args, user=None, logger=None):
         self.cmd = cmd
         self.args = args
         self.user = 'termgr' if user is None else user
+
+        if logger is None:
+            self.logger = Logger(self.__class__.__name__, level=LogLevel.DEBUG)
+        else:
+            self.logger = logger.inherit(self.__class__.__name__)
 
     def __call__(self, terminal, user=None):
         user = self.user if user is None else user
@@ -50,7 +56,7 @@ class TerminalCommand():
         """Get a RemoteController for the
         respective user and terminal
         """
-        return RemoteController(user, terminal)
+        return RemoteController(user, terminal, logger=self.logger)
 
 
 class RebootCommand(TerminalCommand):
