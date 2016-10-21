@@ -69,7 +69,7 @@ def stage(terminal):
     cleanup = Commands.CLEANUP(terminal)
 
     if cleanup:
-        update = Commands.UPDATE(terminal)
+        update = Commands.STAGE(terminal)
 
         if update:
             logger.debug('Staged: {}'.format(terminal))
