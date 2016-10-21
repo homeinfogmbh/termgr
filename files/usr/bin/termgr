@@ -72,22 +72,23 @@ if __name__ == '__main__':
         if not options['--undeployed']:
             terminals = deployed(terminals, logger=logger)
 
+        ctrl = TerminalsController(terminals)
+
         # Perform selected operation
         if options['update']:
-            TerminalsController.update(terminals)
+            ctrl.update()
         elif options['stage']:
-            TerminalsController.stage(terminals)
+            ctrl.stage()
         elif options['system-upgrade']:
-            TerminalsController.upgrade(terminals)
+            ctrl.upgrade()
         elif options['upgrade']:
-            TerminalsController.upgrade(terminals, options['<package>'])
+            ctrl.upgrade(options['<package>'])
         elif options['reboot']:
-            TerminalsController.reboot(terminals)
+            ctrl.reboot()
         elif options['unlock']:
-            TerminalsController.unlock(terminals)
+            ctrl.unlock()
         elif options['chkres']:
-            TerminalsController.resolution(terminals)
+            ctrl.resolution()
         elif options['fixpkg']:
             packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
-
-            TerminalsController.install(terminals, packages, asexplicit=True)
+            ctrl.install(packages, asexplicit=True)
