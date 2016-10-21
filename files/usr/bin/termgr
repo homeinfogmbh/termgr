@@ -80,8 +80,8 @@ if __name__ == '__main__':
                 with TTYAnimation(para, template=template):
                     para.wait()
 
-            for terminal, result, exception in para.failures:
-                print(str(terminal), str(result), str(exception), sep='\n')
+            for terminal, *_ in para.failures:
+                print('Failed to Update:', str(terminal))
         elif options['stage']:
             template = 'Staging {message}: {animation}'
 
