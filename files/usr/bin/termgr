@@ -79,6 +79,9 @@ if __name__ == '__main__':
             with Parallelization(ctrl.update, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
+
+            for failure in para.failures:
+                print(failure)
         elif options['stage']:
             template = 'Staging {message}: {animation}'
 
