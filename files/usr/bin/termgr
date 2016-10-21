@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
         # Filter out undeployed terminals
         if not options['--undeployed']:
-            terminals = deployed(terminals, logger=logger)
+            terminals = (t for t in terminals if t.deployed)
 
         ctrl = TerminalsController(terminals)
 
