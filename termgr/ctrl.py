@@ -36,7 +36,7 @@ class TerminalsController():
         return proxy
 
     @property
-    def update(self, *pkgs):
+    def update(self):
         """Updates packages"""
         def proxy(terminal):
             return self._controller(terminal).update()
@@ -44,10 +44,15 @@ class TerminalsController():
         return proxy
 
     @property
-    def stage(self, *pkgs):
+    def stage(self):
         """Stage packages"""
+        print('#####', 'DEBUG', '#####', sep='\n', flush=True)
+
         def proxy(terminal):
-            return self._controller(terminal).stage()
+            print('#####', 'DEBUG', '#####', sep='\n', flush=True)
+            result = self._controller(terminal).stage()
+            print('#####', 'DEBUG', '#####', sep='\n', flush=True)
+            return result
 
         return proxy
 
