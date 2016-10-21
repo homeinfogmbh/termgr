@@ -77,37 +77,37 @@ if __name__ == '__main__':
             template = 'Updating {message}: {animation}'
 
             with Parallelization(ctrl.update, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
         elif options['stage']:
             template = 'Staging {message}: {animation}'
 
             with Parallelization(ctrl.stage, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
         elif options['system-upgrade']:
             template = 'Upgrading {message}: {animation}'
 
             with Parallelization(ctrl.upgrade, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
         elif options['reboot']:
             template = 'Rebooting {message}: {animation}'
 
             with Parallelization(ctrl.reboot, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
         elif options['unlock']:
             template = 'Unlocking {message}: {animation}'
 
             with Parallelization(ctrl.unlock, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
         elif options['chkres']:
             template = 'Checking resolution {message}: {animation}'
 
             with Parallelization(ctrl.chkres, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
         elif options['fixpkg']:
             packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
@@ -115,5 +115,5 @@ if __name__ == '__main__':
             template = 'Fixing packages {message}: {animation}'
 
             with Parallelization(install, terminals, single=True) as para:
-                with TTYAnimation(para, template=template, refresh=True):
+                with TTYAnimation(para, template=template):
                     para.wait()
