@@ -27,7 +27,8 @@ from sys import stderr
 from getpass import getuser
 from os.path import basename
 
-from homeinfo.lib.log import Logger, LogLevel
+from homeinfo.lib.log import Logger, LogLevel, TTYAnimation
+from homeinfo.lib.system import Parallelization
 
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
@@ -73,19 +74,46 @@ if __name__ == '__main__':
 
         # Perform selected operation
         if options['update']:
-            ctrl.update()
+            template = 'Updating {message}: {animation}'
+
+            with Parallelization(ctrl.update, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()
         elif options['stage']:
-            ctrl.stage()
+            template = 'Staging {message}: {animation}'
+
+            with Parallelization(ctrl.stage, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()
         elif options['system-upgrade']:
-            ctrl.upgrade()
-        elif options['upgrade']:
-            ctrl.upgrade(options['<package>'])
+            template = 'Upgrading {message}: {animation}'
+
+            with Parallelization(ctrl.upgrade, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()
         elif options['reboot']:
-            ctrl.reboot()
+            template = 'Rebooting {message}: {animation}'
+
+            with Parallelization(ctrl.reboot, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()
         elif options['unlock']:
-            ctrl.unlock()
+            template = 'Unlocking {message}: {animation}'
+
+            with Parallelization(ctrl.unlock, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()
         elif options['chkres']:
-            ctrl.resolution()
+            template = 'Checking resolution {message}: {animation}'
+
+            with Parallelization(ctrl.chkres, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()
         elif options['fixpkg']:
             packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
-            ctrl.install(packages, asexplicit=True)
+            install = ctrl.install(*pkgs, asexplicit=True)
+            template = 'Fixing packages {message}: {animation}'
+
+            with Parallelization(install, terminals, single=True) as para:
+                with TTYAnimation(para, template=template, refresh=True):
+                    para.wait()

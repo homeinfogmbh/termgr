@@ -1,7 +1,6 @@
 """Remote terminal controller"""
 
-from homeinfo.lib.log import Logger, LogLevel, TTYAnimation
-from homeinfo.lib.system import Parallelization
+from homeinfo.lib.log import Logger, LogLevel
 from homeinfo.terminals.ctrl import RemoteController
 
 
@@ -11,47 +10,78 @@ __all__ = ['TerminalController']
 class TerminalsController():
     """Processes several terminals in parallel"""
 
-    def __init__(self, terminals, user=None):
+    def __init__(self, user=None):
         """Sets terminals, user and logger"""
-        self.terminals = list(terminals)
         self.user = user
         self.logger = Logger(self.__class__.__name__, level=LogLevel.NONE)
 
-    def _reboot(self, terminal):
-        """Proxy a single terminal reboot"""
-        return TerminalController(
-            terminal, user=self.user, logger=self.logger).reboot()
+    def _controller(self, terminal):
+        """Returns a controller for the respective terminal"""
+        return TerminalController(terminal, user=self.user, logger=self.logger)
 
-    def _cleanup(self, terminal):
-        """Proxy a single terminal cleanup"""
-        return TerminalController(
-            terminal, user=self.user, logger=self.logger).cleanup()
-
-    def _update(self, terminal):
-        """Proxy a single terminal upgrade"""
-        return TerminalController(
-            terminal, user=self.user, logger=self.logger).update()
-
+    @property
     def reboot(self):
-        """Reboots all terminals"""
-        with Parallelization(
-                self._reboot, self.terminals, single=True) as para:
-            with TTYAnimation(para, refresh=3):
-                para.wait()
+        """Reboots the terminal"""
+        def proxy(terminal):
+            return self._controller(terminal).reboot()
 
+        return proxy
+
+    @property
     def cleanup(self):
-        """Updates all terminals"""
-        with Parallelization(
-                self._cleanup, self.terminals, single=True) as para:
-            with TTYAnimation(para, refresh=3):
-                para.wait()
+        """Cleans up package chache"""
+        def proxy(terminal):
+            return self._controller(terminal).cleanup()
 
-    def update(self):
-        """Updates all terminals"""
-        with Parallelization(
-                self._update, self.terminals, single=True) as para:
-            with TTYAnimation(para, refresh=3):
-                para.wait()
+        return proxy
+
+    @property
+    def update(self, *pkgs):
+        """Updates packages"""
+        def proxy(terminal):
+            return self._controller(terminal).update()
+
+        return proxy
+
+    @property
+    def stage(self, *pkgs):
+        """Stage packages"""
+        def proxy(terminal):
+            return self._controller(terminal).stage()
+
+        return proxy
+
+    @property
+    def upgrade(self):
+        """Stage packages"""
+        def proxy(terminal):
+            return self._controller(terminal).upgrade()
+
+        return proxy
+
+    @property
+    def unlock(self):
+        """Unlocks the package manager"""
+        def proxy(terminal):
+            return self._controller(terminal).unlock()
+
+        return proxy
+
+    @property
+    def chkres(self):
+        """Checks the resolution"""
+        def proxy(terminal):
+            return self._controller(terminal).resolution
+
+        return proxy
+
+    def install(self, *pkgs, asexplicit=False):
+        """Installs software packages"""
+        def proxy(terminal):
+            return self._controller(terminal).upgrade(
+                *pkgs, asexplicit=asexplicit)
+
+        return proxy
 
 
 class TerminalController(RemoteController):
