@@ -27,9 +27,9 @@ Options:
 from os import geteuid
 from sys import stderr
 from getpass import getuser
-from logging import INFO, getLogger, basicConfig
 from os.path import basename
 
+from homeinfo.lib.log import Logger, LogLevel
 from homeinfo.lib.system import Parallelization, Watchdog
 
 from homeinfo.terminals.ctrl import RemoteController
@@ -132,8 +132,7 @@ if __name__ == '__main__':
     from docopt import docopt
 
     options = docopt(__doc__)
-    logger = getLogger(basename(__file__))
-    basicConfig(level=INFO)
+    logger = Logger(basename(__file__), level=LogLevel.INFO)
 
     if geteuid() == 0:
         print('Refusing to run as root')
