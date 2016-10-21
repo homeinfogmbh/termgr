@@ -70,7 +70,7 @@ if __name__ == '__main__':
         if not options['--undeployed']:
             terminals = (t for t in terminals if t.deployed)
 
-        ctrl = TerminalsController(terminals)
+        ctrl = TerminalsController()
 
         # Perform selected operation
         if options['update']:

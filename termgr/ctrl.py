@@ -46,13 +46,8 @@ class TerminalsController():
     @property
     def stage(self):
         """Stage packages"""
-        print('#####', 'DEBUG', '#####', sep='\n', flush=True)
-
         def proxy(terminal):
-            print('#####', 'DEBUG', '#####', sep='\n', flush=True)
-            result = self._controller(terminal).stage()
-            print('#####', 'DEBUG', '#####', sep='\n', flush=True)
-            return result
+            return self._controller(terminal).stage()
 
         return proxy
 
