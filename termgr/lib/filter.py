@@ -19,9 +19,9 @@ def deployed(terminals, logger=None):
 
     for terminal in terminals:
         if terminal.deployed is None:
-            logger.warning('Terminal {0} is not deployed'.format(terminal))
+            logger.warning('Terminal {} is not deployed'.format(terminal))
         elif terminal.deployed - datetime.now() > NULL:
-            logger.warning('Terminal {0} is not yet deployed'.format(terminal))
+            logger.warning('Terminal {} is not yet deployed'.format(terminal))
         else:
             yield terminal
 

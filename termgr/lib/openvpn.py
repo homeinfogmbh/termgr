@@ -20,7 +20,7 @@ class OpenVPNPackager(TerminalAware):
         """Packs the key into a ZIP compressed file"""
         if self.terminal.vpn is not None:
             keyname = self.terminal.vpn.key or str(self.terminal)
-            tarname = '{0}.tar'.format(keyname)
+            tarname = '{}.tar'.format(keyname)
             tarpath = join(self.ARCDIR, tarname)
 
             with open(tarpath, 'rb') as tar_file:

@@ -94,10 +94,10 @@ class TerminalCheckerRequestHandler(RequestHandler):
                 try:
                     _, terminals = customers[terminal.customer.id]
                 except KeyError:
-                    customer, terminals = (terminal.customer, [])
+                    customer, terminals = (terminal.customer, [terminal])
                     customers[terminal.customer.id] = (customer, terminals)
-
-                terminals.append(terminal)
+                else:
+                    terminals.append(terminal)
 
         # Build JSON dict from grouped terminals
         customers_json = []
