@@ -97,31 +97,32 @@ class TerminalController(RemoteController):
 
     def install(self, *pkgs, asexplicit=False):
         """Installs software packages"""
-        options = []
-
         if asexplicit:
-            options.append['--asexplicit']
-
-        return self.pacman(*options, '-S', *pkgs)
+            return self.pacman('-S', '--asexplicit', *pkgs)
+        else:
+            return self.pacman('-S', *pkgs)
 
     def remove(self, *pkgs, cascade=False, nosave=False,
                recursive=False, unneeded=False):
         """Removes packages"""
-        options = '-R'
+        options = []
 
         if cascade:
-            options += 'c'
+            options.append('--cascade')
 
         if nosave:
-            options += 'n'
+            options.append('--nosave')
 
         if recursive:
-            options += 's'
+            options.append('--recursive')
 
         if unneeded:
-            options += 'u'
+            options.append('--unneeded')
 
-        return self.pacman(options, *options, *pkgs)
+        for pkg in pkgs:
+            options.append(str(pkg))
+
+        return self.pacman(options, '-R', *options)
 
     def unlock(self):
         """Removes the pacman lockfile"""
