@@ -36,13 +36,13 @@ from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
-from termgr.lib.cmds import TERMGR_USER, PackageManagerCommand,\
-    CheckInitcpioConfig, CheckPacmanConfig, Commands
+from termgr.ctrl import TerminalManager
 from termgr.lib.filter import deployed, online
 from termgr.lib.tui import printterm
 
 
 VERBOSE = False
+TERMGR_USER = 'termgr'
 
 
 # ### Command wrappers ### #
