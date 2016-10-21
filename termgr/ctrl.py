@@ -13,7 +13,7 @@ class TerminalsController():
     def __init__(self, user=None):
         """Sets terminals, user and logger"""
         self.user = user
-        self.logger = Logger(self.__class__.__name__, level=LogLevel.DEBUG)
+        self.logger = Logger(self.__class__.__name__, level=LogLevel.NONE)
 
     def _controller(self, terminal):
         """Returns a controller for the respective terminal"""
