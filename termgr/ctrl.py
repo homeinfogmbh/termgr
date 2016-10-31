@@ -107,8 +107,8 @@ class TerminalController(RemoteController):
     def reboot(self):
         """Reboots the terminal"""
         options = {
-            'ServerAliveInterval': 1,
-            'ServerAliveCountMax': 5}
+            'ServerAliveInterval': 5,
+            'ServerAliveCountMax': 3}
 
         with CustomSSHOptions(options, self):
             return self.sudo('/usr/bin/reboot')
