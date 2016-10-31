@@ -1,7 +1,7 @@
 """Remote terminal controller"""
 
 from homeinfo.lib.log import Logger, LogLevel
-from homeinfo.terminals.ctrl import RemoteController
+from homeinfo.terminals.ctrl import CustomSSHOptions, RemoteController
 
 
 __all__ = ['TerminalController']
@@ -106,7 +106,12 @@ class TerminalController(RemoteController):
 
     def reboot(self):
         """Reboots the terminal"""
-        return self.sudo('/usr/bin/reboot')
+        options = {
+            'ServerAliveInterval': 15,
+            'ServerAliveCountMax': 5}
+
+        with CustomSSHOptions(options, self):
+            return self.sudo('/usr/bin/reboot')
 
     def cleanup(self):
         """Cleanup local package cache"""
