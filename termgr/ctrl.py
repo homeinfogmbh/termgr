@@ -107,7 +107,7 @@ class TerminalController(RemoteController):
     def reboot(self):
         """Reboots the terminal"""
         options = {
-            'ServerAliveInterval': 15,
+            'ServerAliveInterval': 1,
             'ServerAliveCountMax': 5}
 
         with CustomSSHOptions(options, self):
