@@ -9,10 +9,9 @@
 Usage:
     termgr update <expr> [options]
     termgr stage <expr> [options]
-    termgr upgrade <package> <expr> [options]
+    termgr sync <package>... <expr> [--asexplicit] [options]
     termgr system-upgrade <expr> [options]
     termgr (reboot | chkres | unlock) <expr> [options]
-    termgr fixpkg <expr> <pkgs>...
 
 Options:
     -h --help       Show this screen.
@@ -81,29 +80,41 @@ if __name__ == '__main__':
                     para.wait()
 
             for terminal, *_ in para.failures:
-                print('Failed to Update:', str(terminal))
+                print('Failed to update:', str(terminal))
         elif options['stage']:
             template = 'Staging {message}: {animation}'
 
             with Parallelization(ctrl.stage, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
+
+            for terminal, *_ in para.failures:
+                print('Failed to stage:', str(terminal))
+        elif options['sync']:
+            pkgs = options['<package>']
+            asexplicit = options['--asexplicit']
+            install = ctrl.install(*pkgs, asexplicit=asexplicit)
+            template = 'Staging {message}: {animation}'
+
+            with Parallelization(install, terminals, single=True) as para:
+                with TTYAnimation(para, template=template):
+                    para.wait()
+
+            for terminal, *_ in para.failures:
+                print('Failed to sync:', str(terminal))
         elif options['system-upgrade']:
             template = 'Upgrading {message}: {animation}'
 
             with Parallelization(ctrl.upgrade, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
+
+            for terminal, *_ in para.failures:
+                print('Failed to upgrade:', str(terminal))
         elif options['reboot']:
             template = 'Rebooting {message}: {animation}'
 
             with Parallelization(ctrl.reboot, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
-                    para.wait()
-        elif options['unlock']:
-            template = 'Unlocking {message}: {animation}'
-
-            with Parallelization(ctrl.unlock, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
         elif options['chkres']:
@@ -112,11 +123,12 @@ if __name__ == '__main__':
             with Parallelization(ctrl.chkres, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
-        elif options['fixpkg']:
-            packages = options['<pkgs>'] or PackageManagerCommand.BASE_PKGS
-            install = ctrl.install(*pkgs, asexplicit=True)
-            template = 'Fixing packages {message}: {animation}'
+        elif options['unlock']:
+            template = 'Unlocking {message}: {animation}'
 
-            with Parallelization(install, terminals, single=True) as para:
+            with Parallelization(ctrl.unlock, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
+
+            for terminal, *_ in para.failures:
+                print('Failed to unlock:', str(terminal))

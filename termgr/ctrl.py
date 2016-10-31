@@ -87,9 +87,8 @@ class TerminalsController():
 class TerminalController(RemoteController):
     """Does stuff on remote terminals"""
 
-    def __init__(self, terminal, user=None, logger=None):
+    def __init__(self, terminal, user='termgr', logger=None):
         """Sets the respective terminal and logger"""
-        user = 'termgr' if user is None else user
         super().__init__(user, terminal, logger=logger)
 
     @property
