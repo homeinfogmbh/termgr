@@ -4,7 +4,7 @@
 Usage:
     termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
-[options]
+[options] [--no-reload]
     termadm addall <cid> <file> [--class=<class>] [--os=<os>] [options]
     termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
 [--force] [--no-reload]
@@ -23,7 +23,7 @@ Options:
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload services after terminal creation.
     --class=<class>             Specifies the termianl class [default: 3].
-    --os=<os>                   Specifies the termianl class [default: 1].
+    --os=<os>                   Specifies the termianl OS [default: 1].
     --weather=<weather>         Specifies the weather to use.
 """
 
