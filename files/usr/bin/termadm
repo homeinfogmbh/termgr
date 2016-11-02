@@ -11,6 +11,7 @@ Usage:
     termadm undeploy <expr>... [--no-reload]
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>] [--no-reload]
+    termadm reload
     termadm permit <user> [<permissions> <expr>...]
 
 Options:
@@ -167,7 +168,6 @@ if __name__ == '__main__':
 
         if reload:
             update_config()
-
     # Add new terminal
     elif options['addall']:
         # Required options
@@ -210,8 +210,6 @@ if __name__ == '__main__':
 
         if reload:
             update_config()
-
-
     # Deploy terminal
     elif options['deploy']:
         date_string = options['--date']
@@ -237,7 +235,6 @@ if __name__ == '__main__':
 
         if reload:
             update_nagios()
-
     # Undeploy terminal
     elif options['undeploy']:
         for expr in options['<expr>']:
@@ -246,7 +243,6 @@ if __name__ == '__main__':
 
         if reload:
             update_nagios()
-
     # Relocate a terminal
     elif options['relocate']:
         terminals = [t for t in TerminalFilter(options['<terminal>'])]
@@ -294,7 +290,9 @@ if __name__ == '__main__':
                 else:
                     print('Failed to move', terminal, 'to', repr(address))
                     exit(1)
-
+    # Reload configurations
+    elif options['reload']:
+        update_config()
     # Set user permissions
     elif options['permit']:
         user = User.get(User.name == options['<user>'])
