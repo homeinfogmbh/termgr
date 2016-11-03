@@ -50,6 +50,7 @@ def update_nagios():
 
     print('Creating Nagios3 configurations', end='         ', flush=True)
     evaluate(run('/usr/bin/nagioscfg-gen'))
+    evaluate(run('systemctl restart nagios3'))
 
 
 def update_config():
