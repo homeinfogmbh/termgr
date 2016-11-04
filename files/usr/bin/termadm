@@ -29,12 +29,12 @@ Options:
 """
 
 from os import geteuid
-from sys import stderr
 from os.path import basename
-from itertools import chain
 from datetime import datetime
-from logging import INFO, getLogger, basicConfig
 
+from peewee import DoesNotExist
+
+from homeinfo.lib.log import LogLevel, Logger
 from homeinfo.lib.system import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
@@ -42,7 +42,7 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
 from homeinfo.terminals.filter import TerminalFilter
 
 from termgr.lib.permissions import PermissionsParser, UserPermissions
-from termgr.orm import PermissionError, User, Permissions
+from termgr.orm import PermissionError, User
 
 
 def update_nagios():
@@ -91,10 +91,8 @@ def parse_address(string, sep=' '):
 if __name__ == '__main__':
     from docopt import docopt
 
-    logger = getLogger(basename(__file__))
+    logger = Logger(basename(__file__), level=LogLevel.INFO)
     options = docopt(__doc__)
-
-    basicConfig(level=INFO)
 
     try:
         reload = not options['--no-reload']

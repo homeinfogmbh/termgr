@@ -33,7 +33,6 @@ from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal
 
 from termgr.ctrl import TerminalsController
-from termgr.lib.filter import deployed
 
 
 VERBOSE = False
