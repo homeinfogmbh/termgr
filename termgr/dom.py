@@ -1,7 +1,7 @@
-# ./terminals.py
+# ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2016-09-09 10:27:13.278345 by PyXB version 1.2.5-DEV using Python 3.5.2.final.0
+# Generated 2016-11-15 09:51:11.020515 by PyXB version 1.2.6-DEV using Python 3.5.2.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,10 +14,10 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:3574f220-7667-11e6-8b66-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:a80f8056-ab10-11e6-8a14-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
-_PyXBVersion = '1.2.5-DEV'
+_PyXBVersion = '1.2.6-DEV'
 # Generated bindings are not compatible across PyXB versions
 if pyxb.__version__ != _PyXBVersion:
     raise pyxb.PyXBVersionError(_PyXBVersion)
