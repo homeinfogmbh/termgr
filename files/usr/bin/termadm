@@ -2,15 +2,14 @@
 """Command line tool to administer HOMEINFO terminals
 
 Usage:
-    termadm add <class_id> <cid> <os> [<street> <house_number> <zip_code> \
+    termadm add <cid> [<street> <house_number> <zip_code> \
 <city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
-[options] [--no-reload]
-    termadm addall <cid> <file> [--class=<class>] [--os=<os>] [options]
-    termadm deploy <expr>... [--date=<date_string> [--format=<date_format>]] \
-[--force] [--no-reload]
-    termadm undeploy <expr>... [--no-reload]
+[--scheduled=<date>] [options]
+    termadm addall <cid> <file> [--scheduled=<date>] [options]
+    termadm deploy <expr>... [--date=<date_string>] [--force]
+    termadm undeploy <expr>...
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
-[--state=<state_iso>] [--no-reload]
+[--state=<state_iso>]
     termadm reload
     termadm permit <user> [<permissions> <expr>...]
 
@@ -43,6 +42,8 @@ from homeinfo.terminals.filter import TerminalFilter
 
 from termgr.lib.permissions import PermissionsParser, UserPermissions
 from termgr.orm import PermissionError, User
+
+DATE_FORMAT = '%Y-%m-%d'
 
 
 def update_nagios():
@@ -111,8 +112,13 @@ if __name__ == '__main__':
         # Required options
         tid = int(options['--tid']) if options['--tid'] else None
         cid = int(options['<cid>'])
-        class_id = int(options['<class_id>'])
-        os_id = int(options['<os>'])
+        class_id = int(options['--class'])
+        os_id = int(options['--os'])
+
+        if options['--scheduled']:
+            scheduled = datetime.strptime(options['--scheduled'], DATE_FORMAT)
+        else:
+            scheduled = None
 
         # Optional settings
         connection_id = int(options['--connection'])
@@ -157,7 +163,7 @@ if __name__ == '__main__':
         # Add new terminal
         terminal = Terminal.add(
             cid, class_, os, connection, vpn, domain,
-            location=location, weather=weather, tid=tid)
+            location=location, weather=weather, scheduled=scheduled, tid=tid)
 
         if terminal:
             logger.info('Added terminal {}'.format(terminal))
@@ -214,15 +220,13 @@ if __name__ == '__main__':
         force = options['--force']
 
         if date_string:
-            date_format = options['--format'] or '%Y-%m-%d'
-
             try:
-                date_time = datetime.strptime(date_string, date_format)
+                date_time = datetime.strptime(date_string, DATE_FORMAT)
             except ValueError:
                 logger.error(
                     'Invalid date time value ({date_string}) '
                     'or format ({date_format})'.format(
-                        date_string=date_string, date_format=date_format))
+                        date_string=date_string, date_format=DATE_FORMAT))
                 exit(4)
         else:
             date_time = None
