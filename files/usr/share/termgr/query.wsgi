@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 """Terminal query interface"""
 
-from termgr.controllers.query import TerminalQuery
+from homeinfo.lib.wsgi import WsgiApp
+from termgr.controllers.query import QueryHandler
 
-application = TerminalQuery()
+application = WsgiApp(QueryHandler, cors=True)

@@ -3,27 +3,27 @@
 from peewee import DoesNotExist
 
 from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
-    InternalServerError, RequestHandler, WsgiApp
+    InternalServerError, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
 from termgr.lib.openvpn import OpenVPNPackager
 from termgr.orm import User
 
-__all__ = ['SetupController']
+__all__ = ['SetupHandler']
 
 
-class SetupControllerRequestHandler(RequestHandler):
+class SetupHandler(RequestHandler):
     """Handles requests for the SetupController"""
 
     def get(self):
         """Process GET request"""
-        client_version = self.params.get('client_version')
-        user_name = self.params.get('user_name')
+        client_version = self.query.get('client_version')
+        user_name = self.query.get('user_name')
 
         if not user_name:
             return Error('No user name specified', status=400)
 
-        passwd = self.params.get('passwd')
+        passwd = self.query.get('passwd')
 
         if not passwd:
             return Error('No password specified', status=400)
@@ -31,7 +31,7 @@ class SetupControllerRequestHandler(RequestHandler):
         user = User.authenticate(user_name, passwd)
 
         if user:
-            cid_str = self.params.get('cid')
+            cid_str = self.query.get('cid')
 
             if cid_str is None:
                 return Error('No customer ID specified', status=400)
@@ -41,7 +41,7 @@ class SetupControllerRequestHandler(RequestHandler):
                 except ValueError:
                     return Error('Invalid customer ID', status=400)
 
-                tid_str = self.params.get('tid')
+                tid_str = self.query.get('tid')
 
                 if tid_str is None:
                     return Error('No terminal ID specified', status=400)
@@ -57,7 +57,7 @@ class SetupControllerRequestHandler(RequestHandler):
                         return Error('No such terminal', status=400)
                     else:
                         if user.authorize(terminal, setup=True):
-                            action = self.params.get('action')
+                            action = self.query.get('action')
 
                             if action is None:
                                 return Error('No action specified', status=400)
@@ -132,13 +132,3 @@ class SetupControllerRequestHandler(RequestHandler):
         else:
             msg = 'Action "{}" is not implemented'.format(action)
             return Error(msg, status=400)
-
-
-class SetupController(WsgiApp):
-    """Controller for terminal setup automation"""
-
-    DEBUG = True
-
-    def __init__(self):
-        """Initialize with CORS enabled"""
-        super().__init__(SetupControllerRequestHandler, cors=True)

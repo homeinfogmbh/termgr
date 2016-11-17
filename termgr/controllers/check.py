@@ -5,25 +5,25 @@ from peewee import DoesNotExist
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.ctrl import RemoteController
 from homeinfo.lib.wsgi import Error, InternalServerError, JSON, OK, \
-    RequestHandler, WsgiApp
+    RequestHandler
 
 from termgr.orm import User
 
-__all__ = ['TerminalChecker']
+__all__ = ['CheckHandler']
 
 
-class TerminalCheckerRequestHandler(RequestHandler):
+class CheckHandler(RequestHandler):
     """Handles requests to check terminals"""
 
     def get(self):
         """Handles GET requests"""
         try:
-            user_name = self.params['user_name']
+            user_name = self.query['user_name']
         except KeyError:
             return Error('No user name provided', status=400)
 
         try:
-            passwd = self.params['passwd']
+            passwd = self.query['passwd']
         except KeyError:
             return Error('No password provided', status=400)
 
@@ -31,7 +31,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
 
         if user:
             try:
-                action = self.params['action']
+                action = self.query['action']
             except KeyError:
                 return Error('No action specified', status=400)
             else:
@@ -39,7 +39,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                     return self._list(user)
                 elif action == 'identify':
                     try:
-                        tid = self.params['tid']
+                        tid = self.query['tid']
                     except KeyError:
                         return Error('No terminal ID specified', status=400)
                     else:
@@ -50,7 +50,7 @@ class TerminalCheckerRequestHandler(RequestHandler):
                                          status=400)
 
                     try:
-                        cid = self.params['cid']
+                        cid = self.query['cid']
                     except KeyError:
                         return Error('No customer ID specified', status=400)
                     else:
@@ -122,13 +122,3 @@ class TerminalCheckerRequestHandler(RequestHandler):
             customers_json.append(customer_json)
 
         return JSON(json)
-
-
-class TerminalChecker(WsgiApp):
-    """WSGI app for terminal checking"""
-
-    DEBUG = True
-
-    def __init__(self):
-        """Enable CORS"""
-        super().__init__(TerminalCheckerRequestHandler, cors=True)

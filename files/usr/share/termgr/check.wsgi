@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 """Terminal checking interface"""
 
-from termgr.controllers.check import TerminalChecker
+from homeinfo.lib.wsgi import WsgiApp
+from termgr.controllers.check import CheckHandler
 
-application = TerminalChecker()
+application = WsgiApp(CheckHandler, cors=True)

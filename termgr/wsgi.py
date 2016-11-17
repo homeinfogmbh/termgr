@@ -39,12 +39,12 @@ class AuthenticatedResourceHandler():
     def user(self):
         """Authenticates the respective user"""
         try:
-            name = self.params['user']
+            name = self.query['user']
         except KeyError:
             raise Errors.NO_USER_NAME_SPECIFIED from None
         else:
             try:
-                passwd = self.params['passwd']
+                passwd = self.query['passwd']
             except KeyError:
                 raise Errors.NO_PASSWORD_SPECIFIED from None
             else:

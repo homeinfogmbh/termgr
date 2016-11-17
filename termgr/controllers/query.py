@@ -1,25 +1,25 @@
 """Terminal query web service"""
 
-from homeinfo.lib.wsgi import Error, XML, RequestHandler, WsgiApp
+from homeinfo.lib.wsgi import Error, XML, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
 from termgr import dom
 from termgr.orm import User
 
-__all__ = ['TerminalQuery']
+__all__ = ['QueryHandler']
 
 
-class TerminalQueryRequestHandler(RequestHandler):
+class QueryHandler(RequestHandler):
     """Handles requests for the TerminalQuery"""
 
     def get(self):
         """Interpret query dictionary"""
-        user_name = self.params.get('user_name')
+        user_name = self.query.get('user_name')
 
         if not user_name:
             return Error('No user name specified', status=400)
 
-        passwd = self.params.get('passwd')
+        passwd = self.query.get('passwd')
 
         if not passwd:
             return Error('No password specified', status=400)
@@ -27,7 +27,7 @@ class TerminalQueryRequestHandler(RequestHandler):
         user = User.authenticate(user_name, passwd)
 
         if user:
-            cid_str = self.params.get('cid')
+            cid_str = self.query.get('cid')
 
             try:
                 cid = int(cid_str)
@@ -87,13 +87,3 @@ class TerminalQueryRequestHandler(RequestHandler):
         terminal_dom.cid = terminal.customer.id
 
         return terminal_dom
-
-
-class TerminalQuery(WsgiApp):
-    """Controller for terminal queries"""
-
-    DEBUG = True
-
-    def __init__(self):
-        """Initialize with CORS enabled"""
-        super().__init__(TerminalQueryRequestHandler, cors=True)
