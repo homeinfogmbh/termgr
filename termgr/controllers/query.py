@@ -17,12 +17,12 @@ class QueryHandler(RequestHandler):
         user_name = self.query.get('user_name')
 
         if not user_name:
-            return Error('No user name specified', status=400)
+            raise Error('No user name specified', status=400) from None
 
         passwd = self.query.get('passwd')
 
         if not passwd:
-            return Error('No password specified', status=400)
+            raise Error('No password specified', status=400) from None
 
         user = User.authenticate(user_name, passwd)
 
@@ -32,8 +32,8 @@ class QueryHandler(RequestHandler):
             try:
                 cid = int(cid_str)
             except ValueError:
-                return Error(
-                    'Not a customer ID: {0}'.format(cid_str), status=400)
+                raise Error('Not a customer ID: {}'.format(
+                    cid_str), status=400) from None
             except TypeError:
                 cid = None  # all customers
 
@@ -45,7 +45,7 @@ class QueryHandler(RequestHandler):
 
             return XML(terminals_dom)
         else:
-            return Error('Invalid credentials', status=401)
+            raise Error('Invalid credentials', status=401) from None
 
     def terminals(self, cid, user):
         """List terminals of customer with CID"""

@@ -20,12 +20,12 @@ class CheckHandler(RequestHandler):
         try:
             user_name = self.query['user_name']
         except KeyError:
-            return Error('No user name provided', status=400)
+            raise Error('No user name provided', status=400) from None
 
         try:
             passwd = self.query['passwd']
         except KeyError:
-            return Error('No password provided', status=400)
+            raise Error('No password provided', status=400) from None
 
         user = User.authenticate(user_name, passwd)
 
@@ -33,7 +33,7 @@ class CheckHandler(RequestHandler):
             try:
                 action = self.query['action']
             except KeyError:
-                return Error('No action specified', status=400)
+                raise Error('No action specified', status=400) from None
             else:
                 if action == 'list':
                     return self._list(user)
@@ -41,30 +41,32 @@ class CheckHandler(RequestHandler):
                     try:
                         tid = self.query['tid']
                     except KeyError:
-                        return Error('No terminal ID specified', status=400)
+                        raise Error('No terminal ID specified',
+                                    status=400) from None
                     else:
                         try:
                             tid = int(tid)
                         except (ValueError, TypeError):
-                            return Error('Terminal ID must be an integer',
-                                         status=400)
+                            raise Error('Terminal ID must be an integer',
+                                        status=400) from None
 
                     try:
                         cid = self.query['cid']
                     except KeyError:
-                        return Error('No customer ID specified', status=400)
+                        raise Error('No customer ID specified',
+                                    status=400) from None
                     else:
                         try:
                             cid = int(cid)
                         except (ValueError, TypeError):
-                            return Error('Customer ID must be an integer',
-                                         status=400)
+                            raise Error('Customer ID must be an integer',
+                                        status=400) from None
 
                     try:
                         terminal = Terminal.by_ids(cid, tid)
                     except DoesNotExist:
-                        return Error('No such terminal: {tid}.{cid}'.format(
-                            tid=tid, cid=cid), status=400)
+                        raise Error('No such terminal: {tid}.{cid}'.format(
+                            tid=tid, cid=cid), status=400) from None
 
                     if user.authorize(terminal, read=True):
                         remote_controller = RemoteController(
@@ -73,16 +75,16 @@ class CheckHandler(RequestHandler):
                                 '/usr/bin/sudo /usr/bin/beep'):
                             return OK('Display should have beeped')
                         else:
-                            return InternalServerError(
+                            raise InternalServerError(
                                 'Could not get display to beep')
                     else:
-                        return Error('You are not authorized to identify '
-                                     'this terminal', status=400)
+                        raise Error('You are not authorized to identify '
+                                    'this terminal', status=400) from None
                 else:
-                    return Error('Invalid action: {}'.format(action),
-                                 status=400)
+                    raise Error('Invalid action: {}'.format(action),
+                                status=400) from None
         else:
-            return Error('Invalid credentials', status=400)
+            raise Error('Invalid credentials', status=400) from None
 
     def _list(self, user):
         """List customer terminals"""
