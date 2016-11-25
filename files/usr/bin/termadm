@@ -6,8 +6,8 @@ Usage:
 <city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
 [--scheduled=<date>] [options]
     termadm addall <cid> <file> [--scheduled=<date>] [options]
-    termadm deploy <expr>... [--date=<date_string>] [--force]
-    termadm undeploy <expr>...
+    termadm deploy <expr>... [--date=<date_string>] [--force] [--no-reload]
+    termadm undeploy <expr>... [--no-reload]
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>]
     termadm reload
@@ -95,10 +95,7 @@ if __name__ == '__main__':
     logger = Logger(basename(__file__), level=LogLevel.INFO)
     options = docopt(__doc__)
 
-    try:
-        reload = not options['--no-reload']
-    except KeyError:
-        reload = False
+    reload = not options['--no-reload']
 
     # Bail out iff reload of services
     # is required, but we are not root.
