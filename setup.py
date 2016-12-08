@@ -20,6 +20,7 @@ setup(
     data_files=[
         ('/etc', ['files/etc/termgr.conf']),
         ('/usr/bin', [
+            'files/usr/bin/termacls',
             'files/usr/bin/termgr',
             'files/usr/bin/termadm']),
         ('/usr/share/termgr', [

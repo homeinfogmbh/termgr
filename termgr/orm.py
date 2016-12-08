@@ -12,7 +12,7 @@ from homeinfo.terminals.orm import Terminal
 
 from termgr.config import CONFIG
 
-__all__ = ['PermissionError', 'User', 'Permissions']
+__all__ = ['PermissionError', 'User', 'ACL']
 
 
 class PermissionError(Exception):
@@ -48,6 +48,10 @@ class User(TermgrModel):
     enabled = BooleanField()
     annotation = CharField(255, null=True)
     root = BooleanField(default=False)
+
+    def __str__(self):
+        """Returns the user's name"""
+        return self.name
 
     @classmethod
     def authenticate(cls, name, passwd):
@@ -93,9 +97,9 @@ class User(TermgrModel):
 
     def permissions(self, terminal):
         """Returns permissions on terminal"""
-        return Permissions.get(
-            (Permissions.user == self) &
-            (Permissions.terminal == terminal))
+        return ACL.get(
+            (ACL.user == self) &
+            (ACL.terminal == terminal))
 
     def permit(self, terminal, read=None, administer=None, setup=None):
         """Set permissions"""
@@ -105,7 +109,7 @@ class User(TermgrModel):
             try:
                 permissions = self.permissions(terminal)
             except DoesNotExist:
-                permissions = Permissions()
+                permissions = ACL()
                 permissions.user = self
                 permissions.terminal = terminal
 
@@ -155,17 +159,17 @@ class User(TermgrModel):
                 return True
 
 
-class Permissions(TermgrModel):
-    """Many-to-many mapping in-between administrators and terminals"""
+class ACL(TermgrModel):
+    """Many-to-many mapping in-between administrators
+    and terminals with certain permissions
+    """
 
     user = ForeignKeyField(User, db_column='user')
-
-    # Actual privileges
+    terminal = ForeignKeyField(Terminal, db_column='terminal')
+    # Permissions
     read = BooleanField(default=False)
     administer = BooleanField(default=False)
     setup = BooleanField(default=False)
-
-    terminal = ForeignKeyField(Terminal, db_column='terminal')
 
     def __int__(self):
         """Returns the permissions value"""
