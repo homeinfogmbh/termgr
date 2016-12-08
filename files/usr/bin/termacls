@@ -82,7 +82,7 @@ if __name__ == '__main__':
             logger.error('Invalid permissions:', options['<permissions>'])
             exit(2)
 
-        for terminal in parse(options['<expr>']):
+        for terminal in parse(*options['<expr>']):
             try:
                 user.permit(
                     terminal,
