@@ -19,7 +19,7 @@ from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.filter import parse
 
 from termgr.lib.permissions import PermissionsParser
-from termgr.orm import Permissions, PermissionError, User
+from termgr.orm import ACL, PermissionError, User
 
 
 def getacls(terminals=None, user=None):
@@ -27,22 +27,22 @@ def getacls(terminals=None, user=None):
 
     if terminals is None:
         if user is None:
-            yield from Permissions
+            yield from ACL
         else:
-            for permission in Permissions.select().where(
-                    Permissions.user == user):
+            for permission in ACL.select().where(
+                    ACL.user == user):
                 yield permission
     else:
         if user is None:
             for terminal in terminals:
-                for permission in Permissions.select().where(
-                        Permissions.terminal == terminal):
+                for permission in ACL.select().where(
+                        ACL.terminal == terminal):
                     yield permission
         else:
             for terminal in terminals:
-                for permission in Permissions.select().where(
-                        (Permissions.terminal == terminal) &
-                        (Permissions.user == user)):
+                for permission in ACL.select().where(
+                        (ACL.terminal == terminal) &
+                        (ACL.user == user)):
                     yield permission
 
 
