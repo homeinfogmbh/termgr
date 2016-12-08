@@ -11,15 +11,14 @@ Usage:
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>]
     termadm reload
-    termadm permit <user> [<permissions> <expr>...]
 
 Options:
     -h --help                   Show this screen.
     --version                   Show version.
-    --domain=<domain>           Specify the domain [default: 1].
-    --connection=<connection>   Specify connection type [default: 1].
-    --tid=<tid>                 Explicitly select a TID (not recommended!).
-    --key=<key>                 Explicitly specify an OpenVPN key to be used.
+    --domain=<domain>           Specifies the domain [default: 1].
+    --connection=<connection>   Specifies connection type [default: 1].
+    --tid=<tid>                 Explicitly selects a TID (not recommended!).
+    --key=<key>                 Explicitly specifies an OpenVPN key to be used.
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload services after terminal creation.
     --class=<class>             Specifies the termianl class [default: 3].
@@ -39,9 +38,6 @@ from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 from homeinfo.terminals.filter import TerminalFilter
-
-from termgr.lib.permissions import PermissionsParser, UserPermissions
-from termgr.orm import PermissionError, User
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -292,23 +288,3 @@ if __name__ == '__main__':
     # Reload configurations
     elif options['reload']:
         update_config()
-    # Set user permissions
-    elif options['permit']:
-        user = User.get(User.name == options['<user>'])
-
-        if options['<permissions>'] is None:
-            permissions = UserPermissions(user)
-            print(permissions)
-        else:
-            permissions = PermissionsParser(options['<permissions>'])
-
-            for expr in options['<expr>']:
-                for terminal in TerminalFilter(expr):
-                    try:
-                        user.permit(
-                            terminal,
-                            read=permissions.read,
-                            administer=permissions.administer,
-                            setup=permissions.setup)
-                    except PermissionError as e:
-                        logger.warning(e.msg)
