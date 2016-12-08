@@ -38,8 +38,9 @@ class QueryHandler(RequestHandler):
                 cid = None  # all customers
 
             terminals_dom = dom.terminals()
+            undeployed = self.query.get('undeployed', False)
 
-            for terminal in self.terminals(cid, user):
+            for terminal in self.terminals(cid, user, undeployed=undeployed):
                 terminal_dom = self.term2dom(terminal)
                 terminals_dom.terminal.append(terminal_dom)
 
@@ -47,10 +48,13 @@ class QueryHandler(RequestHandler):
         else:
             raise Error('Invalid credentials', status=401) from None
 
-    def terminals(self, cid, user):
+    def terminals(self, cid, user, undeployed=False):
         """List terminals of customer with CID"""
         if cid is None:
             for terminal in Terminal:
+                if undeployed and terminal.deployed is not None:
+                    continue
+
                 if not terminal.testing:
                     if user.authorize(terminal, read=True):
                         yield terminal
@@ -58,6 +62,9 @@ class QueryHandler(RequestHandler):
             for terminal in Terminal.select().where(
                     (Terminal.customer == cid) &
                     (Terminal.testing == 0)):
+                if undeployed and terminal.deployed is not None:
+                    continue
+
                 if user.authorize(terminal, read=True):
                     yield terminal
 
