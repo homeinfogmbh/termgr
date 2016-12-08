@@ -1,0 +1,93 @@
+#! /usr/bin/env python3
+"""Command line tool to administer HOMEINFO terminals ACLs
+
+Usage:
+    termacls get [<expr>...] [options]
+    termacls set <user> <permissions> <expr>...
+
+Options:
+    --user=<user>   Specifies the user to filter for.
+    --version       Show version.
+    -h --help       Show this screen.
+"""
+from os.path import basename
+
+from peewee import DoesNotExist
+
+from homeinfo.lib.log import LogLevel, Logger
+from homeinfo.terminals.orm import Terminal
+from homeinfo.terminals.filter import parse
+
+from termgr.lib.permissions import PermissionsParser
+from termgr.orm import Permissions, PermissionError, User
+
+
+def getacls(terminals=None, user=None):
+    """Yields ACL records for the respective user"""
+
+    if terminals is None:
+        if user is None:
+            yield from Permissions
+        else:
+            for permission in Permissions.select().where(
+                    Permissions.user == user):
+                yield permission
+    else:
+        if user is None:
+            for terminal in terminals:
+                for permission in Permissions.select().where(
+                        Permissions.terminal == terminal):
+                    yield permission
+        else:
+            for terminal in terminals:
+                for permission in Permissions.select().where(
+                        (Permissions.terminal == terminal) &
+                        (Permissions.user == user)):
+                    yield permission
+
+
+if __name__ == '__main__':
+    from docopt import docopt
+
+    logger = Logger(basename(__file__), level=LogLevel.INFO)
+    options = docopt(__doc__)
+
+    # Get ACLs
+    if options['get']:
+        if options['--user']:
+            try:
+                user = User.get(User.name == options['--user'])
+            except DoesNotExist:
+                logger.error('No such user:', options['--user'])
+        else:
+            user = None
+
+        if options['<expr>']:
+            terminals = parse(*options['<expr>'])
+        else:
+            terminals = Terminal
+
+        for acl in getacls(terminals=terminals, user=user):
+            print(acl, acl.terminal, acl.user)
+    elif options['set']:
+        try:
+            user = User.get(User.name == options['<user>'])
+        except DoesNotExist:
+            logger.error('No such user:', options['<user>'])
+            exit(1)
+
+        try:
+            permissions = PermissionsParser(options['<permissions>'])
+        except PermissionError:
+            logger.error('Invalid permissions:', options['<permissions>'])
+            exit(2)
+
+        for terminal in parse(options['<expr>']):
+            try:
+                user.permit(
+                    terminal,
+                    read=permissions.read,
+                    administer=permissions.administer,
+                    setup=permissions.setup)
+            except PermissionError as e:
+                logger.warning(e.msg)
