@@ -71,12 +71,15 @@ class CheckHandler(RequestHandler):
                     if user.authorize(terminal, read=True):
                         remote_controller = RemoteController(
                             'termgr', terminal)
-                        if remote_controller.execute(
-                                '/usr/bin/sudo /usr/bin/beep'):
+                        result = remote_controller.execute(
+                            '/usr/bin/sudo /usr/bin/beep')
+
+                        if result:
                             return OK('Display should have beeped')
                         else:
                             raise InternalServerError(
-                                'Could not get display to beep')
+                                'Could not get display to beep:\n{}'.format(
+                                    str(result)))
                     else:
                         raise Error('You are not authorized to identify '
                                     'this terminal', status=400) from None
