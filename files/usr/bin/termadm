@@ -6,8 +6,8 @@ Usage:
 <city> [--state=<state_iso>] [--address-annotation=<address_annotation>]] \
 [--scheduled=<date>] [options]
     termadm addall <cid> <file> [--scheduled=<date>] [options]
-    termadm deploy <expr>... [--date=<date_string>] [--force] [--no-reload]
-    termadm undeploy <expr>... [--no-reload]
+    termadm deploy <expr>... [--date=<date_string>] [--force] [options]
+    termadm undeploy <expr>... [options]
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>]
     termadm reload
