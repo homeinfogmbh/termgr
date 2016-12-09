@@ -87,9 +87,9 @@ class TerminalsController():
 class TerminalController(RemoteController):
     """Does stuff on remote terminals"""
 
-    def __init__(self, terminal, user='termgr', logger=None):
+    def __init__(self, terminal, user=None, logger=None):
         """Sets the respective terminal and logger"""
-        super().__init__(user, terminal, logger=logger)
+        super().__init__(user or 'termgr', terminal, logger=logger)
 
     @property
     def resolution(self):
