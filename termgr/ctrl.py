@@ -78,7 +78,7 @@ class TerminalsController():
     def install(self, *pkgs, asexplicit=False):
         """Installs software packages"""
         def proxy(terminal):
-            return self._controller(terminal).upgrade(
+            return self._controller(terminal).install(
                 *pkgs, asexplicit=asexplicit)
 
         return proxy
