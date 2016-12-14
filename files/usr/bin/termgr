@@ -9,7 +9,7 @@
 Usage:
     termgr update <expr> [options]
     termgr stage <expr> [options]
-    termgr sync <package>... <expr> [--asexplicit] [options]
+    termgr sync <expr> <package>... [--asexplicit] [options]
     termgr system-upgrade <expr> [options]
     termgr (reboot | chkres | unlock) <expr> [options]
 
