@@ -42,7 +42,7 @@ class QueryHandler(RequestHandler):
             for terminal in self.terminals(cid, user, undeployed=undeployed):
                 terminals.append(terminal.to_dict())
 
-            return JSON({'terminals': terminals})
+            return JSON({'terminals': terminals}, indent=2)
         else:
             raise Error('Invalid credentials', status=401) from None
 
