@@ -1,6 +1,6 @@
 """Terminal query web service"""
 
-from homeinfo.lib.wsgi import Error, XML, RequestHandler
+from homeinfo.lib.wsgi import Error, JSON, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
 from termgr import dom
@@ -37,14 +37,13 @@ class QueryHandler(RequestHandler):
             except TypeError:
                 cid = None  # all customers
 
-            terminals_dom = dom.terminals()
+            terminals = []
             undeployed = self.query.get('undeployed', False)
 
             for terminal in self.terminals(cid, user, undeployed=undeployed):
-                terminal_dom = self.term2dom(terminal)
-                terminals_dom.terminal.append(terminal_dom)
+                terminals.terminal.append(terminal.to_dict())
 
-            return XML(terminals_dom)
+            return JSON({'terminals': terminals})
         else:
             raise Error('Invalid credentials', status=401) from None
 
@@ -67,30 +66,3 @@ class QueryHandler(RequestHandler):
 
                 if user.authorize(terminal, read=True):
                     yield terminal
-
-    def term2dom(self, terminal, status=False):
-        """Formats a terminal to a DOM"""
-        terminal_dom = dom.TerminalInfo()
-
-        if terminal.location is not None:
-            address_dom = dom.Address()
-            address_dom.street = terminal.location.address.street
-            address_dom.house_number = terminal.location.address.house_number
-            address_dom.city = terminal.location.address.city
-            address_dom.zip_code = terminal.location.address.zip_code
-            terminal_dom.location = address_dom
-        else:
-            terminal_dom.location = None
-
-        terminal_dom.annotation = terminal.annotation
-        terminal_dom.tid = terminal.tid
-        terminal_dom.scheduled = terminal.scheduled
-        terminal_dom.deployed = terminal.deployed
-
-        if status:
-            # This is slow!
-            terminal_dom.status = terminal.status
-
-        terminal_dom.cid = terminal.customer.id
-
-        return terminal_dom
