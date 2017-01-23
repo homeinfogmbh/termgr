@@ -3,7 +3,6 @@
 from homeinfo.lib.wsgi import Error, JSON, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
-from termgr import dom
 from termgr.orm import User
 
 __all__ = ['QueryHandler']
