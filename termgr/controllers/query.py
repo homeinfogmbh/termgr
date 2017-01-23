@@ -40,7 +40,7 @@ class QueryHandler(RequestHandler):
             undeployed = self.query.get('undeployed', False)
 
             for terminal in self.terminals(cid, user, undeployed=undeployed):
-                terminals.terminal.append(terminal.to_dict())
+                terminals.append(terminal.to_dict())
 
             return JSON({'terminals': terminals})
         else:
