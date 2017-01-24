@@ -19,6 +19,7 @@ Options:
     --connection=<connection>   Specifies connection type [default: 1].
     --tid=<tid>                 Explicitly selects a TID (not recommended!).
     --key=<key>                 Explicitly specifies an OpenVPN key to be used.
+    --mtu=<mtu>                 Specifies the desired MTU size.
     --annotation=<annotation>   Specify an annotation for this terminal.
     --no-reload                 Do not reload services after terminal creation.
     --class=<class>             Specifies the termianl class [default: 3].
@@ -133,6 +134,7 @@ if __name__ == '__main__':
 
         # Optional parameters
         vpn_key = options['--key'] or None
+        mtu = options['--mtu'] or None
         annotation = options['--annotation'] or None
 
         # Get related ORM instances
@@ -144,7 +146,7 @@ if __name__ == '__main__':
             logger.warning(
                 'Divergent OpenVPN key specified: "{}"!'.format(vpn_key))
 
-        vpn = VPN.add(key=vpn_key)
+        vpn = VPN.add(key=vpn_key, mtu=mtu)
         domain = Domain.get(Domain.id == domain_id)
 
         if addr is not None:
