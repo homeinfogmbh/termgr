@@ -74,10 +74,10 @@ class OpenVPNPackager(TerminalAware):
     @property
     def configuration(self):
         """Returns the rendered client configuration file"""
-        with open(self.CFG_TEMP, 'r') as config_template_file:
-            config_template = config_template_file.read()
+        with open(self.CFG_TEMP, 'r') as template:
+            template = template.read()
 
-        return config_template.format(
+        return template.format(
             crtfile=self.crtfile,
             keyfile=self.keyfile,
             mtu=self.mtu_)
