@@ -137,8 +137,11 @@ if __name__ == '__main__':
 
         try:
             mtu = int(options['--mtu'])
-        except (TypeError, ValueError):
+        except TypeError:
             mtu = None
+        except ValueError:
+            logger.error('Invalid MTU: {}'.format(options['--mtu']))
+            exit(1)
 
         annotation = options['--annotation'] or None
 
