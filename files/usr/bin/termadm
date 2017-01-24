@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
         # Optional parameters
         vpn_key = options['--key'] or None
-        mtu = options['--mtu'] or None
+        mtu = int(options['--mtu']) or None
         annotation = options['--annotation'] or None
 
         # Get related ORM instances
