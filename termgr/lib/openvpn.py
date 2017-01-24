@@ -20,6 +20,7 @@ class OpenVPNPackager(TerminalAware):
     CONFIG_FILE = 'terminals.conf'
     CFG_TEMP = '/usr/share/terminals/openvpn.conf.temp'
     KEYS_DIR = '/usr/lib/terminals/keys'
+    MTU = 'tun-mtu {}\n'
 
     @property
     def key(self):
@@ -67,7 +68,7 @@ class OpenVPNPackager(TerminalAware):
         mtu = self.mtu
 
         if mtu is not None:
-            return '{}\n'.format(mtu)
+            return self.MTU.format(mtu)
         else:
             return ''
 
