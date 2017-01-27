@@ -1,5 +1,6 @@
 """Controller for terminal setup"""
 
+from os.path import basename
 from peewee import DoesNotExist
 
 from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
@@ -105,10 +106,11 @@ class SetupHandler(RequestHandler):
         try:
             response_body = packager.package()
         except FileNotFoundError as e:
-            return InternalServerError('Missing file: {}'.format(e.filename))
+            return InternalServerError('Missing file: {}'.format(
+                basename(e.filename)))
         except PermissionError as e:
             return InternalServerError('Cannot access file: {}'.format(
-                e.filename))
+                basename(e.filename)))
         else:
             return WsgiResponse(
                 200, 'application/x-gzip',
