@@ -104,12 +104,11 @@ class SetupHandler(RequestHandler):
 
         try:
             response_body = packager.package()
-        except FileNotFoundError:
-            msg = 'OpenVPN configuration template file not found'
-            return InternalServerError(msg)
-        except PermissionError:
-            msg = 'Not allowed to read OpenVPN configuration template file'
-            return InternalServerError(msg)
+        except FileNotFoundError as e:
+            return InternalServerError('Missing file: {}'.format(e.filename))
+        except PermissionError as e:
+            return InternalServerError('Cannot access file: {}'.format(
+                e.filename))
         else:
             return WsgiResponse(
                 200, 'application/x-gzip',
