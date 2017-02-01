@@ -13,10 +13,7 @@ setup(
         'homeinfo.crm',
         'homeinfo.terminals',
         'hipster'],
-    packages=[
-        'termgr',
-        'termgr.controllers',
-        'termgr.lib'],
+    packages=['termgr', 'termgr.controllers'],
     data_files=[
         ('/etc', ['files/etc/termgr.conf']),
         ('/usr/bin', [
