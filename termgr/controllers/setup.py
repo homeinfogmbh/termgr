@@ -7,7 +7,7 @@ from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
     InternalServerError, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
-from termgr.lib.openvpn import OpenVPNPackager
+from termgr.openvpn import OpenVPNPackager
 from termgr.orm import User
 
 __all__ = ['SetupHandler']

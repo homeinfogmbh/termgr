@@ -18,7 +18,7 @@ from homeinfo.lib.log import LogLevel, Logger
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.filter import parse
 
-from termgr.lib.permissions import PermissionsParser
+from termgr.permissions import PermissionsParser
 from termgr.orm import ACL, PermissionError, User
 
 
