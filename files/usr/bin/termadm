@@ -186,6 +186,11 @@ if __name__ == '__main__':
         domain_id = int(options['--domain'])
         weather = options['--weather'] or None
 
+        if options['--scheduled']:
+            scheduled = datetime.strptime(options['--scheduled'], DATE_FORMAT)
+        else:
+            scheduled = None
+
         # Get ORM references
         class_ = Class.get(Class.id == class_id)
         os = OS.get(OS.id == os_id)
@@ -208,7 +213,7 @@ if __name__ == '__main__':
                 # Add new terminal
                 terminal = Terminal.add(
                     cid, class_, os, connection, vpn, domain,
-                    location=location, weather=weather)
+                    location=location, weather=weather, scheduled=scheduled)
 
                 if terminal:
                     logger.info('Added terminal {}'.format(terminal))
