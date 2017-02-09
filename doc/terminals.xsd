@@ -62,7 +62,7 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="annotation" type="xs:string" minOccurs="0">
+        <xs:attribute name="annotation" type="xs:string">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
                    An optional annotation
@@ -78,9 +78,9 @@
                 Terminal address
             </xs:documentation>
         </xs:annotation>
-        <xs:attribute name="street" type="xs:string" use="required"/>
-        <xs:attribute name="house_number" type="xs:string" use="required"/>
-        <xs:attribute name="city" type="xs:string" use="required"/>
-        <xs:attribute name="zip_code" type="xs:string" use="required"/>
+        <xs:attribute name="street" type="xs:string"/>
+        <xs:attribute name="house_number" type="xs:string"/>
+        <xs:attribute name="city" type="xs:string"/>
+        <xs:attribute name="zip_code" type="xs:string"/>
     </xs:complexType>
 </xs:schema>

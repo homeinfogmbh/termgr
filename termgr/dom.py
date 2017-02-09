@@ -1,7 +1,7 @@
 # ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-02-09 10:15:05.039159 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
+# Generated 2017-02-09 10:20:48.226576 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:3e6401aa-eea8-11e6-9131-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:0af24498-eea9-11e6-b7df-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -195,7 +195,7 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
     # Base type is pyxb.binding.datatypes.anyType
     
     # Attribute street uses Python identifier street
-    __street = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'street'), 'street', '__httpxml_homeinfo_deschematerminallib_Address_street', pyxb.binding.datatypes.string, required=True)
+    __street = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'street'), 'street', '__httpxml_homeinfo_deschematerminallib_Address_street', pyxb.binding.datatypes.string)
     __street._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 81, 8)
     __street._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 81, 8)
     
@@ -203,7 +203,7 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Attribute house_number uses Python identifier house_number
-    __house_number = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'house_number'), 'house_number', '__httpxml_homeinfo_deschematerminallib_Address_house_number', pyxb.binding.datatypes.string, required=True)
+    __house_number = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'house_number'), 'house_number', '__httpxml_homeinfo_deschematerminallib_Address_house_number', pyxb.binding.datatypes.string)
     __house_number._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 82, 8)
     __house_number._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 82, 8)
     
@@ -211,7 +211,7 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Attribute city uses Python identifier city
-    __city = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'city'), 'city', '__httpxml_homeinfo_deschematerminallib_Address_city', pyxb.binding.datatypes.string, required=True)
+    __city = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'city'), 'city', '__httpxml_homeinfo_deschematerminallib_Address_city', pyxb.binding.datatypes.string)
     __city._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 83, 8)
     __city._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 83, 8)
     
@@ -219,7 +219,7 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Attribute zip_code uses Python identifier zip_code
-    __zip_code = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'zip_code'), 'zip_code', '__httpxml_homeinfo_deschematerminallib_Address_zip_code', pyxb.binding.datatypes.string, required=True)
+    __zip_code = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'zip_code'), 'zip_code', '__httpxml_homeinfo_deschematerminallib_Address_zip_code', pyxb.binding.datatypes.string)
     __zip_code._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 84, 8)
     __zip_code._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 84, 8)
     
