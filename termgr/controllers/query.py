@@ -40,7 +40,7 @@ class QueryHandler(RequestHandler):
             undeployed = self.query.get('undeployed', False)
 
             if self.query.get('xml', False):
-                terminals = dom.TerminalList()
+                terminals = dom.terminals()
 
                 for terminal in self.terminals(
                         cid, user, undeployed=undeployed):
