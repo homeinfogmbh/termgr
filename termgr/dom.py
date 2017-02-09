@@ -1,7 +1,7 @@
 # ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-02-09 10:12:15.450804 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
+# Generated 2017-02-09 10:15:05.039159 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:d94e8a24-eea7-11e6-a557-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:3e6401aa-eea8-11e6-9131-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -113,7 +113,7 @@ class Terminal (pyxb.binding.basis.complexTypeDefinition):
             """
     _TypeDefinition = None
     _ContentTypeTag = pyxb.binding.basis.complexTypeDefinition._CT_ELEMENT_ONLY
-    _Abstract = True
+    _Abstract = False
     _ExpandedName = pyxb.namespace.ExpandedName(Namespace, 'Terminal')
     _XSDLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 22, 4)
     _ElementMap = {}

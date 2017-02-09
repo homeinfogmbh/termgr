@@ -19,7 +19,7 @@
     </xs:complexType>
 
 
-    <xs:complexType name="Terminal" abstract="true">
+    <xs:complexType name="Terminal">
         <xs:annotation>
             <xs:documentation xml:lang="en">
                 Basic terminal information
