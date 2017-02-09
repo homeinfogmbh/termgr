@@ -1,7 +1,7 @@
 # ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-02-09 10:23:52.943304 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
+# Generated 2017-02-09 10:25:53.886739 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:790bcbd4-eea9-11e6-b35d-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:c122350c-eea9-11e6-b8de-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -120,11 +120,11 @@ class Terminal (pyxb.binding.basis.complexTypeDefinition):
     _AttributeMap = {}
     # Base type is pyxb.binding.datatypes.anyType
     
-    # Element location uses Python identifier location
-    __location = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'location'), 'location', '__httpxml_homeinfo_deschematerminallib_Terminal_location', False, pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 29, 12), )
+    # Element address uses Python identifier address
+    __address = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'address'), 'address', '__httpxml_homeinfo_deschematerminallib_Terminal_address', False, pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 29, 12), )
 
     
-    location = property(__location.value, __location.set, None, "\n                        The terminal's location\n                    ")
+    address = property(__address.value, __address.set, None, "\n                        The terminal's location\n                    ")
 
     
     # Attribute tid uses Python identifier tid
@@ -167,7 +167,7 @@ class Terminal (pyxb.binding.basis.complexTypeDefinition):
     annotation = property(__annotation.value, __annotation.set, None, '\n                   An optional annotation\n                ')
 
     _ElementMap.update({
-        __location.name() : __location
+        __address.name() : __address
     })
     _AttributeMap.update({
         __tid.name() : __tid,
@@ -270,7 +270,7 @@ TerminalList._Automaton = _BuildAutomaton()
 
 
 
-Terminal._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'location'), Address, scope=Terminal, documentation="\n                        The terminal's location\n                    ", location=pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 29, 12)))
+Terminal._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'address'), Address, scope=Terminal, documentation="\n                        The terminal's location\n                    ", location=pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 29, 12)))
 
 def _BuildAutomaton_ ():
     # Remove this helper function from the namespace after it is invoked
@@ -284,7 +284,7 @@ def _BuildAutomaton_ ():
     states = []
     final_update = set()
     final_update.add(fac.UpdateInstruction(cc_0, False))
-    symbol = pyxb.binding.content.ElementUse(Terminal._UseForTag(pyxb.namespace.ExpandedName(None, 'location')), pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 29, 12))
+    symbol = pyxb.binding.content.ElementUse(Terminal._UseForTag(pyxb.namespace.ExpandedName(None, 'address')), pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 29, 12))
     st_0 = fac.State(symbol, is_initial=True, final_update=final_update, is_unordered_catenation=False)
     states.append(st_0)
     transitions = []
