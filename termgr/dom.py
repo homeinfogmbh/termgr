@@ -1,7 +1,7 @@
-# ./orm.py
+# ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-02-09 10:01:10.363392 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
+# Generated 2017-02-09 10:12:15.450804 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:4cde9a44-eea6-11e6-bd42-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:d94e8a24-eea7-11e6-a557-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -225,14 +225,6 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
     
     zip_code = property(__zip_code.value, __zip_code.set, None, None)
 
-    
-    # Attribute id uses Python identifier id
-    __id = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'id'), 'id', '__httpxml_homeinfo_deschematerminallib_Address_id', pyxb.binding.datatypes.integer)
-    __id._DeclarationLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 85, 8)
-    __id._UseLocation = pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 85, 8)
-    
-    id = property(__id.value, __id.set, None, "\n                    The appropriate record's ID\n                ")
-
     _ElementMap.update({
         
     })
@@ -240,8 +232,7 @@ class Address (pyxb.binding.basis.complexTypeDefinition):
         __street.name() : __street,
         __house_number.name() : __house_number,
         __city.name() : __city,
-        __zip_code.name() : __zip_code,
-        __id.name() : __id
+        __zip_code.name() : __zip_code
     })
 _module_typeBindings.Address = Address
 Namespace.addCategoryObject('typeBinding', 'Address', Address)

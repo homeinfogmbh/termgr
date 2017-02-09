@@ -1,9 +1,10 @@
 """Terminal query web service"""
 
-from homeinfo.lib.wsgi import Error, JSON, RequestHandler
+from homeinfo.lib.wsgi import Error, JSON, XML, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
 from termgr.orm import User
+from termgr import dom
 
 __all__ = ['QueryHandler']
 
@@ -36,13 +37,41 @@ class QueryHandler(RequestHandler):
             except TypeError:
                 cid = None  # all customers
 
-            terminals = []
             undeployed = self.query.get('undeployed', False)
 
-            for terminal in self.terminals(cid, user, undeployed=undeployed):
-                terminals.append(terminal.to_dict(short=True))
+            if self.query.get('xml', False):
+                terminals = dom.TerminalList()
 
-            return JSON({'terminals': terminals}, indent=2)
+                for terminal in self.terminals(
+                        cid, user, undeployed=undeployed):
+                    terminal_dom = dom.Terminal()
+                    terminal_dom.tid = terminal.tid
+                    terminal_dom.cid = terminal.customer.id
+                    terminal_dom.scheduled = terminal.scheduled
+                    terminal_dom.deployed = terminal.deployed
+                    terminal_dom.annotation = terminal.annotation
+
+                    if terminal.location:
+                        terminal_dom.annotation = terminal.location.annotation
+
+                        if terminal.location.address:
+                            address = terminal.location.address
+                            address_dom = dom.Address()
+                            address_dom.street = address.street
+                            address_dom.house_number = address.house_number
+                            address_dom.zip_code = address.zip_code
+                            address_dom.city = address.city
+                            terminal_dom.address = address_dom
+
+                return XML(terminals)
+            else:
+                terminals = []
+
+                for terminal in self.terminals(
+                        cid, user, undeployed=undeployed):
+                    terminals.append(terminal.to_dict(short=True))
+
+                return JSON(terminals, indent=2)
         else:
             raise Error('Invalid credentials', status=401) from None
 

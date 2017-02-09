@@ -82,12 +82,5 @@
         <xs:attribute name="house_number" type="xs:string" use="required"/>
         <xs:attribute name="city" type="xs:string" use="required"/>
         <xs:attribute name="zip_code" type="xs:string" use="required"/>
-        <xs:attribute name="id" type="xs:integer">
-            <xs:annotation>
-                <xs:documentation xml:lang="en">
-                    The appropriate record's ID
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
     </xs:complexType>
 </xs:schema>
