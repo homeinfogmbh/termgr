@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOMEINFO Terminal Library Web Interface -->
+<xs:schema  xmlns="http://xml.homeinfo.de/schema/terminallib"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
+            targetNamespace="http://xml.homeinfo.de/schema/terminallib">
+
+    <xs:element name="terminals" type="TerminalList"/>
+
+
+    <xs:complexType name="TerminalList">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A list of terminal short info
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <xs:complexType name="Terminal" abstract="true">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Basic terminal information
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="location" type="Address" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">
+                        The terminal's location
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="tid" type="xs:integer" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The terminal identifier
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="cid" type="xs:integer" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The customer identifier
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="scheduled" type="xs:dateTime">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    Date and time when the terminal is scheduled for delivery.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="deployed" type="xs:dateTime">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    Date and time when the terminal was deployed.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="annotation" type="xs:string" minOccurs="0">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                   An optional annotation
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <xs:complexType name="Address">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Terminal address
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="street" type="xs:string" use="required"/>
+        <xs:attribute name="house_number" type="xs:string" use="required"/>
+        <xs:attribute name="city" type="xs:string" use="required"/>
+        <xs:attribute name="zip_code" type="xs:string" use="required"/>
+        <xs:attribute name="id" type="xs:integer">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    The appropriate record's ID
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+</xs:schema>
