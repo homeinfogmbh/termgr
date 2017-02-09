@@ -14,7 +14,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="terminal" type="Terminal" maxOccurs="unbounded"/>
+            <xs:element name="terminal" type="Terminal" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 

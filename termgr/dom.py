@@ -1,7 +1,7 @@
 # ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-02-09 10:20:48.226576 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
+# Generated 2017-02-09 10:23:52.943304 by PyXB version 1.2.6-DEV using Python 3.6.0.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:0af24498-eea9-11e6-b7df-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:790bcbd4-eea9-11e6-b35d-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -252,16 +252,19 @@ def _BuildAutomaton ():
     import pyxb.utils.fac as fac
 
     counters = set()
+    cc_0 = fac.CounterCondition(min=0, max=None, metadata=pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 17, 12))
+    counters.add(cc_0)
     states = []
     final_update = set()
+    final_update.add(fac.UpdateInstruction(cc_0, False))
     symbol = pyxb.binding.content.ElementUse(TerminalList._UseForTag(pyxb.namespace.ExpandedName(None, 'terminal')), pyxb.utils.utility.Location('/home/rne/Projects/termgr/doc/terminals.xsd', 17, 12))
     st_0 = fac.State(symbol, is_initial=True, final_update=final_update, is_unordered_catenation=False)
     states.append(st_0)
     transitions = []
     transitions.append(fac.Transition(st_0, [
-         ]))
+        fac.UpdateInstruction(cc_0, True) ]))
     st_0._set_transitionSet(transitions)
-    return fac.Automaton(states, counters, False, containing_state=None)
+    return fac.Automaton(states, counters, True, containing_state=None)
 TerminalList._Automaton = _BuildAutomaton()
 
 
