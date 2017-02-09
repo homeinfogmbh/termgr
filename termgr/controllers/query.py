@@ -64,6 +64,8 @@ class QueryHandler(RequestHandler):
                             address_dom.city = address.city
                             terminal_dom.address = address_dom
 
+                    terminals.terminal.append(terminal_dom)
+
                 return XML(terminals)
             else:
                 if json is True:
