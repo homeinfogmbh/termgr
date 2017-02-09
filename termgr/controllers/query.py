@@ -38,8 +38,9 @@ class QueryHandler(RequestHandler):
                 cid = None  # all customers
 
             undeployed = self.query.get('undeployed', False)
+            json = self.query.get('json')
 
-            if self.query.get('xml', False):
+            if json is None:
                 terminals = dom.terminals()
 
                 for terminal in self.terminals(
@@ -65,13 +66,21 @@ class QueryHandler(RequestHandler):
 
                 return XML(terminals)
             else:
+                if json is True:
+                    indent = None
+                else:
+                    try:
+                        indent = int(json)
+                    except ValueError:
+                        raise Error('Invalid indentation;: {}'.format(json))
+
                 terminals = []
 
                 for terminal in self.terminals(
                         cid, user, undeployed=undeployed):
                     terminals.append(terminal.to_dict(short=True))
 
-                return JSON(terminals, indent=2)
+                return JSON(terminals, indent=indent)
         else:
             raise Error('Invalid credentials', status=401) from None
 
