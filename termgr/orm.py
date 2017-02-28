@@ -1,10 +1,9 @@
 """ORM models for termgr"""
 
-from hashlib import sha256
-from uuid import uuid4
-
 from peewee import DoesNotExist, Model, PrimaryKeyField, CharField,\
     BooleanField, ForeignKeyField
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 from homeinfo.crm import Company
 from homeinfo.peewee import MySQLDatabase
@@ -43,11 +42,12 @@ class User(TermgrModel):
 
     company = ForeignKeyField(Company, db_column='company')
     name = CharField(64)
-    pwhash = CharField(64)
-    salt = CharField(36)
+    pwhash = CharField(255)
     enabled = BooleanField()
     annotation = CharField(255, null=True)
     root = BooleanField(default=False)
+
+    passwd_hasher = PasswordHasher()
 
     def __str__(self):
         """Returns the user's name"""
@@ -62,19 +62,15 @@ class User(TermgrModel):
             except DoesNotExist:
                 return False
             else:
-                if user.passwd and passwd:
-                    pwstr = passwd + user.salt
-                    pwhash = sha256(pwstr.encode()).hexdigest()
-
-                    if user.pwhash == pwhash:
-                        if user.enabled:
-                            return user
-                        else:
-                            return False
+                try:
+                    cls.passwd_hasher.verify(user.pwhash, passwd)
+                except VerifyMismatchError:
+                    return False
+                else:
+                    if user.enabled:
+                        return user
                     else:
                         return False
-                else:
-                    return False
         else:
             return False
 
@@ -84,16 +80,9 @@ class User(TermgrModel):
         return self.pwhash
 
     @passwd.setter
-    def passwd(self, passwd, save=True):
+    def passwd(self, passwd):
         """Creates a new password hash"""
-        salt = str(uuid4())
-        pwstr = passwd + salt
-        pwhash = sha256(pwstr.encode()).hexdigest()
-        self.salt = salt
-        self.pwhash = pwhash
-
-        if save:
-            self.save()
+        self.pwhash = self.__class__.passwd_hasher.hash(passwd)
 
     def permissions(self, terminal):
         """Returns permissions on terminal"""
