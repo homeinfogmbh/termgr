@@ -45,7 +45,8 @@ class QueryHandler(RequestHandler):
                 try:
                     scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
                 except ValueError:
-                    raise Error('Invalid ISO date: {}') from None
+                    raise Error('Invalid ISO date: {}'.format(
+                        scheduled)) from None
                 else:
                     scheduled = scheduled.date()
 
@@ -92,7 +93,8 @@ class QueryHandler(RequestHandler):
                 terminals = []
 
                 for terminal in self.terminals(
-                        cid, user, undeployed=undeployed):
+                        cid, user, scheduled=scheduled,
+                        undeployed=undeployed):
                     terminals.append(terminal.to_dict(short=True))
 
                 return JSON(terminals, indent=indent)
@@ -105,6 +107,8 @@ class QueryHandler(RequestHandler):
             for terminal in Terminal:
                 if scheduled is not None and terminal.scheduled is not None:
                     if terminal.scheduled.date() != scheduled:
+                        self.logger.info('Skipping {}@{}'.format(
+                            terminal, terminal.scheduled))
                         continue
 
                 if undeployed and terminal.deployed is not None:
@@ -119,6 +123,8 @@ class QueryHandler(RequestHandler):
                     (Terminal.testing == 0)):
                 if scheduled is not None and terminal.scheduled is not None:
                     if terminal.scheduled.date() != scheduled:
+                        self.logger.info('Skipping {}@{}'.format(
+                            terminal, terminal.scheduled))
                         continue
 
                 if undeployed and terminal.deployed is not None:
