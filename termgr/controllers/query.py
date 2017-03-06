@@ -108,8 +108,7 @@ class QueryHandler(RequestHandler):
                 if scheduled is not None:
                     if terminal.scheduled is None:
                         continue
-                else:
-                    if terminal.scheduled.date() != scheduled:
+                    elif terminal.scheduled.date() != scheduled:
                         continue
 
                 if undeployed and terminal.deployed is not None:
@@ -125,8 +124,7 @@ class QueryHandler(RequestHandler):
                 if scheduled is not None:
                     if terminal.scheduled is None:
                         continue
-                else:
-                    if terminal.scheduled.date() != scheduled:
+                    elif terminal.scheduled.date() != scheduled:
                         continue
 
                 if undeployed and terminal.deployed is not None:
