@@ -105,10 +105,11 @@ class QueryHandler(RequestHandler):
         """List terminals of customer with CID"""
         if cid is None:
             for terminal in Terminal:
-                if scheduled is not None and terminal.scheduled is not None:
+                if scheduled is not None:
+                    if terminal.scheduled is None:
+                        continue
+                else:
                     if terminal.scheduled.date() != scheduled:
-                        self.logger.info('Skipping {}@{}'.format(
-                            terminal, terminal.scheduled))
                         continue
 
                 if undeployed and terminal.deployed is not None:
@@ -121,10 +122,11 @@ class QueryHandler(RequestHandler):
             for terminal in Terminal.select().where(
                     (Terminal.customer == cid) &
                     (Terminal.testing == 0)):
-                if scheduled is not None and terminal.scheduled is not None:
+                if scheduled is not None:
+                    if terminal.scheduled is None:
+                        continue
+                else:
                     if terminal.scheduled.date() != scheduled:
-                        self.logger.info('Skipping {}@{}'.format(
-                            terminal, terminal.scheduled))
                         continue
 
                 if undeployed and terminal.deployed is not None:
