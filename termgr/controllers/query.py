@@ -1,5 +1,7 @@
 """Terminal query web service"""
 
+from datetime import datetime
+
 from homeinfo.lib.wsgi import Error, JSON, XML, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
@@ -37,6 +39,16 @@ class QueryHandler(RequestHandler):
             except TypeError:
                 cid = None  # all customers
 
+            scheduled = self.query.get('scheduled')
+
+            if scheduled is not None:
+                try:
+                    scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
+                except ValueError:
+                    raise Error('Invalid ISO date: {}') from None
+                else:
+                    scheduled = scheduled.date()
+
             undeployed = self.query.get('undeployed', False)
             json = self.query.get('json')
 
@@ -44,7 +56,8 @@ class QueryHandler(RequestHandler):
                 terminals = dom.terminals()
 
                 for terminal in self.terminals(
-                        cid, user, undeployed=undeployed):
+                        cid, user, scheduled=scheduled,
+                        undeployed=undeployed):
                     terminal_dom = dom.Terminal()
                     terminal_dom.tid = terminal.tid
                     terminal_dom.cid = terminal.customer.id
@@ -86,10 +99,14 @@ class QueryHandler(RequestHandler):
         else:
             raise Error('Invalid credentials', status=401) from None
 
-    def terminals(self, cid, user, undeployed=False):
+    def terminals(self, cid, user, scheduled=None, undeployed=False):
         """List terminals of customer with CID"""
         if cid is None:
             for terminal in Terminal:
+                if scheduled is not None and terminal.scheduled is not None:
+                    if terminal.scheduled.date() != scheduled:
+                        continue
+
                 if undeployed and terminal.deployed is not None:
                     continue
 
@@ -100,6 +117,10 @@ class QueryHandler(RequestHandler):
             for terminal in Terminal.select().where(
                     (Terminal.customer == cid) &
                     (Terminal.testing == 0)):
+                if scheduled is not None and terminal.scheduled is not None:
+                    if terminal.scheduled.date() != scheduled:
+                        continue
+
                 if undeployed and terminal.deployed is not None:
                     continue
 
