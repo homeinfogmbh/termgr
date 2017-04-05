@@ -101,7 +101,7 @@ class SetupHandler(RequestHandler):
 
     def _openvpn_data(self, terminal):
         """Returns OpenVPN configuration"""
-        packager = OpenVPNPackager(terminal)
+        packager = OpenVPNPackager(terminal, logger=self.logger)
 
         try:
             response_body = packager.package()
