@@ -1,6 +1,6 @@
 """Remote terminal controller"""
 
-from homeinfo.lib.log import Logger, LogLevel
+from fancylog import Logger, LogLevel
 from homeinfo.terminals.ctrl import RemoteController
 
 

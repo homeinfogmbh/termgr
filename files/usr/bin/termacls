@@ -14,7 +14,7 @@ from os.path import basename
 
 from peewee import DoesNotExist
 
-from homeinfo.lib.log import LogLevel, Logger
+from fancylog import LogLevel, Logger
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.filter import parse
 

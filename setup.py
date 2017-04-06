@@ -4,15 +4,8 @@ from distutils.core import setup
 
 setup(
     name='termgr',
-    version='1.3.0-1',
+    version='latest',
     author='Richard Neumann',
-    author_email='r.neumann@homeinfo.de',
-    requires=[
-        'docopt',
-        'homeinfo.lib',
-        'homeinfo.crm',
-        'homeinfo.terminals',
-        'hipster'],
     packages=['termgr', 'termgr.controllers'],
     data_files=[
         ('/etc', ['files/etc/termgr.conf']),

@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from homeinfo.lib.wsgi import Error, JSON, XML, RequestHandler
+from wsgilib import Error, JSON, XML, RequestHandler
 from homeinfo.terminals.orm import Terminal
 
 from termgr.orm import User

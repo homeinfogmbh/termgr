@@ -26,8 +26,8 @@ from sys import stderr
 from getpass import getuser
 from os.path import basename
 
-from homeinfo.lib.log import Logger, LogLevel, TTYAnimation
-from homeinfo.lib.system import Parallelization
+from fancylog import Logger, LogLevel, TTYAnimation
+from syslib import Parallelization
 
 from homeinfo.terminals.filter import TerminalFilter
 from homeinfo.terminals.orm import Terminal

@@ -3,8 +3,8 @@
 from os.path import basename
 from peewee import DoesNotExist
 
-from homeinfo.lib.wsgi import WsgiResponse, Error, OK, JSON, \
-    InternalServerError, RequestHandler
+from wsgilib import WsgiResponse, Error, OK, JSON, InternalServerError, \
+    RequestHandler
 from homeinfo.terminals.orm import Terminal
 
 from termgr.openvpn import OpenVPNPackager

@@ -2,7 +2,7 @@
 
 # TODO: Migrate to using HIS
 
-from homeinfo.lib.wsgi import JSON
+from wsgilib import JSON
 
 from termgr.orm import User
 

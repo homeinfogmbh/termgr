@@ -33,8 +33,9 @@ from datetime import datetime
 
 from peewee import DoesNotExist
 
-from homeinfo.lib.log import LogLevel, Logger
-from homeinfo.lib.system import run, evaluate
+from fancylog import LogLevel, Logger
+from syslib import run, evaluate
+
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal

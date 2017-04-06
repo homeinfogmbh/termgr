@@ -4,8 +4,7 @@ from peewee import DoesNotExist
 
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.ctrl import RemoteController
-from homeinfo.lib.wsgi import Error, InternalServerError, JSON, OK, \
-    RequestHandler
+from wsgilib import Error, InternalServerError, JSON, OK, RequestHandler
 
 from termgr.orm import User
 

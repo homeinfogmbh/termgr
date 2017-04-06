@@ -1,11 +1,11 @@
 """Terminal setup configuration"""
 
-from homeinfo.lib.config import Configuration
+from configparserplus import ConfigParserPlus
 
 __all__ = ['CONFIG']
 
 
-class TermgrConfig(Configuration):
+class TermgrConfig(ConfigParserPlus):
     """Configuration parser enhancement"""
 
     @property
