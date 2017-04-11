@@ -8,7 +8,6 @@ setup(
     author='Richard Neumann',
     packages=['termgr', 'termgr.controllers'],
     data_files=[
-        ('/etc', ['files/etc/termgr.conf']),
         ('/usr/bin', [
             'files/usr/bin/termacls',
             'files/usr/bin/termgr',
