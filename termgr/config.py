@@ -2,31 +2,6 @@
 
 from configparserplus import ConfigParserPlus
 
-__all__ = ['CONFIG']
+__all__ = ['config']
 
-
-class TermgrConfig(ConfigParserPlus):
-    """Configuration parser enhancement"""
-
-    @property
-    def db(self):
-        self.load()
-        return self['db']
-
-    @property
-    def pacman(self):
-        self.load()
-        return self['pacman']
-
-    @property
-    def ssh(self):
-        self.load()
-        return self['ssh']
-
-    @property
-    def screenshot(self):
-        self.load()
-        return self['screenshot']
-
-
-CONFIG = TermgrConfig('/etc/termgr.conf')
+config = ConfigParserPlus('/etc/termgr.conf')

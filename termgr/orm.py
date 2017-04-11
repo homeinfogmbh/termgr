@@ -9,7 +9,7 @@ from peeweeplus import MySQLDatabase
 from homeinfo.crm import Company
 from homeinfo.terminals.orm import Terminal
 
-from termgr.config import CONFIG
+from termgr.config import config
 
 __all__ = ['PermissionError', 'User', 'ACL']
 
@@ -29,10 +29,10 @@ class TermgrModel(Model):
 
     class Meta:
         database = MySQLDatabase(
-            CONFIG.db['db'],
-            host=CONFIG.db['host'],
-            user=CONFIG.db['user'],
-            passwd=CONFIG.db['passwd'],
+            config['db']['db'],
+            host=config['db']['host'],
+            user=config['db']['user'],
+            passwd=config['db']['passwd'],
             closing=True)
         schema = database.database
 
