@@ -104,31 +104,24 @@ class QueryHandler(RequestHandler):
     def terminals(self, cid, user, scheduled=None, undeployed=False):
         """List terminals of customer with CID"""
         if cid is None:
-            for terminal in Terminal:
-                if scheduled is not None:
-                    if terminal.scheduled is None:
-                        continue
-                    elif terminal.scheduled.date() != scheduled:
-                        continue
-
-                if undeployed and terminal.deployed is not None:
-                    continue
-
-                if not terminal.testing:
-                    if user.authorize(terminal, read=True):
-                        yield terminal
+            terminals = Terminal
         else:
-            for terminal in Terminal.select().where(
-                    (Terminal.customer == cid) &
-                    (Terminal.testing == 0)):
-                if scheduled is not None:
-                    if terminal.scheduled is None:
-                        continue
-                    elif terminal.scheduled.date() != scheduled:
-                        continue
+            terminals = Terminal.select().where(
+                (Terminal.customer == cid) &
+                (Terminal.testing == 0))
 
-                if undeployed and terminal.deployed is not None:
+        for terminal in terminals:
+            if terminal.testing:
+                continue
+
+            if scheduled is not None:
+                if terminal.scheduled is None:
+                    continue
+                elif terminal.scheduled.date() != scheduled:
                     continue
 
-                if user.authorize(terminal, read=True):
-                    yield terminal
+            if undeployed and terminal.deployed is not None:
+                continue
+
+            if user.authorize(terminal, read=True):
+                yield terminal
