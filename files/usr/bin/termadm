@@ -152,8 +152,8 @@ if __name__ == '__main__':
         connection = Connection.get(Connection.id == connection_id)
 
         if vpn_key is not None:
-            logger.warning(
-                'Divergent OpenVPN key specified: "{}"!'.format(vpn_key))
+            logger.warning('Divergent OpenVPN key specified: "{}"!'.format(
+                vpn_key))
 
         vpn = VPN.add(key=vpn_key, mtu=mtu)
         domain = Domain.get(Domain.id == domain_id)

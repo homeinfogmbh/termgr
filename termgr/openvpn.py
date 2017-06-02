@@ -44,8 +44,11 @@ class OpenVPNPackager(TerminalAware):
     @property
     def mtu(self):
         """Returns the respective MTU value"""
-        with suppress(AttributeError):
-            return self.terminal.vpn.mtu
+        if self.terminal.vpn is not None:
+            if self.terminal.vpn.mtu is not None:
+                return self.MTU.format(mtu)
+
+        return ''
 
     @property
     def keyfile_path(self):
@@ -63,16 +66,6 @@ class OpenVPNPackager(TerminalAware):
         return join(self.KEYS_DIR, self.CA_FILE)
 
     @property
-    def mtu_(self):
-        """Returns the respective MTU option"""
-        mtu = self.mtu
-
-        if mtu is not None:
-            return self.MTU.format(mtu)
-        else:
-            return ''
-
-    @property
     def configuration(self):
         """Returns the rendered client configuration file"""
         with open(self.CFG_TEMP, 'r') as template:
@@ -81,7 +74,7 @@ class OpenVPNPackager(TerminalAware):
         return template.format(
             crtfile=self.crtfile,
             keyfile=self.keyfile,
-            mtu=self.mtu_)
+            mtu=self.mtu)
 
     def package(self):
         """Packages the files for the specified client"""
