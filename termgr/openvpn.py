@@ -46,7 +46,7 @@ class OpenVPNPackager(TerminalAware):
         """Returns the respective MTU value"""
         if self.terminal.vpn is not None:
             if self.terminal.vpn.mtu is not None:
-                return self.MTU.format(mtu)
+                return self.MTU.format(self.terminal.vpn.mtu)
 
         return ''
 

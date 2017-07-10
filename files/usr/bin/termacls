@@ -3,12 +3,17 @@
 
 Usage:
     termacls get [<expr>...] [options]
-    termacls set <user> <permissions> <expr>...
+    termacls set <user> [-gRras] <expr>...
 
 Options:
-    --user=<user>   Specifies the user to filter for.
-    --version       Show version.
-    -h --help       Show this screen.
+    --grant, -g         Grants the provided permissions.
+    --revoke, -R        Revokes the provided permissions.
+    --read, -r          Enable read permission.
+    --administer, -a    Enable administration permission.
+    --setup, -s         Enable setup permission.
+    --user=<user>       Specifies the user to filter for.
+    --version           Show version.
+    -h --help           Show this screen.
 """
 from os.path import basename
 
@@ -18,7 +23,6 @@ from fancylog import LogLevel, Logger
 from homeinfo.terminals.orm import Terminal
 from homeinfo.terminals.filter import parse
 
-from termgr.permissions import PermissionsParser
 from termgr.orm import ACL, PermissionError, User
 
 
@@ -76,18 +80,26 @@ if __name__ == '__main__':
             logger.error('No such user:', options['<user>'])
             exit(1)
 
-        try:
-            permissions = PermissionsParser(options['<permissions>'])
-        except PermissionError:
-            logger.error('Invalid permissions:', options['<permissions>'])
+        if options['--grant'] and options['--revoke']:
+            print('Error: Cannot grant and revoke at the same time.')
             exit(2)
+
+        if options['--grant']:
+            read = True if options['--read'] else None
+            administer = True if options['--administer'] else None
+            setup = True if options['--setup'] else None
+        elif options['--revoke']:
+            read = False if options['--read'] else None
+            administer = False if options['--administer'] else None
+            setup = False if options['--setup'] else None
+        else:
+            read = bool(options['--read'])
+            administer = bool(options['--administer'])
+            setup = bool(options['--setup'])
 
         for terminal in parse(*options['<expr>']):
             try:
                 user.permit(
-                    terminal,
-                    read=permissions.read,
-                    administer=permissions.administer,
-                    setup=permissions.setup)
+                    terminal, read=read, administer=administer, setup=setup)
             except PermissionError as e:
                 logger.warning(e.msg)
