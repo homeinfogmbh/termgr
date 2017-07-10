@@ -3,10 +3,10 @@
 
 Usage:
     termacls get [<expr>...] [options]
-    termacls set <user> [-gRras] <expr>...
+    termacls set <user> [-GRras] <expr>...
 
 Options:
-    --grant, -g         Grants the provided permissions.
+    --grant, -G         Grants the provided permissions.
     --revoke, -R        Revokes the provided permissions.
     --read, -r          Enable read permission.
     --administer, -a    Enable administration permission.
