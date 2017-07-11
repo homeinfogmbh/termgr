@@ -286,21 +286,14 @@ if __name__ == '__main__':
 
             if terminal.location is None:
                 terminal.location = Location.add(address)
-
-                if terminal.save():
-                    print('Initially located', terminal, 'at', repr(address))
-                else:
-                    print('Failed to locate', terminal, 'at', repr(address))
+                terminal.save()
+                print('Initially located', terminal, 'at', repr(address))
             elif terminal.location.address == address:
                 print(terminal, 'is already located at', repr(address))
             else:
                 terminal.location.address = address
-
-                if terminal.location.save():
-                    print('Moved', terminal, 'to', repr(address))
-                else:
-                    print('Failed to move', terminal, 'to', repr(address))
-                    exit(1)
+                terminal.location.save()
+                print('Moved', terminal, 'to', repr(address))
     # Reload configurations
     elif options['reload']:
         update_config()
