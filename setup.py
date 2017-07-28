@@ -11,7 +11,7 @@ setup(
         ('/usr/local/bin', [
             'files/usr/bin/termacls',
             'files/usr/bin/termgr']),
-         ('/usr/local/sbin', ['files/usr/bin/termadm']),
+        ('/usr/local/sbin', ['files/usr/bin/termadm']),
         ('/usr/share/termgr', [
             'files/usr/share/termgr/check.wsgi',
             'files/usr/share/termgr/query.wsgi',
