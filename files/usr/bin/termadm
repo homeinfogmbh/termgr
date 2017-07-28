@@ -48,17 +48,17 @@ def update_nagios():
     """Generates the Nagios3 configuration"""
 
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run(('/usr/bin/nagioscfg-gen', '--restart')))
+    evaluate(run(('/usr/local/bin/nagioscfg-gen', '--restart')))
 
 
 def update_config():
     """Fix stuff after operations"""
 
     print('Generating bind9 configuration', end='          ', flush=True)
-    evaluate(run('/usr/bin/bindcfg-gen'))
+    evaluate(run('/usr/local/bin/bindcfg-gen'))
 
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    evaluate(run('/usr/bin/openvpncfg-gen'))
+    evaluate(run('/usr/local/bin/openvpncfg-gen'))
     update_nagios()
 
 
