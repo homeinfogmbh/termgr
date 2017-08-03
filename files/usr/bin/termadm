@@ -55,10 +55,10 @@ def update_config():
     """Fix stuff after operations"""
 
     print('Generating bind9 configuration', end='          ', flush=True)
-    evaluate(run('/usr/local/bin/bindcfg-gen'))
+    evaluate(run('/usr/local/sbin/bindcfg-gen'))
 
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    evaluate(run('/usr/local/bin/openvpncfg-gen'))
+    evaluate(run('/usr/local/sbin/openvpncfg-gen'))
     update_nagios()
 
 
