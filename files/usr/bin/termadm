@@ -48,7 +48,7 @@ def update_nagios():
     """Generates the Nagios3 configuration"""
 
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run(('/usr/local/bin/nagioscfg-gen', '--restart')))
+    evaluate(run(('/usr/local/sbin/nagioscfg-gen', '--restart')))
 
 
 def update_config():
