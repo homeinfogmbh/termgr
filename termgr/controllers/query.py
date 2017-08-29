@@ -61,7 +61,7 @@ class QueryHandler(RequestHandler):
                         undeployed=undeployed):
                     terminal_dom = dom.Terminal()
                     terminal_dom.tid = terminal.tid
-                    terminal_dom.cid = terminal.customer.id
+                    terminal_dom.cid = terminal.customer.cid
                     terminal_dom.scheduled = terminal.scheduled
                     terminal_dom.deployed = terminal.deployed
                     terminal_dom.annotation = terminal.annotation
@@ -81,25 +81,25 @@ class QueryHandler(RequestHandler):
                     terminals.terminal.append(terminal_dom)
 
                 return XML(terminals)
+
+            if json is True:
+                indent = None
             else:
-                if json is True:
-                    indent = None
-                else:
-                    try:
-                        indent = int(json)
-                    except ValueError:
-                        raise Error('Invalid indentation;: {}'.format(json))
+                try:
+                    indent = int(json)
+                except ValueError:
+                    raise Error('Invalid indentation;: {}'.format(json))
 
-                terminals = []
+            terminals = []
 
-                for terminal in self.terminals(
-                        cid, user, scheduled=scheduled,
-                        undeployed=undeployed):
-                    terminals.append(terminal.to_dict(short=True))
+            for terminal in self.terminals(
+                    cid, user, scheduled=scheduled,
+                    undeployed=undeployed):
+                terminals.append(terminal.to_dict(short=True))
 
-                return JSON(terminals, indent=indent)
-        else:
-            raise Error('Invalid credentials', status=401) from None
+            return JSON(terminals, indent=indent)
+
+        raise Error('Invalid credentials', status=401) from None
 
     def terminals(self, cid, user, scheduled=None, undeployed=False):
         """List terminals of customer with CID"""
