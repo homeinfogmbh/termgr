@@ -39,7 +39,7 @@ from syslib import run, evaluate
 from homeinfo.crm import Address, State
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
-from homeinfo.terminals.filter import parse
+from homeinfo.terminals.filter import parse, PrintMissing
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -240,21 +240,24 @@ if __name__ == '__main__':
         else:
             date_time = None
 
-        for terminal in parse(*options['<expr>']):
-            terminal.deploy(date_time=date_time, force=force)
+        with PrintMissing():
+            for terminal in parse(*options['<expr>']):
+                terminal.deploy(date_time=date_time, force=force)
 
         if reload:
             update_nagios()
     # Undeploy terminal
     elif options['undeploy']:
-        for terminal in parse(*options['<expr>']):
-            terminal.undeploy()
+        with PrintMissing():
+            for terminal in parse(*options['<expr>']):
+                terminal.undeploy()
 
         if reload:
             update_nagios()
     # Relocate a terminal
     elif options['relocate']:
-        terminal, *overhead = parse(options['<terminal>'])
+        with PrintMissing():
+            terminal, *overhead = parse(options['<terminal>'])
 
         if overhead:
             print('Can only relocate one terminal at a time')

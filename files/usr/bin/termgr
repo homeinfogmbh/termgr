@@ -29,7 +29,7 @@ from os.path import basename
 from fancylog import Logger, LogLevel, TTYAnimation
 from syslib import Parallelization
 
-from homeinfo.terminals.filter import parse
+from homeinfo.terminals.filter import parse, PrintMissing
 from homeinfo.terminals.orm import Terminal
 
 from termgr.ctrl import TerminalsController
@@ -62,7 +62,8 @@ if __name__ == '__main__':
                 ~(Terminal.deployed >> None) &
                 (Terminal.testing == 0))
         else:
-            terminals = parse(options['<expr>'])
+            with PrintMissing():
+                terminals = tuple(parse(options['<expr>']))
 
         # Filter out undeployed terminals
         if not options['--undeployed']:

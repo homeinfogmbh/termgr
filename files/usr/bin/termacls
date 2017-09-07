@@ -21,7 +21,7 @@ from peewee import DoesNotExist
 
 from fancylog import LogLevel, Logger
 from homeinfo.terminals.orm import Terminal
-from homeinfo.terminals.filter import parse
+from homeinfo.terminals.filter import parse, PrintMissing
 
 from termgr.orm import ACL, PermissionError, User
 
@@ -38,16 +38,18 @@ def getacls(terminals=None, user=None):
                 yield permission
     else:
         if user is None:
-            for terminal in terminals:
-                for permission in ACL.select().where(
-                        ACL.terminal == terminal):
-                    yield permission
+            with PrintMissing():
+                for terminal in terminals:
+                    for permission in ACL.select().where(
+                            ACL.terminal == terminal):
+                        yield permission
         else:
-            for terminal in terminals:
-                for permission in ACL.select().where(
-                        (ACL.terminal == terminal) &
-                        (ACL.user == user)):
-                    yield permission
+            with PrintMissing():
+                for terminal in terminals:
+                    for permission in ACL.select().where(
+                            (ACL.terminal == terminal) &
+                            (ACL.user == user)):
+                        yield permission
 
 
 if __name__ == '__main__':
@@ -97,9 +99,11 @@ if __name__ == '__main__':
             administer = bool(options['--administer'])
             setup = bool(options['--setup'])
 
-        for terminal in parse(*options['<expr>']):
-            try:
-                user.permit(
-                    terminal, read=read, administer=administer, setup=setup)
-            except PermissionError as e:
-                logger.warning(e.msg)
+        with PrintMissing():
+            for terminal in parse(*options['<expr>']):
+                try:
+                    user.permit(
+                        terminal, read=read, administer=administer,
+                        setup=setup)
+                except PermissionError as e:
+                    logger.warning(e.msg)
