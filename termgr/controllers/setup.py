@@ -50,7 +50,7 @@ def openvpn_data(terminal, windows=False):
     packager = OpenVPNPackager(terminal)
 
     try:
-        response_body = packager.package(windows=windows)
+        data, filename = packager.package(windows=windows)
     except FileNotFoundError as file_not_found:
         return InternalServerError('Missing file: {}'.format(basename(
             file_not_found.filename)))
@@ -58,8 +58,7 @@ def openvpn_data(terminal, windows=False):
         return InternalServerError('Cannot access file: {}'.format(basename(
             permission_error.filename)))
     else:
-        return WsgiResponse(
-            200, 'application/x-gzip', response_body, charset=None)
+        return Binary(data, filename=filename)
 
 
 class SetupHandler(RequestHandler):

@@ -102,8 +102,10 @@ class OpenVPNPackager(TerminalAware):
         with TemporaryFile(mode='w+b') as tmp:
             if windows:
                 self.zip_file(tmp)
+                filename = '{}.zip'.format(self.key)
             else:
                 self.tar_file(tmp)
+                filename = '{}.tar'.format(self.key)
 
             tmp.seek(0)
-            return tmp.read()
+            return (tmp.read(), filename)
