@@ -76,7 +76,7 @@ class OpenVPNPackager(TerminalAware):
             keyfile=self.keyfile,
             mtu=self.mtu)
 
-    def package(self):
+    def package(self, dos=False):
         """Packages the files for the specified client"""
         with TemporaryFile(mode='w+b') as tmp:
             with tarfile.open(mode='w', fileobj=tmp) as archive:
@@ -85,7 +85,11 @@ class OpenVPNPackager(TerminalAware):
                 archive.add(self.cafile_path, arcname=self.CA_FILE)
 
                 with NamedTemporaryFile(mode='w+') as cfg:
-                    cfg.write(self.configuration)
+                    if dos:
+                        cfg.write(self.configuration.replace('\n', '\r\n'))
+                    else:
+                        cfg.write(self.configuration)
+
                     cfg.seek(0)
                     archive.add(cfg.name, arcname=self.CONFIG_FILE)
 
