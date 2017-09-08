@@ -1,6 +1,6 @@
 """Library for terminal OpenVPN management"""
 
-from os.path import join
+from pathlib import Path
 from tempfile import TemporaryFile, NamedTemporaryFile
 from contextlib import suppress
 
@@ -11,16 +11,19 @@ from homeinfo.terminals.abc import TerminalAware
 __all__ = ['OpenVPNPackager']
 
 
+KEY_FILE = '{}.key'
+CRT_FILE = '{}.crt'
+CA_FILE = 'ca.crt'
+CONFIG_FILE_POSIX = 'terminals.conf'
+CONFIG_FILE_WINDOWS = 'terminals.ovpn'
+CFG_TEMP = '/usr/share/terminals/openvpn.conf.temp'
+KEYS_DIR = Path('/usr/lib/terminals/keys')
+CA_FILE_PATH = KEYS_DIR.joinpath(CA_FILE)
+MTU = 'tun-mtu {}\n'
+
+
 class OpenVPNPackager(TerminalAware):
     """Packs client keys"""
-
-    KEYFILE = '{}.key'
-    CRTFILE = '{}.crt'
-    CA_FILE = 'ca.crt'
-    CONFIG_FILE = 'terminals.conf'
-    CFG_TEMP = '/usr/share/terminals/openvpn.conf.temp'
-    KEYS_DIR = '/usr/lib/terminals/keys'
-    MTU = 'tun-mtu {}\n'
 
     @property
     def key(self):
@@ -32,43 +35,38 @@ class OpenVPNPackager(TerminalAware):
         return str(self.terminal)
 
     @property
-    def keyfile(self):
+    def key_file(self):
         """Returns the respective key file"""
-        return self.KEYFILE.format(self.key)
+        return KEY_FILE.format(self.key)
 
     @property
-    def crtfile(self):
+    def crt_file(self):
         """Returns the respective certificate file"""
-        return self.CRTFILE.format(self.key)
+        return CRT_FILE.format(self.key)
 
     @property
     def mtu(self):
         """Returns the respective MTU value"""
         if self.terminal.vpn is not None:
             if self.terminal.vpn.mtu is not None:
-                return self.MTU.format(self.terminal.vpn.mtu)
+                return MTU.format(self.terminal.vpn.mtu)
 
         return ''
 
     @property
     def keyfile_path(self):
         """Returns the absolute path to the key file"""
-        return join(self.KEYS_DIR, self.keyfile)
+        return KEYS_DIR.joinpath(self.keyfile)
 
     @property
     def crtfile_path(self):
         """Returns the absolute path to the certificate file"""
-        return join(self.KEYS_DIR, self.crtfile)
-
-    @property
-    def cafile_path(self):
-        """Returns the absolute path to the CA file"""
-        return join(self.KEYS_DIR, self.CA_FILE)
+        return KEYS_DIR.joinpath(self.crtfile)
 
     @property
     def configuration(self):
         """Returns the rendered client configuration file"""
-        with open(self.CFG_TEMP, 'r') as template:
+        with open(CFG_TEMP, 'r') as template:
             template = template.read()
 
         return template.format(
@@ -76,22 +74,24 @@ class OpenVPNPackager(TerminalAware):
             keyfile=self.keyfile,
             mtu=self.mtu)
 
-    def package(self, dos=False):
+    def package(self, windows=False):
         """Packages the files for the specified client"""
         with TemporaryFile(mode='w+b') as tmp:
             with tarfile.open(mode='w', fileobj=tmp) as archive:
-                archive.add(self.keyfile_path, arcname=self.keyfile)
-                archive.add(self.crtfile_path, arcname=self.crtfile)
-                archive.add(self.cafile_path, arcname=self.CA_FILE)
+                archive.add(str(self.keyfile_path), arcname=self.key_file)
+                archive.add(str(self.crtfile_path), arcname=self.crt_file)
+                archive.add(str(CA_FILE_PATH), arcname=CA_FILE)
 
                 with NamedTemporaryFile(mode='w+') as cfg:
-                    if dos:
+                    if windows:
                         cfg.write(self.configuration.replace('\n', '\r\n'))
+                        arcname = CONFIG_FILE_WINDOWS
                     else:
                         cfg.write(self.configuration)
+                        arcname = CONFIG_FILE_POSIX
 
                     cfg.seek(0)
-                    archive.add(cfg.name, arcname=self.CONFIG_FILE)
+                    archive.add(cfg.name, arcname=arcname)
 
             tmp.seek(0)
             return tmp.read()
