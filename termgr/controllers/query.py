@@ -61,7 +61,7 @@ class QueryHandler(RequestHandler):
                         undeployed=undeployed):
                     terminal_dom = dom.Terminal()
                     terminal_dom.tid = terminal.tid
-                    terminal_dom.cid = terminal.customer.cid
+                    terminal_dom.cid = terminal.customer.id
                     terminal_dom.scheduled = terminal.scheduled
                     terminal_dom.deployed = terminal.deployed
                     terminal_dom.annotation = terminal.annotation

@@ -1,7 +1,7 @@
-# ./termgr/orm.py
+# ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-08-29 13:43:46.886425 by PyXB version 1.2.6-DEV using Python 3.6.2.final.0
+# Generated 2017-09-08 11:44:53.068316 by PyXB version 1.2.6-DEV using Python 3.6.2.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:514189a0-8caf-11e7-8a1c-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:5d492f96-947a-11e7-988b-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -136,7 +136,7 @@ class Terminal (pyxb.binding.basis.complexTypeDefinition):
 
     
     # Attribute cid uses Python identifier cid
-    __cid = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'cid'), 'cid', '__httpxml_homeinfo_deschematerminallib_Terminal_cid', pyxb.binding.datatypes.string, required=True)
+    __cid = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'cid'), 'cid', '__httpxml_homeinfo_deschematerminallib_Terminal_cid', pyxb.binding.datatypes.integer, required=True)
     __cid._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 44, 8)
     __cid._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 44, 8)
     
