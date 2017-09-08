@@ -37,15 +37,11 @@ def get_location(terminal, client_version):
 
     if client_version is None or client_version < 4:
         return legacy_location(terminal)
-    elif client_version >= 3:
-        if terminal.location:
-            return JSON(terminal.location.to_dict())
 
-        return JSON({})
+    if terminal.location:
+        return JSON(terminal.location.to_dict())
 
-    raise Error(
-        'Version: {} is not supported.'.format(client_version),
-        status=400) from None
+    return JSON({})
 
 
 def openvpn_data(terminal, logger=None):
