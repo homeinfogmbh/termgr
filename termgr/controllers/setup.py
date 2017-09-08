@@ -1,4 +1,4 @@
-"""Controller for terminal setup"""
+"""Controller for terminal setup."""
 
 from os.path import basename
 from peewee import DoesNotExist
@@ -13,123 +13,158 @@ from termgr.orm import User
 __all__ = ['SetupHandler']
 
 
+def legacy_location(terminal):
+    """Returns terminal location data for legacy client versions."""
+
+    if terminal.location is not None:
+        return OK(str(terminal.location))
+
+    return OK('!!!UNCONFIGURED!!!')
+
+
+def json_location(terminal):
+    """Returns terminal location data for
+    new client versions in JSON format.
+    """
+
+    location = {}
+
+    if terminal.location is not None:
+        address = terminal.location.address
+        annotation = terminal.location.annotation
+        location['street'] = str(address.street)
+        location['house_number'] = str(address.house_number)
+        location['zip_code'] = str(address.zip_code)
+        location['city'] = str(address.city)
+
+        if annotation:
+            location['annotation'] = str(annotation)
+
+    return JSON(location)
+
+
+def get_location(terminal, client_version):
+    """Returns the terminal's location."""
+
+    if client_version is None:
+        return legacy_location(terminal)
+    elif client_version >= 3:
+        return json_location(terminal)
+
+    raise Error(
+        'Version: {} is not supported.'.format(client_version),
+        status=400) from None
+
+
+def openvpn_data(terminal, logger=None):
+    """Returns OpenVPN configuration."""
+
+    packager = OpenVPNPackager(terminal, logger=logger)
+
+    try:
+        response_body = packager.package()
+    except FileNotFoundError as file_not_found:
+        return InternalServerError('Missing file: {}'.format(basename(
+            file_not_found.filename)))
+    except PermissionError as permission_error:
+        return InternalServerError('Cannot access file: {}'.format(basename(
+            permission_error.filename)))
+    else:
+        return WsgiResponse(
+            200, 'application/x-gzip', response_body, charset=None)
+
+
 class SetupHandler(RequestHandler):
     """Handles requests for the SetupController"""
 
-    def get(self):
-        """Process GET request"""
-        client_version = self.query.get('client_version')
+    @property
+    def user(self):
+        """Returns the user."""
         user_name = self.query.get('user_name')
 
         if not user_name:
-            return Error('No user name specified', status=400)
+            raise Error('No user name specified', status=400) from None
 
         passwd = self.query.get('passwd')
 
         if not passwd:
-            return Error('No password specified', status=400)
+            raise Error('No password specified', status=400) from None
 
-        user = User.authenticate(user_name, passwd)
+        return User.authenticate(user_name, passwd)
+
+    @property
+    def client_version(self):
+        """Returns the client version."""
+        try:
+            client_version = self.query['client_version']
+        except KeyError:
+            return None
+        else:
+            try:
+                return float(client_version)
+            except ValueError:
+                raise Error('Invalid client version.', status=400) from None
+
+    @property
+    def cid(self):
+        """Returns the customer ID."""
+        try:
+            cid = self.query['cid']
+        except KeyError:
+            raise Error('No customer ID specified', status=400) from None
+        else:
+            try:
+                return int(cid)
+            except ValueError:
+                raise Error('Invalid customer ID', status=400) from None
+
+    @property
+    def tid(self):
+        """Returns the terminal ID."""
+        try:
+            tid = self.query['tid']
+        except KeyError:
+            raise Error('No terminal ID specified', status=400) from None
+        else:
+            try:
+                return int(tid)
+            except ValueError:
+                raise Error('Invalid terminal ID', status=400) from None
+
+    @property
+    def terminal(self):
+        """Returns the appropriate terminal."""
+        try:
+            return Terminal.by_ids(self.cid, self.tid, deleted=False)
+        except DoesNotExist:
+            raise Error('No such terminal', status=400) from None
+
+    @property
+    def action(self):
+        """Returns the action."""
+        try:
+            return self.query['action']
+        except KeyError:
+            raise Error('No action specified', status=400) from None
+
+    def get(self):
+        """Process GET request"""
+        user = self.user
 
         if user:
-            cid_str = self.query.get('cid')
+            terminal = self.terminal
 
-            if cid_str is None:
-                return Error('No customer ID specified', status=400)
-            else:
-                try:
-                    cid = int(cid_str)
-                except ValueError:
-                    return Error('Invalid customer ID', status=400)
+            if user.authorize(terminal, setup=True):
+                action = self.action
 
-                tid_str = self.query.get('tid')
+                if action == 'location':
+                    return get_location(terminal, self.client_version)
+                elif action == 'vpn_data':
+                    return openvpn_data(terminal, logger=self.logger)
 
-                if tid_str is None:
-                    return Error('No terminal ID specified', status=400)
-                else:
-                    try:
-                        tid = int(tid_str)
-                    except ValueError:
-                        return Error('Invalid terminal ID', status=400)
-
-                    try:
-                        terminal = Terminal.by_ids(cid, tid, deleted=False)
-                    except DoesNotExist:
-                        return Error('No such terminal', status=400)
-                    else:
-                        if user.authorize(terminal, setup=True):
-                            action = self.query.get('action')
-
-                            if action is None:
-                                return Error('No action specified', status=400)
-                            else:
-                                return self._handle(
-                                    terminal, action,
-                                    client_version=client_version)
-                        else:
-                            return Error('Unauthorized', status=401)
-        else:
-            return Error('Invalid credentials', status=401)
-
-    def _legacy_location(self, terminal):
-        """Returns terminal location data for legacy client versions"""
-        if terminal.location is not None:
-            location = str(terminal.location)
-        else:
-            location = '!!!UNCONFIGURED!!!'
-
-        return OK(location)
-
-    def _json_location(self, terminal):
-        """Returns terminal location data for
-        new client versions in JSON format
-        """
-        location = {}
-
-        if terminal.location is not None:
-            address = terminal.location.address
-            annotation = terminal.location.annotation
-            location['street'] = str(address.street)
-            location['house_number'] = str(address.house_number)
-            location['zip_code'] = str(address.zip_code)
-            location['city'] = str(address.city)
-
-            if annotation:
-                location['annotation'] = str(annotation)
-
-        return JSON(location)
-
-    def _openvpn_data(self, terminal):
-        """Returns OpenVPN configuration"""
-        packager = OpenVPNPackager(terminal, logger=self.logger)
-
-        try:
-            response_body = packager.package()
-        except FileNotFoundError as e:
-            return InternalServerError('Missing file: {}'.format(
-                basename(e.filename)))
-        except PermissionError as e:
-            return InternalServerError('Cannot access file: {}'.format(
-                basename(e.filename)))
-        else:
-            return WsgiResponse(
-                200, 'application/x-gzip',
-                response_body, charset=None)
-
-    def _handle(self, terminal, action, client_version=None):
-        """Handles an action for a certain
-        customer id, terminal id and action
-        """
-        if action == 'location':
-            if client_version is None:
-                return self._legacy_location(terminal)
-            elif client_version == '3.0':
-                return self._json_location(terminal)
-            else:
-                msg = 'Version: {} is not supported.'.format(client_version)
+                msg = 'Action "{}" is not implemented'.format(action)
                 return Error(msg, status=400)
-        elif action == 'vpn_data':
-            return self._openvpn_data(terminal)
-        else:
-            msg = 'Action "{}" is not implemented'.format(action)
-            return Error(msg, status=400)
+
+            return Error('Unauthorized', status=401)
+
+        return Error('Invalid credentials', status=401)
