@@ -1,10 +1,10 @@
 """Library for terminal OpenVPN management"""
 
-from pathlib import Path
-from tempfile import TemporaryFile, NamedTemporaryFile
 from contextlib import suppress
-
-import tarfile
+from pathlib import Path
+from tarfile import open as tarfile_open
+from tempfile import TemporaryFile, NamedTemporaryFile
+from zipfile import ZipFile
 
 from homeinfo.terminals.abc import TerminalAware
 
@@ -54,12 +54,12 @@ class OpenVPNPackager(TerminalAware):
         return ''
 
     @property
-    def keyfile_path(self):
+    def key_file_path(self):
         """Returns the absolute path to the key file"""
         return KEYS_DIR.joinpath(self.keyfile)
 
     @property
-    def crtfile_path(self):
+    def crt_file_path(self):
         """Returns the absolute path to the certificate file"""
         return KEYS_DIR.joinpath(self.crtfile)
 
@@ -74,24 +74,37 @@ class OpenVPNPackager(TerminalAware):
             keyfile=self.keyfile,
             mtu=self.mtu)
 
+    def zip_file(self, file):
+        """ZIPs OpenVPN files for Windows devices."""
+        with ZipFile(file, mode='w') as zip_file:
+            zip_file.write(str(self.key_file_path), arcname=self.key_file)
+            zip_file.write(str(self.crt_file_path), arcname=self.crt_file)
+            zip_file.write(str(CA_FILE_PATH), arcname=CA_FILE)
+
+            with NamedTemporaryFile(mode='w+') as cfg:
+                cfg.write(self.configuration.replace('\n', '\r\n'))
+                cfg.seek(0)
+                zip_file.write(cfg.name, arcname=CONFIG_FILE_WINDOWS)
+
+    def tar_file(self, file):
+        """Tar OpenVPN files for POSIX devices."""
+        with tarfile_open(mode='w', fileobj=file) as archive:
+            archive.add(str(self.key_file_path), arcname=self.key_file)
+            archive.add(str(self.crt_file_path), arcname=self.crt_file)
+            archive.add(str(CA_FILE_PATH), arcname=CA_FILE)
+
+            with NamedTemporaryFile(mode='w+') as cfg:
+                cfg.write(self.configuration)
+                cfg.seek(0)
+                archive.add(cfg.name, arcname=CONFIG_FILE_POSIX)
+
     def package(self, windows=False):
         """Packages the files for the specified client"""
         with TemporaryFile(mode='w+b') as tmp:
-            with tarfile.open(mode='w', fileobj=tmp) as archive:
-                archive.add(str(self.keyfile_path), arcname=self.key_file)
-                archive.add(str(self.crtfile_path), arcname=self.crt_file)
-                archive.add(str(CA_FILE_PATH), arcname=CA_FILE)
-
-                with NamedTemporaryFile(mode='w+') as cfg:
-                    if windows:
-                        cfg.write(self.configuration.replace('\n', '\r\n'))
-                        arcname = CONFIG_FILE_WINDOWS
-                    else:
-                        cfg.write(self.configuration)
-                        arcname = CONFIG_FILE_POSIX
-
-                    cfg.seek(0)
-                    archive.add(cfg.name, arcname=arcname)
+            if windows:
+                self.zip_file(tmp)
+            else:
+                self.tar_file(tmp)
 
             tmp.seek(0)
             return tmp.read()
