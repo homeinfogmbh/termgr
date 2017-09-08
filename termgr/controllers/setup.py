@@ -3,7 +3,7 @@
 from os.path import basename
 from peewee import DoesNotExist
 
-from wsgilib import WsgiResponse, Error, OK, JSON, InternalServerError, \
+from wsgilib import WsgiResponse, Error, JSON, InternalServerError, \
     RequestHandler
 from homeinfo.terminals.orm import Terminal
 
@@ -13,16 +13,7 @@ from termgr.orm import User
 __all__ = ['SetupHandler']
 
 
-def legacy_location(terminal):
-    """Returns terminal location data for legacy client versions."""
-
-    if terminal.location is not None:
-        return OK(str(terminal.location))
-
-    return OK('!!!UNCONFIGURED!!!')
-
-
-def json_location(terminal):
+def get_location(terminal):
     """Returns terminal location data for
     new client versions in JSON format.
     """
@@ -41,19 +32,6 @@ def json_location(terminal):
             location['annotation'] = str(annotation)
 
     return JSON(location)
-
-
-def get_location(terminal, client_version):
-    """Returns the terminal's location."""
-
-    if client_version is None:
-        return legacy_location(terminal)
-    elif client_version >= 3:
-        return json_location(terminal)
-
-    raise Error(
-        'Version: {} is not supported.'.format(client_version),
-        status=400) from None
 
 
 def openvpn_data(terminal, logger=None):
@@ -91,19 +69,6 @@ class SetupHandler(RequestHandler):
             raise Error('No password specified', status=400) from None
 
         return User.authenticate(user_name, passwd)
-
-    @property
-    def client_version(self):
-        """Returns the client version."""
-        try:
-            client_version = self.query['client_version']
-        except KeyError:
-            return None
-        else:
-            try:
-                return float(client_version)
-            except ValueError:
-                raise Error('Invalid client version.', status=400) from None
 
     @property
     def cid(self):
@@ -158,7 +123,7 @@ class SetupHandler(RequestHandler):
                 action = self.action
 
                 if action == 'location':
-                    return get_location(terminal, self.client_version)
+                    return get_location(terminal)
                 elif action == 'vpn_data':
                     return openvpn_data(terminal, logger=self.logger)
 
