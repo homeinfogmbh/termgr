@@ -55,12 +55,12 @@ class OpenVPNPackager(TerminalAware):
     @property
     def key_file_path(self):
         """Returns the absolute path to the key file"""
-        return KEYS_DIR.joinpath(self.keyfile)
+        return KEYS_DIR.joinpath(self.key_file)
 
     @property
     def crt_file_path(self):
         """Returns the absolute path to the certificate file"""
-        return KEYS_DIR.joinpath(self.crtfile)
+        return KEYS_DIR.joinpath(self.crt_file)
 
     @property
     def configuration(self):
@@ -69,8 +69,8 @@ class OpenVPNPackager(TerminalAware):
             template = template.read()
 
         return template.format(
-            crtfile=self.crtfile,
-            keyfile=self.keyfile,
+            crtfile=self.crt_file,
+            keyfile=self.key_file,
             mtu=self.mtu)
 
     def zip_file(self, file):
