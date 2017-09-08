@@ -14,8 +14,7 @@ __all__ = ['OpenVPNPackager']
 KEY_FILE = '{}.key'
 CRT_FILE = '{}.crt'
 CA_FILE = 'ca.crt'
-CONFIG_FILE_POSIX = 'terminals.conf'
-CONFIG_FILE_WINDOWS = 'terminals.ovpn'
+CONFIG_FILE = 'terminals{}'
 CFG_TEMP = '/usr/share/terminals/openvpn.conf.temp'
 KEYS_DIR = Path('/usr/lib/terminals/keys')
 CA_FILE_PATH = KEYS_DIR.joinpath(CA_FILE)
@@ -84,7 +83,7 @@ class OpenVPNPackager(TerminalAware):
             with NamedTemporaryFile(mode='w+') as cfg:
                 cfg.write(self.configuration.replace('\n', '\r\n'))
                 cfg.seek(0)
-                zip_file.write(cfg.name, arcname=CONFIG_FILE_WINDOWS)
+                zip_file.write(cfg.name, arcname=CONFIG_FILE.format('.ovpn'))
 
     def tar_file(self, file):
         """Tar OpenVPN files for POSIX devices."""
@@ -96,7 +95,7 @@ class OpenVPNPackager(TerminalAware):
             with NamedTemporaryFile(mode='w+') as cfg:
                 cfg.write(self.configuration)
                 cfg.seek(0)
-                archive.add(cfg.name, arcname=CONFIG_FILE_POSIX)
+                archive.add(cfg.name, arcname=CONFIG_FILE.format('.conf'))
 
     def package(self, windows=False):
         """Packages the files for the specified client"""
