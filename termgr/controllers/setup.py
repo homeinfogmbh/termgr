@@ -44,13 +44,13 @@ def get_location(terminal, client_version):
     return JSON({})
 
 
-def openvpn_data(terminal, logger=None):
+def openvpn_data(terminal, windows=False):
     """Returns OpenVPN configuration."""
 
-    packager = OpenVPNPackager(terminal, logger=logger)
+    packager = OpenVPNPackager(terminal)
 
     try:
-        response_body = packager.package()
+        response_body = packager.package(windows=windows)
     except FileNotFoundError as file_not_found:
         return InternalServerError('Missing file: {}'.format(basename(
             file_not_found.filename)))
@@ -135,6 +135,11 @@ class SetupHandler(RequestHandler):
         except KeyError:
             raise Error('No action specified', status=400) from None
 
+    @property
+    def windows(self):
+        """Returns the windows format flag."""
+        return bool(self.query.get('windows'))
+
     def get(self):
         """Process GET request"""
         user = self.user
@@ -148,7 +153,7 @@ class SetupHandler(RequestHandler):
                 if action == 'location':
                     return get_location(terminal, self.client_version)
                 elif action == 'vpn_data':
-                    return openvpn_data(terminal, logger=self.logger)
+                    return openvpn_data(terminal, windows=self.windows)
 
                 msg = 'Action "{}" is not implemented'.format(action)
                 return Error(msg, status=400)
