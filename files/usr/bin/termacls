@@ -26,7 +26,7 @@ from homeinfo.terminals.filter import parse, PrintMissing
 from termgr.orm import ACL, PermissionError, User
 
 
-def getacls(terminals=None, user=None):
+def get_acls(terminals=None, user=None):
     """Yields ACL records for the respective user"""
 
     if terminals is None:
@@ -52,58 +52,75 @@ def getacls(terminals=None, user=None):
                         yield permission
 
 
-if __name__ == '__main__':
-    from docopt import docopt
+def list_acls(options, logger):
+    """Lists the requested ACLs."""
+
+    if options['--user']:
+        try:
+            user = User.get(User.name == options['--user'])
+        except DoesNotExist:
+            logger.error('No such user:', options['--user'])
+    else:
+        user = None
+
+    if options['<expr>']:
+        terminals = parse(*options['<expr>'])
+    else:
+        terminals = Terminal
+
+    for acl in get_acls(terminals=terminals, user=user):
+        print(acl, acl.terminal, acl.user)
+
+
+def set_acls(options, logger):
+    """Sets the requested ACLs."""
+
+    try:
+        user = User.get(User.name == options['<user>'])
+    except DoesNotExist:
+        logger.error('No such user:', options['<user>'])
+        exit(1)
+
+    if options['--grant'] and options['--revoke']:
+        print('Error: Cannot grant and revoke at the same time.')
+        exit(2)
+
+    if options['--grant']:
+        read = True if options['--read'] else None
+        administer = True if options['--administer'] else None
+        setup = True if options['--setup'] else None
+    elif options['--revoke']:
+        read = False if options['--read'] else None
+        administer = False if options['--administer'] else None
+        setup = False if options['--setup'] else None
+    else:
+        read = bool(options['--read'])
+        administer = bool(options['--administer'])
+        setup = bool(options['--setup'])
+
+    with PrintMissing():
+        for terminal in parse(*options['<expr>']):
+            try:
+                user.permit(
+                    terminal, read=read, administer=administer,
+                    setup=setup)
+            except PermissionError as permission_error:
+                logger.warning(permission_error.msg)
+
+
+def main(options):
+    """Runs the ACL client."""
 
     logger = Logger(basename(__file__), level=LogLevel.INFO)
-    options = docopt(__doc__)
 
     # Get ACLs
     if options['get']:
-        if options['--user']:
-            try:
-                user = User.get(User.name == options['--user'])
-            except DoesNotExist:
-                logger.error('No such user:', options['--user'])
-        else:
-            user = None
-
-        if options['<expr>']:
-            terminals = parse(*options['<expr>'])
-        else:
-            terminals = Terminal
-
-        for acl in getacls(terminals=terminals, user=user):
-            print(acl, acl.terminal, acl.user)
+        list_acls(options, logger)
     elif options['set']:
-        try:
-            user = User.get(User.name == options['<user>'])
-        except DoesNotExist:
-            logger.error('No such user:', options['<user>'])
-            exit(1)
+        set_acls(options, logger)
 
-        if options['--grant'] and options['--revoke']:
-            print('Error: Cannot grant and revoke at the same time.')
-            exit(2)
 
-        if options['--grant']:
-            read = True if options['--read'] else None
-            administer = True if options['--administer'] else None
-            setup = True if options['--setup'] else None
-        elif options['--revoke']:
-            read = False if options['--read'] else None
-            administer = False if options['--administer'] else None
-            setup = False if options['--setup'] else None
-        else:
-            read = bool(options['--read'])
-            administer = bool(options['--administer'])
-            setup = bool(options['--setup'])
+if __name__ == '__main__':
+    from docopt import docopt
 
-        with PrintMissing():
-            for terminal in parse(*options['<expr>']):
-                try:
-                    user.permit(
-                        terminal, read=read, administer=administer,
-                        setup=setup)
-                except PermissionError as e:
-                    logger.warning(e.msg)
+    main(docopt(__doc__))
