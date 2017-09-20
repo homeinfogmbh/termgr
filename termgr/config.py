@@ -1,7 +1,7 @@
 """Terminal setup configuration"""
 
-from configparserplus import ConfigParserPlus
+from configlib import INIParser
 
 __all__ = ['config']
 
-config = ConfigParserPlus('/etc/termgr.conf')
+config = INIParser('/etc/termgr.conf')
