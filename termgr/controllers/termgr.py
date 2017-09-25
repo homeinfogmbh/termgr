@@ -14,24 +14,6 @@ class TerminalHandler(RestHandler):
     """Handles listing and creation of terminals."""
 
     @property
-    def text(self):
-        """Returns POST-ed text."""
-        try:
-            return self.data.decode()
-        except AttributeError:
-            raise Error('No data available.') from None
-        except ValueError:
-            raise Error('Invalid UTF-8 data.') from None
-
-    @property
-    def json(self):
-        """Returns POST-ed JSON data."""
-        try:
-            return loads(self.text)
-        except ValueError:
-            raise Error('Invalid JSON data.') from None
-
-    @property
     def cid(self):
         """Returns the customer ID."""
         try:
@@ -83,7 +65,7 @@ class TerminalHandler(RestHandler):
     def post(self):
         """Requests a new terminal."""
         try:
-            terminal = Terminal.from_dict(self.json)
+            terminal = Terminal.from_dict(self.data.json)
         except FieldValueError as field_value_error:
             return JSON(field_value_error.to_dict(), status=422)
         else:
@@ -92,7 +74,7 @@ class TerminalHandler(RestHandler):
     def patch(self):
         """Modifies terminal data."""
         try:
-            self.terminal.patch(self.json)
+            self.terminal.patch(self.data.json)
         except FieldValueError as field_value_error:
             return JSON(field_value_error.to_dict(), status=422)
         else:
