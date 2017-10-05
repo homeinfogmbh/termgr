@@ -3,7 +3,7 @@
 
 Usage:
     termadm add <cid> [<street> <house_number> <zip_code> <city> \
-[--state=<state_iso>] [--address.annotation=<annotation>]] \
+[--state=<state_iso>] [--address-annotation=<annotation>]] \
 [--scheduled=<date>] [options]
     termadm addall <cid> <file> [--scheduled=<date>] [options]
     termadm deploy <expr>... [--date=<date_string>] [--force] [options]
