@@ -27,9 +27,10 @@ Options:
     --weather=<weather>         Specifies the weather to use.
 """
 
-from os import geteuid
-from os.path import basename
 from datetime import datetime
+from os import geteuid
+from pathlib import Path
+from sys import exit as exit_
 
 from peewee import DoesNotExist
 
@@ -37,9 +38,9 @@ from fancylog import LogLevel, Logger
 from syslib import run, evaluate
 
 from homeinfo.crm import Address, State
+from homeinfo.terminals.filter import parse, PrintMissing
 from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
-from homeinfo.terminals.filter import parse, PrintMissing
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -48,18 +49,22 @@ def update_nagios():
     """Generates the Nagios3 configuration."""
 
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    evaluate(run(('/usr/local/sbin/nagioscfg-gen', '--restart')))
+    nagios_ok = run(('/usr/local/sbin/nagioscfg-gen', '--restart'))
+    evaluate(nagios_ok)
+    return nagios_ok
 
 
 def update_config():
     """Fix stuff after operations."""
 
     print('Generating bind9 configuration', end='          ', flush=True)
-    evaluate(run('/usr/local/sbin/bindcfg-gen'))
-
+    bind_ok = run('/usr/local/sbin/bindcfg-gen')
+    evaluate(bind_ok)
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    evaluate(run('/usr/local/sbin/openvpncfg-gen'))
-    update_nagios()
+    openvpn_ok = run('/usr/local/sbin/openvpncfg-gen')
+    evaluate(openvpn_ok)
+    nagios_ok = update_nagios()
+    return bind_ok and openvpn_ok and nagios_ok
 
 
 def read_file(path):
@@ -85,6 +90,13 @@ def parse_address(string, sep=' '):
         raise ValueError('Not an address: {}'.format(string))
     else:
         return (city, (sep.join(street), house_number, zip_code))
+
+
+def get_state(state_iso):
+    """Gets the state by ISO code."""
+
+    if state_iso:
+        return State.get(State.iso == state_iso)
 
 
 def add_terminal(options, logger, reload):
@@ -119,6 +131,12 @@ def add_terminal(options, logger, reload):
     else:
         addr = None
 
+    try:
+        state = get_state(state_iso)
+    except DoesNotExist:
+        logger.error('No such state: "{}".'.format(state_iso))
+        return 1
+
     # Optional parameters
     vpn_key = options['--key'] or None
 
@@ -127,8 +145,8 @@ def add_terminal(options, logger, reload):
     except TypeError:
         mtu = None
     except ValueError:
-        logger.error('Invalid MTU: {}'.format(options['--mtu']))
-        exit(1)
+        logger.error('Invalid MTU: {}.'.format(options['--mtu']))
+        return 2
 
     annotation = options['--annotation'] or None
 
@@ -145,7 +163,7 @@ def add_terminal(options, logger, reload):
     domain = Domain.get(Domain.id == domain_id)
 
     if addr is not None:
-        address = Address.add(city, addr=addr, state=None)
+        address = Address.add(city, addr=addr, state=state)
         location = Location.add(address, annotation=address_annotation)
     else:
         location = None
@@ -162,6 +180,8 @@ def add_terminal(options, logger, reload):
 
     if reload:
         update_config()
+
+    return 0
 
 
 def add_terminals(options, logger, reload):
@@ -213,6 +233,8 @@ def add_terminals(options, logger, reload):
     if reload:
         update_config()
 
+    return 0
+
 
 def deploy(options, logger, reload):
     """Deploys terminals."""
@@ -225,10 +247,9 @@ def deploy(options, logger, reload):
             date_time = datetime.strptime(date_string, DATE_FORMAT)
         except ValueError:
             logger.error(
-                'Invalid date time value ({date_string}) '
-                'or format ({date_format})'.format(
-                    date_string=date_string, date_format=DATE_FORMAT))
-            exit(4)
+                'Invalid date time value "{}" or format "{}".'.format(
+                    date_string, DATE_FORMAT))
+            return 4
     else:
         date_time = None
 
@@ -238,6 +259,8 @@ def deploy(options, logger, reload):
 
     if reload:
         update_nagios()
+
+    return 0
 
 
 def undeploy(options, reload):
@@ -250,16 +273,18 @@ def undeploy(options, reload):
     if reload:
         update_nagios()
 
+    return 0
 
-def relocate(options):
+
+def relocate(options, logger):
     """Relocates a terminal."""
 
     with PrintMissing():
         terminal, *overhead = parse(options['<terminal>'])
 
     if overhead:
-        print('Can only relocate one terminal at a time')
-        exit(1)
+        print('Can only relocate one terminal at a time.')
+        return 1
     else:
         street = options['<street>']
         house_number = options['<house_number>']
@@ -269,15 +294,11 @@ def relocate(options):
 
         addr = street, house_number, zip_code
 
-        # Get state
-        if state_iso:
-            try:
-                state = State.get(State._iso == state_iso)
-            except DoesNotExist:
-                print('No such state:', state_iso)
-                exit(1)
-        else:
-            state = None
+        try:
+            state = get_state(state_iso)
+        except DoesNotExist:
+            logger.error('No such state: "{}".'.format(state_iso))
+            return 1
 
         address = Address.add(city, addr=addr, state=state)
 
@@ -292,35 +313,38 @@ def relocate(options):
             terminal.location.save()
             print('Moved', terminal, 'to', repr(address))
 
+        return 0
+
 
 def main(options):
     """Runs the terminal administration CLI."""
 
-    logger = Logger(basename(__file__), level=LogLevel.INFO)
+    logger = Logger(Path(__file__).name, level=LogLevel.INFO)
     reload = not options['--no-reload']
 
     # Bail out iff reload of services
     # is required, but we are not root.
     if options['add'] or options['deploy'] or options['undeploy']:
         if reload and geteuid() != 0:
-            print('You must be root to update the related services')
-            exit(3)
+            logger.error('You must be root to update the related services.')
+            return 3
 
     if options['add']:
-        add_terminal(options, logger, reload)
+        return add_terminal(options, logger, reload)
     elif options['addall']:
-        add_terminals(options, logger, reload)
+        return add_terminals(options, logger, reload)
     elif options['deploy']:
-        deploy(options, logger, reload)
+        return deploy(options, logger, reload)
     elif options['undeploy']:
-        undeploy(options, reload)
+        return undeploy(options, reload)
     elif options['relocate']:
-        relocate(options)
+        return relocate(options, logger)
     elif options['reload']:
-        update_config()
+        return 0 if update_config() else 1
+
+    return 0
 
 
 if __name__ == '__main__':
     from docopt import docopt
-
-    main(docopt(__doc__))
+    exit_(main(docopt(__doc__)))
