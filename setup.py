@@ -5,19 +5,19 @@ from distutils.core import setup
 setup(
     name='termgr',
     version='latest',
-    author='Richard Neumann',
+    author='HOMEINFO - Digitale Informationssysteme GmbH',
+    author_email='info@homeinfo.de',
+    maintainer='Richard Neumann',
+    maintainer_email='r.neumann@homeinfo.de',
     packages=['termgr', 'termgr.controllers'],
+    scripts=['files/termacls', 'files/termgr', 'files/termadm'],
     data_files=[
-        ('/usr/local/bin', [
-            'files/usr/bin/termacls',
-            'files/usr/bin/termgr']),
-        ('/usr/local/sbin', ['files/usr/bin/termadm']),
         ('/usr/share/termgr', [
-            'files/usr/share/termgr/check.wsgi',
-            'files/usr/share/termgr/query.wsgi',
-            'files/usr/share/termgr/setup.wsgi']),
+            'files/check.wsgi',
+            'files/query.wsgi',
+            'files/setup.wsgi']),
         ('/etc/uwsgi/apps-available', [
-            'files/etc/uwsgi/apps-available/termcheck.ini',
-            'files/etc/uwsgi/apps-available/termquery.ini',
-            'files/etc/uwsgi/apps-available/termsetup.ini'])],
+            'files/termcheck.ini',
+            'files/termquery.ini',
+            'files/termsetup.ini'])],
     description=('Homeinfo Terminal Manager'))
