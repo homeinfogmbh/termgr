@@ -20,11 +20,10 @@ Options:
     --undeployed    Also handle undeployed terminals.
     --user=<user>   Specify user account for SSH connections.
 """
-
-from os import geteuid
-from sys import stderr
 from getpass import getuser
+from os import geteuid
 from os.path import basename
+from sys import stderr
 
 from fancylog import Logger, LogLevel, TTYAnimation
 from syslib import Parallelization
@@ -39,17 +38,16 @@ VERBOSE = False
 TERMGR_USER = 'termgr'
 
 
-if __name__ == '__main__':
-    from docopt import docopt
+def main(options):
+    """Runs the terminal manager."""
 
-    options = docopt(__doc__)
     logger = Logger(basename(__file__), level=LogLevel.INFO)
 
     if geteuid() == 0:
         print('Refusing to run as root')
         exit(3)
     elif getuser() != TERMGR_USER:
-        print('You must be {0} to run {1}'.format(
+        print('You must be {} to run {}'.format(
             TERMGR_USER, __file__), file=stderr)
         exit(2)
     else:
@@ -132,3 +130,8 @@ if __name__ == '__main__':
 
             for terminal, *_ in para.failures:
                 print('Failed to unlock:', str(terminal))
+
+
+if __name__ == '__main__':
+    from docopt import docopt
+    main(docopt(__doc__))

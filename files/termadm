@@ -43,13 +43,16 @@ from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 
 DATE_FORMAT = '%Y-%m-%d'
+NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
+BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
+OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
 
 
 def update_nagios():
     """Generates the Nagios3 configuration."""
 
     print('Creating Nagios3 configurations', end='         ', flush=True)
-    nagios_ok = run(('/usr/local/sbin/nagioscfg-gen', '--restart'))
+    nagios_ok = run((NAGIOSCFG_GEN, '--restart'))
     evaluate(nagios_ok)
     return nagios_ok
 
@@ -58,10 +61,10 @@ def update_config():
     """Fix stuff after operations."""
 
     print('Generating bind9 configuration', end='          ', flush=True)
-    bind_ok = run('/usr/local/sbin/bindcfg-gen')
+    bind_ok = run(BINDCFG_GEN)
     evaluate(bind_ok)
     print('Generating OpenVPN host configurations', end='  ', flush=True)
-    openvpn_ok = run('/usr/local/sbin/openvpncfg-gen')
+    openvpn_ok = run(OPENVPNCFG_GEN)
     evaluate(openvpn_ok)
     nagios_ok = update_nagios()
     return bind_ok and openvpn_ok and nagios_ok
