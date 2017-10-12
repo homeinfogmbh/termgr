@@ -71,7 +71,7 @@ def main(options):
 
         # Perform selected operation
         if options['update']:
-            template = 'Updating {message}: {animation}'
+            template = 'Updating {}: {}'
 
             with Parallelization(ctrl.update, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
@@ -80,7 +80,7 @@ def main(options):
             for terminal, *_ in para.failures:
                 print('Failed to update:', str(terminal))
         elif options['stage']:
-            template = 'Staging {message}: {animation}'
+            template = 'Staging {}: {}'
 
             with Parallelization(ctrl.stage, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
@@ -92,7 +92,7 @@ def main(options):
             pkgs = options['<package>']
             asexplicit = options['--asexplicit']
             install = ctrl.install(*pkgs, asexplicit=asexplicit)
-            template = 'Staging {message}: {animation}'
+            template = 'Staging {}: {}'
 
             with Parallelization(install, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
@@ -101,7 +101,7 @@ def main(options):
             for terminal, *_ in para.failures:
                 print('Failed to sync:', str(terminal))
         elif options['system-upgrade']:
-            template = 'Upgrading {message}: {animation}'
+            template = 'Upgrading {}: {}'
 
             with Parallelization(ctrl.upgrade, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
@@ -110,19 +110,19 @@ def main(options):
             for terminal, *_ in para.failures:
                 print('Failed to upgrade:', str(terminal))
         elif options['reboot']:
-            template = 'Rebooting {message}: {animation}'
+            template = 'Rebooting {}: {}'
 
             with Parallelization(ctrl.reboot, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
         elif options['chkres']:
-            template = 'Checking resolution {message}: {animation}'
+            template = 'Checking resolution {}: {}'
 
             with Parallelization(ctrl.chkres, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
                     para.wait()
         elif options['unlock']:
-            template = 'Unlocking {message}: {animation}'
+            template = 'Unlocking {}: {}'
 
             with Parallelization(ctrl.unlock, terminals, single=True) as para:
                 with TTYAnimation(para, template=template):
