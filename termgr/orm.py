@@ -1,4 +1,4 @@
-"""ORM models for termgr"""
+"""ORM models for termgr."""
 
 from peewee import DoesNotExist, Model, PrimaryKeyField, CharField,\
     BooleanField, ForeignKeyField
@@ -11,11 +11,21 @@ from terminallib import Terminal
 
 from termgr.config import config
 
-__all__ = ['PermissionError', 'User', 'ACL']
+__all__ = [
+    'AuthenticationError',
+    'PermissionError',
+    'User',
+    'ACL']
+
+
+class AuthenticationError(Exception):
+    """Indicates an error during authentication process."""
+
+    pass
 
 
 class PermissionError(Exception):
-    """Indicates error during permission handling"""
+    """Indicates error during permission handling."""
 
     def __init__(self, msg):
         super().__init__(msg)
@@ -23,7 +33,7 @@ class PermissionError(Exception):
 
 
 class TermgrModel(Model):
-    """Terminal manager basic Model"""
+    """Terminal manager basic Model."""
 
     id = PrimaryKeyField()
 
@@ -38,7 +48,7 @@ class TermgrModel(Model):
 
 
 class User(TermgrModel):
-    """A generic abstract user"""
+    """A generic abstract user."""
 
     company = ForeignKeyField(Company, db_column='company')
     name = CharField(64)
@@ -50,50 +60,48 @@ class User(TermgrModel):
     passwd_hasher = PasswordHasher()
 
     def __str__(self):
-        """Returns the user's name"""
+        """Returns the user's name."""
         return self.name
 
     @classmethod
     def authenticate(cls, name, passwd):
-        """Authenticate with name and hashed password"""
+        """Authenticate with name and hashed password."""
         if passwd:
             try:
                 user = cls.get(cls.name == name)
             except DoesNotExist:
-                return False
+                raise AuthenticationError() from None
             else:
                 try:
                     cls.passwd_hasher.verify(user.pwhash, passwd)
                 except VerifyMismatchError:
-                    return False
+                    raise AuthenticationError() from None
                 else:
                     if user.enabled:
                         return user
-                    else:
-                        return False
-        else:
-            return False
+
+        raise AuthenticationError() from None
 
     @property
     def passwd(self):
-        """Returns the password hash"""
+        """Returns the password hash."""
         return self.pwhash
 
     @passwd.setter
     def passwd(self, passwd):
-        """Creates a new password hash"""
+        """Creates a new password hash."""
         self.pwhash = self.__class__.passwd_hasher.hash(passwd)
 
     def permissions(self, terminal):
-        """Returns permissions on terminal"""
+        """Returns permissions on terminal."""
         return ACL.get(
             (ACL.user == self) &
             (ACL.terminal == terminal))
 
     def permit(self, terminal, read=None, administer=None, setup=None):
-        """Set permissions"""
+        """Set permissions."""
         if self.root:
-            raise PermissionError('Cannot set permissions for root users')
+            raise PermissionError('Cannot set permissions for root users.')
         else:
             try:
                 permissions = self.permissions(terminal)
@@ -117,40 +125,39 @@ class User(TermgrModel):
                 permissions.delete_instance()
 
     def authorize(self, terminal, read=None, administer=None, setup=None):
-        """Validate permissions
-
-        XXX: None means "don't care"!
+        """Validate permissions.
+        None means "don't care"!
         """
-        if read is None and administer is None and setup is None:
-            raise PermissionError('No permissions selected')
+        if all(permission is None for permission in (read, administer, setup)):
+            raise PermissionError('No permissions selected.')
         elif not self.enabled:
             return False
         elif self.root:
             return True
+
+        try:
+            permissions = self.permissions(terminal)
+        except DoesNotExist:
+            return False
         else:
-            try:
-                permissions = self.permissions(terminal)
-            except DoesNotExist:
-                return False
-            else:
-                if read is not None:
-                    if permissions.read != read:
-                        return False
+            if read is not None:
+                if permissions.read != read:
+                    return False
 
-                if administer is not None:
-                    if permissions.administer != administer:
-                        return False
+            if administer is not None:
+                if permissions.administer != administer:
+                    return False
 
-                if setup is not None:
-                    if permissions.setup != setup:
-                        return False
+            if setup is not None:
+                if permissions.setup != setup:
+                    return False
 
-                return True
+            return True
 
 
 class ACL(TermgrModel):
     """Many-to-many mapping in-between administrators
-    and terminals with certain permissions
+    and terminals with certain permissions.
     """
 
     user = ForeignKeyField(User, db_column='user')
@@ -161,15 +168,15 @@ class ACL(TermgrModel):
     setup = BooleanField(default=False)
 
     def __int__(self):
-        """Returns the permissions value"""
+        """Returns the permissions value."""
         return 4 * self.read + 2 * self.administer + self.setup
 
     def __repr__(self):
-        """Returns the permissions as a string"""
+        """Returns the permissions as a string."""
         return str(int(self))
 
     def __str__(self):
-        """Returns the permissions as an alternative string"""
+        """Returns the permissions as an alternative string."""
         return ''.join((
             'r' if self.read else '-',
             'a' if self.administer else '-',

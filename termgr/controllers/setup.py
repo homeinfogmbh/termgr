@@ -1,13 +1,11 @@
 """Controller for terminal setup."""
 
 from os.path import basename
-from peewee import DoesNotExist
 
-from terminallib import Terminal
-from wsgilib import Error, JSON, InternalServerError, Binary
+from wsgilib import OK, Error, JSON, InternalServerError, Binary
 
 from termgr.openvpn import OpenVPNPackager
-from .abc import UserAwareHandler
+from .abc import TermgrHandler
 
 __all__ = ['SetupHandler']
 
@@ -60,7 +58,7 @@ def openvpn_data(terminal, windows=False):
         return Binary(data, filename=filename)
 
 
-class SetupHandler(UserAwareHandler):
+class SetupHandler(TermgrHandler):
     """Handles requests for the SetupController"""
 
     @property
@@ -77,46 +75,12 @@ class SetupHandler(UserAwareHandler):
                 raise Error('Invalid client version.', status=400) from None
 
     @property
-    def cid(self):
-        """Returns the customer ID."""
-        try:
-            cid = self.query['cid']
-        except KeyError:
-            raise Error('No customer ID specified', status=400) from None
-        else:
-            try:
-                return int(cid)
-            except ValueError:
-                raise Error('Invalid customer ID', status=400) from None
-
-    @property
-    def tid(self):
-        """Returns the terminal ID."""
-        try:
-            tid = self.query['tid']
-        except KeyError:
-            raise Error('No terminal ID specified', status=400) from None
-        else:
-            try:
-                return int(tid)
-            except ValueError:
-                raise Error('Invalid terminal ID', status=400) from None
-
-    @property
-    def terminal(self):
-        """Returns the appropriate terminal."""
-        try:
-            return Terminal.by_ids(self.cid, self.tid, deleted=False)
-        except DoesNotExist:
-            raise Error('No such terminal', status=400) from None
-
-    @property
     def action(self):
         """Returns the action."""
         try:
             return self.query['action']
         except KeyError:
-            raise Error('No action specified', status=400) from None
+            raise Error('No action specified.', status=400) from None
 
     @property
     def windows(self):
@@ -124,7 +88,7 @@ class SetupHandler(UserAwareHandler):
         return bool(self.query.get('windows'))
 
     def get(self):
-        """Process GET request"""
+        """Process GET request."""
         user = self.user
 
         if user:
@@ -138,9 +102,31 @@ class SetupHandler(UserAwareHandler):
                 elif action == 'vpn_data':
                     return openvpn_data(terminal, windows=self.windows)
 
-                msg = 'Action "{}" is not implemented'.format(action)
+                msg = 'Action "{}" is not implemented.'.format(action)
                 return Error(msg, status=400)
 
-            return Error('Unauthorized', status=401)
+            return Error('Unauthorized.', status=401)
 
-        return Error('Invalid credentials', status=401)
+        return Error('Invalid credentials.', status=401)
+
+    def post(self):
+        """Handle POST requests."""
+        user = self.user
+
+        if user:
+            terminal = self.terminal
+
+            if user.authorize(terminal, setup=True):
+                try:
+                    serial_number = self.query['serial_number']
+                except KeyError:
+                    return Error('No serial number specified.')
+                else:
+                    terminal.serial_number = serial_number
+                    terminal.save()
+                    return OK('Set serial number to "{}".'.format(
+                        serial_number))
+
+            return Error('Unauthorized.', status=401)
+
+        return Error('Invalid credentials.', status=401)
