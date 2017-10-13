@@ -27,9 +27,7 @@ from sys import stderr
 
 from fancylog import Logger, LogLevel, TTYAnimation
 from syslib import Parallelization
-
-from homeinfo.terminals.filter import parse, PrintMissing
-from homeinfo.terminals.orm import Terminal
+from terminallib import parse, PrintMissing, Terminal
 
 from termgr.ctrl import TerminalsController
 

@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
+from terminallib import Terminal
 from wsgilib import Error, JSON, XML, RequestHandler
-from homeinfo.terminals.orm import Terminal
 
 from termgr.orm import User
 from termgr import dom

@@ -3,8 +3,8 @@
 from os.path import basename
 from peewee import DoesNotExist
 
+from terminallib import Terminal
 from wsgilib import Error, JSON, InternalServerError, Binary, RequestHandler
-from homeinfo.terminals.orm import Terminal
 
 from termgr.openvpn import OpenVPNPackager
 from termgr.orm import User

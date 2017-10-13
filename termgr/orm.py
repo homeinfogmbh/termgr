@@ -7,7 +7,7 @@ from argon2.exceptions import VerifyMismatchError
 
 from peeweeplus import MySQLDatabase
 from homeinfo.crm import Company
-from homeinfo.terminals.orm import Terminal
+from terminallib import Terminal
 
 from termgr.config import config
 

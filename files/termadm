@@ -38,9 +38,8 @@ from fancylog import LogLevel, Logger
 from syslib import run, evaluate
 
 from homeinfo.crm import Address, State
-from homeinfo.terminals.filter import parse, PrintMissing
-from homeinfo.terminals.orm import Class, Domain, OS, VPN, Connection, \
-    Location, Terminal
+from terminallib import parse, PrintMissing, Class, Domain, OS, VPN, \
+    Connection, Location, Terminal
 
 DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'

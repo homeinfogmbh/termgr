@@ -1,7 +1,7 @@
 """Remote terminal controller"""
 
 from fancylog import Logger, LogLevel
-from homeinfo.terminals.ctrl import RemoteController
+from terminallib import RemoteController
 
 
 __all__ = ['TerminalController']

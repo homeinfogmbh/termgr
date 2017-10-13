@@ -6,7 +6,7 @@ from tarfile import open as tarfile_open
 from tempfile import TemporaryFile, NamedTemporaryFile
 from zipfile import ZipFile
 
-from homeinfo.terminals.abc import TerminalAware
+from terminallib import TerminalAware
 
 __all__ = ['OpenVPNPackager']
 

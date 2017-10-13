@@ -5,8 +5,8 @@ from json import loads
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
-from homeinfo.terminals.orm import Terminal
 from peeweeplus import FieldValueError
+from terminallib import Terminal
 from wsgilib import Error, JSON, RestHandler
 
 
