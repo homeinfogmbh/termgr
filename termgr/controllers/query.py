@@ -1,32 +1,49 @@
-"""Terminal query web service"""
+"""Terminal query web service."""
 
 from datetime import datetime
 
 from terminallib import Terminal
-from wsgilib import Error, JSON, XML, RequestHandler
+from wsgilib import Error, JSON, XML
 
-from termgr.orm import User
 from termgr import dom
+from .abc import UserAwareHandler
 
 __all__ = ['QueryHandler']
 
 
-class QueryHandler(RequestHandler):
-    """Handles requests for the TerminalQuery"""
+def get_terminals(cid, user, scheduled=None, undeployed=False):
+    """List terminals of customer with CID."""
+
+    if cid is None:
+        terminals = Terminal
+    else:
+        terminals = Terminal.select().where(
+            (Terminal.customer == cid) &
+            (Terminal.testing == 0))
+
+    for terminal in terminals:
+        if terminal.testing:
+            continue
+
+        if scheduled is not None:
+            if terminal.scheduled is None:
+                continue
+            elif terminal.scheduled.date() != scheduled:
+                continue
+
+        if undeployed and terminal.deployed is not None:
+            continue
+
+        if user.authorize(terminal, read=True):
+            yield terminal
+
+
+class QueryHandler(UserAwareHandler):
+    """Handles requests for the TerminalQuery."""
 
     def get(self):
-        """Interpret query dictionary"""
-        user_name = self.query.get('user_name')
-
-        if not user_name:
-            raise Error('No user name specified', status=400) from None
-
-        passwd = self.query.get('passwd')
-
-        if not passwd:
-            raise Error('No password specified', status=400) from None
-
-        user = User.authenticate(user_name, passwd)
+        """Interpret query dictionary."""
+        user = self.user
 
         if user:
             cid_str = self.query.get('cid')
@@ -34,7 +51,7 @@ class QueryHandler(RequestHandler):
             try:
                 cid = int(cid_str)
             except ValueError:
-                raise Error('Not a customer ID: {}'.format(
+                raise Error('Not a customer ID: {}.'.format(
                     cid_str), status=400) from None
             except TypeError:
                 cid = None  # all customers
@@ -45,7 +62,7 @@ class QueryHandler(RequestHandler):
                 try:
                     scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
                 except ValueError:
-                    raise Error('Invalid ISO date: {}'.format(
+                    raise Error('Invalid ISO date: {}.'.format(
                         scheduled)) from None
                 else:
                     scheduled = scheduled.date()
@@ -56,9 +73,8 @@ class QueryHandler(RequestHandler):
             if json is None:
                 terminals = dom.terminals()
 
-                for terminal in self.terminals(
-                        cid, user, scheduled=scheduled,
-                        undeployed=undeployed):
+                for terminal in get_terminals(
+                        cid, user, scheduled=scheduled, undeployed=undeployed):
                     terminal_dom = dom.Terminal()
                     terminal_dom.tid = terminal.tid
                     terminal_dom.cid = terminal.customer.id
@@ -88,40 +104,14 @@ class QueryHandler(RequestHandler):
                 try:
                     indent = int(json)
                 except ValueError:
-                    raise Error('Invalid indentation;: {}'.format(json))
+                    raise Error('Invalid indentation;: {}.'.format(json))
 
             terminals = []
 
-            for terminal in self.terminals(
-                    cid, user, scheduled=scheduled,
-                    undeployed=undeployed):
+            for terminal in get_terminals(
+                    cid, user, scheduled=scheduled, undeployed=undeployed):
                 terminals.append(terminal.to_dict(short=True))
 
             return JSON(terminals, indent=indent)
 
-        raise Error('Invalid credentials', status=401) from None
-
-    def terminals(self, cid, user, scheduled=None, undeployed=False):
-        """List terminals of customer with CID"""
-        if cid is None:
-            terminals = Terminal
-        else:
-            terminals = Terminal.select().where(
-                (Terminal.customer == cid) &
-                (Terminal.testing == 0))
-
-        for terminal in terminals:
-            if terminal.testing:
-                continue
-
-            if scheduled is not None:
-                if terminal.scheduled is None:
-                    continue
-                elif terminal.scheduled.date() != scheduled:
-                    continue
-
-            if undeployed and terminal.deployed is not None:
-                continue
-
-            if user.authorize(terminal, read=True):
-                yield terminal
+        raise Error('Invalid credentials.', status=401) from None

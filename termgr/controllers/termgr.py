@@ -1,13 +1,11 @@
 """Web application for terminal management."""
 
-from json import loads
-
 from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from peeweeplus import FieldValueError
 from terminallib import Terminal
-from wsgilib import Error, JSON, RestHandler
+from wsgilib import Error, OK, JSON, RestHandler
 
 
 class TerminalHandler(RestHandler):
@@ -78,7 +76,7 @@ class TerminalHandler(RestHandler):
         except FieldValueError as field_value_error:
             return JSON(field_value_error.to_dict(), status=422)
         else:
-            return JSON(terminal.to_dict())
+            return OK()
 
 
 class TerminalManager(RestHandler):

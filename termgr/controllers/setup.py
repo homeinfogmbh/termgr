@@ -4,10 +4,10 @@ from os.path import basename
 from peewee import DoesNotExist
 
 from terminallib import Terminal
-from wsgilib import Error, JSON, InternalServerError, Binary, RequestHandler
+from wsgilib import Error, JSON, InternalServerError, Binary
 
 from termgr.openvpn import OpenVPNPackager
-from termgr.orm import User
+from .abc import UserAwareHandler
 
 __all__ = ['SetupHandler']
 
@@ -60,23 +60,8 @@ def openvpn_data(terminal, windows=False):
         return Binary(data, filename=filename)
 
 
-class SetupHandler(RequestHandler):
+class SetupHandler(UserAwareHandler):
     """Handles requests for the SetupController"""
-
-    @property
-    def user(self):
-        """Returns the user."""
-        user_name = self.query.get('user_name')
-
-        if not user_name:
-            raise Error('No user name specified', status=400) from None
-
-        passwd = self.query.get('passwd')
-
-        if not passwd:
-            raise Error('No password specified', status=400) from None
-
-        return User.authenticate(user_name, passwd)
 
     @property
     def client_version(self):
