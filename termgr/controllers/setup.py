@@ -110,7 +110,7 @@ class SetupHandler(TermgrHandler):
 
             if user.authorize(terminal, setup=True):
                 try:
-                    serial_number = self.query['serial_number']
+                    serial_number = self.data.text
                 except KeyError:
                     return Error('No serial number specified.')
                 else:
