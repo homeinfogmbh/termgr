@@ -126,7 +126,7 @@ class SetupHandler(TermgrHandler):
                         return OK('Set serial number to "{}".'.format(
                             serial_number))
 
-                return ACTION_NOT_IMPLEMENTED
+                return Error('Action not implemented: "{}".'.format(action))
 
             return NOT_AUTHORIZED
 
