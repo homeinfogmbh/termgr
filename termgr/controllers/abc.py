@@ -15,20 +15,26 @@ class TermgrHandler(RequestHandler):
     """User aware handler."""
 
     @property
-    def user(self):
-        """Returns the user."""
+    def user_name(self):
+        """Returns the respective user name."""
         try:
-            user_name = self.query['user_name']
+            return self.query['user_name']
         except KeyError:
             raise Error('No user name specified.', status=400) from None
 
+    @property
+    def passwd(self):
+        """Returns the specified password."""
         try:
-            passwd = self.query['passwd']
+            return self.query['passwd']
         except KeyError:
             raise Error('No password specified.', status=400) from None
 
+    @property
+    def user(self):
+        """Returns the user."""
         try:
-            return User.authenticate(user_name, passwd)
+            return User.authenticate(self.user_name, self.passwd)
         except AuthenticationError:
             raise Error('Invalid credentials.', status=401) from None
 
