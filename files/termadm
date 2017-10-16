@@ -129,7 +129,7 @@ def add_terminal(options, logger, reload):
     address_annotation = options['--address-annotation']
 
     if street:
-        addr = (street, house_number, zip_code)
+        addr = (street, house_number.rstrip(','), zip_code)
     else:
         addr = None
 
