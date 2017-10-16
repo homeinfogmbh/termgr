@@ -10,6 +10,11 @@ from .abc import TermgrHandler
 __all__ = ['SetupHandler']
 
 
+ACTION_NOT_IMPLEMENTED = Error('Action not implemented.', status=400)
+NOT_AUTHORIZED = Error('Unauthorized.', status=401)
+INVALID_CREDENTIALS = Error('Invalid credentials.', status=401)
+
+
 def legacy_location(terminal):
     """Returns terminal location data for legacy client versions."""
 
@@ -94,12 +99,11 @@ class SetupHandler(TermgrHandler):
                 elif action == 'vpn_data':
                     return openvpn_data(terminal, windows=self.windows)
 
-                msg = 'Action "{}" is not implemented.'.format(action)
-                return Error(msg, status=400)
+                return ACTION_NOT_IMPLEMENTED
 
-            return Error('Unauthorized.', status=401)
+            return NOT_AUTHORIZED
 
-        return Error('Invalid credentials.', status=401)
+        return INVALID_CREDENTIALS
 
     def post(self):
         """Handle POST requests."""
@@ -109,16 +113,21 @@ class SetupHandler(TermgrHandler):
             terminal = self.terminal
 
             if user.authorize(terminal, setup=True):
-                try:
-                    serial_number = self.data.text
-                except KeyError:
-                    return Error('No serial number specified.')
-                else:
-                    terminal.serial_number = serial_number
-                    terminal.save()
-                    return OK('Set serial number to "{}".'.format(
-                        serial_number))
+                action = self.action
 
-            return Error('Unauthorized.', status=401)
+                if action == 'serial_number':
+                    try:
+                        serial_number = self.data.text
+                    except KeyError:
+                        return Error('No serial number specified.')
+                    else:
+                        terminal.serial_number = serial_number
+                        terminal.save()
+                        return OK('Set serial number to "{}".'.format(
+                            serial_number))
 
-        return Error('Invalid credentials.', status=401)
+                return ACTION_NOT_IMPLEMENTED
+
+            return NOT_AUTHORIZED
+
+        return INVALID_CREDENTIALS
