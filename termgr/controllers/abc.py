@@ -88,3 +88,11 @@ class TermgrHandler(RequestHandler):
                 (Terminal.deleted >> None))
         except DoesNotExist:
             raise Error('No such terminal.', status=404) from None
+
+    @property
+    def action(self):
+        """Returns the requested action."""
+        try:
+            return self.query['action']
+        except KeyError:
+            raise Error('No action specified.', status=400) from None

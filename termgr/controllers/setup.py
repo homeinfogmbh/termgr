@@ -75,14 +75,6 @@ class SetupHandler(TermgrHandler):
                 raise Error('Invalid client version.', status=400) from None
 
     @property
-    def action(self):
-        """Returns the action."""
-        try:
-            return self.query['action']
-        except KeyError:
-            raise Error('No action specified.', status=400) from None
-
-    @property
     def windows(self):
         """Returns the windows format flag."""
         return bool(self.query.get('windows'))

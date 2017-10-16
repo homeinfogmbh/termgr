@@ -52,14 +52,6 @@ def list_terminals(user):
 class CheckHandler(TermgrHandler):
     """Handles requests to check terminals."""
 
-    @property
-    def action(self):
-        """Returns the requested action."""
-        try:
-            return self.query['action']
-        except KeyError:
-            raise Error('No action specified.', status=400) from None
-
     def get(self):
         """Handles GET requests."""
         action = self.action
