@@ -94,6 +94,8 @@ class SetupHandler(TermgrHandler):
             if user.authorize(terminal, setup=True):
                 action = self.action
 
+                if action == 'terminal_information':
+                    return JSON(terminal.to_dict())
                 if action == 'location':
                     return get_location(terminal, self.client_version)
                 elif action == 'vpn_data':
