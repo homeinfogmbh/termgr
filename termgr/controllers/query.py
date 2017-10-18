@@ -11,33 +11,6 @@ from .abc import TermgrHandler
 __all__ = ['QueryHandler']
 
 
-def get_terminals(cid, user, scheduled=None, undeployed=False):
-    """List terminals of customer with CID."""
-
-    if cid is None:
-        terminals = Terminal
-    else:
-        terminals = Terminal.select().where(
-            (Terminal.customer == cid) &
-            (Terminal.testing == 0))
-
-    for terminal in terminals:
-        if terminal.testing:
-            continue
-
-        if scheduled is not None:
-            if terminal.scheduled is None:
-                continue
-            elif terminal.scheduled.date() != scheduled:
-                continue
-
-        if undeployed and terminal.deployed is not None:
-            continue
-
-        if user.authorize(terminal, read=True):
-            yield terminal
-
-
 def xml_terminals(terminals):
     """Returns terminals as XML response."""
 
@@ -73,6 +46,66 @@ class QueryHandler(TermgrHandler):
     """Handles requests for the TerminalQuery."""
 
     @property
+    def cid(self):
+        """Returns the customer ID."""
+        try:
+            cid = self.query['cid']
+        except KeyError:
+            return None
+        else:
+            try:
+                return int(cid)
+            except ValueError:
+                raise Error('Invalid customer ID.', status=400) from None
+
+    @property
+    def scheduled(self):
+        """Returns the scheduled date."""
+        try:
+            scheduled = self.query['scheduled']
+        except KeyError:
+            return None
+        else:
+            try:
+                scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
+            except ValueError:
+                raise Error('Invalid ISO date: {}.'.format(
+                    scheduled)) from None
+            else:
+                return scheduled.date()
+
+    @property
+    def terminals(self):
+        """List terminals of customer with CID."""
+
+        cid = self.cid
+        scheduled = self.scheduled
+        undeployed = self.query.get('undeployed', False)
+
+        if cid is None:
+            terminals = Terminal
+        else:
+            terminals = Terminal.select().where(
+                (Terminal.customer == cid) &
+                (Terminal.testing == 0))
+
+        for terminal in terminals:
+            if terminal.testing:
+                continue
+
+            if scheduled is not None:
+                if terminal.scheduled is None:
+                    continue
+                elif terminal.scheduled.date() != scheduled:
+                    continue
+
+            if undeployed and terminal.deployed is not None:
+                continue
+
+            if self.user.authorize(terminal, read=True):
+                yield terminal
+
+    @property
     def json(self):
         """Returns the JSON indentation."""
         try:
@@ -86,39 +119,15 @@ class QueryHandler(TermgrHandler):
             try:
                 return int(json)
             except ValueError:
-                raise Error('Invalid indentation: {}.'.format(json))
+                raise Error('Invalid indentation: {}.'.format(json)) from None
 
     def get(self):
         """Interpret query dictionary."""
-        cid_str = self.query.get('cid')
-
-        try:
-            cid = int(cid_str)
-        except ValueError:
-            raise Error('Not a customer ID: {}.'.format(
-                cid_str), status=400) from None
-        except TypeError:
-            cid = None  # all customers
-
-        scheduled = self.query.get('scheduled')
-
-        if scheduled is not None:
-            try:
-                scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
-            except ValueError:
-                raise Error('Invalid ISO date: {}.'.format(
-                    scheduled)) from None
-            else:
-                scheduled = scheduled.date()
-
-        undeployed = self.query.get('undeployed', False)
-        terminals = get_terminals(
-            cid, self.user, scheduled=scheduled, undeployed=undeployed)
         json = self.json
 
         if json is False:
-            return xml_terminals(terminals)
+            return xml_terminals(self.terminals)
 
         return JSON(
-            [terminal.to_dict(short=True) for terminal in terminals],
+            [terminal.to_dict(short=True) for terminal in self.terminals],
             indent=json)
