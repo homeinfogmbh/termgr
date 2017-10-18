@@ -2,6 +2,6 @@
 """Terminal checking interface"""
 
 from wsgilib import WsgiApp
-from termgr.controllers.check import CheckHandler
+from termgr.wsgi.check import CheckHandler
 
 application = WsgiApp(CheckHandler, cors=True)

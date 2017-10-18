@@ -9,7 +9,7 @@ from peeweeplus import MySQLDatabase
 from homeinfo.crm import Company
 from terminallib import Terminal
 
-from termgr.config import config
+from termgr.config import CONFIG
 
 __all__ = [
     'AuthenticationError',
@@ -39,10 +39,10 @@ class TermgrModel(Model):
 
     class Meta:
         database = MySQLDatabase(
-            config['db']['db'],
-            host=config['db']['host'],
-            user=config['db']['user'],
-            passwd=config['db']['passwd'],
+            CONFIG['db']['db'],
+            host=CONFIG['db']['host'],
+            user=CONFIG['db']['user'],
+            passwd=CONFIG['db']['passwd'],
             closing=True)
         schema = database.database
 

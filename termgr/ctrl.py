@@ -1,142 +1,118 @@
-"""Remote terminal controller"""
+"""Remote terminal controller."""
 
-from fancylog import Logger, LogLevel
+from fancylog import Logger
 from terminallib import RemoteController
 
 
-__all__ = ['TerminalController']
+__all__ = ['TerminalsController', 'TerminalController']
 
 
-class TerminalsController():
-    """Processes several terminals in parallel"""
+REBOOT_OPTIONS = {
+    'ServerAliveInterval': 5,
+    'ServerAliveCountMax': 3}
+
+
+class TerminalsController:
+    """Processes several terminals in parallel."""
 
     def __init__(self, user=None):
-        """Sets terminals, user and logger"""
+        """Sets terminals, user and logger."""
         self.user = user
-        self.logger = Logger(self.__class__.__name__, level=LogLevel.NONE)
+        self.logger = Logger(self.__class__.__name__)
 
     def _controller(self, terminal):
-        """Returns a controller for the respective terminal"""
+        """Returns a controller for the respective terminal."""
         return TerminalController(terminal, user=self.user, logger=self.logger)
 
-    @property
-    def reboot(self):
-        """Reboots the terminal"""
-        def proxy(terminal):
-            return self._controller(terminal).reboot()
+    def reboot(self, terminal):
+        """Rboots a terminal."""
+        return self._controller(terminal).reboot()
 
-        return proxy
+    def cleanup(self, terminal):
+        """Cleans up package chache."""
+        return self._controller(terminal).cleanup()
 
-    @property
-    def cleanup(self):
-        """Cleans up package chache"""
-        def proxy(terminal):
-            return self._controller(terminal).cleanup()
+    def update(self, terminal):
+        """Updates packages."""
+        return self._controller(terminal).update()
 
-        return proxy
+    def stage(self, terminal):
+        """Stage packages."""
+        return self._controller(terminal).stage()
 
-    @property
-    def update(self):
-        """Updates packages"""
-        def proxy(terminal):
-            return self._controller(terminal).update()
+    def upgrade(self, terminal):
+        """Stage packages."""
+        return self._controller(terminal).upgrade()
 
-        return proxy
+    def unlock(self, terminal):
+        """Unlocks the package manager."""
+        return self._controller(terminal).unlock()
 
-    @property
-    def stage(self):
-        """Stage packages"""
-        def proxy(terminal):
-            return self._controller(terminal).stage()
-
-        return proxy
-
-    @property
-    def upgrade(self):
-        """Stage packages"""
-        def proxy(terminal):
-            return self._controller(terminal).upgrade()
-
-        return proxy
-
-    @property
-    def unlock(self):
-        """Unlocks the package manager"""
-        def proxy(terminal):
-            return self._controller(terminal).unlock()
-
-        return proxy
-
-    @property
-    def chkres(self):
-        """Checks the resolution"""
-        def proxy(terminal):
-            return self._controller(terminal).resolution
-
-        return proxy
+    def chkres(self, terminal):
+        """Checks the resolution."""
+        return self._controller(terminal).resolution
 
     def install(self, *pkgs, asexplicit=False):
-        """Installs software packages"""
-        def proxy(terminal):
+        """Installs software packages."""
+        def install(terminal):
+            """Proxies the package installation."""
             return self._controller(terminal).install(
                 *pkgs, asexplicit=asexplicit)
 
-        return proxy
+        return install
 
 
 class TerminalController(RemoteController):
-    """Does stuff on remote terminals"""
+    """Does stuff on remote terminals."""
 
     def __init__(self, terminal, user=None, logger=None):
-        """Sets the respective terminal and logger"""
+        """Sets the respective terminal and logger."""
         super().__init__(user or 'termgr', terminal, logger=logger)
 
     @property
     def resolution(self):
-        """Returns the display resolution"""
-        return self.execute('export DISPLAY=:0 \; xrandr | grep " connected"')
+        """Returns the display resolution."""
+        return self.execute('export DISPLAY=:0 \\; xrandr | grep " connected"')
 
     def sudo(self, cmd, *args):
-        """Execute a command with sudo"""
+        """Execute a command with sudo."""
         return self.execute('/usr/bin/sudo', cmd, *args)
 
     def pacman(self, *args):
-        """Issues a pacman command"""
+        """Issues a pacman command."""
         return self.sudo('/usr/bin/pacman', '--noconfirm', *args)
 
     def reboot(self):
-        """Reboots the terminal"""
-        with self.extra_options(
-                {'ServerAliveInterval': 5,
-                 'ServerAliveCountMax': 3}):
+        """Reboots the terminal."""
+        with self.extra_options(REBOOT_OPTIONS):
             return self.sudo('/usr/bin/reboot')
 
     def cleanup(self):
-        """Cleanup local package cache"""
+        """Cleanup local package cache."""
         return self.pacman('-Sc')
 
     def update(self):
-        """Update package databases"""
+        """Update package databases."""
         return self.pacman('-Sy')
 
     def stage(self):
-        """Stage current packages"""
+        """Stage current packages."""
         return self.pacman('-Suw')
 
     def upgrade(self):
-        """Performs a system upgrade"""
+        """Performs a system upgrade."""
         return self.pacman('-Su')
 
     def install(self, *pkgs, asexplicit=False):
-        """Installs software packages"""
+        """Installs software packages."""
         if asexplicit:
             return self.pacman('-S', '--asexplicit', *pkgs)
-        else:
-            return self.pacman('-S', *pkgs)
+
+        return self.pacman('-S', *pkgs)
 
     def remove(self, *pkgs, cascade=False, nosave=False,
                recursive=False, unneeded=False):
-        """Removes packages"""
+        """Removes packages."""
         options = []
 
         if cascade:
@@ -157,9 +133,9 @@ class TerminalController(RemoteController):
         return self.pacman(options, '-R', *options)
 
     def unlock(self):
-        """Removes the pacman lockfile"""
+        """Removes the pacman lockfile."""
         if self.execute('/usr/bin/pidof', 'pacman'):
-            self.logger.error('Pacman is still running on {}'.format(
+            self.logger.error('Pacman is still running on {}.'.format(
                 self.terminal))
         else:
             return self.sudo('/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')

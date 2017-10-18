@@ -2,6 +2,6 @@
 """Terminal query interface"""
 
 from wsgilib import WsgiApp
-from termgr.controllers.query import QueryHandler
+from termgr.wsgi.query import QueryHandler
 
 application = WsgiApp(QueryHandler, cors=True)
