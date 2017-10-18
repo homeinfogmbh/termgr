@@ -8,35 +8,37 @@ from .abc import TermgrHandler
 __all__ = ['CheckHandler']
 
 
-def list_terminals(user):
-    """List customer terminals."""
+def group_terminals(terminals):
+    """Groups the respective terminals by customers."""
 
-    # Group terminals by customers.
-    customer_terminals = {}
+    grouped = {}
 
-    for terminal in Terminal:
-        if user.authorize(terminal, read=True):
-            try:
-                _, terminals = customer_terminals[terminal.customer.id]
-            except KeyError:
-                customer_terminals[terminal.customer.id] = (
-                    terminal.customer, [terminal])
-            else:
-                terminals.append(terminal)
+    for terminal in terminals:
+        try:
+            _, customer_terminals = grouped[terminal.customer.id]
+        except KeyError:
+            grouped[terminal.customer.id] = (terminal.customer, [terminal])
+        else:
+            customer_terminals.append(terminal)
 
-    # Build JSON dict from grouped terminals.
+    return grouped
+
+
+def list_terminals(grouped_terminals):
+    """Lists customer terminals."""
+
     customers = []
 
-    for customer, terminals in customer_terminals.items():
-        terminals_list = []
+    for customer, terminals in grouped_terminals.items():
+        customer_terminals = []
 
         for terminal in terminals:
-            terminals_list.append({
+            customer_terminals.append({
                 'id': terminal.tid, 'location': repr(terminal.location)})
 
         customers.append({
             'id': customer.id, 'name': customer.name,
-            'terminals': terminals_list})
+            'terminals': customer_terminals})
 
     return JSON({'customers': customers})
 
@@ -44,12 +46,19 @@ def list_terminals(user):
 class CheckHandler(TermgrHandler):
     """Handles requests to check terminals."""
 
+    @property
+    def terminals(self):
+        """Yields terminals readable by the respective user."""
+        for terminal in Terminal:
+            if self.user.authorize(terminal, read=True):
+                yield terminal
+
     def get(self):
         """Handles GET requests."""
         action = self.action
 
         if action == 'list':
-            return list_terminals(self.user)
+            return list_terminals(group_terminals(self.terminals))
         elif action == 'identify':
             terminal = self.terminal
 
