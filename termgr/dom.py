@@ -1,7 +1,7 @@
 # ./dom.py
 # -*- coding: utf-8 -*-
 # PyXB bindings for NM:e0f2b2b6088681bd91db874b9eaa9b60ccb9bc46
-# Generated 2017-09-08 11:44:53.068316 by PyXB version 1.2.6-DEV using Python 3.6.2.final.0
+# Generated 2017-10-18 10:03:27.994297 by PyXB version 1.2.6-DEV using Python 3.6.2.final.0
 # Namespace http://xml.homeinfo.de/schema/terminallib
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ import pyxb.utils.domutils
 import sys
 import pyxb.utils.six as _six
 # Unique identifier for bindings created at the same time
-_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:5d492f96-947a-11e7-988b-7427eaa9df7d')
+_GenerationUID = pyxb.utils.utility.UniqueIdentifier('urn:uuid:d2d33cfa-b3da-11e7-9f72-7427eaa9df7d')
 
 # Version of PyXB used to generate the bindings
 _PyXBVersion = '1.2.6-DEV'
@@ -79,7 +79,7 @@ def CreateFromDOM (node, default_namespace=None):
 # Complex type {http://xml.homeinfo.de/schema/terminallib}TerminalList with content type ELEMENT_ONLY
 class TerminalList (pyxb.binding.basis.complexTypeDefinition):
     """
-                A list of terminal short info
+                A list of terminal short info.
             """
     _TypeDefinition = None
     _ContentTypeTag = pyxb.binding.basis.complexTypeDefinition._CT_ELEMENT_ONLY
@@ -109,7 +109,7 @@ Namespace.addCategoryObject('typeBinding', 'TerminalList', TerminalList)
 # Complex type {http://xml.homeinfo.de/schema/terminallib}Terminal with content type ELEMENT_ONLY
 class Terminal (pyxb.binding.basis.complexTypeDefinition):
     """
-                Basic terminal information
+                Basic terminal information.
             """
     _TypeDefinition = None
     _ContentTypeTag = pyxb.binding.basis.complexTypeDefinition._CT_ELEMENT_ONLY
@@ -120,27 +120,25 @@ class Terminal (pyxb.binding.basis.complexTypeDefinition):
     _AttributeMap = {}
     # Base type is pyxb.binding.datatypes.anyType
     
+    # Element tid uses Python identifier tid
+    __tid = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'tid'), 'tid', '__httpxml_homeinfo_deschematerminallib_Terminal_tid', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12), )
+
+    
+    tid = property(__tid.value, __tid.set, None, '\n                        The terminal identifier.\n                    ')
+
+    
+    # Element cid uses Python identifier cid
+    __cid = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'cid'), 'cid', '__httpxml_homeinfo_deschematerminallib_Terminal_cid', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 36, 12), )
+
+    
+    cid = property(__cid.value, __cid.set, None, '\n                        The customer identifier.\n                    ')
+
+    
     # Element address uses Python identifier address
-    __address = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'address'), 'address', '__httpxml_homeinfo_deschematerminallib_Terminal_address', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12), )
+    __address = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'address'), 'address', '__httpxml_homeinfo_deschematerminallib_Terminal_address', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 43, 12), )
 
     
-    address = property(__address.value, __address.set, None, "\n                        The terminal's location\n                    ")
-
-    
-    # Attribute tid uses Python identifier tid
-    __tid = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'tid'), 'tid', '__httpxml_homeinfo_deschematerminallib_Terminal_tid', pyxb.binding.datatypes.integer, required=True)
-    __tid._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 37, 8)
-    __tid._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 37, 8)
-    
-    tid = property(__tid.value, __tid.set, None, '\n                    The terminal identifier\n                ')
-
-    
-    # Attribute cid uses Python identifier cid
-    __cid = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'cid'), 'cid', '__httpxml_homeinfo_deschematerminallib_Terminal_cid', pyxb.binding.datatypes.integer, required=True)
-    __cid._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 44, 8)
-    __cid._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 44, 8)
-    
-    cid = property(__cid.value, __cid.set, None, '\n                    The customer identifier\n                ')
+    address = property(__address.value, __address.set, None, "\n                        The terminal's location.\n                    ")
 
     
     # Attribute scheduled uses Python identifier scheduled
@@ -164,75 +162,88 @@ class Terminal (pyxb.binding.basis.complexTypeDefinition):
     __annotation._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 65, 8)
     __annotation._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 65, 8)
     
-    annotation = property(__annotation.value, __annotation.set, None, '\n                   An optional annotation\n                ')
+    annotation = property(__annotation.value, __annotation.set, None, '\n                   An optional annotation.\n                ')
+
+    
+    # Attribute serial_number uses Python identifier serial_number
+    __serial_number = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'serial_number'), 'serial_number', '__httpxml_homeinfo_deschematerminallib_Terminal_serial_number', pyxb.binding.datatypes.string)
+    __serial_number._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 72, 8)
+    __serial_number._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 72, 8)
+    
+    serial_number = property(__serial_number.value, __serial_number.set, None, '\n                   An optional serial number of the respective device.\n                ')
 
     _ElementMap.update({
+        __tid.name() : __tid,
+        __cid.name() : __cid,
         __address.name() : __address
     })
     _AttributeMap.update({
-        __tid.name() : __tid,
-        __cid.name() : __cid,
         __scheduled.name() : __scheduled,
         __deployed.name() : __deployed,
-        __annotation.name() : __annotation
+        __annotation.name() : __annotation,
+        __serial_number.name() : __serial_number
     })
 _module_typeBindings.Terminal = Terminal
 Namespace.addCategoryObject('typeBinding', 'Terminal', Terminal)
 
 
-# Complex type {http://xml.homeinfo.de/schema/terminallib}Address with content type EMPTY
+# Complex type {http://xml.homeinfo.de/schema/terminallib}Address with content type ELEMENT_ONLY
 class Address (pyxb.binding.basis.complexTypeDefinition):
     """
-                Terminal address
+                A Terminal's address.
             """
     _TypeDefinition = None
-    _ContentTypeTag = pyxb.binding.basis.complexTypeDefinition._CT_EMPTY
+    _ContentTypeTag = pyxb.binding.basis.complexTypeDefinition._CT_ELEMENT_ONLY
     _Abstract = False
     _ExpandedName = pyxb.namespace.ExpandedName(Namespace, 'Address')
-    _XSDLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 75, 4)
+    _XSDLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 82, 4)
     _ElementMap = {}
     _AttributeMap = {}
     # Base type is pyxb.binding.datatypes.anyType
     
-    # Attribute street uses Python identifier street
-    __street = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'street'), 'street', '__httpxml_homeinfo_deschematerminallib_Address_street', pyxb.binding.datatypes.string)
-    __street._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 81, 8)
-    __street._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 81, 8)
+    # Element street uses Python identifier street
+    __street = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'street'), 'street', '__httpxml_homeinfo_deschematerminallib_Address_street', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 89, 12), )
+
     
     street = property(__street.value, __street.set, None, None)
 
     
-    # Attribute house_number uses Python identifier house_number
-    __house_number = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'house_number'), 'house_number', '__httpxml_homeinfo_deschematerminallib_Address_house_number', pyxb.binding.datatypes.string)
-    __house_number._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 82, 8)
-    __house_number._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 82, 8)
+    # Element house_number uses Python identifier house_number
+    __house_number = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'house_number'), 'house_number', '__httpxml_homeinfo_deschematerminallib_Address_house_number', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 90, 12), )
+
     
     house_number = property(__house_number.value, __house_number.set, None, None)
 
     
-    # Attribute city uses Python identifier city
-    __city = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'city'), 'city', '__httpxml_homeinfo_deschematerminallib_Address_city', pyxb.binding.datatypes.string)
-    __city._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 83, 8)
-    __city._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 83, 8)
+    # Element city uses Python identifier city
+    __city = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'city'), 'city', '__httpxml_homeinfo_deschematerminallib_Address_city', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 91, 12), )
+
     
     city = property(__city.value, __city.set, None, None)
 
     
-    # Attribute zip_code uses Python identifier zip_code
-    __zip_code = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'zip_code'), 'zip_code', '__httpxml_homeinfo_deschematerminallib_Address_zip_code', pyxb.binding.datatypes.string)
-    __zip_code._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 84, 8)
-    __zip_code._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 84, 8)
+    # Element zip_code uses Python identifier zip_code
+    __zip_code = pyxb.binding.content.ElementDeclaration(pyxb.namespace.ExpandedName(None, 'zip_code'), 'zip_code', '__httpxml_homeinfo_deschematerminallib_Address_zip_code', False, pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 92, 12), )
+
     
     zip_code = property(__zip_code.value, __zip_code.set, None, None)
 
+    
+    # Attribute annotation uses Python identifier annotation
+    __annotation = pyxb.binding.content.AttributeUse(pyxb.namespace.ExpandedName(None, 'annotation'), 'annotation', '__httpxml_homeinfo_deschematerminallib_Address_annotation', pyxb.binding.datatypes.string)
+    __annotation._DeclarationLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 94, 8)
+    __annotation._UseLocation = pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 94, 8)
+    
+    annotation = property(__annotation.value, __annotation.set, None, '\n                   An optional annotation.\n                ')
+
     _ElementMap.update({
-        
-    })
-    _AttributeMap.update({
         __street.name() : __street,
         __house_number.name() : __house_number,
         __city.name() : __city,
         __zip_code.name() : __zip_code
+    })
+    _AttributeMap.update({
+        __annotation.name() : __annotation
     })
 _module_typeBindings.Address = Address
 Namespace.addCategoryObject('typeBinding', 'Address', Address)
@@ -270,7 +281,11 @@ TerminalList._Automaton = _BuildAutomaton()
 
 
 
-Terminal._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'address'), Address, scope=Terminal, documentation="\n                        The terminal's location\n                    ", location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12)))
+Terminal._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'tid'), pyxb.binding.datatypes.integer, scope=Terminal, documentation='\n                        The terminal identifier.\n                    ', location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12)))
+
+Terminal._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'cid'), pyxb.binding.datatypes.integer, scope=Terminal, documentation='\n                        The customer identifier.\n                    ', location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 36, 12)))
+
+Terminal._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'address'), Address, scope=Terminal, documentation="\n                        The terminal's location.\n                    ", location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 43, 12)))
 
 def _BuildAutomaton_ ():
     # Remove this helper function from the namespace after it is invoked
@@ -279,18 +294,86 @@ def _BuildAutomaton_ ():
     import pyxb.utils.fac as fac
 
     counters = set()
-    cc_0 = fac.CounterCondition(min=0, max=1, metadata=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12))
+    cc_0 = fac.CounterCondition(min=0, max=1, metadata=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 43, 12))
     counters.add(cc_0)
     states = []
-    final_update = set()
-    final_update.add(fac.UpdateInstruction(cc_0, False))
-    symbol = pyxb.binding.content.ElementUse(Terminal._UseForTag(pyxb.namespace.ExpandedName(None, 'address')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12))
+    final_update = None
+    symbol = pyxb.binding.content.ElementUse(Terminal._UseForTag(pyxb.namespace.ExpandedName(None, 'tid')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 29, 12))
     st_0 = fac.State(symbol, is_initial=True, final_update=final_update, is_unordered_catenation=False)
     states.append(st_0)
+    final_update = set()
+    symbol = pyxb.binding.content.ElementUse(Terminal._UseForTag(pyxb.namespace.ExpandedName(None, 'cid')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 36, 12))
+    st_1 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
+    states.append(st_1)
+    final_update = set()
+    final_update.add(fac.UpdateInstruction(cc_0, False))
+    symbol = pyxb.binding.content.ElementUse(Terminal._UseForTag(pyxb.namespace.ExpandedName(None, 'address')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 43, 12))
+    st_2 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
+    states.append(st_2)
     transitions = []
-    transitions.append(fac.Transition(st_0, [
-        fac.UpdateInstruction(cc_0, True) ]))
+    transitions.append(fac.Transition(st_1, [
+         ]))
     st_0._set_transitionSet(transitions)
-    return fac.Automaton(states, counters, True, containing_state=None)
+    transitions = []
+    transitions.append(fac.Transition(st_2, [
+         ]))
+    st_1._set_transitionSet(transitions)
+    transitions = []
+    transitions.append(fac.Transition(st_2, [
+        fac.UpdateInstruction(cc_0, True) ]))
+    st_2._set_transitionSet(transitions)
+    return fac.Automaton(states, counters, False, containing_state=None)
 Terminal._Automaton = _BuildAutomaton_()
+
+
+
+
+Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'street'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 89, 12)))
+
+Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'house_number'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 90, 12)))
+
+Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'city'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 91, 12)))
+
+Address._AddElement(pyxb.binding.basis.element(pyxb.namespace.ExpandedName(None, 'zip_code'), pyxb.binding.datatypes.string, scope=Address, location=pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 92, 12)))
+
+def _BuildAutomaton_2 ():
+    # Remove this helper function from the namespace after it is invoked
+    global _BuildAutomaton_2
+    del _BuildAutomaton_2
+    import pyxb.utils.fac as fac
+
+    counters = set()
+    states = []
+    final_update = None
+    symbol = pyxb.binding.content.ElementUse(Address._UseForTag(pyxb.namespace.ExpandedName(None, 'street')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 89, 12))
+    st_0 = fac.State(symbol, is_initial=True, final_update=final_update, is_unordered_catenation=False)
+    states.append(st_0)
+    final_update = None
+    symbol = pyxb.binding.content.ElementUse(Address._UseForTag(pyxb.namespace.ExpandedName(None, 'house_number')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 90, 12))
+    st_1 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
+    states.append(st_1)
+    final_update = None
+    symbol = pyxb.binding.content.ElementUse(Address._UseForTag(pyxb.namespace.ExpandedName(None, 'city')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 91, 12))
+    st_2 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
+    states.append(st_2)
+    final_update = set()
+    symbol = pyxb.binding.content.ElementUse(Address._UseForTag(pyxb.namespace.ExpandedName(None, 'zip_code')), pyxb.utils.utility.Location('/home/neumann/Projects/termgr/doc/terminals.xsd', 92, 12))
+    st_3 = fac.State(symbol, is_initial=False, final_update=final_update, is_unordered_catenation=False)
+    states.append(st_3)
+    transitions = []
+    transitions.append(fac.Transition(st_1, [
+         ]))
+    st_0._set_transitionSet(transitions)
+    transitions = []
+    transitions.append(fac.Transition(st_2, [
+         ]))
+    st_1._set_transitionSet(transitions)
+    transitions = []
+    transitions.append(fac.Transition(st_3, [
+         ]))
+    st_2._set_transitionSet(transitions)
+    transitions = []
+    st_3._set_transitionSet(transitions)
+    return fac.Automaton(states, counters, False, containing_state=None)
+Address._Automaton = _BuildAutomaton_2()
 

@@ -54,11 +54,11 @@ def xml_terminals(cid, user, scheduled, undeployed):
         terminal_dom.annotation = terminal.annotation
 
         if terminal.location:
-            terminal_dom.annotation = terminal.location.annotation
+            address_dom = dom.Address()
+            address_dom.annotation = terminal.location.annotation
 
             if terminal.location.address:
                 address = terminal.location.address
-                address_dom = dom.Address()
                 address_dom.street = address.street
                 address_dom.house_number = address.house_number
                 address_dom.zip_code = address.zip_code

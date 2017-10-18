@@ -10,7 +10,7 @@
     <xs:complexType name="TerminalList">
         <xs:annotation>
             <xs:documentation xml:lang="en">
-                A list of terminal short info
+                A list of terminal short info.
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
@@ -22,32 +22,32 @@
     <xs:complexType name="Terminal">
         <xs:annotation>
             <xs:documentation xml:lang="en">
-                Basic terminal information
+                Basic terminal information.
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
+            <xs:element name="tid" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">
+                        The terminal identifier.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="cid" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">
+                        The customer identifier.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element name="address" type="Address" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
-                        The terminal's location
+                        The terminal's location.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
-        <xs:attribute name="tid" type="xs:integer" use="required">
-            <xs:annotation>
-                <xs:documentation xml:lang="en">
-                    The terminal identifier
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="cid" type="xs:integer" use="required">
-            <xs:annotation>
-                <xs:documentation xml:lang="en">
-                    The customer identifier
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
         <xs:attribute name="scheduled" type="xs:dateTime">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
@@ -65,7 +65,14 @@
         <xs:attribute name="annotation" type="xs:string">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
-                   An optional annotation
+                   An optional annotation.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="serial_number" type="xs:string">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                   An optional serial number of the respective device.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -75,12 +82,21 @@
     <xs:complexType name="Address">
         <xs:annotation>
             <xs:documentation xml:lang="en">
-                Terminal address
+                A Terminal's address.
             </xs:documentation>
         </xs:annotation>
-        <xs:attribute name="street" type="xs:string"/>
-        <xs:attribute name="house_number" type="xs:string"/>
-        <xs:attribute name="city" type="xs:string"/>
-        <xs:attribute name="zip_code" type="xs:string"/>
+        <xs:sequence>
+            <xs:element name="street" type="xs:string"/>
+            <xs:element name="house_number" type="xs:string"/>
+            <xs:element name="city" type="xs:string"/>
+            <xs:element name="zip_code" type="xs:string"/>
+        </xs:sequence>
+        <xs:attribute name="annotation" type="xs:string">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                   An optional annotation.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 </xs:schema>
