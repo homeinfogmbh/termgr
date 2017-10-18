@@ -61,7 +61,8 @@ def xml_terminals(terminals):
                 address_dom.house_number = address.house_number
                 address_dom.zip_code = address.zip_code
                 address_dom.city = address.city
-                terminal_dom.address = address_dom
+
+            terminal_dom.address = address_dom
 
         terminals_dom.terminal.append(terminal_dom)
 
