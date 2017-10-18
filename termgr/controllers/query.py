@@ -38,14 +38,12 @@ def get_terminals(cid, user, scheduled=None, undeployed=False):
             yield terminal
 
 
-def xml_terminals(cid, user, scheduled, undeployed):
+def xml_terminals(terminals):
     """Returns terminals as XML response."""
 
-    terminals = dom.terminals()
+    terminals_dom = dom.terminals()
 
-    for terminal in get_terminals(
-            cid, user, scheduled=scheduled,
-            undeployed=undeployed):
+    for terminal in terminals:
         terminal_dom = dom.Terminal()
         terminal_dom.tid = terminal.tid
         terminal_dom.cid = terminal.customer.id
@@ -65,9 +63,9 @@ def xml_terminals(cid, user, scheduled, undeployed):
                 address_dom.city = address.city
                 terminal_dom.address = address_dom
 
-        terminals.terminal.append(terminal_dom)
+        terminals_dom.terminal.append(terminal_dom)
 
-    return XML(terminals)
+    return XML(terminals_dom)
 
 
 class QueryHandler(TermgrHandler):
@@ -113,15 +111,13 @@ class QueryHandler(TermgrHandler):
                 scheduled = scheduled.date()
 
         undeployed = self.query.get('undeployed', False)
+        terminals = get_terminals(
+            cid, self.user, scheduled=scheduled, undeployed=undeployed)
         json = self.json
 
         if json is False:
-            return xml_terminals(cid, self.user, scheduled, undeployed)
+            return xml_terminals(terminals)
 
-        terminals = []
-
-        for terminal in get_terminals(
-                cid, self.user, scheduled=scheduled, undeployed=undeployed):
-            terminals.append(terminal.to_dict(short=True))
-
-        return JSON(terminals, indent=json)
+        return JSON(
+            [terminal.to_dict(short=True) for terminal in terminals],
+            indent=json)
