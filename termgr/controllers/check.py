@@ -11,42 +11,34 @@ __all__ = ['CheckHandler']
 def list_terminals(user):
     """List customer terminals."""
 
-    # Group terminals to customers
-    customers = {}
+    # Group terminals by customers.
+    customer_terminals = {}
 
     for terminal in Terminal:
         if user.authorize(terminal, read=True):
             try:
-                _, terminals = customers[terminal.customer.id]
+                _, terminals = customer_terminals[terminal.customer.id]
             except KeyError:
-                customer, terminals = (terminal.customer, [terminal])
-                customers[terminal.customer.id] = (customer, terminals)
+                customer_terminals[terminal.customer.id] = (
+                    terminal.customer, [terminal])
             else:
                 terminals.append(terminal)
 
-    # Build JSON dict from grouped terminals
-    customers_json = []
-    json = {'customers': customers_json}
+    # Build JSON dict from grouped terminals.
+    customers = []
 
-    for cid in customers:
-        customer, terminals = customers[cid]
-        terminals_json = []
+    for customer, terminals in customer_terminals.items():
+        terminals_list = []
 
         for terminal in terminals:
-            terminal_json = {
-                'id': terminal.tid,
-                'location': repr(terminal.location)}
+            terminals_list.append({
+                'id': terminal.tid, 'location': repr(terminal.location)})
 
-            terminals_json.append(terminal_json)
+        customers.append({
+            'id': customer.id, 'name': customer.name,
+            'terminals': terminals_list})
 
-        customer_json = {
-            'id': customer.id,
-            'name': customer.name,
-            'terminals': terminals_json}
-
-        customers_json.append(customer_json)
-
-    return JSON(json)
+    return JSON({'customers': customers})
 
 
 class CheckHandler(TermgrHandler):
