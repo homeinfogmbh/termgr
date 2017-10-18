@@ -11,7 +11,7 @@ from .abc import TermgrHandler
 __all__ = ['QueryHandler']
 
 
-def xml_terminals(terminals):
+def terminals_to_dom(terminals):
     """Returns terminals as XML response."""
 
     terminals_dom = dom.terminals()
@@ -52,11 +52,11 @@ class QueryHandler(TermgrHandler):
             cid = self.query['cid']
         except KeyError:
             return None
-        else:
-            try:
-                return int(cid)
-            except ValueError:
-                raise Error('Invalid customer ID.', status=400) from None
+
+        try:
+            return int(cid)
+        except ValueError:
+            raise Error('Invalid customer ID.', status=400) from None
 
     @property
     def scheduled(self):
@@ -65,14 +65,13 @@ class QueryHandler(TermgrHandler):
             scheduled = self.query['scheduled']
         except KeyError:
             return None
-        else:
-            try:
-                scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
-            except ValueError:
-                raise Error('Invalid ISO date: {}.'.format(
-                    scheduled)) from None
-            else:
-                return scheduled.date()
+
+        try:
+            scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
+        except ValueError:
+            raise Error('Invalid ISO date: {}.'.format(scheduled)) from None
+
+        return scheduled.date()
 
     @property
     def terminals(self):
@@ -112,21 +111,21 @@ class QueryHandler(TermgrHandler):
             json = self.query['json']
         except KeyError:
             return False
-        else:
-            if json is True:
-                return None
 
-            try:
-                return int(json)
-            except ValueError:
-                raise Error('Invalid indentation: {}.'.format(json)) from None
+        if json is True:
+            return None
+
+        try:
+            return int(json)
+        except ValueError:
+            raise Error('Invalid indentation: {}.'.format(json)) from None
 
     def get(self):
         """Interpret query dictionary."""
         json = self.json
 
         if json is False:
-            return xml_terminals(self.terminals)
+            return terminals_to_dom(self.terminals)
 
         return JSON(
             [terminal.to_dict(short=True) for terminal in self.terminals],
