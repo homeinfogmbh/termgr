@@ -1,5 +1,7 @@
 """Terminal checking web service."""
 
+from collections import defaultdict
+
 from terminallib import Terminal, RemoteController
 from wsgilib import Error, InternalServerError, JSON, OK
 
@@ -11,15 +13,10 @@ __all__ = ['CheckHandler']
 def group_terminals(terminals):
     """Groups the respective terminals by customers."""
 
-    grouped = {}
+    grouped = defaultdict(list)
 
     for terminal in terminals:
-        try:
-            _, customer_terminals = grouped[terminal.customer.id]
-        except KeyError:
-            grouped[terminal.customer.id] = (terminal.customer, [terminal])
-        else:
-            customer_terminals.append(terminal)
+        grouped[terminal.customer].append(terminal)
 
     return grouped
 
@@ -30,15 +27,12 @@ def list_terminals(grouped_terminals):
     customers = []
 
     for customer, terminals in grouped_terminals.items():
-        customer_terminals = []
-
-        for terminal in terminals:
-            customer_terminals.append({
-                'id': terminal.tid, 'location': repr(terminal.location)})
-
         customers.append({
             'id': customer.id, 'name': customer.name,
-            'terminals': customer_terminals})
+            'terminals': [{
+                'id': terminal.tid,
+                'location': repr(terminal.location)}
+                          for terminal in terminals]})
 
     return JSON({'customers': customers})
 
