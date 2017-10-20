@@ -21,20 +21,16 @@ def group_terminals(terminals):
     return grouped
 
 
-def list_terminals(grouped_terminals):
-    """Lists customer terminals."""
+def dict_terminals(grouped_terminals):
+    """Converts grouped terminals into JSON compliant dictionaries."""
 
-    customers = []
-
-    for customer, terminals in grouped_terminals.items():
-        customers.append({
-            'id': customer.id, 'name': customer.name,
-            'terminals': [{
-                'id': terminal.tid,
-                'location': repr(terminal.location)}
-                          for terminal in terminals]})
-
-    return JSON({'customers': customers})
+    return {'customers': [{
+        'id': customer.id, 'name': customer.name,
+        'terminals': [{
+            'id': terminal.tid,
+            'location': repr(terminal.location)}
+            for terminal in terminals]}
+        for customer, terminals in grouped_terminals.items()]}
 
 
 class CheckHandler(TermgrHandler):
@@ -52,7 +48,7 @@ class CheckHandler(TermgrHandler):
         action = self.action
 
         if action == 'list':
-            return list_terminals(group_terminals(self.terminals))
+            return JSON(dict_terminals(group_terminals(self.terminals)))
         elif action == 'identify':
             terminal = self.terminal
 
