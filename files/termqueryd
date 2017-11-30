@@ -1,0 +1,11 @@
+#! /usr/bin/env python3
+"""Terminal querying interface"""
+
+from termgr.config import CONFIG
+from termgr.wsgi.query import APPLICATION
+
+
+if __name__ == '__main__':
+    HOST = CONFIG['query']['host']
+    PORT = int(CONFIG['query']['port'])
+    APPLICATION.run(host=HOST, port=PORT)

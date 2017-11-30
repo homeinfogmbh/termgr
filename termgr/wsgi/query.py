@@ -2,13 +2,16 @@
 
 from datetime import datetime
 
+from flask import request, jsonify, Response, Flask
 from terminallib import Terminal
-from wsgilib import Error, JSON, XML
 
 from termgr import dom
-from .abc import TermgrHandler
+from termgr.orm import AuthenticationError, User
 
-__all__ = ['QueryHandler']
+__all__ = ['APPLICATION']
+
+
+APPLICATION = Flask('termquery')
 
 
 def terminals_to_dom(terminals):
@@ -39,94 +42,67 @@ def terminals_to_dom(terminals):
 
         terminals_dom.terminal.append(terminal_dom)
 
-    return XML(terminals_dom)
+    return terminals_dom
 
 
-class QueryHandler(TermgrHandler):
-    """Handles requests for the TerminalQuery."""
+def get_scheduled():
+    """Returns the scheduled date."""
+    try:
+        scheduled = request.args['scheduled']
+    except KeyError:
+        return None
 
-    @property
-    def cid(self):
-        """Returns the customer ID."""
-        try:
-            cid = self.query['cid']
-        except KeyError:
-            return None
+    try:
+        scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
+    except ValueError:
+        raise ValueError('Invalid ISO date: {}.'.format(scheduled)) from None
 
-        try:
-            return int(cid)
-        except ValueError:
-            raise Error('Invalid customer ID.', status=400) from None
+    return scheduled.date()
 
-    @property
-    def scheduled(self):
-        """Returns the scheduled date."""
-        try:
-            scheduled = self.query['scheduled']
-        except KeyError:
-            return None
 
-        try:
-            scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
-        except ValueError:
-            raise Error('Invalid ISO date: {}.'.format(scheduled)) from None
+def get_terminals(user):
+    """List terminals of customer with CID."""
 
-        return scheduled.date()
+    scheduled = get_scheduled()
+    undeployed = request.args.get('undeployed', False)
+    cid = request.args.query['cid']
 
-    @property
-    def terminals(self):
-        """List terminals of customer with CID."""
+    if cid is None:
+        terminals = Terminal
+    else:
+        terminals = Terminal.select().where(
+            (Terminal.customer == cid) & (Terminal.testing == 0))
 
-        cid = self.cid
-        scheduled = self.scheduled
-        undeployed = self.query.get('undeployed', False)
+    for terminal in terminals:
+        if terminal.testing:
+            continue
 
-        if cid is None:
-            terminals = Terminal
-        else:
-            terminals = Terminal.select().where(
-                (Terminal.customer == cid) &
-                (Terminal.testing == 0))
-
-        for terminal in terminals:
-            if terminal.testing:
+        if scheduled is not None:
+            if terminal.scheduled is None:
+                continue
+            elif terminal.scheduled.date() != scheduled:
                 continue
 
-            if scheduled is not None:
-                if terminal.scheduled is None:
-                    continue
-                elif terminal.scheduled.date() != scheduled:
-                    continue
+        if undeployed and terminal.deployed is not None:
+            continue
 
-            if undeployed and terminal.deployed is not None:
-                continue
+        if user.authorize(terminal, read=True):
+            yield terminal
 
-            if self.user.authorize(terminal, read=True):
-                yield terminal
 
-    @property
-    def json(self):
-        """Returns the JSON indentation."""
-        try:
-            json = self.query['json']
-        except KeyError:
-            return False
+@APPLICATION.route('/')
+def list_terminals():
+    """Lists the respective terminals."""
 
-        if json is True:
-            return None
+    try:
+        user = User.authenticate(
+            request.args['user_name'], request.args['passwd'])
+    except AuthenticationError:
+        return ('Invalid user name and / or password.', 401)
 
-        try:
-            return int(json)
-        except ValueError:
-            raise Error('Invalid indentation: {}.'.format(json)) from None
+    if request.args.get('json'):
+        return jsonify(
+            [terminal.to_dict(short=True) for terminal in get_terminals(user)])
 
-    def get(self):
-        """Interpret query dictionary."""
-        json = self.json
-
-        if json is False:
-            return terminals_to_dom(self.terminals)
-
-        return JSON(
-            [terminal.to_dict(short=True) for terminal in self.terminals],
-            indent=json)
+    xml = terminals_to_dom(get_terminals(user)).toxml()
+    return Response(xml, mimetype='application/xml')
