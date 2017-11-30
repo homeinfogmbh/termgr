@@ -20,4 +20,4 @@ push:
 	@ git push
 
 post-install:
-	fixuwsgi termsetup termquery
+	fixuwsgi termsetup
