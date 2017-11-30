@@ -65,7 +65,7 @@ def get_terminals(user):
 
     scheduled = get_scheduled()
     undeployed = request.args.get('undeployed', False)
-    cid = request.args.query['cid']
+    cid = request.args['cid']
 
     if cid is None:
         terminals = Terminal
