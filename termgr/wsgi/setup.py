@@ -2,17 +2,19 @@
 
 from os.path import basename
 
-from wsgilib import OK, Error, JSON, InternalServerError, Binary
+from flask import request, make_response, jsonify, Flask
+from peewee import DoesNotExist
+
+from terminallib import Terminal
 
 from termgr.openvpn import OpenVPNPackager
-from .abc import TermgrHandler
-
-__all__ = ['SetupHandler']
+from termgr.orm import AuthenticationError, User
 
 
-ACTION_NOT_IMPLEMENTED = Error('Action not implemented.', status=400)
-NOT_AUTHORIZED = Error('Unauthorized.', status=401)
-INVALID_CREDENTIALS = Error('Invalid credentials.', status=401)
+__all__ = ['APPLICATION']
+
+
+APPLICATION = Flask('termsetup')
 
 
 def legacy_location(terminal):
@@ -31,7 +33,7 @@ def legacy_location(terminal):
         if annotation:
             location['annotation'] = str(annotation)
 
-    return JSON(location)
+    return location
 
 
 def get_location(terminal, client_version):
@@ -41,9 +43,9 @@ def get_location(terminal, client_version):
         return legacy_location(terminal)
 
     if terminal.location:
-        return JSON(terminal.location.to_dict())
+        return terminal.location.to_dict()
 
-    return JSON({})
+    return {}
 
 
 def openvpn_data(terminal, windows=False):
@@ -53,83 +55,89 @@ def openvpn_data(terminal, windows=False):
 
     try:
         data, filename = packager.package(windows=windows)
-    except FileNotFoundError as file_not_found:
-        return InternalServerError('Missing file: {}'.format(basename(
-            file_not_found.filename)))
-    except PermissionError as permission_error:
-        return InternalServerError('Cannot access file: {}'.format(basename(
-            permission_error.filename)))
-    else:
-        return Binary(data, filename=filename)
+    except FileNotFoundError as error:
+        return ('Missing file: {}'.format(basename(error.filename)), 500)
+    except PermissionError as error:
+        return ('Cannot access file: {}'.format(basename(error.filename)), 500)
+
+    content_disposition = 'attachment; filename={}'.format(filename)
+    response = make_response(data)
+    response.headers['Content-Type'] = 'application/x-tar'
+    response.headers['Content-Disposition'] = content_disposition
+    return response
 
 
-class SetupHandler(TermgrHandler):
-    """Handles requests for the SetupController"""
+@APPLICATION.route('/', methods=['GET'])
+def get_setup_data():
+    """Returns the respective setup data."""
 
-    @property
-    def client_version(self):
-        """Returns the client version."""
-        try:
-            client_version = self.query['client_version']
-        except KeyError:
-            return None
-        else:
+    try:
+        user = User.authenticate(
+            request.args['user_name'], request.args['passwd'])
+    except AuthenticationError:
+        return ('Invalid user name and / or password.', 401)
+
+    try:
+        client_version = float(request.args.get('client_version'))
+    except TypeError:
+        client_version = None
+    except ValueError:
+        return ('Invalid client version.', 400)
+
+    windows = bool(request.args.get('windows'))
+
+    try:
+        terminal = Terminal.get(
+            (Terminal.customer == request.args.get('cid'))
+            & (Terminal.tid == request.args.get('tid')))
+    except DoesNotExist:
+        return ('No such terminal.', 404)
+
+    if user.authorize(terminal, setup=True):
+        action = request.args.get('action')
+
+        if action == 'terminal_information':
+            return jsonify(terminal.to_dict())
+        if action == 'location':
+            return jsonify(get_location(terminal, client_version))
+        elif action == 'vpn_data':
+            return openvpn_data(terminal, windows=windows)
+
+        return ('Action not implemented.', 400)
+
+    return ('Not authorized.', 403)
+
+
+@APPLICATION.route('/', methods=['POST'])
+def post_setup_data():
+    """Posts setup data."""
+
+    try:
+        user = User.authenticate(
+            request.args['user_name'], request.args['passwd'])
+    except AuthenticationError:
+        return ('Invalid user name and / or password.', 401)
+
+    try:
+        terminal = Terminal.get(
+            (Terminal.customer == request.args.get('cid'))
+            & (Terminal.tid == request.args.get('tid')))
+    except DoesNotExist:
+        return ('No such terminal.', 404)
+
+    if user.authorize(terminal, setup=True):
+        action = request.args.get('action')
+
+        if action == 'serial_number':
             try:
-                return float(client_version)
+                serial_number = request.get_data().decode()
             except ValueError:
-                raise Error('Invalid client version.', status=400) from None
+                return ('No serial number specified.', 400)
 
-    @property
-    def windows(self):
-        """Returns the windows format flag."""
-        return bool(self.query.get('windows'))
+            terminal.serial_number = serial_number
+            terminal.save()
+            return 'Set serial number to "{}".'.format(serial_number)
 
-    def get(self):
-        """Process GET request."""
-        user = self.user
+        return ('Action not implemented.', 400)
 
-        if user:
-            terminal = self.terminal
-
-            if user.authorize(terminal, setup=True):
-                action = self.action
-
-                if action == 'terminal_information':
-                    return JSON(terminal.to_dict())
-                if action == 'location':
-                    return get_location(terminal, self.client_version)
-                elif action == 'vpn_data':
-                    return openvpn_data(terminal, windows=self.windows)
-
-                return ACTION_NOT_IMPLEMENTED
-
-            return NOT_AUTHORIZED
-
-        return INVALID_CREDENTIALS
-
-    def post(self):
-        """Handle POST requests."""
-        user = self.user
-
-        if user:
-            terminal = self.terminal
-
-            if user.authorize(terminal, setup=True):
-                action = self.action
-
-                if action == 'serial_number':
-                    try:
-                        serial_number = self.data.text
-                    except KeyError:
-                        return Error('No serial number specified.')
-                    else:
-                        terminal.serial_number = serial_number
-                        terminal.save()
-                        return OK('Set serial number to "{}".'.format(
-                            serial_number))
-
-                return Error('Action not implemented: "{}".'.format(action))
-
-            return NOT_AUTHORIZED
-
-        return INVALID_CREDENTIALS
+    return ('Not authorized.', 403)

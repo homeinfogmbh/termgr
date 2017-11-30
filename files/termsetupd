@@ -1,0 +1,11 @@
+#! /usr/bin/env python3
+"""Terminal setup interface"""
+
+from termgr.config import CONFIG
+from termgr.wsgi.setup import APPLICATION
+
+
+if __name__ == '__main__':
+    HOST = CONFIG['setup']['host']
+    PORT = int(CONFIG['setup']['port'])
+    APPLICATION.run(host=HOST, port=PORT)

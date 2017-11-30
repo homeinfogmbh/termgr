@@ -1,8 +1,8 @@
 FILE_LIST = ./.installed_files.txt
 
-.PHONY: pull push clean install post-install uninstall
+.PHONY: pull push clean install uninstall
 
-default: | pull clean install post-install
+default: | pull clean install
 
 install:
 	@ ./setup.py install --record $(FILE_LIST)
@@ -18,6 +18,3 @@ pull:
 
 push:
 	@ git push
-
-post-install:
-	fixuwsgi termsetup

@@ -12,13 +12,10 @@ setup(
     packages=['termgr', 'termgr.wsgi'],
     scripts=[
         'files/termacls', 'files/termgr', 'files/termadm', 'files/termcheckd',
-        'files/termqueryd'],
+        'files/termqueryd', 'files/termsetupd'],
     data_files=[
-        ('/usr/share/termgr', [
-            'files/setup.wsgi']),
-        ('/etc/uwsgi/apps-available', [
-            'files/termsetup.ini']),
         ('/usr/lib/systemd/system', [
             'files/termcheck.service',
-            'files/termquery.service'])],
+            'files/termquery.service',
+            'files/termsetup.service'])],
     description=('Homeinfo Terminal Manager'))
