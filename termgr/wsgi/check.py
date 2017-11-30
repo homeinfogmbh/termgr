@@ -85,9 +85,3 @@ def check_terminal():
         return ('You are not authorized to identify this terminal.', 403)
 
     return ('Invalid action: {}.'.format(action), 400)
-
-
-def run(host=port=):
-    """Runs the WSGI service."""
-
-    APPLICATION.run(host=host, port=port)
