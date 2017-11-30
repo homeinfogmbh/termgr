@@ -2,12 +2,17 @@
 
 from collections import defaultdict
 
+from flask import request, jsonify, Flask
+from peewee import DoesNotExist
+
 from terminallib import Terminal, RemoteController
-from wsgilib import Error, InternalServerError, JSON, OK
 
-from .abc import TermgrHandler
+from termgr.orm import AuthenticationError, User
 
-__all__ = ['CheckHandler']
+__all__ = ['APPLICATION']
+
+
+APPLICATION = Flask('termcheck')
 
 
 def group_terminals(terminals):
@@ -33,37 +38,56 @@ def dict_terminals(grouped_terminals):
         for customer, terminals in grouped_terminals.items()]}
 
 
-class CheckHandler(TermgrHandler):
-    """Handles requests to check terminals."""
+def authorized_terminals(user):
+    """Yields terminals readable by the respective user."""
 
-    @property
-    def terminals(self):
-        """Yields terminals readable by the respective user."""
-        for terminal in Terminal:
-            if self.user.authorize(terminal, read=True):
-                yield terminal
+    for terminal in Terminal:
+        if user.authorize(terminal, read=True):
+            yield terminal
 
-    def get(self):
-        """Handles GET requests."""
-        action = self.action
 
-        if action == 'list':
-            return JSON(dict_terminals(group_terminals(self.terminals)))
-        elif action == 'identify':
-            terminal = self.terminal
+def identify_terminal(terminal):
+    """Indentifies the respective terminal."""
 
-            if self.user.authorize(terminal, read=True):
-                remote_controller = RemoteController('termgr', terminal)
-                result = remote_controller.execute(
-                    '/usr/bin/sudo /usr/bin/beep')
+    return RemoteController('termgr', terminal).execute(
+        '/usr/bin/sudo /usr/bin/beep')
 
-                if result:
-                    return OK('Display should have beeped.')
 
-                raise InternalServerError(
-                    'Could not get display to beep:\n{}'.format(str(result)))
+@APPLICATION.route('/')
+def check_terminal():
+    """Checks the terminals."""
 
-            raise Error('You are not authorized to identify this terminal.',
-                        status=400) from None
+    try:
+        user = User.authenticate(
+            request.args['user_name'], request.args['passwd'])
+    except AuthenticationError:
+        return ('Invalid user name and / or password.', 401)
 
-        raise Error('Invalid action: {}.'.format(action), status=400) from None
+    action = request.args.get('action')
+
+    if action == 'list':
+        return jsonify(dict_terminals(group_terminals(
+            authorized_terminals(user))))
+    elif action == 'identify':
+        try:
+            terminal = Terminal.get(
+                (Terminal.customer == request.args.get('cid'))
+                & (Terminal.tid == request.args.get('tid')))
+        except DoesNotExist:
+            return ('No such terminal.', 404)
+
+        if user.authorize(terminal, read=True):
+            if identify_terminal(terminal):
+                return 'Display should have beeped.'
+
+            return ('Could not get display to beep.', 500)
+
+        return ('You are not authorized to identify this terminal.', 403)
+
+    return ('Invalid action: {}.'.format(action), 400)
+
+
+def run(host=port=):
+    """Runs the WSGI service."""
+
+    APPLICATION.run(host=host, port=port)

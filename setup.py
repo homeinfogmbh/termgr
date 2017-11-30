@@ -10,14 +10,15 @@ setup(
     maintainer='Richard Neumann',
     maintainer_email='r.neumann@homeinfo.de',
     packages=['termgr', 'termgr.wsgi'],
-    scripts=['files/termacls', 'files/termgr', 'files/termadm'],
+    scripts=[
+        'files/termacls', 'files/termgr', 'files/termadm', 'files/termcheckd'],
     data_files=[
         ('/usr/share/termgr', [
-            'files/check.wsgi',
             'files/query.wsgi',
             'files/setup.wsgi']),
         ('/etc/uwsgi/apps-available', [
-            'files/termcheck.ini',
             'files/termquery.ini',
-            'files/termsetup.ini'])],
+            'files/termsetup.ini']),
+        ('/usr/lib/systemd/system', [
+            'files/termcheck.service'])],
     description=('Homeinfo Terminal Manager'))
