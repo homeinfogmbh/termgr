@@ -48,11 +48,10 @@ def identify_terminal(terminal):
         '/usr/bin/sudo /usr/bin/beep')
 
 
-def check_terminal():
+def check_terminal(action):
     """Checks the terminals."""
 
     user = get_user()
-    action = get_action()
 
     if action == 'list':
         return JSON(dict_terminals(group_terminals(
@@ -71,4 +70,4 @@ def check_terminal():
     return ('Invalid action: {}.'.format(action), 400)
 
 
-ROUTES = (('/check', 'POST', check_terminal),)
+ROUTES = (('/check/<action>', 'POST', check_terminal),)
