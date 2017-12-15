@@ -5,11 +5,14 @@ from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from terminallib import Terminal
-from wsgilib import DATA, Error
+from wsgilib import Error, PostData
 
 from termgr.orm import AuthenticationError, User
 
-__all__ = ['get_user', 'get_action', 'get_customer', 'get_terminal']
+__all__ = ['DATA', 'get_user', 'get_action', 'get_customer', 'get_terminal']
+
+
+DATA = PostData()
 
 
 def get_user(legacy=False):
