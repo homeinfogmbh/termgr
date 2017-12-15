@@ -6,7 +6,7 @@ Requires=mysql.service
 [Service]
 User=termgr
 Group=termgr
-ExecStart=/usr/local/bin/termcheckd
+ExecStart=/usr/local/bin/termgrd
 
 [Install]
 WantedBy=multi-user.target
