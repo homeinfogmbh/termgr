@@ -112,4 +112,5 @@ def post_setup_data():
     return ('Not authorized.', 403)
 
 
-ROUTES = (('/setup', 'GET', get_setup_data), ('/', 'POST', post_setup_data))
+ROUTES = (
+    ('/setup', 'GET', get_setup_data), ('/setup', 'POST', post_setup_data))
