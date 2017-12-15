@@ -15,13 +15,16 @@ __all__ = ['DATA', 'get_user', 'get_action', 'get_customer', 'get_terminal']
 DATA = PostData()
 
 
+def _get_container(legacy):
+    """Returns the respective request data container."""
+
+    return request.args if legacy else DATA.json
+
+
 def get_user(legacy=False):
     """Returns the appropriate user."""
 
-    if legacy:
-        container = request.args
-    else:
-        container = DATA.json
+    container = _get_container(legacy)
 
     try:
         passwd = container['passwd']
@@ -48,11 +51,13 @@ def get_action():
         raise Error('No action specified.')
 
 
-def get_customer():
+def get_customer(legacy=False):
     """Returns the respective customer."""
 
+    container = _get_container(legacy)
+
     try:
-        cids = request.args['cid'].split(':')
+        cids = container['cid'].split(':')
     except KeyError:
         raise Error('No CID specified.')
 
@@ -72,16 +77,19 @@ def get_customer():
     return customer
 
 
-def get_terminal():
+def get_terminal(legacy=False):
     """Returns the respective terminal."""
 
+    container = _get_container(legacy)
+
     try:
-        tid = request.args['tid']
+        tid = container['tid']
     except KeyError:
         raise Error('No TID specified.')
 
     try:
         return Terminal.get(
-            (Terminal.customer == get_customer()) & (Terminal.tid == tid))
+            (Terminal.customer == get_customer(legacy=legacy))
+            & (Terminal.tid == tid))
     except DoesNotExist:
         raise Error('No such terminal.', status=404)
