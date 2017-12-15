@@ -113,4 +113,5 @@ def post_setup_data():
 
 
 ROUTES = (
-    ('/setup', 'GET', get_setup_data), ('/setup', 'POST', post_setup_data))
+    ('/setup', 'GET', get_setup_data),
+    ('/setup', 'POST', post_setup_data))
