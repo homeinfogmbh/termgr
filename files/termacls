@@ -20,7 +20,7 @@ from os.path import basename
 from peewee import DoesNotExist
 
 from fancylog import LogLevel, Logger
-from terminallib import parse, PrintMissing, Terminal
+from terminallib import parse, PrintErrors, Terminal
 
 from termgr.orm import ACL, PermissionError, User
 
@@ -37,13 +37,13 @@ def get_acls(terminals=None, user=None):
                 yield permission
     else:
         if user is None:
-            with PrintMissing():
+            with PrintErrors():
                 for terminal in terminals:
                     for permission in ACL.select().where(
                             ACL.terminal == terminal):
                         yield permission
         else:
-            with PrintMissing():
+            with PrintErrors():
                 for terminal in terminals:
                     for permission in ACL.select().where(
                             (ACL.terminal == terminal) &
@@ -97,7 +97,7 @@ def set_acls(options, logger):
         administer = bool(options['--administer'])
         setup = bool(options['--setup'])
 
-    with PrintMissing():
+    with PrintErrors():
         for terminal in parse(*options['<expr>']):
             try:
                 user.permit(

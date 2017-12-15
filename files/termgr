@@ -27,7 +27,7 @@ from sys import stderr
 
 from fancylog import Logger, LogLevel, TTYAnimation
 from syslib import Parallelization
-from terminallib import parse, PrintMissing, Terminal
+from terminallib import parse, PrintErrors, Terminal
 
 from termgr.ctrl import TerminalsController
 
@@ -58,7 +58,7 @@ def main(options):
                 ~(Terminal.deployed >> None) &
                 (Terminal.testing == 0))
         else:
-            with PrintMissing():
+            with PrintErrors():
                 terminals = tuple(parse(options['<expr>']))
 
         # Filter out undeployed terminals

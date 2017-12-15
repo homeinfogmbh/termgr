@@ -38,7 +38,7 @@ from fancylog import LogLevel, Logger
 from syslib import run, evaluate
 
 from homeinfo.crm import Address, State
-from terminallib import parse, PrintMissing, Class, Domain, OS, VPN, \
+from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
     Connection, Location, Terminal
 
 DATE_FORMAT = '%Y-%m-%d'
@@ -255,7 +255,7 @@ def deploy(options, logger, reload):
     else:
         date_time = None
 
-    with PrintMissing():
+    with PrintErrors():
         for terminal in parse(*options['<expr>']):
             terminal.deploy(date_time=date_time, force=force)
 
@@ -268,7 +268,7 @@ def deploy(options, logger, reload):
 def undeploy(options, reload):
     """Removed deployment of terminals."""
 
-    with PrintMissing():
+    with PrintErrors():
         for terminal in parse(*options['<expr>']):
             terminal.undeploy()
 
@@ -281,7 +281,7 @@ def undeploy(options, reload):
 def relocate(options, logger):
     """Relocates a terminal."""
 
-    with PrintMissing():
+    with PrintErrors():
         terminal, *overhead = parse(options['<terminal>'])
 
     if overhead:
