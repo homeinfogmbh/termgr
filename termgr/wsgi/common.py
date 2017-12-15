@@ -5,24 +5,28 @@ from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from terminallib import Terminal
-from wsgilib import Error
+from wsgilib import DATA, Error
 
 from termgr.orm import AuthenticationError, User
 
 __all__ = ['get_user', 'get_action', 'get_customer', 'get_terminal']
 
 
-def get_user():
+def get_user(legacy=False):
     """Returns the appropriate user."""
 
+    if legacy:
+        contaner = request.args
+    else:
+        container = DATA.json
+
     try:
-        passwd = request.args['passwd']
+        passwd = container['passwd']
     except KeyError:
         raise Error('No password specified.')
 
-
     try:
-        user_name = request.args['user_name']
+        user_name = container['user_name']
     except KeyError:
         raise Error('No user name specified.')
 

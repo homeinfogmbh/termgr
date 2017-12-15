@@ -71,4 +71,4 @@ def check_terminal():
     return ('Invalid action: {}.'.format(action), 400)
 
 
-ROUTES = (('/check', 'GET', check_terminal),)
+ROUTES = (('/check', 'POST', check_terminal),)

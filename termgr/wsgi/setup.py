@@ -61,7 +61,7 @@ def openvpn_data(terminal, windows=False):
 def get_setup_data():
     """Returns the respective setup data."""
 
-    user = get_user()
+    user = get_user(legacy=True)
 
     try:
         client_version = float(request.args.get('client_version'))
