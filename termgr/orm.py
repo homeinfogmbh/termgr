@@ -50,7 +50,8 @@ class TermgrModel(Model):
 class User(TermgrModel):
     """A generic abstract user."""
 
-    company = ForeignKeyField(Company, db_column='company')
+    company = ForeignKeyField(
+        Company, db_column='company', on_update='CASCADE', on_delete='CASCADE')
     name = CharField(64)
     pwhash = CharField(255)
     enabled = BooleanField()
@@ -160,8 +161,11 @@ class ACL(TermgrModel):
     and terminals with certain permissions.
     """
 
-    user = ForeignKeyField(User, db_column='user')
-    terminal = ForeignKeyField(Terminal, db_column='terminal')
+    user = ForeignKeyField(
+        User, db_column='user', on_update='CASCADE', on_delete='CASCADE')
+    terminal = ForeignKeyField(
+        Terminal, db_column='terminal', on_update='CASCADE',
+        on_delete='CASCADE')
     # Permissions
     read = BooleanField(default=False)
     administer = BooleanField(default=False)
