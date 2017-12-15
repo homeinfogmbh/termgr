@@ -1,5 +1,5 @@
 [Unit]
-Description=Terminal checking
+Description=Terminal manager
 After=network.target mysql.service
 Requires=mysql.service
 
