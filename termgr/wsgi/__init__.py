@@ -10,4 +10,4 @@ __all__ = ['APPLICATION']
 APPLICATION = Application('termgr')
 
 for route, method, function in check.ROUTES + query.ROUTES + setup.ROUTES:
-    APPLICATION.route(route, methods=[method], strict_slashes=False)(function)
+    APPLICATION.route(route, methods=[method])(function)
