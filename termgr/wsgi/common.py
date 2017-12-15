@@ -16,7 +16,7 @@ def get_user(legacy=False):
     """Returns the appropriate user."""
 
     if legacy:
-        contaner = request.args
+        container = request.args
     else:
         container = DATA.json
 
