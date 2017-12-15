@@ -2,19 +2,14 @@
 
 from os.path import basename
 
-from flask import request, make_response, jsonify, Flask
-from peewee import DoesNotExist
+from flask import request
 
-from terminallib import Terminal
+from wsgilib import JSON, Binary
 
 from termgr.openvpn import OpenVPNPackager
-from termgr.orm import AuthenticationError, User
+from termgr.wsgi.common import get_user, get_terminal, get_action
 
-
-__all__ = ['APPLICATION']
-
-
-APPLICATION = Flask('termsetup')
+__all__ = ['ROUTES']
 
 
 def legacy_location(terminal):
@@ -60,22 +55,13 @@ def openvpn_data(terminal, windows=False):
     except PermissionError as error:
         return ('Cannot access file: {}'.format(basename(error.filename)), 500)
 
-    content_disposition = 'attachment; filename={}'.format(filename)
-    response = make_response(data)
-    response.headers['Content-Type'] = 'application/x-tar'
-    response.headers['Content-Disposition'] = content_disposition
-    return response
+    return Binary(data, filename=filename)
 
 
-@APPLICATION.route('/', methods=['GET'])
 def get_setup_data():
     """Returns the respective setup data."""
 
-    try:
-        user = User.authenticate(
-            request.args['user_name'], request.args['passwd'])
-    except AuthenticationError:
-        return ('Invalid user name and / or password.', 401)
+    user = get_user()
 
     try:
         client_version = float(request.args.get('client_version'))
@@ -85,21 +71,15 @@ def get_setup_data():
         return ('Invalid client version.', 400)
 
     windows = bool(request.args.get('windows'))
-
-    try:
-        terminal = Terminal.get(
-            (Terminal.customer == request.args.get('cid'))
-            & (Terminal.tid == request.args.get('tid')))
-    except DoesNotExist:
-        return ('No such terminal.', 404)
+    terminal = get_terminal()
 
     if user.authorize(terminal, setup=True):
-        action = request.args.get('action')
+        action = get_action()
 
         if action == 'terminal_information':
-            return jsonify(terminal.to_dict())
+            return JSON(terminal.to_dict())
         if action == 'location':
-            return jsonify(get_location(terminal, client_version))
+            return JSON(get_location(terminal, client_version))
         elif action == 'vpn_data':
             return openvpn_data(terminal, windows=windows)
 
@@ -108,25 +88,14 @@ def get_setup_data():
     return ('Not authorized.', 403)
 
 
-@APPLICATION.route('/', methods=['POST'])
 def post_setup_data():
     """Posts setup data."""
 
-    try:
-        user = User.authenticate(
-            request.args['user_name'], request.args['passwd'])
-    except AuthenticationError:
-        return ('Invalid user name and / or password.', 401)
-
-    try:
-        terminal = Terminal.get(
-            (Terminal.customer == request.args.get('cid'))
-            & (Terminal.tid == request.args.get('tid')))
-    except DoesNotExist:
-        return ('No such terminal.', 404)
+    user = get_user()
+    terminal = get_terminal()
 
     if user.authorize(terminal, setup=True):
-        action = request.args.get('action')
+        action = get_action()
 
         if action == 'serial_number':
             try:
@@ -141,3 +110,6 @@ def post_setup_data():
         return ('Action not implemented.', 400)
 
     return ('Not authorized.', 403)
+
+
+ROUTES = (('/', 'GET', get_setup_data), ('/', 'POST', post_setup_data))

@@ -2,17 +2,12 @@
 
 from collections import defaultdict
 
-from flask import request, jsonify, Flask
-from peewee import DoesNotExist
-
 from terminallib import Terminal, RemoteController
+from wsgilib import JSON
 
-from termgr.orm import AuthenticationError, User
+from termgr.wsgi.common import get_user, get_action, get_terminal
 
-__all__ = ['APPLICATION']
-
-
-APPLICATION = Flask('termcheck')
+__all__ = ['ROUTES']
 
 
 def group_terminals(terminals):
@@ -53,28 +48,17 @@ def identify_terminal(terminal):
         '/usr/bin/sudo /usr/bin/beep')
 
 
-@APPLICATION.route('/')
 def check_terminal():
     """Checks the terminals."""
 
-    try:
-        user = User.authenticate(
-            request.args['user_name'], request.args['passwd'])
-    except AuthenticationError:
-        return ('Invalid user name and / or password.', 401)
-
-    action = request.args.get('action')
+    user = get_user()
+    action = get_action()
 
     if action == 'list':
-        return jsonify(dict_terminals(group_terminals(
+        return JSON(dict_terminals(group_terminals(
             authorized_terminals(user))))
     elif action == 'identify':
-        try:
-            terminal = Terminal.get(
-                (Terminal.customer == request.args.get('cid'))
-                & (Terminal.tid == request.args.get('tid')))
-        except DoesNotExist:
-            return ('No such terminal.', 404)
+        terminal = get_terminal()
 
         if user.authorize(terminal, read=True):
             if identify_terminal(terminal):
@@ -85,3 +69,6 @@ def check_terminal():
         return ('You are not authorized to identify this terminal.', 403)
 
     return ('Invalid action: {}.'.format(action), 400)
+
+
+ROUTES = (('/check', 'GET', check_terminal))

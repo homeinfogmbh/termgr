@@ -2,16 +2,15 @@
 
 from datetime import datetime
 
-from flask import request, jsonify, Response, Flask
+from flask import request
 from terminallib import Terminal
 
+from wsgilib import JSON, XML
+
 from termgr import dom
-from termgr.orm import AuthenticationError, User
+from termgr.wsgi.common import get_user
 
-__all__ = ['APPLICATION']
-
-
-APPLICATION = Flask('termquery')
+__all__ = ['ROUTES']
 
 
 def terminals_to_dom(terminals):
@@ -90,19 +89,16 @@ def get_terminals(user):
             yield terminal
 
 
-@APPLICATION.route('/')
 def list_terminals():
     """Lists the respective terminals."""
 
-    try:
-        user = User.authenticate(
-            request.args['user_name'], request.args['passwd'])
-    except AuthenticationError:
-        return ('Invalid user name and / or password.', 401)
+    user = get_user()
 
     if request.args.get('json'):
-        return jsonify(
-            [terminal.to_dict(short=True) for terminal in get_terminals(user)])
+        return JSON([
+            terminal.to_dict(short=True) for terminal in get_terminals(user)])
 
-    xml = terminals_to_dom(get_terminals(user)).toxml()
-    return Response(xml, mimetype='application/xml')
+    return XML(terminals_to_dom(get_terminals(user)))
+
+
+ROUTES = (('/', 'GET', list_terminals))
