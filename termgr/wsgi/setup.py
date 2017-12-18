@@ -62,7 +62,7 @@ def legacy_setup_terminal():
     """Returns the respective setup data."""
 
     user = get_user(legacy=True)
-    terminal = get_terminal()
+    terminal = get_terminal(legacy=True)
     windows = bool(request.args.get('windows'))
 
     if user.authorize(terminal, setup=True):
