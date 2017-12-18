@@ -63,7 +63,7 @@ def legacy_setup_terminal():
 
     user = get_user(legacy=True)
     terminal = get_terminal(legacy=True)
-    windows = bool(request.args.get('windows'))
+    windows = 'windows' in request.args
 
     if user.authorize(terminal, setup=True):
         action = get_action()
@@ -85,7 +85,7 @@ def setup_terminal(action):
 
     user = get_user()
     terminal = get_terminal()
-    windows = bool(request.args.get('windows'))
+    windows = DATA.json.get('windows', False)
 
     if user.authorize(terminal, setup=True):
         if action == 'terminal_information':
