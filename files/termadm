@@ -13,11 +13,8 @@ Usage:
     termadm reload
 
 Options:
-    -h --help                   Show this screen.
-    --version                   Show version.
     --domain=<domain>           Specifies the domain [default: 1].
     --connection=<connection>   Specifies connection type [default: 1].
-    --tid=<tid>                 Explicitly selects a TID (not recommended!).
     --key=<key>                 Explicitly specifies an OpenVPN key to be used.
     --mtu=<mtu>                 Specifies the desired MTU size.
     --annotation=<annotation>   Specifies an annotation for the terminal.
@@ -25,6 +22,9 @@ Options:
     --class=<class>             Specifies the termianl class [default: 3].
     --os=<os>                   Specifies the termianl OS [default: 1].
     --weather=<weather>         Specifies the weather to use.
+    --testing                   Mark this terminal as a testing terminal.
+    --version                   Show version.
+    -h --help                   Show this screen.
 """
 
 from datetime import datetime
@@ -104,8 +104,7 @@ def get_state(state_iso):
 def add_terminal(options, logger, reload):
     """Adds a new terminal."""
 
-    # Required options
-    tid = int(options['--tid']) if options['--tid'] else None
+    # Required options.
     cid = int(options['<cid>'])
     class_id = int(options['--class'])
     os_id = int(options['--os'])
@@ -115,12 +114,13 @@ def add_terminal(options, logger, reload):
     else:
         scheduled = None
 
-    # Optional settings
+    # Optional settings.
     connection_id = int(options['--connection'])
     domain_id = int(options['--domain'])
     weather = options['--weather'] or None
+    testing = options['--testing']
 
-    # Optional address
+    # Optional address.
     street = options['<street>']
     house_number = options['<house_number>']
     zip_code = options['<zip_code>']
@@ -173,7 +173,8 @@ def add_terminal(options, logger, reload):
     # Add new terminal
     terminal = Terminal.add(
         cid, class_, os, connection, vpn, domain, location=location,
-        weather=weather, scheduled=scheduled, annotation=annotation, tid=tid)
+        weather=weather, scheduled=scheduled, annotation=annotation,
+        testing=testing)
 
     if terminal:
         logger.info('Added terminal {}'.format(terminal))
