@@ -1,8 +1,8 @@
 FILE_LIST = ./.installed_files.txt
 
-.PHONY: pull push clean install uninstall
+.PHONY: pull push clean install uninstall bindings
 
-default: | pull clean install
+default: | pull clean bindings install
 
 install:
 	@ ./setup.py install --record $(FILE_LIST)
@@ -18,3 +18,6 @@ pull:
 
 push:
 	@ git push
+
+bindings:
+	@ pyxbgen -u doc/terminals.xsd --module-prefix=termgr -m dom
