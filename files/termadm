@@ -81,24 +81,31 @@ def read_file(path):
                     yield sline
 
 
-def parse_address(string, sep=' '):
+def parse_address(string):
     """Parses an address from a string"""
 
-    elements = [e for e in string.split(sep) if e]
+    street_houseno, zip_code_city = string.split(',')
+    street_houseno = street_houseno.strip()
+    zip_code_city = zip_code_city.strip()
 
     try:
-        *street, house_number, zip_code, city = elements
+        *street, house_number = street_houseno.split()
     except ValueError:
-        raise ValueError('Not an address: {}'.format(string))
-    else:
-        return (city, (sep.join(street), house_number, zip_code))
+        raise ValueError('Not a street / house number: {}.'.format(
+            street_houseno))
+
+    try:
+        zip_code, city = zip_code_city.split()
+    except ValueError:
+        raise ValueError('Not a zip code / city: {}.'.format(zip_code_city))
+
+    return (city, (' '.join(street), house_number, zip_code))
 
 
 def get_state(state_iso):
     """Gets the state by ISO code."""
 
-    if state_iso:
-        return State.get(State.iso == state_iso)
+    return State.get(State.iso == state_iso) if state_iso else None
 
 
 def add_terminal(options, logger, reload):
@@ -190,7 +197,6 @@ def add_terminal(options, logger, reload):
 def add_terminals(options, logger, reload):
     """Adds multiple terminals from a file."""
 
-    # Required options
     cid = int(options['<cid>'])
     path = options['<file>']
     class_id = int(options['--class'])
@@ -204,7 +210,6 @@ def add_terminals(options, logger, reload):
     else:
         scheduled = None
 
-    # Get ORM references
     class_ = Class.get(Class.id == class_id)
     os = OS.get(OS.id == os_id)
     connection = Connection.get(Connection.id == connection_id)
@@ -213,25 +218,21 @@ def add_terminals(options, logger, reload):
     for line in read_file(path):
         try:
             city, addr = parse_address(line)
-        except ValueError:
-            logger.error('Not an address: {}'.format(line))
+        except ValueError as error:
+            logger.error(str(error))
+            continue
+
+        vpn = VPN.add()
+        address = Address.add(city, addr=addr, state=None)
+        location = Location.add(address)
+        terminal = Terminal.add(
+            cid, class_, os, connection, vpn, domain, location=location,
+            weather=weather, scheduled=scheduled)
+
+        if terminal:
+            logger.info('Added terminal {}'.format(terminal))
         else:
-            # Generate unique VPN connection
-            vpn = VPN.add()
-
-            # Add location
-            address = Address.add(city, addr=addr, state=None)
-            location = Location.add(address)
-
-            # Add new terminal
-            terminal = Terminal.add(
-                cid, class_, os, connection, vpn, domain, location=location,
-                weather=weather, scheduled=scheduled)
-
-            if terminal:
-                logger.info('Added terminal {}'.format(terminal))
-            else:
-                logger.error('Failed to add terminal')
+            logger.error('Failed to add terminal')
 
     if reload:
         update_config()
