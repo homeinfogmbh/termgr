@@ -82,7 +82,7 @@ def read_file(path):
 
 
 def parse_address(string):
-    """Parses an address from a string"""
+    """Parses an address from a string."""
 
     street_houseno, zip_code_city = string.split(',')
     street_houseno = street_houseno.strip()
@@ -184,9 +184,9 @@ def add_terminal(options, logger, reload):
         testing=testing)
 
     if terminal:
-        logger.info('Added terminal {}'.format(terminal))
+        logger.info('Added terminal {}.'.format(terminal))
     else:
-        logger.error('Failed to add terminal')
+        logger.error('Failed to add terminal.')
 
     if reload:
         update_config()
@@ -230,9 +230,9 @@ def add_terminals(options, logger, reload):
             weather=weather, scheduled=scheduled)
 
         if terminal:
-            logger.info('Added terminal {}'.format(terminal))
+            logger.info('Added terminal {}.'.format(terminal))
         else:
-            logger.error('Failed to add terminal')
+            logger.error('Failed to add terminal.')
 
     if reload:
         update_config()
