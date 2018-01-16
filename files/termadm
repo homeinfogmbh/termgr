@@ -91,8 +91,8 @@ def parse_address(string):
     try:
         *street, house_number = street_houseno.split()
     except ValueError:
-        raise ValueError('Not a street / house number: {}.'.format(
-            street_houseno))
+        street = street_houseno
+        house_number = None
 
     try:
         zip_code, city = zip_code_city.split()
