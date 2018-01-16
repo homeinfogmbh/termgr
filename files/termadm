@@ -70,7 +70,7 @@ def update_config():
 
 
 def read_file(path):
-    """Read address information from file."""
+    """Read non-comment lines from file."""
 
     with open(path, 'r') as file:
         for line in file:
