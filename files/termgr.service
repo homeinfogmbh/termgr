@@ -1,7 +1,5 @@
 [Unit]
 Description=Terminal manager
-After=network.target mysql.service
-Wants=mysql.service
 
 [Service]
 User=termgr
@@ -9,4 +7,4 @@ Group=termgr
 ExecStart=/usr/local/bin/termgrd
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=wsgi-services.target
