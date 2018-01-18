@@ -1,5 +1,6 @@
 [Unit]
 Description=Terminal manager
+PartOf=wsgi-services.target
 
 [Service]
 User=termgr
