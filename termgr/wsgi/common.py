@@ -1,7 +1,6 @@
 """Common WSGI functions."""
 
 from flask import request
-from peewee import DoesNotExist
 
 from homeinfo.crm import Customer
 from terminallib import Terminal
@@ -71,7 +70,7 @@ def get_customer(legacy=False):
 
         try:
             customer = Customer.get((Customer.cid == cid) & reseller_match)
-        except DoesNotExist:
+        except Customer.DoesNotExist:
             raise Error('No such customer.', status=404)
 
     return customer
@@ -91,5 +90,5 @@ def get_terminal(legacy=False):
         return Terminal.get(
             (Terminal.customer == get_customer(legacy=legacy))
             & (Terminal.tid == tid))
-    except DoesNotExist:
+    except Terminal.DoesNotExist:
         raise Error('No such terminal.', status=404)

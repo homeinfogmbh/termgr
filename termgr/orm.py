@@ -1,7 +1,7 @@
 """ORM models for termgr."""
 
-from peewee import DoesNotExist, Model, PrimaryKeyField, CharField,\
-    BooleanField, ForeignKeyField
+from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
+    ForeignKeyField
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
@@ -70,16 +70,16 @@ class User(TermgrModel):
         if passwd:
             try:
                 user = cls.get(cls.name == name)
-            except DoesNotExist:
-                raise AuthenticationError() from None
-            else:
-                try:
-                    cls.passwd_hasher.verify(user.pwhash, passwd)
-                except VerifyMismatchError:
-                    raise AuthenticationError() from None
-                else:
-                    if user.enabled:
-                        return user
+            except cls.DoesNotExist:
+                raise AuthenticationError()
+
+            try:
+                cls.passwd_hasher.verify(user.pwhash, passwd)
+            except VerifyMismatchError:
+                raise AuthenticationError()
+
+            if user.enabled:
+                return user
 
         raise AuthenticationError() from None
 
@@ -95,35 +95,33 @@ class User(TermgrModel):
 
     def permissions(self, terminal):
         """Returns permissions on terminal."""
-        return ACL.get(
-            (ACL.user == self) &
-            (ACL.terminal == terminal))
+        return ACL.get((ACL.user == self) & (ACL.terminal == terminal))
 
     def permit(self, terminal, read=None, administer=None, setup=None):
         """Set permissions."""
         if self.root:
             raise PermissionError('Cannot set permissions for root users.')
+
+        try:
+            permissions = self.permissions(terminal)
+        except ACL.DoesNotExist:
+            permissions = ACL()
+            permissions.user = self
+            permissions.terminal = terminal
+
+        if read is not None:
+            permissions.read = read
+
+        if administer is not None:
+            permissions.administer = administer
+
+        if setup is not None:
+            permissions.setup = setup
+
+        if permissions.read or permissions.administer or permissions.setup:
+            permissions.save()
         else:
-            try:
-                permissions = self.permissions(terminal)
-            except DoesNotExist:
-                permissions = ACL()
-                permissions.user = self
-                permissions.terminal = terminal
-
-            if read is not None:
-                permissions.read = read
-
-            if administer is not None:
-                permissions.administer = administer
-
-            if setup is not None:
-                permissions.setup = setup
-
-            if permissions.read or permissions.administer or permissions.setup:
-                permissions.save()
-            else:
-                permissions.delete_instance()
+            permissions.delete_instance()
 
     def authorize(self, terminal, read=None, administer=None, setup=None):
         """Validate permissions.
@@ -138,22 +136,19 @@ class User(TermgrModel):
 
         try:
             permissions = self.permissions(terminal)
-        except DoesNotExist:
+        except ACL.DoesNotExist:
             return False
-        else:
-            if read is not None:
-                if permissions.read != read:
-                    return False
 
-            if administer is not None:
-                if permissions.administer != administer:
-                    return False
+        if read is not None and permissions.read != read:
+            return False
 
-            if setup is not None:
-                if permissions.setup != setup:
-                    return False
+        if administer is not None and permissions.administer != administer:
+            return False
 
-            return True
+        if setup is not None and permissions.setup != setup:
+            return False
+
+        return True
 
 
 class ACL(TermgrModel):

@@ -32,8 +32,6 @@ from os import geteuid
 from pathlib import Path
 from sys import exit as exit_
 
-from peewee import DoesNotExist
-
 from fancylog import LogLevel, Logger
 from syslib import run, evaluate
 
@@ -145,7 +143,7 @@ def add_terminal(options, logger, reload):
 
     try:
         state = get_state(state_iso)
-    except DoesNotExist:
+    except State.DoesNotExist:
         logger.error('No such state: "{}".'.format(state_iso))
         return 1
 
@@ -303,7 +301,7 @@ def relocate(options, logger):
 
         try:
             state = get_state(state_iso)
-        except DoesNotExist:
+        except State.DoesNotExist:
             logger.error('No such state: "{}".'.format(state_iso))
             return 1
 
