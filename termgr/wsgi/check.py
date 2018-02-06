@@ -5,7 +5,7 @@ from collections import defaultdict
 from terminallib import Terminal, RemoteController
 from wsgilib import JSON
 
-from termgr.wsgi.common import get_user, get_action, get_terminal
+from termgr.wsgi.common import authenticated, authorized
 
 __all__ = ['ROUTES']
 
@@ -48,26 +48,25 @@ def identify_terminal(terminal):
         '/usr/bin/sudo /usr/bin/beep')
 
 
-def check_terminal(action):
+@authenticated
+def list_terminals(user):
     """Checks the terminals."""
 
-    user = get_user()
-
-    if action == 'list':
-        return JSON(dict_terminals(group_terminals(
-            authorized_terminals(user))))
-    elif action == 'identify':
-        terminal = get_terminal()
-
-        if user.authorize(terminal, read=True):
-            if identify_terminal(terminal):
-                return 'Display should have beeped.'
-
-            return ('Could not get display to beep.', 500)
-
-        return ('You are not authorized to identify this terminal.', 403)
-
-    return ('Invalid action: {}.'.format(action), 400)
+    return JSON(dict_terminals(group_terminals(
+        authorized_terminals(user))))
 
 
-ROUTES = (('/check/<action>', 'POST', check_terminal),)
+@authenticated
+@authorized(read=True)
+def identify_terminal(terminal):
+    """Identifies the respective terminal by beep test."""
+
+    if identify_terminal(terminal):
+        return 'Display should have beeped.'
+
+    return ('Could not get display to beep.', 500)
+
+
+ROUTES = (
+    ('/check/list', 'POST', list_terminals),
+    ('/check/identify', 'POST', identify_terminal))

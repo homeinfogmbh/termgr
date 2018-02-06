@@ -1,5 +1,7 @@
 """Common WSGI functions."""
 
+from functools import partial, wraps
+
 from flask import request
 
 from homeinfo.crm import Customer
@@ -8,7 +10,14 @@ from wsgilib import Error, PostData
 
 from termgr.orm import AuthenticationError, User
 
-__all__ = ['DATA', 'get_user', 'get_action', 'get_customer', 'get_terminal']
+__all__ = [
+    'DATA',
+    'get_user',
+    'get_action',
+    'get_customer',
+    'get_terminal',
+    'authenticated',
+    'authorized']
 
 
 DATA = PostData()
@@ -92,3 +101,30 @@ def get_terminal(legacy=False):
             & (Terminal.tid == tid))
     except Terminal.DoesNotExist:
         raise Error('No such terminal.', status=404)
+
+
+def authenticated(function):
+    """Enforces a terminal manager user login."""
+
+    return partial(function, get_user())
+
+
+def authorized(read=None, administer=None, setup=None):
+    """Enforces a terminal authorization."""
+
+    @wraps
+    def wrap(function):
+        """Wraps the actual function."""
+        def wrapper(user, *args, **kwargs):
+            """Performs terminal check and runs function."""
+            terminal = get_terminal()
+
+            if user.authorize(
+                    terminal, read=read, administer=administer, setup=setup):
+                return funtion(terminal, *args, **kwargs)
+
+            raise Error('Terminal operation unauthorized.', status=403)
+
+        return wrapper
+
+    return wrap
