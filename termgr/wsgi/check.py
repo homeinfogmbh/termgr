@@ -41,13 +41,6 @@ def authorized_terminals(user):
             yield terminal
 
 
-def identify_terminal(terminal):
-    """Indentifies the respective terminal."""
-
-    return RemoteController('termgr', terminal).execute(
-        '/usr/bin/sudo /usr/bin/beep')
-
-
 @authenticated
 def list_terminals(user):
     """Checks the terminals."""
@@ -56,11 +49,13 @@ def list_terminals(user):
         authorized_terminals(user))))
 
 
+@authenticated
 @authorized(read=True)
 def identify_terminal(terminal):
     """Identifies the respective terminal by beep test."""
 
-    if identify_terminal(terminal):
+    if RemoteController('termgr', terminal).execute(
+            '/usr/bin/sudo /usr/bin/beep'):
         return 'Display should have beeped.'
 
     return ('Could not get display to beep.', 500)
