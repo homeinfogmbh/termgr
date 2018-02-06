@@ -68,5 +68,5 @@ def identify_terminal(terminal):
 
 
 ROUTES = (
-    ('/check/list', 'POST', list_terminals),
-    ('/check/identify', 'POST', identify_terminal))
+    ('/check/list', 'POST', list_terminals, 'list_terminals'),
+    ('/check/identify', 'POST', identify_terminal, 'identify_terminal'))

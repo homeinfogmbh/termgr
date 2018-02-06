@@ -89,7 +89,7 @@ def get_terminals(user):
             yield terminal
 
 
-def list_terminals():
+def query_terminals():
     """Lists the respective terminals."""
 
     user = get_user()
@@ -101,4 +101,4 @@ def list_terminals():
     return XML(terminals_to_dom(get_terminals(user)))
 
 
-ROUTES = (('/query', 'POST', list_terminals),)
+ROUTES = (('/query', 'POST', query_terminals, 'query_terminals'),)

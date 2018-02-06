@@ -8,6 +8,4 @@ __all__ = ['APPLICATION']
 
 
 APPLICATION = Application('termgr', debug=True)
-
-for route, method, function in check.ROUTES + query.ROUTES + setup.ROUTES:
-    APPLICATION.route(route, methods=[method])(function)
+APPLICATION.add_routes(check.ROUTES + query.ROUTES + setup.ROUTES)
