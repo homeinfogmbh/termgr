@@ -1,7 +1,5 @@
 """Common WSGI functions."""
 
-from functools import wraps
-
 from flask import request
 
 from homeinfo.crm import Customer
