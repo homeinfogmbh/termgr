@@ -2,6 +2,6 @@
 
 from configlib import INIParser
 
-__all__ = ['config']
+__all__ = ['CONFIG']
 
 CONFIG = INIParser('/etc/termgr.conf')

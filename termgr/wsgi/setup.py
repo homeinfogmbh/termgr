@@ -64,6 +64,7 @@ def setup_terminal(terminal, action):
     """Posts setup data."""
 
     windows = DATA.json.get('windows', False)
+
     if action == 'terminal_information':
         return JSON(terminal.to_dict())
     elif action == 'location':

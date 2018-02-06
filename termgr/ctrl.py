@@ -137,5 +137,6 @@ class TerminalController(RemoteController):
         if self.execute('/usr/bin/pidof', 'pacman'):
             self.logger.error('Pacman is still running on {}.'.format(
                 self.terminal))
-        else:
-            return self.sudo('/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
+            return False
+
+        return self.sudo('/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')

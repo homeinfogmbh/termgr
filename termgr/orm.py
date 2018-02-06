@@ -5,8 +5,8 @@ from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-from peeweeplus import MySQLDatabase
 from homeinfo.crm import Company
+from peeweeplus import MySQLDatabase
 from terminallib import Terminal
 
 from termgr.config import CONFIG

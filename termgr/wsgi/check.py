@@ -2,9 +2,10 @@
 
 from collections import defaultdict
 
-from terminallib import Terminal, RemoteController
+from terminallib import Terminal
 from wsgilib import JSON
 
+from termgr.ctrl import TerminalController
 from termgr.wsgi.common import authenticated, authorized
 
 __all__ = ['ROUTES']
@@ -54,8 +55,7 @@ def list_terminals(user):
 def identify_terminal(terminal):
     """Identifies the respective terminal by beep test."""
 
-    if RemoteController('termgr', terminal).execute(
-            '/usr/bin/sudo /usr/bin/beep'):
+    if TerminalController(terminal).sudo('/usr/bin/beep'):
         return 'Display should have beeped.'
 
     return ('Could not get display to beep.', 500)
