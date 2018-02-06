@@ -1,6 +1,6 @@
 """Common WSGI functions."""
 
-from functools import partial, wraps
+from functools import wraps
 
 from flask import request
 
@@ -103,10 +103,15 @@ def get_terminal(legacy=False):
         raise Error('No such terminal.', status=404)
 
 
+@wraps
 def authenticated(function):
     """Enforces a terminal manager user login."""
 
-    return partial(function, get_user())
+    def wrapper(*args, **kwargs):
+        """Calls the function with additional user parameter."""
+        return function(get_user(), *args, **kwargs)
+
+    return wrapper
 
 
 def authorized(read=None, administer=None, setup=None):
