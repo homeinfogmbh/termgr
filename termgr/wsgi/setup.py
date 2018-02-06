@@ -7,7 +7,7 @@ from flask import request
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import OpenVPNPackager
-from termgr.wsgi.common import DATA, get_user, get_terminal, get_action
+from termgr.wsgi.common import DATA, authenticated, authorized
 
 __all__ = ['ROUTES']
 
@@ -58,55 +58,29 @@ def openvpn_data(terminal, windows=False):
     return Binary(data, filename=filename)
 
 
-def legacy_setup_terminal():
-    """Returns the respective setup data."""
-
-    user = get_user(legacy=True)
-    terminal = get_terminal(legacy=True)
-    windows = 'windows' in request.args
-
-    if user.authorize(terminal, setup=True):
-        action = get_action()
-
-        if action == 'terminal_information':
-            return JSON(terminal.to_dict())
-        elif action == 'location':
-            return JSON(get_location(terminal))
-        elif action == 'vpn_data':
-            return openvpn_data(terminal, windows=windows)
-
-        raise Error('Action not implemented.')
-
-    raise Error('Not authorized.', status=403)
-
-
+@authenticated
+@authorized(terminal, setup=True)
 def setup_terminal(action):
     """Posts setup data."""
 
-    user = get_user()
-    terminal = get_terminal()
     windows = DATA.json.get('windows', False)
+    if action == 'terminal_information':
+        return JSON(terminal.to_dict())
+    elif action == 'location':
+        return JSON(get_location(terminal))
+    elif action == 'vpn_data':
+        return openvpn_data(terminal, windows=windows)
+    elif action == 'serial_number':
+        try:
+            serial_number = DATA.json['serial_number']
+        except KeyError:
+            raise Error('No serial number specified.')
 
-    if user.authorize(terminal, setup=True):
-        if action == 'terminal_information':
-            return JSON(terminal.to_dict())
-        elif action == 'location':
-            return JSON(get_location(terminal))
-        elif action == 'vpn_data':
-            return openvpn_data(terminal, windows=windows)
-        elif action == 'serial_number':
-            try:
-                serial_number = DATA.json['serial_number']
-            except KeyError:
-                raise Error('No serial number specified.')
+        terminal.serial_number = serial_number
+        terminal.save()
+        return 'Set serial number to "{}".'.format(serial_number)
 
-            terminal.serial_number = serial_number
-            terminal.save()
-            return 'Set serial number to "{}".'.format(serial_number)
-
-        raise Error('Action not implemented.')
-
-    raise Error('Not authorized.', status=403)
+    raise Error('Action not implemented.')
 
 
 ROUTES = (('POST', '/setup/<action>', setup_terminal, 'setup_terminal'),)

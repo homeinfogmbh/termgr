@@ -8,7 +8,7 @@ from terminallib import Terminal
 from wsgilib import JSON, XML
 
 from termgr import dom
-from termgr.wsgi.common import get_user
+from termgr.wsgi.common import authenticated
 
 __all__ = ['ROUTES']
 
@@ -89,10 +89,9 @@ def get_terminals(user):
             yield terminal
 
 
-def query_terminals():
+@authenticated
+def query_terminals(user):
     """Lists the respective terminals."""
-
-    user = get_user()
 
     if request.args.get('json'):
         return JSON([
