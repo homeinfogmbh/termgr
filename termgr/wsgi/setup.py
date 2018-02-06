@@ -109,4 +109,4 @@ def setup_terminal(action):
     raise Error('Not authorized.', status=403)
 
 
-ROUTES = (('/setup/<action>', 'POST', setup_terminal, 'setup_terminal'),)
+ROUTES = (('POST', '/setup/<action>', setup_terminal, 'setup_terminal'),)

@@ -101,4 +101,4 @@ def query_terminals():
     return XML(terminals_to_dom(get_terminals(user)))
 
 
-ROUTES = (('/query', 'POST', query_terminals, 'query_terminals'),)
+ROUTES = (('POST', '/query', query_terminals, 'query_terminals'),)
