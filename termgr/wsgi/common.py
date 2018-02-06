@@ -106,8 +106,8 @@ def authenticated(function):
 
     def wrapper(*args, **kwargs):
         """Calls the function with additional user parameter."""
-        print('authenticated:', args, kwargs, flush=True)
-        return function(get_user(), *args, **kwargs)
+        get_user()
+        return function(*args, **kwargs)
 
     return wrapper
 
@@ -117,14 +117,13 @@ def authorized(read=None, administer=None, setup=None):
 
     def wrap(function):
         """Wraps the actual function."""
-        def wrapper(user, *args, **kwargs):
+        def wrapper(*args, **kwargs):
             """Performs terminal check and runs function."""
             terminal = get_terminal()
-            print('authorized:', user, args, kwargs, flush=True)
 
-            if user.authorize(
+            if get_user().authorize(
                     terminal, read=read, administer=administer, setup=setup):
-                return function(terminal, *args, **kwargs)
+                return function(*args, **kwargs)
 
             raise Error('Terminal operation unauthorized.', status=403)
 
