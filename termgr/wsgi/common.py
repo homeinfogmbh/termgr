@@ -106,7 +106,6 @@ def get_terminal(legacy=False):
 def authenticated(function):
     """Enforces a terminal manager user login."""
 
-    @wraps
     def wrapper(*args, **kwargs):
         """Calls the function with additional user parameter."""
         return function(get_user(), *args, **kwargs)
@@ -119,7 +118,6 @@ def authorized(read=None, administer=None, setup=None):
 
     def wrap(function):
         """Wraps the actual function."""
-        @wraps
         def wrapper(user, *args, **kwargs):
             """Performs terminal check and runs function."""
             terminal = get_terminal()
