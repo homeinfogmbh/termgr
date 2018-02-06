@@ -56,8 +56,8 @@ def list_terminals(user):
         authorized_terminals(user))))
 
 
-@authorized(read=True)
 @authenticated
+@authorized(read=True)
 def identify_terminal(terminal):
     """Identifies the respective terminal by beep test."""
 

@@ -106,6 +106,7 @@ def authenticated(function):
 
     def wrapper(*args, **kwargs):
         """Calls the function with additional user parameter."""
+        print('authenticated:', args, kwargs, flush=True)
         return function(get_user(), *args, **kwargs)
 
     return wrapper
@@ -119,7 +120,7 @@ def authorized(read=None, administer=None, setup=None):
         def wrapper(user, *args, **kwargs):
             """Performs terminal check and runs function."""
             terminal = get_terminal()
-            print('Args:', user, args, kwargs, flush=True)
+            print('authorized:', user, args, kwargs, flush=True)
 
             if user.authorize(
                     terminal, read=read, administer=administer, setup=setup):
