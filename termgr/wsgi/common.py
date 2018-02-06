@@ -119,7 +119,7 @@ def authorized(read=None, administer=None, setup=None):
         def wrapper(user, *args, **kwargs):
             """Performs terminal check and runs function."""
             terminal = get_terminal()
-            print('args:', args, flush=True)
+            print('Args:', user, args, kwargs, flush=True)
 
             if user.authorize(
                     terminal, read=read, administer=administer, setup=setup):
