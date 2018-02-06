@@ -124,7 +124,7 @@ def authorized(read=None, administer=None, setup=None):
 
             if user.authorize(
                     terminal, read=read, administer=administer, setup=setup):
-                return funtion(terminal, *args, **kwargs)
+                return function(terminal, *args, **kwargs)
 
             raise Error('Terminal operation unauthorized.', status=403)
 
