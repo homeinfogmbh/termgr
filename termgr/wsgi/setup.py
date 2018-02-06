@@ -59,8 +59,8 @@ def openvpn_data(terminal, windows=False):
 
 
 @authenticated
-@authorized(terminal, setup=True)
-def setup_terminal(action):
+@authorized(setup=True)
+def setup_terminal(terminal, action):
     """Posts setup data."""
 
     windows = DATA.json.get('windows', False)
