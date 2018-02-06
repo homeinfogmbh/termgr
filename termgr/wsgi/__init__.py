@@ -2,10 +2,11 @@
 
 from wsgilib import Application
 
-from termgr.wsgi import check, query, setup
+from termgr.wsgi import administer, check, query, setup
 
-__all__ = ['APPLICATION']
+__all__ = ['ROUTES', 'APPLICATION']
 
 
+ROUTES = administer.ROUTES + check.ROUTES + query.ROUTES + setup.ROUTES
 APPLICATION = Application('termgr', debug=True)
-APPLICATION.add_routes(check.ROUTES + query.ROUTES + setup.ROUTES)
+APPLICATION.add_routes(ROUTES)
