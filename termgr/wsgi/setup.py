@@ -79,7 +79,7 @@ def setup_terminal(terminal, action):
 
         terminal.serial_number = serial_number or None  # Delete iff empty.
         terminal.save()
-        return 'Set serial number to "{}".'.format(serial_number)
+        return 'Set serial number to "{}".'.format(terminal.serial_number)
 
     raise Error('Action not implemented.')
 
