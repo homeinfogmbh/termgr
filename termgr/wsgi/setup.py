@@ -77,7 +77,7 @@ def setup_terminal(terminal, action):
         except KeyError:
             raise Error('No serial number specified.')
 
-        terminal.serial_number = serial_number
+        terminal.serial_number = serial_number or None  # Delete iff empty.
         terminal.save()
         return 'Set serial number to "{}".'.format(serial_number)
 
