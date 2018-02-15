@@ -13,7 +13,7 @@ from termgr.config import CONFIG
 
 __all__ = [
     'AuthenticationError',
-    'PermissionError',
+    'PermissionsError',
     'User',
     'ACL']
 
@@ -24,12 +24,10 @@ class AuthenticationError(Exception):
     pass
 
 
-class PermissionError(Exception):
+class PermissionsError(Exception):
     """Indicates error during permission handling."""
 
-    def __init__(self, msg):
-        super().__init__(msg)
-        self.msg = msg
+    pass
 
 
 class TermgrModel(Model):
@@ -100,7 +98,7 @@ class User(TermgrModel):
     def permit(self, terminal, read=None, administer=None, setup=None):
         """Set permissions."""
         if self.root:
-            raise PermissionError('Cannot set permissions for root users.')
+            raise PermissionsError('Cannot set permissions for root users.')
 
         try:
             permissions = self.permissions(terminal)
@@ -128,7 +126,7 @@ class User(TermgrModel):
         None means "don't care"!
         """
         if all(permission is None for permission in (read, administer, setup)):
-            raise PermissionError('No permissions selected.')
+            raise PermissionsError('No permissions selected.')
         elif not self.enabled:
             return False
         elif self.root:

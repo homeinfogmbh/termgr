@@ -23,7 +23,7 @@ from docopt import docopt
 from fancylog import LogLevel, Logger
 from terminallib import parse, PrintErrors, Terminal
 
-from termgr.orm import ACL, PermissionError, User
+from termgr.orm import ACL, PermissionsError, User
 
 
 LOGGER = Logger(basename(__file__), level=LogLevel.INFO)
@@ -94,7 +94,7 @@ def set_acls(options):
                 user.permit(
                     terminal, read=read, administer=administer,
                     setup=setup)
-            except PermissionError as permission_error:
+            except PermissionsError as permission_error:
                 LOGGER.warning(permission_error.msg)
 
     return 0
