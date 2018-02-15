@@ -95,7 +95,7 @@ def set_acls(options):
                     terminal, read=read, administer=administer,
                     setup=setup)
             except PermissionsError as permission_error:
-                LOGGER.warning(permission_error.msg)
+                LOGGER.warning(permission_error)
 
     return 0
 
