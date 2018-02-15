@@ -32,7 +32,7 @@ def get_permissions(terminals=None, user=None):
     print('Terminals:', terminals)
     print('User:', user)
     terminal_expr = True if terminals is None else ACL.terminal << terminals
-    user_expr = True if terminals is None else ACL.user == user
+    user_expr = True if user is None else ACL.user == user
     print('Terminal expression:', terminal_expr)
     print('User expression:', user_expr)
 
