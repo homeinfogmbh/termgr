@@ -26,27 +26,12 @@ from termgr.orm import ACL, PermissionError, User
 def get_acls(terminals=None, user=None):
     """Yields ACL records for the respective user"""
 
-    if terminals is None:
-        if user is None:
-            yield from ACL
-        else:
-            for permission in ACL.select().where(
-                    ACL.user == user):
-                yield permission
-    else:
-        if user is None:
-            with PrintErrors():
-                for terminal in terminals:
-                    for permission in ACL.select().where(
-                            ACL.terminal == terminal):
-                        yield permission
-        else:
-            with PrintErrors():
-                for terminal in terminals:
-                    for permission in ACL.select().where(
-                            (ACL.terminal == terminal) &
-                            (ACL.user == user)):
-                        yield permission
+    terminal_expr = True if terminals is None else ACL.terminal << terminals
+    user_expr = True if terminals is None else ACL.user == user
+
+    with PrintErrors():
+        for permission in ACL.select().where(terminal_expr & user_expr):
+            yield permission
 
 
 def list_acls(options, logger):
