@@ -29,6 +29,7 @@ from termgr.orm import ACL, PermissionError, User
 def get_permissions(terminals=None, user=None):
     """Yields ACL records for the respective user"""
 
+    print('Terminals:', terminals)
     terminal_expr = True if terminals is None else ACL.terminal << terminals
     user_expr = True if terminals is None else ACL.user == user
 
