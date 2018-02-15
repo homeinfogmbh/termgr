@@ -38,6 +38,7 @@ def get_permissions(terminals=None, user=None):
 
     with PrintErrors():
         for permission in ACL.select().where(terminal_expr & user_expr):
+            print(permission)
             yield permission
 
 
