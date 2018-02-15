@@ -51,7 +51,7 @@ def list_acls(options, logger):
             return 3
 
     if options['<expr>']:
-        terminals = tuple(parse(*options['<expr>']))
+        terminals = [terminal.id for terminal in (parse(*options['<expr>'])]]
 
     for permission in get_permissions(terminals=terminals, user=user):
         print(permission, permission.terminal, permission.user)
