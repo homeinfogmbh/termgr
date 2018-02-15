@@ -16,6 +16,9 @@ Options:
     -h --help           Show this screen.
 """
 from os.path import basename
+from sys import exit as exit_
+
+from docopt import docopt
 
 from fancylog import LogLevel, Logger
 from terminallib import parse, PrintErrors, Terminal
@@ -23,7 +26,7 @@ from terminallib import parse, PrintErrors, Terminal
 from termgr.orm import ACL, PermissionError, User
 
 
-def get_acls(terminals=None, user=None):
+def get_permissions(terminals=None, user=None):
     """Yields ACL records for the respective user"""
 
     terminal_expr = True if terminals is None else ACL.terminal << terminals
@@ -37,21 +40,23 @@ def get_acls(terminals=None, user=None):
 def list_acls(options, logger):
     """Lists the requested ACLs."""
 
+    user = None
+    terminals = None
+
     if options['--user']:
         try:
             user = User.get(User.name == options['--user'])
         except User.DoesNotExist:
             logger.error('No such user:', options['--user'])
-    else:
-        user = None
+            return 3
 
     if options['<expr>']:
-        terminals = parse(*options['<expr>'])
-    else:
-        terminals = Terminal
+        terminals = tuple(parse(*options['<expr>']))
 
-    for acl in get_acls(terminals=terminals, user=user):
-        print(acl, acl.terminal, acl.user)
+    for permission in get_permissions(terminals=terminals, user=user):
+        print(permission, permission.terminal, permission.user)
+
+    return 0
 
 
 def set_acls(options, logger):
@@ -61,11 +66,11 @@ def set_acls(options, logger):
         user = User.get(User.name == options['<user>'])
     except User.DoesNotExist:
         logger.error('No such user:', options['<user>'])
-        exit(1)
+        return 1
 
     if options['--grant'] and options['--revoke']:
         print('Error: Cannot grant and revoke at the same time.')
-        exit(2)
+        return 2
 
     if options['--grant']:
         read = True if options['--read'] else None
@@ -89,6 +94,8 @@ def set_acls(options, logger):
             except PermissionError as permission_error:
                 logger.warning(permission_error.msg)
 
+    return 0
+
 
 def main(options):
     """Runs the ACL client."""
@@ -97,12 +104,10 @@ def main(options):
 
     # Get ACLs
     if options['get']:
-        list_acls(options, logger)
+        return list_acls(options, logger)
     elif options['set']:
-        set_acls(options, logger)
+        return set_acls(options, logger)
 
 
 if __name__ == '__main__':
-    from docopt import docopt
-
-    main(docopt(__doc__))
+    exit_(main(docopt(__doc__)))
