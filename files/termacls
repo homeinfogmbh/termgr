@@ -26,6 +26,9 @@ from terminallib import parse, PrintErrors, Terminal
 from termgr.orm import ACL, PermissionError, User
 
 
+LOGGER = Logger(basename(__file__), level=LogLevel.INFO)
+
+
 def get_permissions(terminals=None, user=None):
     """Yields ACL records for the respective user"""
 
@@ -37,7 +40,7 @@ def get_permissions(terminals=None, user=None):
             yield permission
 
 
-def list_acls(options, logger):
+def list_acls(options):
     """Lists the requested ACLs."""
 
     user = None
@@ -47,7 +50,7 @@ def list_acls(options, logger):
         try:
             user = User.get(User.name == options['--user'])
         except User.DoesNotExist:
-            logger.error('No such user:', options['--user'])
+            LOGGER.error('No such user:', options['--user'])
             return 3
 
     if options['<expr>']:
@@ -59,13 +62,13 @@ def list_acls(options, logger):
     return 0
 
 
-def set_acls(options, logger):
+def set_acls(options):
     """Sets the requested ACLs."""
 
     try:
         user = User.get(User.name == options['<user>'])
     except User.DoesNotExist:
-        logger.error('No such user:', options['<user>'])
+        LOGGER.error('No such user:', options['<user>'])
         return 1
 
     if options['--grant'] and options['--revoke']:
@@ -92,7 +95,7 @@ def set_acls(options, logger):
                     terminal, read=read, administer=administer,
                     setup=setup)
             except PermissionError as permission_error:
-                logger.warning(permission_error.msg)
+                LOGGER.warning(permission_error.msg)
 
     return 0
 
@@ -100,13 +103,10 @@ def set_acls(options, logger):
 def main(options):
     """Runs the ACL client."""
 
-    logger = Logger(basename(__file__), level=LogLevel.INFO)
-
-    # Get ACLs
     if options['get']:
-        return list_acls(options, logger)
+        return list_acls(options)
     elif options['set']:
-        return set_acls(options, logger)
+        return set_acls(options)
 
     return 0
 
