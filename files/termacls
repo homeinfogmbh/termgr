@@ -96,6 +96,7 @@ def set_acls(options):
                     setup=setup)
             except PermissionsError as permission_error:
                 LOGGER.warning(permission_error)
+                break
 
     return 0
 
