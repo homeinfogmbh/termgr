@@ -84,8 +84,11 @@ class TerminalController(RemoteController):
 
     def reboot(self):
         """Reboots the terminal."""
-        with self.extra_options(REBOOT_OPTIONS):
-            return self.sudo('/usr/bin/reboot')
+        if self.execute('/usr/bin/test -x /usr/bin/reboot'):
+            with self.extra_options(REBOOT_OPTIONS):
+                return self.sudo('/usr/bin/reboot')
+
+        return self.sudo('/usr/bin/systemctl isolate reboot.target')
 
     def cleanup(self):
         """Cleanup local package cache."""
