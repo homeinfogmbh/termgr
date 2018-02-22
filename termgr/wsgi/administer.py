@@ -12,7 +12,7 @@ __all__ = ['ROUTES']
 
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
-REBOOT_KEYWORDS = (b'Timeout', b'not responding.')
+SSH_TIMEOUT_KEYWORDS = (b'Timeout', b'not responding.')
 CONTROLLER = TerminalsController()
 
 
@@ -69,7 +69,7 @@ def reboot(terminal):
     if response:
         return 'Rebooted terminal.'
     elif response.exit_code == 255:     # Timeout.
-        if all(keyword in response.stderr for keyword in REBOOT_KEYWORDS):
+        if all(keyword in response.stderr for keyword in SSH_TIMEOUT_KEYWORDS):
             return ('Probably rebooted terminal.', 202)
 
     return ('Failed to reboot terminal.', 500)
