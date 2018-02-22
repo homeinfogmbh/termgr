@@ -26,6 +26,172 @@
 
 termgr = termgr || {};
 
+termgr.BASE_URL = "https://termgr.homeinfo.de";
+termgr.customers = {};
+
+termgr.containsIgnoreCase = function (haystack, needle) {
+  return haystack.toLowerCase().indexOf(needle.toLowerCase()) >= 0;
+}
+
+termgr.getCredentials = function () {
+  return {'user_name': $("#userName").val(), 'passwd': $("#passwd").val()};
+}
+
+
+termgr.getCustomers = function (callback) {
+  var credentials = getCredentials();
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/deploy',
+    type: 'POST',
+    data: JSON.stringify(credentials),
+    success: function (json) {
+      callback(json);
+    },
+    error: function() {
+      swal({
+        title: 'Konnte Terminaldaten nicht abfragen.',
+        text: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.',
+        type: 'error'
+      })
+    }
+  });
+}
+
+
+termgr.filterTerminals = function (keywords, terminals) {
+  var filteredTerminals = [];
+  var terminal = null;
+  var keyword = null;
+
+  for (var i = 0; i < terminals.length; i++) {
+    terminal = terminals[i];
+
+    for (var j = 0; j < keywords.length; j++) {
+      keyword = keywords[j];
+
+      if (termgr.containsIgnoreCase('' + terminal.tid, keyword)) {
+        filteredTerminals.push(terminal);
+      } else if (termgr.containsIgnoreCase('' + terminal.cid, keyword)) {
+        filteredTerminals.push(terminal);
+      } else if (termgr.containsIgnoreCase(terminal.location, keyword)) {
+        filteredTerminals.push(terminal);
+      }
+    }
+  }
+
+  return filteredTerminals;
+}
+
+
+termgr.filterCustomer = function (keywords, customer) {
+  for (var i = 0; i < keywords.length; i++) {
+    if (termgr.containsIgnoreCase(customer.name, keywords[i])) {
+      return customer;
+    }
+  }
+
+  var terminals = termgr.filterTerminals(keywords, customer.terminals);
+
+  if (terminals.length > 0) {
+    return {'id': customer.id, 'name': customer.name, 'terminals': terminals};
+  }
+
+  return null;
+}
+
+
+termgr.listCustomers = function (customers) {
+  var customerList = document.getElementById("customerList");
+  customerList.innerHTML = '';
+  var filters = getFilters();
+  var customer;
+
+  for (cidStr in customers) {
+    if (customers.hasOwnProperty(cidStr)) {
+      customer = customers[cidStr];
+
+      if (filters.length > 0) {
+        customer = termgr.filterCustomer(filters, customer)
+
+        if (customer != null) {
+          customerList.appendChild(termgr.customerEntry(customer));
+        }
+      }
+    }
+  }
+}
+
+
+termgr.Client = function (userName, passwd) {
+  this.userName = userName;
+  this.passwd = passwd
+
+  this.getData = function (terminal) {
+    var data = {'user_name': userName, 'passwd': passwd};
+
+    if (terminal != null) {
+      data['cid'] = terminal.cid;
+      data['tid'] = terminal.tid;
+    }
+
+    return data;
+  }
+
+  this.deploy = function(terminal, success, error, undeploy) {
+    var data = this.getData(terminal);
+
+    if (undeploy) {
+      data['undeploy'] = true;
+    }
+
+    $.ajax({
+      url: termgr.BASE_URL + '/administer/deploy',
+      type: 'POST',
+      data: JSON.stringify(data),
+      success: success,
+      error: error
+    });
+  }
+
+  this.undeploy = function(terminal, success, error) {
+    this.deploy(terminal, success, error, true);
+  }
+
+  this.enableApplication = function(terminal, success, error, disable) {
+    var data = this.getData(terminal);
+
+    if (disable) {
+      data['disable'] = true;
+    }
+
+    $.ajax({
+      url: termgr.BASE_URL + '/administer/application',
+      type: 'POST',
+      data: JSON.stringify(data),
+      success: success,
+      error: error
+    });
+  }
+
+  this.disableApplication = function(terminal, success, error) {
+    this.enableApplication(terminal, success, error, true);
+  }
+
+  this.reboot = function(terminal, success, error) {
+    var data = this.getData(terminal);
+
+    $.ajax({
+      url: termgr.BASE_URL + '/administer/reboot',
+      type: 'POST',
+      data: JSON.stringify(data),
+      success: success,
+      error: error
+    });
+  }
+}
+
+
 termgr.Terminal = function(json) {
   for (var prop in json) {
     if (json.hasOwnProperty(prop)) {
@@ -36,8 +202,95 @@ termgr.Terminal = function(json) {
   this.getId = function() {
     return this.tid + '.' + this.customer.cid;
   }
+
+  this.getDescription = function() {
+    return
+  }
 }
 
-termgr.TerminalEntry = function(terminal) {
 
+termgr.terminalEntry = function(terminal) {
+  var icon = document.createElement('i');
+  icon.setAttribute('class', 'fa fa-television');
+
+  var columnIcon = document.createElement('div');
+  columnIcon.setAttribute('class', 'col-m-1');
+  columnIcon.appendChild(icon);
+
+  var btnBeepIcon = document.createElement('i');
+  btnBeepIcon.setAttribute('class', 'fa fa-volume-up');
+
+  var btnBeep = document.createElement('button');
+  btnBeep.setAttribute('class', 'btn btn-success');
+  btnBeep.setAttribute('type', 'button');
+  btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnBeep.appendChild(btnBeepIcon);
+
+  var btnRebootIcon = document.createElement('i');
+  btnRebootIcon.setAttribute('class', 'fa fa-power-off');
+
+  var btnReboot = document.createElement('button');
+  btnReboot.setAttribute('class', 'btn btn-success');
+  btnReboot.setAttribute('type', 'button');
+  btnReboot.setAttribute('onclick', 'termgr.reboot(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnReboot.appendChild(btnRebootIcon);
+
+  var btnApplicationIcon = document.createElement('i');
+  btnApplicationIcon.setAttribute('class', 'fa fa-desktop');
+
+  var btnApplication = document.createElement('button');
+  btnApplication.setAttribute('class', 'btn btn-success');
+  btnApplication.setAttribute('type', 'button');
+  btnApplication.setAttribute('onclick', 'termgr.application(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnApplication.appendChild(btnApplicationIcon);
+
+  var btnSyncIcon = document.createElement('i');
+  btnSyncIcon.setAttribute('class', 'fa fa-sync');
+
+  var btnSync = document.createElement('button');
+  btnSync.setAttribute('class', 'btn btn-success');
+  btnSync.setAttribute('type', 'button');
+  btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnSync.appendChild(btnSyncIcon);
+
+  var columnButtons = document.createElement('div');
+  columnButtons.setAttribute('class', 'col-m-5');
+  columnButtons.appendChild(btnBeep);
+  columnButtons.appendChild(btnReboot);
+  columnButtons.appendChild(btnApplication);
+  columnButtons.appendChild(btnSync);
+
+  var description = document.createElement('p');
+  description.innerHTML = terminal.getDescription();
+
+  var columnDescription = document.createElement('div');
+  columnDescription.setAttribute('class', 'col-m-6');
+  columnDescription.appendChild(description);
+
+  var entry = document.createElement('div');
+  entry.setAttribute('class', 'row');
+  entry.appendChild(columnIcon);
+  entry.appendChild(columnButtons);
+  entry.appendChild(columnDescription);
+
+  return entry;
+}
+
+
+termgr.customerEntry = function (customer) {
+  var caption = document.createElement('p');
+  caption.innerHTML = customer.name;
+
+  var terminals = document.createElement('div');
+
+  for (var i = 0; i < customer.terminals.length; i++) {
+    terminals.appendChild(termgr.terminalEntry(customer.terminals[i]));
+  }
+
+  var entry = document.createElement('div');
+  entry.setAttribute('class', 'row');
+  entry.appendChild(caption);
+  entry.appendChild(terminals);
+
+  return entry;
 }
