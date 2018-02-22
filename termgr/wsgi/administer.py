@@ -61,11 +61,11 @@ def reboot(terminal):
     response = CONTROLLER.reboot(terminal)
 
     if response:
-        return ('Rebooted terminal: {}/{}.'.format(
-            response, response.exit_code), 200)
+        return 'Rebooted terminal.'
+    elif response.exit_code == 255:     # Timeout.
+        return ('Probably rebooted terminal.', 202)
 
-    return ('Probably rebooted terminal.{}/{}.'.format(
-        response, response.exit_code), 202)
+    return ('Failed to reboot terminal.', 500)
 
 
 ROUTES = (
