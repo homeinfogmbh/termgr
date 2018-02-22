@@ -58,8 +58,11 @@ def application(terminal):
 def reboot(terminal):
     """Reboots the respective terminal."""
 
-    if CONTROLLER.reboot(terminal):
-        return ('Rebooted terminal.', 200)
+    response = CONTROLLER.reboot(terminal)
+
+    if response:
+        return ('Rebooted terminal: {}/{}.'.format(
+            response, response.exit_code), 200)
 
     return ('Probably rebooted terminal.', 202)
 
