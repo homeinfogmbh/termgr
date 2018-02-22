@@ -63,7 +63,8 @@ def reboot(terminal):
     if response:
         return 'Rebooted terminal.'
     elif response.exit_code == 255:     # Timeout.
-        return ('Probably rebooted terminal.', 202)
+        return ('Probably rebooted terminal: {}.'.format(
+            response.stderr.decode()), 202)
 
     return ('Failed to reboot terminal.', 500)
 
