@@ -106,7 +106,7 @@ def authenticated(function):
     return wrapper
 
 
-def authorized(read=None, administer=None, setup=None, forward_user=False):
+def authorized(read=None, administer=None, setup=None):
     """Enforces a terminal authorization."""
 
     def wrap(function):
@@ -117,9 +117,6 @@ def authorized(read=None, administer=None, setup=None, forward_user=False):
 
             if user.authorize(
                     terminal, read=read, administer=administer, setup=setup):
-                if forward_user:
-                    return function(user, terminal, *args, **kwargs)
-
                 return function(terminal, *args, **kwargs)
 
             raise Error('Terminal operation unauthorized.', status=403)
