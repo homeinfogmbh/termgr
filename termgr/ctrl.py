@@ -4,62 +4,15 @@ from fancylog import Logger
 from terminallib import RemoteController
 
 
-__all__ = ['TerminalsController', 'TerminalController']
+__all__ = ['TerminalController', 'TerminalsController']
 
 
-REBOOT_OPTIONS = {
-    'ServerAliveInterval': 5,
-    'ServerAliveCountMax': 3}
-
-
-class TerminalsController:
-    """Processes several terminals in parallel."""
-
-    def __init__(self, user='termgr'):
-        """Sets terminals, user and logger."""
-        self.user = user
-        self.logger = Logger(self.__class__.__name__)
-
-    def _controller(self, terminal):
-        """Returns a controller for the respective terminal."""
-        return TerminalController(terminal, user=self.user, logger=self.logger)
-
-    def reboot(self, terminal):
-        """Rboots a terminal."""
-        return self._controller(terminal).reboot()
-
-    def cleanup(self, terminal):
-        """Cleans up package chache."""
-        return self._controller(terminal).cleanup()
-
-    def update(self, terminal):
-        """Updates packages."""
-        return self._controller(terminal).update()
-
-    def stage(self, terminal):
-        """Stage packages."""
-        return self._controller(terminal).stage()
-
-    def upgrade(self, terminal):
-        """Stage packages."""
-        return self._controller(terminal).upgrade()
-
-    def unlock(self, terminal):
-        """Unlocks the package manager."""
-        return self._controller(terminal).unlock()
-
-    def chkres(self, terminal):
-        """Checks the resolution."""
-        return self._controller(terminal).resolution
-
-    def install(self, *pkgs, asexplicit=False):
-        """Installs software packages."""
-        def install(terminal):
-            """Proxies the package installation."""
-            return self._controller(terminal).install(
-                *pkgs, asexplicit=asexplicit)
-
-        return install
+REBOOT_OPTIONS = {'ServerAliveInterval': 5, 'ServerAliveCountMax': 3}
+RESOLUTION_CMD = 'export DISPLAY=:0 \\; xrandr | grep " connected"'
+SUDO = '/usr/bin/sudo'
+PACMAN = '/usr/bin/pacman'
+SYSTEMCTL = '/usr/bin/systemctl'
+DIGSIG_APP = 'application.service'
 
 
 class TerminalController(RemoteController):
@@ -72,23 +25,27 @@ class TerminalController(RemoteController):
     @property
     def resolution(self):
         """Returns the display resolution."""
-        return self.execute('export DISPLAY=:0 \\; xrandr | grep " connected"')
+        return self.execute(RESOLUTION_CMD, shell=True)
 
     def sudo(self, cmd, *args):
         """Execute a command with sudo."""
-        return self.execute('/usr/bin/sudo', cmd, *args)
+        return self.execute(SUDO, cmd, *args)
+
+    def identify(self, *args):
+        """Lets the terminal beep."""
+        return self.sudo('/usr/bin/beep', *args)
 
     def pacman(self, *args):
         """Issues a pacman command."""
-        return self.sudo('/usr/bin/pacman', '--noconfirm', *args)
+        return self.sudo(PACMAN, *args, '--noconfirm')
 
     def reboot(self):
         """Reboots the terminal."""
-        if self.execute('/usr/bin/test -x /usr/bin/reboot'):
+        if self.execute('/usr/bin/test', '-x', '/usr/bin/reboot'):
             with self.extra_options(REBOOT_OPTIONS):
                 return self.sudo('/usr/bin/reboot')
 
-        return self.sudo('/usr/bin/systemctl isolate reboot.target')
+        return self.sudo(SYSTEMCTL, 'isolate', 'reboot.target')
 
     def cleanup(self):
         """Cleanup local package cache."""
@@ -143,3 +100,32 @@ class TerminalController(RemoteController):
             return False
 
         return self.sudo('/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
+
+    def enable_application(self):
+        """Enables the application."""
+        return self.sudo(SYSTEMCTL, 'enable', '--now', DIGSIG_APP)
+
+    def disable_application(self):
+        """Disables the application."""
+        return self.sudo(SYSTEMCTL, 'disable', '--now', DIGSIG_APP)
+
+
+class TerminalsController:
+    """Processes several terminals in parallel."""
+
+    def __init__(self, user='termgr'):
+        """Sets terminals, user and logger."""
+        self.user = user
+        self.logger = Logger(self.__class__.__name__)
+
+    def __getattr__(self, attr):
+        """Delegates to the respective controller."""
+        return lambda terminal: getattr(self._controller(terminal), attr)
+
+    def _controller(self, terminal):
+        """Returns a controller for the respective terminal."""
+        return TerminalController(terminal, user=self.user, logger=self.logger)
+
+    def chkres(self, terminal):
+        """Checks the resolution."""
+        return self._controller(terminal).resolution
