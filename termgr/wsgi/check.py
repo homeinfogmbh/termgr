@@ -25,13 +25,16 @@ def group_terminals(terminals):
 def dict_terminals(grouped_terminals):
     """Converts grouped terminals into JSON compliant dictionaries."""
 
-    return {'customers': [{
-        'id': customer.id, 'name': customer.name,
-        'terminals': [{
-            'id': terminal.tid,
-            'location': repr(terminal.location)}
-            for terminal in terminals]}
-        for customer, terminals in grouped_terminals.items()]}
+    return {
+        str(customer.id): {
+            'id': customer.id,
+            'name': customer.name,
+            'terminals': [{
+                'tid': terminal.tid,
+                'cid': customer.id,
+                'location': repr(terminal.location)}
+                          for terminal in terminals]}
+        for customer, terminals in grouped_terminals.items()}
 
 
 def authorized_terminals(user):
