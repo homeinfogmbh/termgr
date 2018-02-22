@@ -55,7 +55,7 @@ def application(terminal):
 
 @authenticated
 @authorized(administer=True)
-def reboot(user, terminal):
+def reboot(terminal):
     """Reboots the respective terminal."""
 
     if CONTROLLER.check_login():
