@@ -64,7 +64,8 @@ def reboot(terminal):
         return ('Rebooted terminal: {}/{}.'.format(
             response, response.exit_code), 200)
 
-    return ('Probably rebooted terminal.', 202)
+    return ('Probably rebooted terminal.{}/{}.'.format(
+        response, response.exit_code), 202)
 
 
 ROUTES = (
