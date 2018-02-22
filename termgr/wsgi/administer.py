@@ -58,8 +58,11 @@ def application(terminal):
 def reboot(user, terminal):
     """Reboots the respective terminal."""
 
-    if not user.root and not CONTROLLER.check_login():
-        return ('Admin user is currently logged in.', 403)
+    if not user.root:
+        if CONTROLLER.check_login():
+            return ('Admin user is currently logged in.', 403)
+        elif CONTROLLER.pacman():
+            return ('Package manager is currently running.', 403)
 
     response = CONTROLLER.reboot(terminal)
 

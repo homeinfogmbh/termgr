@@ -37,7 +37,14 @@ class TerminalController(RemoteController):
         return self.sudo('/usr/bin/beep', *args)
 
     def pacman(self, *args):
-        """Issues a pacman command."""
+        """Issues a pacman command.
+
+        If no arguments are given, it checks
+        for a running pacman process.
+        """
+        if not args:
+            return self.execute('/usr/bin/pidof', 'pacman')
+
         return self.sudo(PACMAN, '--noconfirm', *args)
 
     def reboot(self):
