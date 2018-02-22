@@ -103,7 +103,9 @@ class TerminalController(RemoteController):
 
     def enable_application(self):
         """Enables the application."""
-        return self.sudo(SYSTEMCTL, 'enable', '--now', DIGSIG_APP)
+        result = self.sudo(SYSTEMCTL, 'enable', '--now', DIGSIG_APP)
+        print('DEBUG:', result)
+        return result
 
     def disable_application(self):
         """Disables the application."""
