@@ -2,16 +2,17 @@
 
 from flask import request
 
-from wsgilib import JSON
+from wsgilib import JSON, Error
 
 from termgr.ctrl import TerminalController
-from termgr.wsgi.common import authenticated, authorized
+from termgr.wsgi.common import DATA, authenticated, authorized
 
 __all__ = ['ROUTES']
 
 
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
+CONTROLLER = TerminalsController()
 
 
 @authenticated
@@ -20,7 +21,7 @@ def deploy(terminal):
     """Deploys the respective terminal."""
 
     try:
-        request.args['undeploy']
+        DATA.json['undeploy']
     except KeyError:
         if terminal.deploy():
             return 'Terminal deployed.'
@@ -39,30 +40,17 @@ def application(terminal):
     """Activates and deactivates terminals."""
 
     try:
-        request.args['disable']
+        DATA.json['disable']
     except KeyError:
-        result = TerminalController(terminal).sudo(
-            SYSTEMCTL, 'enable', DIGSIG_APP)
+        if CONTROLLER.enable_application(terminal):
+            return 'Digital signage application enabled.'
 
-        if result:
-            message = 'Digital signage application enabled.'
-            status = 200
-        else:
-            message = 'Could not enable digital signage application.'
-            status = 500
-    else:
-        result = TerminalController(terminal).sudo(
-            SYSTEMCTL, 'disable', DIGSIG_APP)
+        return ('Could not enable digital signage application.', 500)
 
-        if result:
-            message = 'Digital signage application disabled.'
-            status = 200
-        else:
-            message = 'Could not disable digital signage application.'
-            status = 500
+    if CONTROLLER.disable_application(terminal):
+        return 'Digital signage application disabled.'
 
-    return JSON({'message': message, 'result': result.to_dict()},
-                status=status)
+    return ('Could not disable digital signage application.', 500)
 
 
 @authenticated
@@ -70,20 +58,13 @@ def application(terminal):
 def reboot(terminal):
     """Reboots the respective terminal."""
 
-    result = TerminalController(terminal).sudo('/usr/bin/reboot')
+    if CONTROLLER.reboot(terminal):
+        return ('Rebooted terminal.', 200)
 
-    if result:
-        message = 'Rebooted terminal.'
-        status = 200
-    else:
-        message = 'Probably rebooted terminal.'
-        status = 202
-
-    return JSON({'message': message, 'result': result.to_dict()},
-                status=status)
+    return ('Probably rebooted terminal.', 202)
 
 
 ROUTES = (
     ('POST', '/administer/deploy', deploy, 'deploy_terminal'),
-    ('POST', '/administer/activate', application, 'activate_application'),
+    ('POST', '/administer/application', application, 'activate_application'),
     ('POST', '/administer/reboot', reboot, 'reboot_terminal'))

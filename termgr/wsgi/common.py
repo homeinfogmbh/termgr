@@ -21,24 +21,18 @@ __all__ = [
 DATA = PostData()
 
 
-def _get_container(legacy):
-    """Returns the respective request data container."""
-
-    return request.args if legacy else DATA.json
-
-
-def get_user(legacy=False):
+def get_user():
     """Returns the appropriate user."""
 
-    container = _get_container(legacy)
+    json = DATA.json
 
     try:
-        passwd = container['passwd']
+        passwd = json['passwd']
     except KeyError:
         raise Error('No password specified.')
 
     try:
-        user_name = container['user_name']
+        user_name = json['user_name']
     except KeyError:
         raise Error('No user name specified.')
 
@@ -57,13 +51,14 @@ def get_action():
         raise Error('No action specified.')
 
 
-def get_customer(legacy=False):
+def get_customer(json=None):
     """Returns the respective customer."""
 
-    container = _get_container(legacy)
+    if json is None:
+        json = DATA.json
 
     try:
-        cids = container['cid'].split(':')
+        cids = json['cid'].split(':')
     except KeyError:
         raise Error('No CID specified.')
 
@@ -83,19 +78,19 @@ def get_customer(legacy=False):
     return customer
 
 
-def get_terminal(legacy=False):
+def get_terminal():
     """Returns the respective terminal."""
 
-    container = _get_container(legacy)
+    json = DATA.json
 
     try:
-        tid = container['tid']
+        tid = json['tid']
     except KeyError:
         raise Error('No TID specified.')
 
     try:
         return Terminal.get(
-            (Terminal.customer == get_customer(legacy=legacy))
+            (Terminal.customer == get_customer(json=json))
             & (Terminal.tid == tid))
     except Terminal.DoesNotExist:
         raise Error('No such terminal.', status=404)
@@ -120,7 +115,7 @@ def authorized(read=None, administer=None, setup=None):
             """Performs terminal check and runs function."""
             terminal = get_terminal()
 
-            if get_user().authorize(
+            if user.authorize(
                     terminal, read=read, administer=administer, setup=setup):
                 return function(terminal, *args, **kwargs)
 

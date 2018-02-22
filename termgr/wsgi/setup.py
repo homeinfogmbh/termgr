@@ -12,25 +12,6 @@ from termgr.wsgi.common import DATA, authenticated, authorized
 __all__ = ['ROUTES']
 
 
-def legacy_location(terminal):
-    """Returns terminal location data for legacy client versions."""
-
-    location = {}
-
-    if terminal.location is not None:
-        address = terminal.location.address
-        annotation = terminal.location.annotation
-        location['street'] = str(address.street)
-        location['house_number'] = str(address.house_number)
-        location['zip_code'] = str(address.zip_code)
-        location['city'] = str(address.city)
-
-        if annotation:
-            location['annotation'] = str(annotation)
-
-    return location
-
-
 def get_location(terminal):
     """Returns the terminal's location."""
 
