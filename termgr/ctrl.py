@@ -13,6 +13,7 @@ SUDO = '/usr/bin/sudo'
 PACMAN = '/usr/bin/pacman'
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
+ADMIN_USER = 'homeinfo'
 
 
 class TerminalController(RemoteController):
@@ -111,6 +112,10 @@ class TerminalController(RemoteController):
     def disable_application(self):
         """Disables the application."""
         return self.sudo(SYSTEMCTL, 'disable', '--now', DIGSIG_APP)
+
+    def check_login(self, user=ADMIN_USER):
+        """Checks whether the respective user is logged in."""
+        return self.execute('/usr/bin/loginctl', 'user-status', user)
 
 
 class TerminalsController:

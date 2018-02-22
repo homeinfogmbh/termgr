@@ -54,9 +54,12 @@ def application(terminal):
 
 
 @authenticated
-@authorized(administer=True)
-def reboot(terminal):
+@authorized(administer=True, forward_user=True)
+def reboot(user, terminal):
     """Reboots the respective terminal."""
+
+    if not user.root and not CONTROLLER.check_login():
+        return ('Admin user is currently logged in.', 403)
 
     response = CONTROLLER.reboot(terminal)
 
