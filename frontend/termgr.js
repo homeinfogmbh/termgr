@@ -20,18 +20,18 @@
 
   Requires:
     * jquery.js
-    * sweetalert.js
+    * sweetalert2.js
 */
 "use strict";
 
 termgr = termgr || {};
 
 termgr.BASE_URL = "https://termgr.homeinfo.de";
-termgr.customers = {};
 
 termgr.containsIgnoreCase = function (haystack, needle) {
   return haystack.toLowerCase().indexOf(needle.toLowerCase()) >= 0;
 }
+
 
 termgr.getCredentials = function () {
   return {'user_name': $("#userName").val(), 'passwd': $("#passwd").val()};
@@ -39,7 +39,7 @@ termgr.getCredentials = function () {
 
 
 termgr.getCustomers = function (callback) {
-  var credentials = getCredentials();
+  var credentials = termgr.getCredentials();
 
   $.ajax({
     url: termgr.BASE_URL + '/administer/deploy',
@@ -59,7 +59,7 @@ termgr.getCustomers = function (callback) {
 }
 
 
-termgr.filterTerminals = function (keywords, terminals) {
+termgr.filterTerminals = function (terminals, keywords) {
   var filteredTerminals = [];
   var terminal = null;
   var keyword = null;
@@ -84,14 +84,14 @@ termgr.filterTerminals = function (keywords, terminals) {
 }
 
 
-termgr.filterCustomer = function (keywords, customer) {
+termgr.filterCustomer = function (customer, keywords) {
   for (var i = 0; i < keywords.length; i++) {
     if (termgr.containsIgnoreCase(customer.name, keywords[i])) {
       return customer;
     }
   }
 
-  var terminals = termgr.filterTerminals(keywords, customer.terminals);
+  var terminals = termgr.filterTerminals(customer.terminals, keywords);
 
   if (terminals.length > 0) {
     return {'id': customer.id, 'name': customer.name, 'terminals': terminals};
@@ -101,25 +101,88 @@ termgr.filterCustomer = function (keywords, customer) {
 }
 
 
+termgr.filterCustomers = function (customers, keywords) {
+  var customers = [];
+
+  for (var i = 0; i < customers.length; i++) {
+    customer = termgr.filterCustomer(customer, keywords);
+
+    if (customer != null) {
+      customers.push(customer);
+    }
+  }
+
+  return customers;
+}
+
+
 termgr.listCustomers = function (customers) {
   var customerList = document.getElementById("customerList");
   customerList.innerHTML = '';
   var filters = getFilters();
-  var customer;
 
   for (cidStr in customers) {
     if (customers.hasOwnProperty(cidStr)) {
-      customer = customers[cidStr];
-
-      if (filters.length > 0) {
-        customer = termgr.filterCustomer(filters, customer)
-
-        if (customer != null) {
-          customerList.appendChild(termgr.customerEntry(customer));
-        }
+      if (customers[cidStr] != null) {
+        customerList.appendChild(termgr.customerEntry(customers[cidStr]));
       }
     }
   }
+}
+
+
+termgr.doReboot = function(tid, cid) {
+  var data = termgr.getCredentials();
+  data['tid'] = tid;
+  data['cid'] = cid;
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/reboot',
+    type: 'POST',
+    data: JSON.stringify(data),
+    success: function (message) {
+      swal({
+        title: 'OK,',
+        html: 'Terminal wurde neu gestartet.',
+        type: 'success'
+      })
+    },
+    error: function () {
+      swal({
+        title: 'Fehler,',
+        html: 'Das Terminal konnte nicht neu gestartet werden.',
+        type: 'error'
+      })
+    }
+  });
+}
+
+
+termgr.reboot = function (tid, cid) {
+  swal({
+    title: 'Sind Sie sicher?',
+    text: 'Wollen Sie das Terminal ' + tid + '.' + cid + ' wirklich neu starten?',
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ja, neu starten!',
+    cancelButtonText: 'Nein, abbrechen!',
+    confirmButtonClass: 'btn btn-success',
+    cancelButtonClass: 'btn btn-danger',
+    buttonsStyling: false,
+    reverseButtons: true
+  }).then((result) => {
+    if (result.value) {
+      termgr.doReboot(tid, cid);
+    } else if (result.dismiss === swal.DismissReason.cancel) {
+      swal({
+        title: 'Abgebrochen.',
+        text: 'Das Terminal ' + tid + '.' + cid + ' wird nicht neu gestartet,',
+        type: 'error'
+      })
+    }
+  })
 }
 
 
@@ -176,18 +239,6 @@ termgr.Client = function (userName, passwd) {
 
   this.disableApplication = function(terminal, success, error) {
     this.enableApplication(terminal, success, error, true);
-  }
-
-  this.reboot = function(terminal, success, error) {
-    var data = this.getData(terminal);
-
-    $.ajax({
-      url: termgr.BASE_URL + '/administer/reboot',
-      type: 'POST',
-      data: JSON.stringify(data),
-      success: success,
-      error: error
-    });
   }
 }
 
@@ -294,3 +345,7 @@ termgr.customerEntry = function (customer) {
 
   return entry;
 }
+
+
+termgr.main = function () {
+  
