@@ -103,9 +103,7 @@ class TerminalController(RemoteController):
 
     def enable_application(self):
         """Enables the application."""
-        print('DEBUG:', 'Calling enable_application.', flush=True)
         result = self.sudo(SYSTEMCTL, 'enable', '--now', DIGSIG_APP)
-        print('DEBUG:', result, flush=True)
         return result
 
     def disable_application(self):
@@ -123,7 +121,7 @@ class TerminalsController:
 
     def __getattr__(self, attr):
         """Delegates to the respective controller."""
-        return lambda terminal: getattr(self._controller(terminal), attr)
+        return lambda terminal: getattr(self._controller(terminal), attr)()
 
     def _controller(self, terminal):
         """Returns a controller for the respective terminal."""
