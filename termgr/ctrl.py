@@ -37,7 +37,7 @@ class TerminalController(RemoteController):
 
     def pacman(self, *args):
         """Issues a pacman command."""
-        return self.sudo(PACMAN, *args, '--noconfirm')
+        return self.sudo(PACMAN, '--noconfirm', *args)
 
     def reboot(self):
         """Reboots the terminal."""
