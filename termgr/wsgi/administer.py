@@ -4,7 +4,7 @@ from flask import request
 
 from wsgilib import JSON, Error
 
-from termgr.ctrl import TerminalController
+from termgr.ctrl import TerminalsController
 from termgr.wsgi.common import DATA, authenticated, authorized
 
 __all__ = ['ROUTES']
