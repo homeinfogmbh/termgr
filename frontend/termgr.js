@@ -296,18 +296,17 @@ termgr.queryReboot = function (tid, cid) {
     text: 'Wollen Sie das Terminal ' + tid + '.' + cid + ' wirklich neu starten?',
     type: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
     confirmButtonText: 'Ja, neu starten!',
     cancelButtonText: 'Nein, abbrechen!',
     confirmButtonClass: 'btn btn-success',
     cancelButtonClass: 'btn btn-danger',
-    buttonsStyling: false,
-    reverseButtons: true
-  }).then((result) => {
-    if (result.value) {
+    closeOnConfirm: false,
+    closeOnCancel: true,
+    showLoaderOnConfirm: true
+  }, function (confirmed) {
+    if (confirmed) {
       termgr.reboot(tid, cid);
-    } else if (result.dismiss === swal.DismissReason.cancel) {
+    } else {
       swal({
         title: 'Abgebrochen.',
         text: 'Das Terminal ' + tid + '.' + cid + ' wird nicht neu gestartet.',
