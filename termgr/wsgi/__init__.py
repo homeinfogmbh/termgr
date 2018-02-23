@@ -8,5 +8,5 @@ __all__ = ['ROUTES', 'APPLICATION']
 
 
 ROUTES = administer.ROUTES + check.ROUTES + query.ROUTES + setup.ROUTES
-APPLICATION = Application('termgr', debug=True)
+APPLICATION = Application('termgr', cors=True, debug=True)
 APPLICATION.add_routes(ROUTES)
