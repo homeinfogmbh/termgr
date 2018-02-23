@@ -479,7 +479,7 @@ termgr.terminalEntry = function(terminal) {
   icon.setAttribute('class', 'fa fa-tv');
 
   var columnIcon = document.createElement('td');
-  columnIcon.setAttribute('class', 'col-xs-1');
+  columnIcon.setAttribute('class', 'col-xs-2');
   columnIcon.appendChild(icon);
 
   var btnBeepIcon = document.createElement('i');
@@ -522,7 +522,7 @@ termgr.terminalEntry = function(terminal) {
   btnSync.appendChild(btnSyncIcon);
 
   var columnButtons = document.createElement('td');
-  columnButtons.setAttribute('class', 'col-xs-5');
+  columnButtons.setAttribute('class', 'col-xs-10');
   columnButtons.appendChild(btnBeep);
   columnButtons.appendChild(btnReboot);
   columnButtons.appendChild(btnApplication);
@@ -533,7 +533,7 @@ termgr.terminalEntry = function(terminal) {
   description.innerHTML = terminal.location + ' (' + terminal.tid + '.' + terminal.cid + ')';
 
   var columnDescription = document.createElement('td');
-  columnDescription.setAttribute('class', 'col-md-6 termgr-terminal-description');
+  columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
   columnDescription.appendChild(description);
 
   var entry = document.createElement('tr');
