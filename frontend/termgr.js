@@ -78,7 +78,8 @@ termgr.getCustomers = function (callback) {
         title: 'Konnte Terminaldaten nicht abfragen.',
         html: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort<br>oder versuchen Sie es später noch ein Mal.',
         type: 'error'
-      })
+      });
+      $('#loader').hide();
     }
   });
 }
