@@ -34,16 +34,16 @@ body {
   align-items: center;
 }
 
+.termgr-terminal-entry:nth-child(even){
+  background-color: #f2f2f2;
+}
+
 .termgr-customer-caption {
   cursor: pointer;
 }
 
 .termgr-customer-terminals {
   border: 1px solid DarkGray;
-}
-
-.termgr-terminal-entry:nth-child(even){
-  background-color: #f2f2f2;
 }
 
 .termgr-customer-entry {
