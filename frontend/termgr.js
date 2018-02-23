@@ -89,22 +89,16 @@ termgr.getCustomers = function (callback) {
 */
 termgr.filterTerminals = function (terminals, keywords) {
   var filteredTerminals = [];
-  var terminal = null;
-  var keyword = null;
-  var matching = null;
-  var matchingTid = null;
-  var matchingCid = null;
-  var matchingLocation = null;
 
   for (var i = 0; i < terminals.length; i++) {
-    terminal = terminals[i];
-    matching = true;
+    var terminal = terminals[i];
+    var matching = true;
 
     for (var j = 0; j < keywords.length; j++) {
-      keyword = keywords[j];
-      matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
-      matchingCid = termgr.containsIgnoreCase('' + terminal.cid, keyword);
-      matchingLocation = termgr.containsIgnoreCase(terminal.location, keyword);
+      var keyword = keywords[j];
+      var matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
+      var matchingCid = termgr.containsIgnoreCase('' + terminal.cid, keyword);
+      var matchingLocation = termgr.containsIgnoreCase(terminal.location, keyword);
 
       if (! (matchingTid || matchingCid || matchingLocation)) {
         matching = false;
