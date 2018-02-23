@@ -59,8 +59,14 @@
     </div>
 
     <div class="row" style="margin-top:30px;">
-      <div class="col-md-6">
-        <input id="searchField" type="text" class="form-control" onKeyUp="termgr.listFiltered();" placeholder="Live Suchen">
+      <div class="col-md-3">
+        <input id="searchField" type="text" class="form-control" placeholder="Filtern nach...">
+      </div>
+      <div class="col-md-3">
+        <button type="button" class="btn btn-info" onclick="termgr.listFiltered();">
+          <i class="fa fa-filter" aria-hidden="true"></i>
+          Terminals filtern
+        </button>
       </div>
     </div>
   </div>
