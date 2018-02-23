@@ -588,6 +588,35 @@ termgr.customerEntry = function (customer) {
 
 
 /*
+  Prepares the application control dialog.
+*/
+termgr.prepareApplicationDialog = function (event) {
+  // Button that triggered the modal.
+  var button = $(event.relatedTarget);
+  // Extract info from data-* attributes and convert to string.
+  var terminalId = '' + button.data('whatever');
+  var [tid, cid] = terminalId.split('.');
+  var modal = $(this)
+
+  var terminalIdField = modal.find('#terminalId');
+  terminalIdField.text(terminalId);
+
+  var disableButton = modal.find('#disableApplication');
+  disableButton.unbind('click');
+  disableButton.click(function () {
+    termgr.disableApplication(tid, cid);
+    $('#applicationDialog').modal('hide');
+  });
+
+  var enableButton = modal.find('#enableApplication');
+  enableButton.unbind('click');
+  enableButton.click(function () {
+    termgr.enableApplication(tid, cid);
+    $('#applicationDialog').modal('hide');
+  });
+}
+
+/*
   Performs the initial login.
 */
 termgr.login = function () {
@@ -598,26 +627,7 @@ termgr.login = function () {
 
 
 termgr.init = function () {
-  $('#applicationDialog').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Button that triggered the modal.
-    var terminalId = '' + button.data('whatever'); // Extract info from data-* attributes and convert to string.
-    var [tid, cid] = terminalId.split('.');
-    var modal = $(this)
-    var terminalIdField = modal.find('#terminalId');
-    terminalIdField.text(terminalId);
-    var disableButton = modal.find('#disableApplication');
-    var enableButton = modal.find('#enableApplication');
-    disableButton.unbind('click');
-    enableButton.unbind('click');
-    disableButton.click(function () {
-      termgr.disableApplication(tid, cid);
-      $('#applicationDialog').modal('hide');
-    });
-    enableButton.click(function () {
-      termgr.enableApplication(tid, cid);
-      $('#applicationDialog').modal('hide');
-    });
-  })
+  $('#applicationDialog').on('show.bs.modal', termgr.prepareApplicationDialog);
 }
 
 
