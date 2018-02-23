@@ -30,6 +30,11 @@ body {
 }
 
 .termgr-terminal-entry {
-  margin: 0 auto;
+  margin-top: 1em;
   align-items: center;
+}
+
+.termgr-customer-entry {
+  margin-top: 2em;
+  cursor: pointer;
 }

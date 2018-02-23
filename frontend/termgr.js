@@ -482,6 +482,14 @@ termgr.terminalEntry = function(terminal) {
   columnIcon.setAttribute('class', 'col-xs-2');
   columnIcon.appendChild(icon);
 
+  var description = document.createElement('p');
+  description.setAttribute('class', 'termgr-terminal-description');
+  description.innerHTML = terminal.location + ' (' + terminal.tid + '.' + terminal.cid + ')';
+
+  var columnDescription = document.createElement('td');
+  columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
+  columnDescription.appendChild(description);
+
   var btnBeepIcon = document.createElement('i');
   btnBeepIcon.setAttribute('class', 'fa fa-volume-up termgr-terminal-icon');
 
@@ -528,19 +536,23 @@ termgr.terminalEntry = function(terminal) {
   columnButtons.appendChild(btnApplication);
   columnButtons.appendChild(btnSync);
 
-  var description = document.createElement('p');
-  description.setAttribute('class', 'termgr-terminal-description');
-  description.innerHTML = terminal.location + ' (' + terminal.tid + '.' + terminal.cid + ')';
+  var rowButtons = document.createElement('tr');
+  rowButtons.appendChild(columnButtons);
 
-  var columnDescription = document.createElement('td');
-  columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
-  columnDescription.appendChild(description);
+  var rowDescription = document.createElement('tr');
+  rowDescription.appendChild(columnDescription);
+
+  var tableDescriptionAndButtons = document.createElement('table');
+  tableDescriptionAndButtons.appendChild(rowDescription);
+  tableDescriptionAndButtons.appendChild(rowButtons);
+
+  var columnDescriptionAndButtons = document.createElement('td');
+  columnDescriptionAndButtons.appendChild(tableDescriptionAndButtons);
 
   var entry = document.createElement('tr');
   entry.setAttribute('class', 'row row-centered termgr-terminal-entry');
   entry.appendChild(columnIcon);
-  entry.appendChild(columnButtons);
-  entry.appendChild(columnDescription);
+  entry.appendChild(columnDescriptionAndButtons);
 
   return entry;
 }
@@ -554,13 +566,17 @@ termgr.customerEntry = function (customer) {
   caption.innerHTML = '<h2>' + customer.name + '</h2>';
 
   var terminals = document.createElement('table');
+  terminals.setAttribute('id', 'terminals_' + customer.id);
+  terminals.setAttribute('class', 'termgr-customer-terminals');
+  terminals.setAttribute('style', 'display:none;');
 
   for (var i = 0; i < customer.terminals.length; i++) {
     terminals.appendChild(termgr.terminalEntry(customer.terminals[i]));
   }
 
   var entry = document.createElement('div');
-  entry.setAttribute('class', 'row row-centered');
+  entry.setAttribute('class', 'row row-centered termgr-customer-entry');
+  entry.setAttribute('onclick', '$("#terminals_' + customer.id + '").toggle();');
   entry.appendChild(caption);
   entry.appendChild(terminals);
 
