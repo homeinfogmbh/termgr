@@ -600,9 +600,11 @@ termgr.login = function () {
 termgr.init = function () {
   $('#applicationDialog').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget); // Button that triggered the modal.
-    var terminal = '' + button.data('whatever'); // Extract info from data-* attributes and convert to string.
-    var [tid, cid] = terminal.split('.');
+    var terminalId = '' + button.data('whatever'); // Extract info from data-* attributes and convert to string.
+    var [tid, cid] = terminalId.split('.');
     var modal = $(this)
+    var terminalIdField = modal.find('#terminalId');
+    terminalIdField.text(terminalId);
     var disableButton = modal.find('#disableApplication');
     var enableButton = modal.find('#enableApplication');
     disableButton.unbind('click');
