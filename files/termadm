@@ -246,15 +246,12 @@ def add_terminals(options):
             retval += 1
             continue
 
-        if scheduled is None and scheduled_ is not None:
-            scheduled = scheduled_
-
         vpn = VPN.add()
         address = Address.add(city, addr=addr, state=None)
         location = Location.add(address)
         terminal = Terminal.add(
             cid, class_, os_, connection, vpn, domain, location=location,
-            weather=weather, scheduled=scheduled)
+            weather=weather, scheduled=scheduled or scheduled_)
 
         if terminal:
             LOGGER.info('Added terminal {}.'.format(terminal))
