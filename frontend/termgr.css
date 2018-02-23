@@ -34,7 +34,10 @@ body {
   align-items: center;
 }
 
+.termgr-customer-caption{
+  cursor: pointer;
+}
+
 .termgr-customer-entry {
   margin-top: 2em;
-  cursor: pointer;
 }

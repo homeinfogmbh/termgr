@@ -563,6 +563,7 @@ termgr.terminalEntry = function(terminal) {
 */
 termgr.customerEntry = function (customer) {
   var caption = document.createElement('h3');
+  caption.setAttribute('class', 'termgr-customer-caption');
   caption.innerHTML = customer.name + ' (' + customer.id + ')';
 
   var captionContainer = document.createElement('span');
