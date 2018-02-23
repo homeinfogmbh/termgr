@@ -562,9 +562,12 @@ termgr.terminalEntry = function(terminal) {
   Generates a customer DOM entry.
 */
 termgr.customerEntry = function (customer) {
-  var caption = document.createElement('p');
-  caption.setAttribute('onclick', '$("#terminals_' + customer.id + '").toggle();');
-  caption.innerHTML = '<h2>' + customer.name + '</h2>';
+  var caption = document.createElement('h3');
+  caption.innerHTML = customer.name + ' (' + customer.id + ')';
+
+  var captionContainer = document.createElement('span');
+  captionContainer.setAttribute('onclick', '$("#terminals_' + customer.id + '").toggle();');
+  captionContainer.appendChild(caption);
 
   var terminals = document.createElement('table');
   terminals.setAttribute('id', 'terminals_' + customer.id);
@@ -577,7 +580,7 @@ termgr.customerEntry = function (customer) {
 
   var entry = document.createElement('div');
   entry.setAttribute('class', 'row row-centered termgr-customer-entry');
-  entry.appendChild(caption);
+  entry.appendChild(captionContainer);
   entry.appendChild(terminals);
 
   return entry;
