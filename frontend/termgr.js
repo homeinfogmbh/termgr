@@ -563,6 +563,7 @@ termgr.terminalEntry = function(terminal) {
 */
 termgr.customerEntry = function (customer) {
   var caption = document.createElement('p');
+  caption.setAttribute('onclick', '$("#terminals_' + customer.id + '").toggle();');
   caption.innerHTML = '<h2>' + customer.name + '</h2>';
 
   var terminals = document.createElement('table');
@@ -576,7 +577,6 @@ termgr.customerEntry = function (customer) {
 
   var entry = document.createElement('div');
   entry.setAttribute('class', 'row row-centered termgr-customer-entry');
-  entry.setAttribute('onclick', '$("#terminals_' + customer.id + '").toggle();');
   entry.appendChild(caption);
   entry.appendChild(terminals);
 
