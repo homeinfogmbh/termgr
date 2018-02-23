@@ -24,34 +24,59 @@
 */
 "use strict";
 
-termgr = termgr || {};
+var termgr = termgr || {};
 
 termgr.BASE_URL = "https://termgr.homeinfo.de";
 
+termgr.customer = null;
+
+
+/*
+  Case-insensitively checks whether a string contains another string.
+*/
 termgr.containsIgnoreCase = function (haystack, needle) {
   return haystack.toLowerCase().indexOf(needle.toLowerCase()) >= 0;
 }
 
 
+/*
+  Returns the user name and password from the respective input fields.
+*/
 termgr.getCredentials = function () {
   return {'user_name': $("#userName").val(), 'passwd': $("#passwd").val()};
 }
 
 
+/*
+  Returns the basic post data for the respective terminal.
+*/
+termgr.getData = function (tid, cid) {
+  var data = termgr.getCredentials();
+  data['tid'] = tid;
+  data['cid'] = '' + cid;   // Backend needs a string here.
+  return data;
+}
+
+
+/*
+  Retrieves the customers and their respective terminals
+  from the API and invokes the callback function.
+*/
 termgr.getCustomers = function (callback) {
   var credentials = termgr.getCredentials();
 
   $.ajax({
-    url: termgr.BASE_URL + '/administer/deploy',
+    url: termgr.BASE_URL + '/check/list',
     type: 'POST',
     data: JSON.stringify(credentials),
-    success: function (json) {
-      callback(json);
+    success: function (customers) {
+      termgr.customers = customers;
+      callback(customers);
     },
     error: function() {
       swal({
         title: 'Konnte Terminaldaten nicht abfragen.',
-        text: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.',
+        html: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort<br>oder versuchen Sie es später noch ein Mal.',
         type: 'error'
       })
     }
@@ -59,24 +84,36 @@ termgr.getCustomers = function (callback) {
 }
 
 
+/*
+  Filters the provided terminals by the respective keywords.
+*/
 termgr.filterTerminals = function (terminals, keywords) {
   var filteredTerminals = [];
   var terminal = null;
   var keyword = null;
+  var matching = null;
+  var matchingTid = null;
+  var matchingCid = null;
+  var matchingLocation = null;
 
   for (var i = 0; i < terminals.length; i++) {
     terminal = terminals[i];
+    matching = true;
 
     for (var j = 0; j < keywords.length; j++) {
       keyword = keywords[j];
+      matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
+      matchingCid = termgr.containsIgnoreCase('' + terminal.cid, keyword);
+      matchingLocation = termgr.containsIgnoreCase(terminal.location, keyword);
 
-      if (termgr.containsIgnoreCase('' + terminal.tid, keyword)) {
-        filteredTerminals.push(terminal);
-      } else if (termgr.containsIgnoreCase('' + terminal.cid, keyword)) {
-        filteredTerminals.push(terminal);
-      } else if (termgr.containsIgnoreCase(terminal.location, keyword)) {
-        filteredTerminals.push(terminal);
+      if (! (matchingTid || matchingCid || matchingLocation)) {
+        matching = false;
+        break;
       }
+    }
+
+    if (matching) {
+      filteredTerminals.push(terminal);
     }
   }
 
@@ -84,11 +121,21 @@ termgr.filterTerminals = function (terminals, keywords) {
 }
 
 
+/*
+  Filters the provided customer by the respective keywords.
+*/
 termgr.filterCustomer = function (customer, keywords) {
+  var customerMatch = true;
+
   for (var i = 0; i < keywords.length; i++) {
-    if (termgr.containsIgnoreCase(customer.name, keywords[i])) {
-      return customer;
+    if (! termgr.containsIgnoreCase(customer.name, keywords[i])) {
+      customerMatch = false;
+      break;
     }
+  }
+
+  if (customerMatch) {
+    return customer;
   }
 
   var terminals = termgr.filterTerminals(customer.terminals, keywords);
@@ -101,64 +148,154 @@ termgr.filterCustomer = function (customer, keywords) {
 }
 
 
+/*
+  Filters the provided customers by the respective keywords.
+*/
 termgr.filterCustomers = function (customers, keywords) {
-  var customers = [];
+  var filteredCustomers = {};
 
-  for (var i = 0; i < customers.length; i++) {
-    customer = termgr.filterCustomer(customer, keywords);
+  for (var cidStr in customers) {
+    if (customers.hasOwnProperty(cidStr)) {
+      var customer = termgr.filterCustomer(customers[cidStr], keywords);
 
-    if (customer != null) {
-      customers.push(customer);
+      if (customer != null) {
+        filteredCustomers[cidStr] = customer;
+      }
     }
   }
 
-  return customers;
+  return filteredCustomers;
 }
 
 
+/*
+  Lists the provided customers.
+*/
 termgr.listCustomers = function (customers) {
   var customerList = document.getElementById("customerList");
   customerList.innerHTML = '';
-  var filters = getFilters();
 
-  for (cidStr in customers) {
+  for (var cidStr in customers) {
     if (customers.hasOwnProperty(cidStr)) {
       if (customers[cidStr] != null) {
         customerList.appendChild(termgr.customerEntry(customers[cidStr]));
       }
     }
   }
+
+  $('#loader').hide();
+  $('#customerList').show();
 }
 
 
-termgr.doReboot = function(tid, cid) {
-  var data = termgr.getCredentials();
-  data['tid'] = tid;
-  data['cid'] = cid;
+/*
+  Filters customers and terminals and lists them.
+*/
+termgr.listFiltered = function (customers) {
+  if (customers == null) {
+    var customers = termgr.customers;
+  }
+
+  var searchValue = $('#searchField').val();
+
+  if (searchValue.length > 0) {
+    var keywords = searchValue.split();
+
+    if (keywords.length > 0) {
+      customers = termgr.filterCustomers(customers, keywords);
+    }
+  }
+
+  termgr.listCustomers(customers);
+}
+
+
+/*
+  Lets the respecive terminal beep.
+*/
+termgr.beep = function (tid, cid) {
+  var data = termgr.getData(tid, cid);
 
   $.ajax({
-    url: termgr.BASE_URL + '/administer/reboot',
+    url: termgr.BASE_URL + '/check/identify',
     type: 'POST',
     data: JSON.stringify(data),
-    success: function (message) {
+    error: function (jqXHR, textStatus, errorThrown) {
       swal({
-        title: 'OK,',
-        html: 'Terminal wurde neu gestartet.',
-        type: 'success'
+        title: 'Fehler.',
+        text: 'Das Terminal konnte nicht zum Piepen gebracht werden.',
+        type: 'error'
       })
     },
-    error: function () {
+    success: function () {
       swal({
-        title: 'Fehler,',
-        html: 'Das Terminal konnte nicht neu gestartet werden.',
-        type: 'error'
+        title: 'OK.',
+        text: 'Das Terminal sollte gepiept haben.',
+        type: 'success'
       })
     }
   });
 }
 
 
-termgr.reboot = function (tid, cid) {
+/*
+  Actually performs a reboot of the respective terminal.
+*/
+termgr.reboot = function(tid, cid) {
+  var data = termgr.getData(tid, cid);
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/reboot',
+    type: 'POST',
+    data: JSON.stringify(data),
+    error: function (jqXHR, textStatus, errorThrown) {
+      swal({
+        title: 'Das Terminal konnte nicht neu gestartet werden.',
+        html: '<pre>' + jqXHR.responseText + '</pre>',
+        type: 'error'
+      })
+    },
+    statusCode: {
+      200: function () {
+        swal({
+          title: 'OK.',
+          text: 'Das Terminal wurde neu gestartet.',
+          type: 'success'
+        })
+      },
+      202: function () {
+        swal({
+          title: 'OK.',
+          text: 'Das Terminal wurde wahrscheinlich neu gestartet.',
+          type: 'success'
+        })
+      },
+      403: function () {
+        swal({
+          title: 'Fehler.',
+          text: 'Sie sind nicht berechtigt, dieses Terminal neu zu starten.',
+          type: 'error'
+        })
+      },
+      503: function () {
+        swal({
+          title: 'Zur Zeit nicht möglich.',
+          text: 'Auf dem Terminal werden aktuell administrative Aufgaben ausgeführt.',
+          type: 'error'
+        })
+      }
+    }
+  });
+}
+
+
+/*
+  Reboots a terminal.
+
+  This function will open a popup to
+  confirm or abort the actual reboot.
+*/
+termgr.queryReboot = function (tid, cid) {
   swal({
     title: 'Sind Sie sicher?',
     text: 'Wollen Sie das Terminal ' + tid + '.' + cid + ' wirklich neu starten?',
@@ -174,11 +311,11 @@ termgr.reboot = function (tid, cid) {
     reverseButtons: true
   }).then((result) => {
     if (result.value) {
-      termgr.doReboot(tid, cid);
+      termgr.reboot(tid, cid);
     } else if (result.dismiss === swal.DismissReason.cancel) {
       swal({
         title: 'Abgebrochen.',
-        text: 'Das Terminal ' + tid + '.' + cid + ' wird nicht neu gestartet,',
+        text: 'Das Terminal ' + tid + '.' + cid + ' wird nicht neu gestartet.',
         type: 'error'
       })
     }
@@ -186,140 +323,226 @@ termgr.reboot = function (tid, cid) {
 }
 
 
-termgr.Client = function (userName, passwd) {
-  this.userName = userName;
-  this.passwd = passwd
+/*
+  Actually enables the application.
+*/
+termgr.enableApplication = function(tid, cid) {
+  var data = termgr.getData(tid, cid);
 
-  this.getData = function (terminal) {
-    var data = {'user_name': userName, 'passwd': passwd};
-
-    if (terminal != null) {
-      data['cid'] = terminal.cid;
-      data['tid'] = terminal.tid;
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/application',
+    type: 'POST',
+    data: JSON.stringify(data),
+    success: function () {
+      swal({
+        title: 'OK.',
+        text: 'Application wurde aktiviert.',
+        type: 'success'
+      })
+    },
+    error: function () {
+      swal({
+        title: 'Fehler.',
+        text: 'Application konnte nicht aktiviert werden.',
+        type: 'error'
+      })
+    },
+    statusCode: {
+      403: function () {
+        swal({
+          title: 'Fehler.',
+          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Application zu aktivieren.',
+          type: 'error'
+        })
+      }
     }
-
-    return data;
-  }
-
-  this.deploy = function(terminal, success, error, undeploy) {
-    var data = this.getData(terminal);
-
-    if (undeploy) {
-      data['undeploy'] = true;
-    }
-
-    $.ajax({
-      url: termgr.BASE_URL + '/administer/deploy',
-      type: 'POST',
-      data: JSON.stringify(data),
-      success: success,
-      error: error
-    });
-  }
-
-  this.undeploy = function(terminal, success, error) {
-    this.deploy(terminal, success, error, true);
-  }
-
-  this.enableApplication = function(terminal, success, error, disable) {
-    var data = this.getData(terminal);
-
-    if (disable) {
-      data['disable'] = true;
-    }
-
-    $.ajax({
-      url: termgr.BASE_URL + '/administer/application',
-      type: 'POST',
-      data: JSON.stringify(data),
-      success: success,
-      error: error
-    });
-  }
-
-  this.disableApplication = function(terminal, success, error) {
-    this.enableApplication(terminal, success, error, true);
-  }
+  });
 }
 
 
-termgr.Terminal = function(json) {
-  for (var prop in json) {
-    if (json.hasOwnProperty(prop)) {
-        this[prop] = json[prop];
+/*
+  Actually disables the application.
+*/
+termgr.disableApplication = function(tid, cid) {
+  var data = termgr.getData(tid, cid);
+  data['disable'] = true;
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/application',
+    type: 'POST',
+    data: JSON.stringify(data),
+    success: function () {
+      swal({
+        title: 'OK.',
+        text: 'Application wurde deaktiviert.',
+        type: 'success'
+      })
+    },
+    error: function () {
+      swal({
+        title: 'Fehler.',
+        text: 'Application konnte nicht deaktiviert werden.',
+        type: 'error'
+      })
+    },
+    statusCode: {
+      403: function () {
+        swal({
+          title: 'Fehler.',
+          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Application zu deaktivieren.',
+          type: 'error'
+        })
+      }
     }
-  }
-
-  this.getId = function() {
-    return this.tid + '.' + this.customer.cid;
-  }
-
-  this.getDescription = function() {
-    return
-  }
+  });
 }
 
 
+/*
+  Deploys the respective terminal.
+*/
+termgr.deploy = function(tid, cid) {
+  var data = termgr.getData(tid, cid);
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/deploy',
+    type: 'POST',
+    data: JSON.stringify(data),
+    success: function () {
+      swal({
+        title: 'OK.',
+        text: 'Terminal wurde als "verbaut" markiert.',
+        type: 'success'
+      })
+    },
+    error: function () {
+      swal({
+        title: 'Fehler.',
+        text: 'Das Terminal konnte nicht als "verbaut" markiert werden.',
+        type: 'error'
+      })
+    },
+    statusCode: {
+      403: function () {
+        swal({
+          title: 'Fehler.',
+          text: 'Sie sind nicht berechtigt, dieses Terminal als "verbaut" zu markieren.',
+          type: 'error'
+        })
+      }
+    }
+  });
+}
+
+
+/*
+  Un-deploys the respective terminal.
+*/
+termgr.undeploy = function(tid, cid) {
+  var data = termgr.getData(tid, cid);
+
+  if (undeploy) {
+    data['undeploy'] = true;
+  }
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/deploy',
+    type: 'POST',
+    data: JSON.stringify(data),
+    success: function () {
+      swal({
+        title: 'OK.',
+        text: 'Terminal wurde als "nicht verbaut" markiert.',
+        type: 'success'
+      })
+    },
+    error: function () {
+      swal({
+        title: 'Fehler.',
+        text: 'Das Terminal konnte nicht als "nicht verbaut" markiert werden.',
+        type: 'error'
+      })
+    },
+    statusCode: {
+      403: function () {
+        swal({
+          title: 'Fehler.',
+          text: 'Sie sind nicht berechtigt, dieses Terminal als "nicht verbaut" zu markieren.',
+          type: 'error'
+        })
+      }
+    }
+  });
+}
+
+
+/*
+  Generates a terminal DOM entry.
+*/
 termgr.terminalEntry = function(terminal) {
   var icon = document.createElement('i');
-  icon.setAttribute('class', 'fa fa-television');
+  icon.setAttribute('class', 'fa fa-tv');
 
-  var columnIcon = document.createElement('div');
-  columnIcon.setAttribute('class', 'col-m-1');
+  var columnIcon = document.createElement('td');
+  columnIcon.setAttribute('class', 'col-md-1');
   columnIcon.appendChild(icon);
 
   var btnBeepIcon = document.createElement('i');
-  btnBeepIcon.setAttribute('class', 'fa fa-volume-up');
+  btnBeepIcon.setAttribute('class', 'fa fa-volume-up termgr-terminal-icon');
 
   var btnBeep = document.createElement('button');
-  btnBeep.setAttribute('class', 'btn btn-success');
+  btnBeep.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnBeep.setAttribute('type', 'button');
-  btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.tid + ', ' + terminal.cid + ');');
   btnBeep.appendChild(btnBeepIcon);
 
   var btnRebootIcon = document.createElement('i');
   btnRebootIcon.setAttribute('class', 'fa fa-power-off');
 
   var btnReboot = document.createElement('button');
-  btnReboot.setAttribute('class', 'btn btn-success');
+  btnReboot.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnReboot.setAttribute('type', 'button');
-  btnReboot.setAttribute('onclick', 'termgr.reboot(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + terminal.cid + ');');
   btnReboot.appendChild(btnRebootIcon);
 
   var btnApplicationIcon = document.createElement('i');
   btnApplicationIcon.setAttribute('class', 'fa fa-desktop');
 
   var btnApplication = document.createElement('button');
-  btnApplication.setAttribute('class', 'btn btn-success');
+  btnApplication.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnApplication.setAttribute('type', 'button');
-  btnApplication.setAttribute('onclick', 'termgr.application(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  //btnApplication.setAttribute('onclick', 'termgr.showApplicationDialog(' + terminal.tid + ', ' + terminal.cid + ');');
+  btnApplication.setAttribute('data-toggle', 'modal');
+  btnApplication.setAttribute('data-target', '#applicationDialog');
+  btnApplication.setAttribute('data-whatever', terminal.tid + '.' + terminal.cid);
   btnApplication.appendChild(btnApplicationIcon);
 
   var btnSyncIcon = document.createElement('i');
   btnSyncIcon.setAttribute('class', 'fa fa-sync');
 
   var btnSync = document.createElement('button');
-  btnSync.setAttribute('class', 'btn btn-success');
+  btnSync.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnSync.setAttribute('type', 'button');
-  btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.customer.id + ', ' + terminal.tid + ');');
+  btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.tid + ', ' + terminal.cid + ');');
   btnSync.appendChild(btnSyncIcon);
 
-  var columnButtons = document.createElement('div');
-  columnButtons.setAttribute('class', 'col-m-5');
+  var columnButtons = document.createElement('td');
+  columnButtons.setAttribute('class', 'col-md-5');
   columnButtons.appendChild(btnBeep);
   columnButtons.appendChild(btnReboot);
   columnButtons.appendChild(btnApplication);
   columnButtons.appendChild(btnSync);
 
   var description = document.createElement('p');
-  description.innerHTML = terminal.getDescription();
+  description.setAttribute('class', 'termgr-terminal-description');
+  description.innerHTML = terminal.location + ' (' + terminal.tid + '.' + terminal.cid + ')';
 
-  var columnDescription = document.createElement('div');
-  columnDescription.setAttribute('class', 'col-m-6');
+  var columnDescription = document.createElement('td');
+  columnDescription.setAttribute('class', 'col-md-6 termgr-terminal-description');
   columnDescription.appendChild(description);
 
-  var entry = document.createElement('div');
-  entry.setAttribute('class', 'row');
+  var entry = document.createElement('tr');
+  entry.setAttribute('class', 'row row-centered termgr-terminal-entry');
   entry.appendChild(columnIcon);
   entry.appendChild(columnButtons);
   entry.appendChild(columnDescription);
@@ -328,18 +551,21 @@ termgr.terminalEntry = function(terminal) {
 }
 
 
+/*
+  Generates a customer DOM entry.
+*/
 termgr.customerEntry = function (customer) {
   var caption = document.createElement('p');
   caption.innerHTML = customer.name;
 
-  var terminals = document.createElement('div');
+  var terminals = document.createElement('table');
 
   for (var i = 0; i < customer.terminals.length; i++) {
     terminals.appendChild(termgr.terminalEntry(customer.terminals[i]));
   }
 
   var entry = document.createElement('div');
-  entry.setAttribute('class', 'row');
+  entry.setAttribute('class', 'row row-centered');
   entry.appendChild(caption);
   entry.appendChild(terminals);
 
@@ -347,5 +573,36 @@ termgr.customerEntry = function (customer) {
 }
 
 
-termgr.main = function () {
-  
+/*
+  Performs the initial login.
+*/
+termgr.login = function () {
+  $('#customerList').hide();
+  $('#loader').show();
+  termgr.getCustomers(termgr.listFiltered);
+}
+
+
+termgr.init = function () {
+  $('#applicationDialog').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal.
+    var terminal = '' + button.data('whatever'); // Extract info from data-* attributes and convert to string.
+    var [tid, cid] = terminal.split('.');
+    var modal = $(this)
+    var disableButton = modal.find('#disableApplication');
+    var enableButton = modal.find('#enableApplication');
+    disableButton.unbind('click');
+    enableButton.unbind('click');
+    disableButton.click(function () {
+      termgr.disableApplication(tid, cid);
+      $('#applicationDialog').modal('hide');
+    });
+    enableButton.click(function () {
+      termgr.enableApplication(tid, cid);
+      $('#applicationDialog').modal('hide');
+    });
+  })
+}
+
+
+$(document).ready(termgr.init)
