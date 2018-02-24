@@ -206,7 +206,7 @@ termgr.listFiltered = function (customers) {
 
 
 /*
-  Lets the respecive terminal beep.
+  Lets the respective terminal beep.
 */
 termgr.beep = function (tid, cid) {
   var data = termgr.getData(tid, cid);
