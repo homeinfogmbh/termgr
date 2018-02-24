@@ -306,12 +306,6 @@ termgr.queryReboot = function (tid, cid) {
   }, function (confirmed) {
     if (confirmed) {
       termgr.reboot(tid, cid);
-    } else {
-      swal({
-        title: 'Abgebrochen.',
-        text: 'Das Terminal ' + tid + '.' + cid + ' wird nicht neu gestartet.',
-        type: 'error'
-      })
     }
   })
 }
@@ -330,14 +324,14 @@ termgr.enableApplication = function(tid, cid) {
     success: function () {
       swal({
         title: 'OK.',
-        text: 'Application wurde aktiviert.',
+        text: 'Digital Signage Anwendung wurde aktiviert.',
         type: 'success'
       })
     },
     error: function () {
       swal({
         title: 'Fehler.',
-        text: 'Application konnte nicht aktiviert werden.',
+        text: 'Digital Signage Anwendung konnte nicht aktiviert werden.',
         type: 'error'
       })
     },
@@ -345,7 +339,7 @@ termgr.enableApplication = function(tid, cid) {
       403: function () {
         swal({
           title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Application zu aktivieren.',
+          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Digital Signage Anwendung zu aktivieren.',
           type: 'error'
         })
       }
@@ -368,14 +362,14 @@ termgr.disableApplication = function(tid, cid) {
     success: function () {
       swal({
         title: 'OK.',
-        text: 'Application wurde deaktiviert.',
+        text: 'Digital Signage Anwendung wurde deaktiviert.',
         type: 'success'
       })
     },
     error: function () {
       swal({
         title: 'Fehler.',
-        text: 'Application konnte nicht deaktiviert werden.',
+        text: 'Digital Signage Anwendung konnte nicht deaktiviert werden.',
         type: 'error'
       })
     },
@@ -383,7 +377,7 @@ termgr.disableApplication = function(tid, cid) {
       403: function () {
         swal({
           title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Application zu deaktivieren.',
+          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Digital Signage Anwendung zu deaktivieren.',
           type: 'error'
         })
       }
@@ -513,7 +507,6 @@ termgr.terminalEntry = function(terminal) {
   var btnApplication = document.createElement('button');
   btnApplication.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnApplication.setAttribute('type', 'button');
-  //btnApplication.setAttribute('onclick', 'termgr.showApplicationDialog(' + terminal.tid + ', ' + terminal.cid + ');');
   btnApplication.setAttribute('data-toggle', 'modal');
   btnApplication.setAttribute('data-target', '#applicationDialog');
   btnApplication.setAttribute('data-whatever', terminal.tid + '.' + terminal.cid);
@@ -616,6 +609,7 @@ termgr.prepareApplicationDialog = function (event) {
   });
 }
 
+
 /*
   Performs the initial login.
 */
@@ -626,6 +620,9 @@ termgr.login = function () {
 }
 
 
+/*
+  Runs on document.ready().
+*/
 termgr.init = function () {
   $('#applicationDialog').on('show.bs.modal', termgr.prepareApplicationDialog);
 }
