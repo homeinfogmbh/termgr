@@ -20,7 +20,7 @@
 
   Requires:
     * jquery.js
-    * sweetalert2.js
+    * sweetalert.js
 */
 "use strict";
 
