@@ -73,7 +73,7 @@ termgr.getCustomers = function (callback) {
       termgr.customers = customers;
       callback(customers);
     },
-    error: function() {
+    error: function () {
       swal({
         title: 'Konnte Terminaldaten nicht abfragen.',
         text: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.',
@@ -88,7 +88,7 @@ termgr.getCustomers = function (callback) {
 /*
   Filters the provided terminals by the respective keywords.
 */
-termgr.filterTerminals = function (terminals, keywords) {
+termgr.filterTerminals = function (terminals, cid, keywords) {
   var filteredTerminals = [];
 
   for (var i = 0; i < terminals.length; i++) {
@@ -98,7 +98,7 @@ termgr.filterTerminals = function (terminals, keywords) {
     for (var j = 0; j < keywords.length; j++) {
       var keyword = keywords[j];
       var matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
-      var matchingCid = termgr.containsIgnoreCase('' + terminal.cid, keyword);
+      var matchingCid = termgr.containsIgnoreCase('' + cid, keyword);
       var matchingLocation = termgr.containsIgnoreCase(terminal.location, keyword);
 
       if (! (matchingTid || matchingCid || matchingLocation)) {
@@ -133,7 +133,7 @@ termgr.filterCustomer = function (customer, keywords) {
     return customer;
   }
 
-  var terminals = termgr.filterTerminals(customer.terminals, keywords);
+  var terminals = termgr.filterTerminals(customer.terminals, customer.id, keywords);
 
   if (terminals.length > 0) {
     return {'id': customer.id, 'name': customer.name, 'terminals': terminals};
@@ -236,7 +236,7 @@ termgr.beep = function (tid, cid) {
 /*
   Actually performs a reboot of the respective terminal.
 */
-termgr.reboot = function(tid, cid) {
+termgr.reboot = function (tid, cid) {
   var data = termgr.getData(tid, cid);
 
   $.ajax({
@@ -314,7 +314,7 @@ termgr.queryReboot = function (tid, cid) {
 /*
   Actually enables the application.
 */
-termgr.enableApplication = function(tid, cid) {
+termgr.enableApplication = function (tid, cid) {
   var data = termgr.getData(tid, cid);
 
   $.ajax({
@@ -351,7 +351,7 @@ termgr.enableApplication = function(tid, cid) {
 /*
   Actually disables the application.
 */
-termgr.disableApplication = function(tid, cid) {
+termgr.disableApplication = function (tid, cid) {
   var data = termgr.getData(tid, cid);
   data['disable'] = true;
 
@@ -389,7 +389,7 @@ termgr.disableApplication = function(tid, cid) {
 /*
   Deploys the respective terminal.
 */
-termgr.deploy = function(tid, cid) {
+termgr.deploy = function (tid, cid) {
   var data = termgr.getData(tid, cid);
 
   $.ajax({
@@ -426,7 +426,7 @@ termgr.deploy = function(tid, cid) {
 /*
   Un-deploys the respective terminal.
 */
-termgr.undeploy = function(tid, cid) {
+termgr.undeploy = function (tid, cid) {
   var data = termgr.getData(tid, cid);
 
   if (undeploy) {
@@ -467,7 +467,7 @@ termgr.undeploy = function(tid, cid) {
 /*
   Generates a terminal DOM entry.
 */
-termgr.terminalEntry = function(terminal) {
+termgr.terminalEntry = function (terminal, cid) {
   var icon = document.createElement('i');
   icon.setAttribute('class', 'fa fa-tv');
 
@@ -477,7 +477,7 @@ termgr.terminalEntry = function(terminal) {
 
   var description = document.createElement('p');
   description.setAttribute('class', 'termgr-terminal-description');
-  description.innerHTML = terminal.location + ' (' + terminal.tid + '.' + terminal.cid + ')';
+  description.innerHTML = terminal.location + ' (' + terminal.tid + '.' + cid + ')';
 
   var columnDescription = document.createElement('td');
   columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
@@ -489,7 +489,7 @@ termgr.terminalEntry = function(terminal) {
   var btnBeep = document.createElement('button');
   btnBeep.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnBeep.setAttribute('type', 'button');
-  btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.tid + ', ' + terminal.cid + ');');
+  btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.tid + ', ' + cid + ');');
   btnBeep.appendChild(btnBeepIcon);
 
   var btnRebootIcon = document.createElement('i');
@@ -498,7 +498,7 @@ termgr.terminalEntry = function(terminal) {
   var btnReboot = document.createElement('button');
   btnReboot.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnReboot.setAttribute('type', 'button');
-  btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + terminal.cid + ');');
+  btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + cid + ');');
   btnReboot.appendChild(btnRebootIcon);
 
   var btnApplicationIcon = document.createElement('i');
@@ -509,7 +509,7 @@ termgr.terminalEntry = function(terminal) {
   btnApplication.setAttribute('type', 'button');
   btnApplication.setAttribute('data-toggle', 'modal');
   btnApplication.setAttribute('data-target', '#applicationDialog');
-  btnApplication.setAttribute('data-whatever', terminal.tid + '.' + terminal.cid);
+  btnApplication.setAttribute('data-whatever', terminal.tid + '.' + cid);
   btnApplication.appendChild(btnApplicationIcon);
 
   var btnSyncIcon = document.createElement('i');
@@ -518,7 +518,7 @@ termgr.terminalEntry = function(terminal) {
   var btnSync = document.createElement('button');
   btnSync.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnSync.setAttribute('type', 'button');
-  btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.tid + ', ' + terminal.cid + ');');
+  btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.tid + ', ' + cid + ');');
   btnSync.appendChild(btnSyncIcon);
 
   var columnButtons = document.createElement('td');
@@ -568,7 +568,7 @@ termgr.customerEntry = function (customer) {
   terminals.setAttribute('style', 'display:none;');
 
   for (var i = 0; i < customer.terminals.length; i++) {
-    terminals.appendChild(termgr.terminalEntry(customer.terminals[i]));
+    terminals.appendChild(termgr.terminalEntry(customer.terminals[i], customer.id));
   }
 
   var entry = document.createElement('div');
