@@ -64,7 +64,7 @@ class User(TermgrModel):
 
     @classmethod
     def authenticate(cls, name, passwd):
-        """Authenticate with name and hashed password."""
+        """Authenticate with name and password."""
         if passwd:
             try:
                 user = cls.get(cls.name == name)
@@ -79,7 +79,7 @@ class User(TermgrModel):
             if user.enabled:
                 return user
 
-        raise AuthenticationError() from None
+        raise AuthenticationError()
 
     @property
     def passwd(self):
