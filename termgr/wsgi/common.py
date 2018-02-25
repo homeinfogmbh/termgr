@@ -11,7 +11,6 @@ from termgr.orm import AuthenticationError, User
 __all__ = [
     'DATA',
     'get_user',
-    'get_action',
     'get_customer',
     'get_terminal',
     'authenticated',
@@ -19,6 +18,7 @@ __all__ = [
 
 
 DATA = PostData()
+INVALID_CREDENTIALS = Error('Invalid user name and / or password.', status=401)
 
 
 def get_user():
@@ -29,26 +29,17 @@ def get_user():
     try:
         passwd = json['passwd']
     except KeyError:
-        raise Error('No password specified.')
+        raise INVALID_CREDENTIALS
 
     try:
         user_name = json['user_name']
     except KeyError:
-        raise Error('No user name specified.')
+        raise INVALID_CREDENTIALS
 
     try:
         return User.authenticate(user_name, passwd)
     except AuthenticationError:
-        raise Error('Invalid user name and / or password.', status=401)
-
-
-def get_action():
-    """Returns the respective action."""
-
-    try:
-        return request.args['action']
-    except KeyError:
-        raise Error('No action specified.')
+        raise INVALID_CREDENTIALS
 
 
 def get_customer(json=None):
