@@ -26,7 +26,7 @@
 
 var termgr = termgr || {};
 
-termgr.BASE_URL = "https://termgr.homeinfo.de";
+termgr.BASE_URL = 'https://termgr.homeinfo.de';
 
 termgr.customer = null;
 
@@ -43,7 +43,7 @@ termgr.containsIgnoreCase = function (haystack, needle) {
   Returns the user name and password from the respective input fields.
 */
 termgr.getCredentials = function () {
-  return {'user_name': $("#userName").val(), 'passwd': $("#passwd").val()};
+  return {'user_name': $('#userName').val(), 'passwd': $('#passwd').val()};
 }
 
 
@@ -167,7 +167,7 @@ termgr.filterCustomers = function (customers, keywords) {
   Lists the provided customers.
 */
 termgr.listCustomers = function (customers) {
-  var customerList = document.getElementById("customerList");
+  var customerList = document.getElementById('customerList');
   customerList.innerHTML = '';
 
   for (var cidStr in customers) {
