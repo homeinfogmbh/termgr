@@ -159,7 +159,6 @@ class ACL(TermgrModel):
     terminal = ForeignKeyField(
         Terminal, db_column='terminal', on_update='CASCADE',
         on_delete='CASCADE')
-    # Permissions
     read = BooleanField(default=False)
     administer = BooleanField(default=False)
     setup = BooleanField(default=False)
