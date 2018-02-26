@@ -74,6 +74,7 @@ def reboot(terminal):
         if all(keyword in response.stderr for keyword in SSH_TIMEOUT_KEYWORDS):
             return ('Probably rebooted terminal.', 202)
 
+    print('Unknown SSH error:', response.stderr.decode())
     return ('Failed to reboot terminal.', 500)
 
 
