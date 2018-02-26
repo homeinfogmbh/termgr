@@ -1,8 +1,7 @@
 """Terminal administration."""
 
-from flask import request
-
-from wsgilib import JSON, Error
+from hipster.sync import Synchronizer
+from wsgilib import JSON
 
 from termgr.ctrl import TerminalsController
 from termgr.wsgi.common import DATA, authenticated, authorized
@@ -75,7 +74,22 @@ def reboot(terminal):
     return ('Failed to reboot terminal.', 500)
 
 
+@authenticated
+@authorized(administer=True)
+def sync(terminal):
+    """Synchronizes the respective terminal."""
+
+    with Synchronizer() as synchronizer:
+        result = synchronizer.sync(terminal)
+
+    if result:
+        return 'Terminal synchronizeed.'
+
+    return JSON([str(collector) for collector in result], status=500)
+
+
 ROUTES = (
-    ('POST', '/administer/deploy', deploy, 'deploy_terminal'),
-    ('POST', '/administer/application', application, 'activate_application'),
-    ('POST', '/administer/reboot', reboot, 'reboot_terminal'))
+    ('POST', '/administer/deploy', deploy, 'manage_deployment'),
+    ('POST', '/administer/application', application, 'manage_application'),
+    ('POST', '/administer/reboot', reboot, 'reboot_terminal'),
+    ('POST', '/administer/sync', reboot, 'sync_terminal'))
