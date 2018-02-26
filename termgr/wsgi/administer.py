@@ -13,6 +13,7 @@ SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
 SSH_TIMEOUT_KEYWORDS = (b'Timeout', b'not responding.')
 CONTROLLER = TerminalsController()
+KEY_FILE = '/home/termgr/.ssh/digsig'
 
 
 @authenticated
@@ -79,7 +80,7 @@ def reboot(terminal):
 def sync(terminal):
     """Synchronizes the respective terminal."""
 
-    with Synchronizer() as synchronizer:
+    with Synchronizer(keyfile=KEY_FILE) as synchronizer:
         result = synchronizer.sync(terminal)
 
     if result:
