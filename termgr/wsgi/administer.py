@@ -1,6 +1,7 @@
 """Terminal administration."""
 
 from hipster.sync import Synchronizer
+from hipster.appctl import ApplicationHandler
 from wsgilib import JSON
 
 from termgr.ctrl import TerminalsController
@@ -14,6 +15,7 @@ DIGSIG_APP = 'application.service'
 SSH_TIMEOUT_KEYWORDS = (b'Timeout', b'not responding.')
 CONTROLLER = TerminalsController()
 KEY_FILE = '/home/termgr/.ssh/digsig'
+APPCTL = ApplicationHandler(keyfile=KEY_FILE)
 
 
 @authenticated
