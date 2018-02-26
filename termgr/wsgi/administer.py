@@ -86,6 +86,7 @@ def sync(terminal):
         result = synchronizer.sync(terminal)
 
     if result:
+        APPCTL.restart(terminal)
         return 'Terminal synchronizeed.'
 
     return JSON([str(collector) for collector in result], status=500)
