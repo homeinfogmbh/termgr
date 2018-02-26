@@ -663,11 +663,11 @@ termgr.initApplicationDialog = function () {
     '#applicationDialog',
     function () {
       termgr.undeploy(tid, cid);
-    }),
+    },
     function () {
       termgr.deploy(tid, cid);
-    })
-  };
+    }
+  );
 }
 
 
