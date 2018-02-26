@@ -1,7 +1,7 @@
 """Terminal administration."""
 
-from hipster.sync import Synchronizer
 from hipster.appctl import ApplicationHandler
+from hipster.sync import Synchronizer
 from wsgilib import JSON
 
 from termgr.ctrl import TerminalsController
