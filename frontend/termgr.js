@@ -628,7 +628,7 @@ termgr.customerEntry = function (customer) {
 /*
   Prepares the application control dialog.
 */
-termgr.initDialog = function (id, negativeAction, positiveAction) {
+termgr.initDialog = function (negativeAction, positiveAction) {
   return function (event) {
     // Button that triggered the modal.
     var button = $(event.relatedTarget);
@@ -669,10 +669,8 @@ termgr.login = function () {
   Runs on document.ready().
 */
 termgr.init = function () {
-  $('#applicationDialog').on('show.bs.modal', termgr.initDialog(
-    '#applicationDialog', termgr.disableApplication, termgr.enableApplication));
-  $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(
-    '#deploymentDialog', termgr.undeploy, termgr.deploy));
+  $('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
+  $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
 }
 
 
