@@ -642,7 +642,7 @@ termgr.initDialog = function (negativeAction, positiveAction) {
     var positiveActionButton = modal.find('#positiveAction');
     positiveActionButton.unbind('click');
     positiveActionButton.click(function () {
-      negativeAction(tid, cid);
+      positiveAction(tid, cid);
       modal.modal('hide');
     });
   }
