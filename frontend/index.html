@@ -104,8 +104,32 @@
         </div>
       </div>
       <div class="modal-footer" style="visible:false;">
-        <input type="button" class="btn btn-danger" id="disableApplication" value="Deaktivieren">
-        <input type="button" class="btn btn-success" id="enableApplication" value="Aktivieren">
+        <input type="button" class="btn btn-danger" id="negativeAction" value="Deaktivieren">
+        <input type="button" class="btn btn-success" id="positiveAction" value="Aktivieren">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div id="deploymentDialog" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Terminal als verbaut / nicht verbaut eintragen</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row" id="the_form" style="margin-top:10px;">
+          <div class="col-md-12">
+            Möchten Sie das Terminal <span id="terminalId"></span> als "verbaut" oder als "nicht verbaut" markieren?
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="visible:false;">
+        <input type="button" class="btn btn-danger" id="negativeAction" value="Nicht verbaut">
+        <input type="button" class="btn btn-success" id="positiveAction" value="Verbaut">
       </div>
     </div>
   </div>

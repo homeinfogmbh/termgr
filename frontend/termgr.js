@@ -460,6 +460,12 @@ termgr.undeploy = function (tid, cid) {
 
 
 /*
+  Shows a popup window to query for deployment or undeployment.
+*/
+termgr.queryDeployment = function (tid, cid)
+
+
+/*
   Synchronizes the respective terminal.
 */
 termgr.sync = function (tid, cid) {
@@ -527,6 +533,15 @@ termgr.terminalEntry = function (terminal, cid) {
   btnReboot.setAttribute('type', 'button');
   btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + cid + ');');
   btnReboot.appendChild(btnRebootIcon);
+
+  var btnDeployIcon = document.createElement('i');
+  btnDeployIcon.setAttribute('class', 'fa fa-wrench');
+
+  var btnDeploy = document.createElement('button');
+  btnDeploy.setAttribute('class', 'btn btn-success termgr-terminal-action');
+  btnDeploy.setAttribute('type', 'button');
+  btnDeploy.setAttribute('onclick', 'termgr.queryDeployment(' + terminal.tid + ', ' + cid + ');');
+  btnDeploy.appendChild(btnDeployIcon);
 
   var btnApplicationIcon = document.createElement('i');
   btnApplicationIcon.setAttribute('class', 'fa fa-desktop');
@@ -610,30 +625,62 @@ termgr.customerEntry = function (customer) {
 /*
   Prepares the application control dialog.
 */
-termgr.prepareApplicationDialog = function (event) {
-  // Button that triggered the modal.
-  var button = $(event.relatedTarget);
-  // Extract info from data-* attributes and convert to string.
-  var terminalId = '' + button.data('whatever');
-  var [tid, cid] = terminalId.split('.');
-  var modal = $(this)
+termgr.initDialog = function (id, negativeAction, positiveAction) {
+  var hide = function () {
+    $(id).modal('hide');
+  };
 
-  var terminalIdField = modal.find('#terminalId');
-  terminalIdField.text(terminalId);
+  return function (event) {
+    // Button that triggered the modal.
+    var button = $(event.relatedTarget);
+    // Extract info from data-* attributes and convert to string.
+    var terminalId = '' + button.data('whatever');
+    var [tid, cid] = terminalId.split('.');
+    var modal = $(this)
+    modal.find('#terminalId').text(terminalId);
 
-  var disableButton = modal.find('#disableApplication');
-  disableButton.unbind('click');
-  disableButton.click(function () {
-    termgr.disableApplication(tid, cid);
-    $('#applicationDialog').modal('hide');
-  });
+    var negativeActionButton = modal.find('#negativeAction');
+    negativeActionButton.unbind('click');
+    negativeActionButton.click(negativeAction);
+    negativeActionButton.click(hide);
 
-  var enableButton = modal.find('#enableApplication');
-  enableButton.unbind('click');
-  enableButton.click(function () {
-    termgr.enableApplication(tid, cid);
-    $('#applicationDialog').modal('hide');
-  });
+    var positiveActionButton = modal.find('#positiveAction');
+    positiveActionButton.unbind('click');
+    positiveActionButton.click(positiveAction);
+    positiveActionButton.click(hide);
+  }
+}
+
+
+/*
+  Prepares the application control dialog.
+*/
+termgr.initApplicationDialog = function () {
+  return termgr.initDialog(
+    '#applicationDialog',
+    function () {
+      termgr.undeploy(tid, cid);
+    }),
+    function () {
+      termgr.deploy(tid, cid);
+    })
+  };
+}
+
+
+/*
+  Prepares the deployment control dialog.
+*/
+termgr.initDeploymentDialog = function () {
+  return termgr.initDialog(
+    '#deploymentDialog',
+    function () {
+      termgr.undeploy(tid, cid);
+    }),
+    function () {
+      termgr.deploy(tid, cid);
+    })
+  };
 }
 
 
@@ -651,7 +698,8 @@ termgr.login = function () {
   Runs on document.ready().
 */
 termgr.init = function () {
-  $('#applicationDialog').on('show.bs.modal', termgr.prepareApplicationDialog);
+  $('#applicationDialog').on('show.bs.modal', termgr.initApplicationDialog());
+  $('#deploymentDialog').on('show.bs.modal', termgr.initDeploymentDialog());
 }
 
 
