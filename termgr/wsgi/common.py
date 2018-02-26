@@ -1,7 +1,5 @@
 """Common WSGI functions."""
 
-from flask import request
-
 from homeinfo.crm import Customer
 from terminallib import Terminal
 from wsgilib import Error, PostData
