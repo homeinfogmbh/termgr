@@ -92,4 +92,4 @@ ROUTES = (
     ('POST', '/administer/deploy', deploy, 'manage_deployment'),
     ('POST', '/administer/application', application, 'manage_application'),
     ('POST', '/administer/reboot', reboot, 'reboot_terminal'),
-    ('POST', '/administer/sync', reboot, 'sync_terminal'))
+    ('POST', '/administer/sync', sync, 'sync_terminal'))
