@@ -540,7 +540,9 @@ termgr.terminalEntry = function (terminal, cid) {
   var btnDeploy = document.createElement('button');
   btnDeploy.setAttribute('class', 'btn btn-success termgr-terminal-action');
   btnDeploy.setAttribute('type', 'button');
-  btnDeploy.setAttribute('onclick', 'termgr.queryDeployment(' + terminal.tid + ', ' + cid + ');');
+  btnDeploy.setAttribute('data-toggle', 'modal');
+  btnDeploy.setAttribute('data-target', '#deploymentDialog');
+  btnDeploy.setAttribute('data-whatever', terminal.tid + '.' + cid);
   btnDeploy.appendChild(btnDeployIcon);
 
   var btnApplicationIcon = document.createElement('i');
@@ -568,6 +570,7 @@ termgr.terminalEntry = function (terminal, cid) {
   columnButtons.appendChild(btnBeep);
   columnButtons.appendChild(btnReboot);
   columnButtons.appendChild(btnApplication);
+  columnButtons.appendChild(btnDeploy);
   columnButtons.appendChild(btnSync);
 
   var rowButtons = document.createElement('tr');
