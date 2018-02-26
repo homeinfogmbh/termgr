@@ -629,10 +629,6 @@ termgr.customerEntry = function (customer) {
   Prepares the application control dialog.
 */
 termgr.initDialog = function (id, negativeAction, positiveAction) {
-  var hide = function () {
-    $(id).modal('hide');
-  };
-
   return function (event) {
     // Button that triggered the modal.
     var button = $(event.relatedTarget);
@@ -644,46 +640,18 @@ termgr.initDialog = function (id, negativeAction, positiveAction) {
 
     var negativeActionButton = modal.find('#negativeAction');
     negativeActionButton.unbind('click');
-    negativeActionButton.click(negativeAction);
-    negativeActionButton.click(hide);
+    negativeActionButton.click(function() {
+      negativeAction(tid, cid);
+      modal.modal('hide');
+    };
 
     var positiveActionButton = modal.find('#positiveAction');
     positiveActionButton.unbind('click');
-    positiveActionButton.click(positiveAction);
-    positiveActionButton.click(hide);
+    positiveActionButton.click(function () {
+      negativeAction(tid, cid);
+      modal.modal('hide');
+    };
   }
-}
-
-
-/*
-  Prepares the application control dialog.
-*/
-termgr.initApplicationDialog = function () {
-  return termgr.initDialog(
-    '#applicationDialog',
-    function () {
-      termgr.undeploy(tid, cid);
-    },
-    function () {
-      termgr.deploy(tid, cid);
-    }
-  );
-}
-
-
-/*
-  Prepares the deployment control dialog.
-*/
-termgr.initDeploymentDialog = function () {
-  return termgr.initDialog(
-    '#deploymentDialog',
-    function () {
-      termgr.undeploy(tid, cid);
-    },
-    function () {
-      termgr.deploy(tid, cid);
-    }
-  );
 }
 
 
@@ -701,8 +669,10 @@ termgr.login = function () {
   Runs on document.ready().
 */
 termgr.init = function () {
-  $('#applicationDialog').on('show.bs.modal', termgr.initApplicationDialog());
-  $('#deploymentDialog').on('show.bs.modal', termgr.initDeploymentDialog());
+  $('#applicationDialog').on('show.bs.modal', termgr.initDialog(
+    '#applicationDialog', termgr.disableApplication, termgr.enableApplication));
+  $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(
+    '#deploymentDialog', termgr.undeploy, termgr.deploy));
 }
 
 
