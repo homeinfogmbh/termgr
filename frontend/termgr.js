@@ -640,17 +640,17 @@ termgr.initDialog = function (id, negativeAction, positiveAction) {
 
     var negativeActionButton = modal.find('#negativeAction');
     negativeActionButton.unbind('click');
-    negativeActionButton.click(function() {
+    negativeActionButton.click(function () {
       negativeAction(tid, cid);
       modal.modal('hide');
-    };
+    });
 
     var positiveActionButton = modal.find('#positiveAction');
     positiveActionButton.unbind('click');
     positiveActionButton.click(function () {
       negativeAction(tid, cid);
       modal.modal('hide');
-    };
+    });
   }
 }
 
