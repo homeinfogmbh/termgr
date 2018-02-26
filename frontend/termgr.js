@@ -28,6 +28,26 @@ var termgr = termgr || {};
 
 termgr.BASE_URL = 'https://termgr.homeinfo.de';
 
+termgr.INVALID_CREDENTIALS = function () {
+  swal({
+    title: 'Fehler.',
+    text: 'Ungültiger Benutzername und / oder Passwort.',
+    type: 'error'
+  })
+};
+
+termgr.UNAUTHORIZED = function (what) {
+  var msg = 'Sie sind nicht berechtigt, ' + what + '.';
+
+  return function () {
+    swal({
+      title: 'Fehler.',
+      text: msg,
+      type: 'error'
+    })
+  };
+};
+
 termgr.customer = null;
 
 
@@ -228,6 +248,9 @@ termgr.beep = function (tid, cid) {
         text: 'Das Terminal sollte gepiept haben.',
         type: 'success'
       })
+    },
+    statusCode: {
+      401: termgr.INVALID_CREDENTIALS
     }
   });
 }
@@ -265,13 +288,8 @@ termgr.reboot = function (tid, cid) {
           type: 'success'
         })
       },
-      403: function () {
-        swal({
-          title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, dieses Terminal neu zu starten.',
-          type: 'error'
-        })
-      },
+      401: termgr.INVALID_CREDENTIALS,
+      403: termgr.UNAUTHORIZED('dieses Terminal neu zu starten'),
       503: function () {
         swal({
           title: 'Zur Zeit nicht möglich.',
@@ -336,13 +354,8 @@ termgr.enableApplication = function (tid, cid) {
       })
     },
     statusCode: {
-      403: function () {
-        swal({
-          title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Digital Signage Anwendung zu aktivieren.',
-          type: 'error'
-        })
-      }
+      401: termgr.INVALID_CREDENTIALS,
+      403: termgr.UNAUTHORIZED('auf diesem Terminal die Digital Signage Anwendung zu aktivieren')
     }
   });
 }
@@ -374,13 +387,8 @@ termgr.disableApplication = function (tid, cid) {
       })
     },
     statusCode: {
-      403: function () {
-        swal({
-          title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, auf diesem Terminal die Digital Signage Anwendung zu deaktivieren.',
-          type: 'error'
-        })
-      }
+      401: termgr.INVALID_CREDENTIALS,
+      403: termgr.UNAUTHORIZED('auf diesem Terminal die Digital Signage Anwendung zu deaktivieren')
     }
   });
 }
@@ -411,13 +419,8 @@ termgr.deploy = function (tid, cid) {
       })
     },
     statusCode: {
-      403: function () {
-        swal({
-          title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, dieses Terminal als "verbaut" zu markieren.',
-          type: 'error'
-        })
-      }
+      401: termgr.INVALID_CREDENTIALS,
+      403: termgr.UNAUTHORIZED('dieses Terminal als "verbaut" zu markieren')
     }
   });
 }
@@ -428,10 +431,7 @@ termgr.deploy = function (tid, cid) {
 */
 termgr.undeploy = function (tid, cid) {
   var data = termgr.getData(tid, cid);
-
-  if (undeploy) {
-    data['undeploy'] = true;
-  }
+  data['undeploy'] = true;
 
   $.ajax({
     url: termgr.BASE_URL + '/administer/deploy',
@@ -452,13 +452,40 @@ termgr.undeploy = function (tid, cid) {
       })
     },
     statusCode: {
-      403: function () {
-        swal({
-          title: 'Fehler.',
-          text: 'Sie sind nicht berechtigt, dieses Terminal als "nicht verbaut" zu markieren.',
-          type: 'error'
-        })
-      }
+      401: termgr.INVALID_CREDENTIALS,
+      403: termgr.UNAUTHORIZED('dieses Terminal als "nicht verbaut" zu markieren')
+    }
+  });
+}
+
+
+/*
+  Synchronizes the respective terminal.
+*/
+termgr.sync = function (tid, cid) {
+  var data = termgr.getData(tid, cid);
+
+  $.ajax({
+    url: termgr.BASE_URL + '/administer/sync',
+    type: 'POST',
+    data: JSON.stringify(data),
+    success: function () {
+      swal({
+        title: 'OK.',
+        text: 'Terminal wurde synchronisiert.',
+        type: 'success'
+      })
+    },
+    error: function () {
+      swal({
+        title: 'Fehler.',
+        text: 'Das Terminal konnte nicht synchronisiert werden.',
+        type: 'error'
+      })
+    },
+    statusCode: {
+      401: termgr.INVALID_CREDENTIALS,
+      403: termgr.UNAUTHORIZED('dieses Terminal zu synchronisieren')
     }
   });
 }
