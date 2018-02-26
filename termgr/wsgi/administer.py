@@ -1,5 +1,6 @@
 """Terminal administration."""
 
+from fancylog import Logger
 from hipster.appctl import ApplicationHandler
 from hipster.sync import Synchronizer
 from wsgilib import JSON
@@ -16,6 +17,7 @@ SSH_TIMEOUT_KEYWORDS = (b'Timeout', b'not responding.')
 CONTROLLER = TerminalsController()
 DIGSIG_KEY_FILE = '/home/termgr/.ssh/digsig'
 APPCTL = ApplicationHandler(keyfile=DIGSIG_KEY_FILE)
+LOGGER = Logger('terminal administration')
 
 
 @authenticated
@@ -74,7 +76,7 @@ def reboot(terminal):
         if all(keyword in response.stderr for keyword in SSH_TIMEOUT_KEYWORDS):
             return ('Probably rebooted terminal.', 202)
 
-    print('Unknown SSH error:', response.stderr.decode())
+    LOGGER.warning('Unknown SSH error:', response.stderr.decode())
     return ('Failed to reboot terminal.', 500)
 
 
