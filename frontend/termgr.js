@@ -626,7 +626,7 @@ termgr.customerEntry = function (customer) {
 
 
 /*
-  Prepares the application control dialog.
+  Prepares the respective dialog.
 */
 termgr.initDialog = function (negativeAction, positiveAction) {
   return function (event) {
