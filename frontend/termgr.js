@@ -460,12 +460,6 @@ termgr.undeploy = function (tid, cid) {
 
 
 /*
-  Shows a popup window to query for deployment or undeployment.
-*/
-termgr.queryDeployment = function (tid, cid)
-
-
-/*
   Synchronizes the respective terminal.
 */
 termgr.sync = function (tid, cid) {
