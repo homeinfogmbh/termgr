@@ -43,18 +43,19 @@ def get_permissions(terminals=None, user=None):
 def list_acls(options):
     """Lists the requested ACLs."""
 
-    user = None
-    terminals = None
-
     if options['--user']:
         try:
             user = User.get(User.name == options['--user'])
         except User.DoesNotExist:
             LOGGER.error('No such user:', options['--user'])
             return 3
+    else:
+        user = None
 
     if options['<expr>']:
-        terminals = [terminal.id for terminal in (parse(*options['<expr>']))]
+        terminals = set(terminal.id for terminal in parse(*options['<expr>'])))
+    else:
+        terminals = None
 
     for permission in get_permissions(terminals=terminals, user=user):
         print(permission, permission.terminal, permission.user)
