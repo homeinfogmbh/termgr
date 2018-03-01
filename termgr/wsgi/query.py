@@ -79,7 +79,7 @@ def get_terminals(user):
         if scheduled is not None:
             if terminal.scheduled is None:
                 continue
-            elif terminal.scheduled.date() != scheduled:
+            elif terminal.scheduled != scheduled:
                 continue
 
         if undeployed and terminal.deployed is not None:
