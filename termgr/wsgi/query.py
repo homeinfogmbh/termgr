@@ -63,28 +63,19 @@ def get_terminals(user):
     """List terminals of customer with CID."""
 
     scheduled = get_scheduled()
-    undeployed = request.args.get('undeployed', False)
     cid = request.args['cid']
+    expression = Terminal.testing == 0
 
-    if cid is None:
-        terminals = Terminal
-    else:
-        terminals = Terminal.select().where(
-            (Terminal.customer == cid) & (Terminal.testing == 0))
+    if cid is not None:
+        expression &= Terminal.customer == cid
 
-    for terminal in terminals:
-        if terminal.testing:
-            continue
+    if scheduled is not None:
+        expression &= Terminal.scheduled == scheduled
 
-        if scheduled is not None:
-            if terminal.scheduled is None:
-                continue
-            elif terminal.scheduled != scheduled:
-                continue
+    if request.args.get('undeployed', False):
+        expression &= Terminal.deployed >> None
 
-        if undeployed and terminal.deployed is not None:
-            continue
-
+    for terminal in Terminal.select().where(expression):
         if user.authorize(terminal, read=True):
             yield terminal
 
