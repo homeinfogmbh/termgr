@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import request
 from terminallib import Terminal
 
-from wsgilib import JSON, XML
+from wsgilib import JSON, XML, Error
 
 from termgr import dom
 from termgr.wsgi.common import authenticated
@@ -46,6 +46,7 @@ def terminals_to_dom(terminals):
 
 def get_scheduled():
     """Returns the scheduled date."""
+
     try:
         scheduled = request.args['scheduled']
     except KeyError:
@@ -54,7 +55,7 @@ def get_scheduled():
     try:
         scheduled = datetime.strptime(scheduled, '%Y-%m-%d')
     except ValueError:
-        raise ValueError('Invalid ISO date: {}.'.format(scheduled)) from None
+        raise Error('Invalid ISO date: {}.'.format(scheduled))
 
     return scheduled.date()
 
