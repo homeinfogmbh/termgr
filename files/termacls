@@ -53,7 +53,7 @@ def list_acls(options):
         user = None
 
     if options['<expr>']:
-        terminals = set(terminal.id for terminal in parse(*options['<expr>'])))
+        terminals = set(terminal.id for terminal in parse(*options['<expr>']))
     else:
         terminals = None
 
