@@ -32,8 +32,7 @@ def dict_terminals(grouped_terminals):
             'terminals': [{
                 'tid': terminal.tid,
                 'cid': customer.id,
-                'location': repr(terminal.location),
-                'online': terminal.online}
+                'location': repr(terminal.location)}
             for terminal in terminals]}
         for customer, terminals in grouped_terminals.items()}
 
