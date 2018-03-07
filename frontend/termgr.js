@@ -209,6 +209,8 @@ termgr.listCustomers = function (customers) {
 termgr.listFiltered = function (customers) {
   if (customers == null) {
     var customers = termgr.customers;
+    $('#customerList').hide();
+    $('#loader').show();
   }
 
   var searchValue = $('#searchField').val();
