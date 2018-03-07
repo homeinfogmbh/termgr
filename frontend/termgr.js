@@ -659,16 +659,21 @@ termgr.login = function () {
 
 
 /*
+  Hides the loader.
+*/
+termgr.hideLoader = function () {
+  $('#loader').hide();
+  $('#customerList').show();
+}
+
+
+/*
   Runs on document.ready().
 */
 termgr.init = function () {
   $('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
   $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
-  document.addEventListener("DOMContentLoaded", function(event) {
-    console.log("DOM fully loaded and parsed");
-    $('#loader').hide();
-    $('#customerList').show();
-  });
+  window.onDomChange = termgr.hideLoader;
 }
 
 
