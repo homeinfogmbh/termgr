@@ -675,7 +675,7 @@ termgr.init = function () {
   $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
   var observer = new MutationObserver(termgr.hideLoader);
   var targetNode = document.getElementById('customerList');
-  var config = {attributes: true, childList: true};
+  var config = {attributes: false, childList: true};
   observer.observe(targetNode, config);
 }
 
