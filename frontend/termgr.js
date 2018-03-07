@@ -673,7 +673,10 @@ termgr.hideLoader = function () {
 termgr.init = function () {
   $('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
   $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
-  window.onDomChange = termgr.hideLoader;
+  var observer = new MutationObserver(termgr.hideLoader);
+  var targetNode = document.getElementById('customerList');
+  var config = {attributes: true, childList: true};
+  observer.observe(targetNode, config);
 }
 
 
