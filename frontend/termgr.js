@@ -206,8 +206,10 @@ termgr.listCustomers = function (customers) {
 termgr.listFiltered = function (customers) {
   if (customers == null) {
     var customers = termgr.customers;
+    console.log('Showing loader.');
     $('#customerList').hide();
     $('#loader').show();
+    console.log('Showed loader.');
   }
 
   var searchValue = $('#searchField').val();
@@ -662,8 +664,10 @@ termgr.login = function () {
   Hides the loader.
 */
 termgr.hideLoader = function () {
+  console.log('Hiding loader.');
   $('#loader').hide();
   $('#customerList').show();
+  console.log('Loader hidden.');
 }
 
 
