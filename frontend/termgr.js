@@ -198,8 +198,10 @@ termgr.listCustomers = function (customers) {
     }
   }
 
+  console.log('Hiding.');
   $('#loader').hide();
   $('#customerList').show();
+  console.log('Hidden.');
 }
 
 
@@ -209,8 +211,10 @@ termgr.listCustomers = function (customers) {
 termgr.listFiltered = function (customers) {
   if (customers == null) {
     var customers = termgr.customers;
+    console.log('Showing.');
     $('#customerList').hide();
     $('#loader').show();
+    console.log('Showed.');
   }
 
   var searchValue = $('#searchField').val();
