@@ -33,7 +33,8 @@ def dict_terminals(grouped_terminals):
                 'tid': terminal.tid,
                 'cid': customer.id,
                 'location': repr(terminal.location)}
-                          for terminal in terminals]}
+                          for terminal in terminals],
+                'online': terminal.online}
         for customer, terminals in grouped_terminals.items()}
 
 
