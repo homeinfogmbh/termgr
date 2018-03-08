@@ -18,6 +18,9 @@ __all__ = [
     'ACL']
 
 
+_PASSWORD_HASHER = PasswordHasher()
+
+
 class AuthenticationError(Exception):
     """Indicates an error during authentication process."""
 
@@ -56,8 +59,6 @@ class User(TermgrModel):
     annotation = CharField(255, null=True)
     root = BooleanField(default=False)
 
-    passwd_hasher = PasswordHasher()
-
     def __str__(self):
         """Returns the user's name."""
         return self.name
@@ -72,7 +73,7 @@ class User(TermgrModel):
                 raise AuthenticationError()
 
             try:
-                cls.passwd_hasher.verify(user.pwhash, passwd)
+                _PASSWORD_HASHER.verify(user.pwhash, passwd)
             except VerifyMismatchError:
                 raise AuthenticationError()
 
@@ -81,15 +82,11 @@ class User(TermgrModel):
 
         raise AuthenticationError()
 
-    @property
-    def passwd(self):
-        """Returns the password hash."""
-        return self.pwhash
-
-    @passwd.setter
     def passwd(self, passwd):
         """Creates a new password hash."""
-        self.pwhash = self.__class__.passwd_hasher.hash(passwd)
+        self.pwhash = _PASSWORD_HASHER.hash(passwd)
+
+    passwd = property(None, passwd)
 
     def permissions(self, terminal):
         """Returns permissions on terminal."""
@@ -132,18 +129,25 @@ class User(TermgrModel):
         elif self.root:
             return True
 
+        if read is None:
+            read_expr = True
+        else:
+            read_expr = ACL.read == read
+
+        if administer is None:
+            administer_expr = True
+        else:
+            administer_expr = ACL.administer == administer
+
+        if setup is None:
+            setup_expr = True
+        else:
+            setup_expr = ACL.setup == setup
+
         try:
-            permissions = self.permissions(terminal)
+            ACL.get((ACL.user == self) & (ACL.terminal == terminal)
+                    & read_expr & administer_expr & setup_expr)
         except ACL.DoesNotExist:
-            return False
-
-        if read is not None and permissions.read != read:
-            return False
-
-        if administer is not None and permissions.administer != administer:
-            return False
-
-        if setup is not None and permissions.setup != setup:
             return False
 
         return True
@@ -169,7 +173,7 @@ class ACL(TermgrModel):
 
     def __repr__(self):
         """Returns the permissions as a string."""
-        return str(int(self))
+        return '{0:#0{1}o}'.format(int(self), 5)
 
     def __str__(self):
         """Returns the permissions as an alternative string."""
