@@ -25,7 +25,7 @@ from os import geteuid
 from os.path import basename
 from sys import stderr
 
-from fancylog import Logger, LogLevel, TTYAnimation
+from fancylog import Logger, LogLevel, TTYAnimator
 from syslib import Parallelization
 from terminallib import parse, PrintErrors, Terminal
 
@@ -72,7 +72,7 @@ def main(options):
             template = 'Updating {}: {}'
 
             with Parallelization(ctrl.update, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
 
             for terminal, *_ in para.failures:
@@ -81,7 +81,7 @@ def main(options):
             template = 'Staging {}: {}'
 
             with Parallelization(ctrl.stage, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
 
             for terminal, *_ in para.failures:
@@ -93,7 +93,7 @@ def main(options):
             template = 'Staging {}: {}'
 
             with Parallelization(install, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
 
             for terminal, *_ in para.failures:
@@ -102,7 +102,7 @@ def main(options):
             template = 'Upgrading {}: {}'
 
             with Parallelization(ctrl.upgrade, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
 
             for terminal, *_ in para.failures:
@@ -111,19 +111,19 @@ def main(options):
             template = 'Rebooting {}: {}'
 
             with Parallelization(ctrl.reboot, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
         elif options['chkres']:
             template = 'Checking resolution {}: {}'
 
             with Parallelization(ctrl.chkres, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
         elif options['unlock']:
             template = 'Unlocking {}: {}'
 
             with Parallelization(ctrl.unlock, terminals, single=True) as para:
-                with TTYAnimation(para, template=template):
+                with TTYAnimator(para, template=template):
                     para.wait()
 
             for terminal, *_ in para.failures:
