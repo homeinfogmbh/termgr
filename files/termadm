@@ -89,7 +89,7 @@ def parse_line(string, date_format=DATE_FORMAT):
 
     try:
         address, scheduled = string.split('@')
-    except KeyError:
+    except ValueError:
         address = string
         scheduled = None
     else:
