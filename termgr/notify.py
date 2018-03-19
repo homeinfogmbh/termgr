@@ -10,8 +10,8 @@ from termgr.orm import WatchList, ReportedTerminal
 
 
 MAILER = Mailer(
-    CONFIG['notify']['smtp_server'], CONFIG['notify']['port'],
-    CONFIG['notify']['login_name'], CONFIG['notify']['passwd'])
+    CONFIG['mail']['host'], CONFIG['mail']['port'],
+    CONFIG['mail']['user'], CONFIG['mail']['passwd'])
 SEP = ';'
 
 
@@ -45,7 +45,7 @@ def mail_terminals(user):
 
     terminals = []
     email = EMail(
-        CONFIG['notify']['subject'], CONFIG['notify']['sender'], user.email,
+        CONFIG['notify']['subject'], CONFIG['mail']['from'], user.email,
         CONFIG['notify']['body'])
 
     for watchlist in WatchList.select().where(WatchList.user == user):
@@ -74,6 +74,6 @@ def mail_terminals(user):
     if incomplete:
         list_ = ', '.join(str(terminal) for terminal in incomplete)
         email = EMail(
-            'Terminals without OpenVPN config.', CONFIG['notify']['sender'],
+            'Terminals without OpenVPN config.', CONFIG['mail']['from'],
             CONFIG['notify']['admin'], list_)
         MAILER.send([email])

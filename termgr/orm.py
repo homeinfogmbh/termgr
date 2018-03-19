@@ -62,6 +62,7 @@ class User(TermgrModel):
         on_delete='CASCADE')
     name = CharField(64)
     pwhash = CharField(255)
+    email = CharField(255, null=True)
     enabled = BooleanField()
     annotation = CharField(255, null=True)
     root = BooleanField(default=False)
