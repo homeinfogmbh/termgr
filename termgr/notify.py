@@ -52,6 +52,7 @@ def mail_terminals(user):
     email = EMail(
         CONFIG['notify']['subject'], CONFIG['mail']['from'], user.email,
         CONFIG['notify']['body'])
+    empty = True
 
     for watchlist in WatchList.select().where(WatchList.user == user):
         lines = []
@@ -62,23 +63,26 @@ def mail_terminals(user):
             terminals.append(terminal)
             lines.append(terminal_to_csv_record(terminal))
 
-        csv_file = '\r\n'.join(lines)   # Use DOS line breaks.
-        attachment = MIMEApplication(csv_file.encode(), Name=filename)
-        email.attach(attachment)
+        if lines:
+            csv_file = '\r\n'.join(lines)   # Use DOS line breaks.
+            attachment = MIMEApplication(csv_file.encode(), Name=filename)
+            email.attach(attachment)
+            empty = False
 
-    MAILER.send([email])
-    incomplete = []
-
-    for terminal in terminals:
-        if not OpenVPNPackager(terminal).complete:
-            incomplete.append(terminal)
-
-        reported_terminal = ReportedTerminal.add(user, terminal)
-        reported_terminal.save()
-
-    if incomplete:
-        list_ = ', '.join(str(terminal) for terminal in incomplete)
-        email = EMail(
-            'Terminals without OpenVPN config.', CONFIG['mail']['from'],
-            CONFIG['notify']['admin'], list_)
+    if not empty:
         MAILER.send([email])
+        incomplete = []
+
+        for terminal in terminals:
+            if not OpenVPNPackager(terminal).complete:
+                incomplete.append(terminal)
+
+            reported_terminal = ReportedTerminal.add(user, terminal)
+            reported_terminal.save()
+
+        if incomplete:
+            list_ = ', '.join(str(terminal) for terminal in incomplete)
+            email = EMail(
+                'Terminals without OpenVPN config.', CONFIG['mail']['from'],
+                CONFIG['notify']['admin'], list_)
+            MAILER.send([email])
