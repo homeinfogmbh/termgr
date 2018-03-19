@@ -7,7 +7,7 @@ from argon2.exceptions import VerifyMismatchError
 
 from homeinfo.crm import Company
 from peeweeplus import MySQLDatabase
-from terminallib import Terminal
+from terminallib import Class, Terminal
 
 from termgr.config import CONFIG
 
@@ -39,6 +39,7 @@ class TermgrModel(Model):
     id = PrimaryKeyField()
 
     class Meta:
+        """Configures the database and schema."""
         database = MySQLDatabase(
             CONFIG['db']['db'],
             host=CONFIG['db']['host'],
@@ -52,7 +53,8 @@ class User(TermgrModel):
     """A generic abstract user."""
 
     company = ForeignKeyField(
-        Company, db_column='company', on_update='CASCADE', on_delete='CASCADE')
+        Company, column_name='company', on_update='CASCADE',
+        on_delete='CASCADE')
     name = CharField(64)
     pwhash = CharField(255)
     enabled = BooleanField()
@@ -92,33 +94,16 @@ class User(TermgrModel):
         """Returns permissions on terminal."""
         return ACL.get((ACL.user == self) & (ACL.terminal == terminal))
 
-    def permit(self, terminal, read=None, administer=None, setup=None):
+    def permit(self, terminal, *, read=None, administer=None, setup=None):
         """Set permissions."""
         if self.root:
             raise PermissionsError('Cannot set permissions for root users.')
 
-        try:
-            permissions = self.permissions(terminal)
-        except ACL.DoesNotExist:
-            permissions = ACL()
-            permissions.user = self
-            permissions.terminal = terminal
+        acl = ACL.add(
+            self, terminal, read=read, administer=administer, setup=setup)
+        acl.commit()
 
-        if read is not None:
-            permissions.read = read
-
-        if administer is not None:
-            permissions.administer = administer
-
-        if setup is not None:
-            permissions.setup = setup
-
-        if permissions.read or permissions.administer or permissions.setup:
-            permissions.save()
-        else:
-            permissions.delete_instance()
-
-    def authorize(self, terminal, read=None, administer=None, setup=None):
+    def authorize(self, terminal, *, read=None, administer=None, setup=None):
         """Validate permissions.
         None means "don't care"!
         """
@@ -159,9 +144,9 @@ class ACL(TermgrModel):
     """
 
     user = ForeignKeyField(
-        User, db_column='user', on_update='CASCADE', on_delete='CASCADE')
+        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
     terminal = ForeignKeyField(
-        Terminal, db_column='terminal', on_update='CASCADE',
+        Terminal, column_name='terminal', on_update='CASCADE',
         on_delete='CASCADE')
     read = BooleanField(default=False)
     administer = BooleanField(default=False)
@@ -187,3 +172,99 @@ class ACL(TermgrModel):
 
     def __lt__(self, other):
         return int(self) < int(other)
+
+    @classmethod
+    def add(cls, user, terminal, *, read=None, administer=None, setup=None):
+        """Adds the respective ACL entry."""
+        try:
+            acl = cls.get((cls.user == user) & (cls.terminal == terminal))
+        except cls.DoesNotExist:
+            acl = cls()
+            acl.user = user
+            acl.terminal = terminal
+
+        if read is not None:
+            acl.read = read
+
+        if administer is not None:
+            acl.administer = administer
+
+        if setup is not None:
+            acl.setup = setup
+
+        return acl
+
+    def commit(self):
+        """Commits the ACLs."""
+        if self.read or self.administer or self.setup:
+            return self.save()
+
+        return self.delete_instance()
+
+
+class DefaultACL(TermgrModel):
+    """Represents default ACL settings for users."""
+
+    user = ForeignKeyField(
+        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    customer = ForeignKeyField(
+        Customer, column_name='customer', on_update='CASCADE',
+        on_delete='CASCADE')
+    class_ = ForeignKeyField(
+        Class, column_name='class', on_update='CASCADE', on_delete='CASCADE')
+    read = BooleanField(default=False)
+    administer = BooleanField(default=False)
+    setup = BooleanField(default=False)
+
+    @classmethod
+    def add(cls, user, customer, class_, *, read=False, administer=False,
+            setup=False):
+        """Adds new default ACLs."""
+        try:
+            acl = cls.get(
+                (cls.user == user) & (cls.customer == customer)
+                & (cls.class_ == class_))
+        except cls.DoesNotExist:
+            acl = cls()
+            acl.user = user
+            acl.customer = customer
+            acl.class_ = class_
+
+        if read is not None:
+            acl.read = read
+
+        if administer is not None:
+            acl.administer = administer
+
+        if setup is not None:
+            acl.setup = setup
+
+        return acl
+
+    @classmethod
+    def apply(cls, user=None):
+        """Applies the default ACLs to the current terminals."""
+        sel_expr = True if user is None else cls.user == user
+
+        for default_acl in cls.select().where(sel_expr):
+            for terminal in default_acl.terminals:
+                acl = ACL.add(
+                    default_acl.user, terminal, read=default_acl.read,
+                    administer=default_acl.administer, setup=default_acl.setup)
+                acl.commit()
+
+    @property
+    def terminals(self):
+        """Yields the respective terminals
+        associated with the default ACL entry.
+        """
+        return Terminal.select().where(
+            (Terminal.customer == self.customer)
+            & (Terminal.class_ == self.class_))
+
+    def commit(self):
+        """Commits the ACLs."""
+        if self.read or self.administer or self.setup:
+            return self.save()
+
+        return self.delete_instance()
