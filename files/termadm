@@ -370,6 +370,11 @@ def main(options):
     elif options['reload']:
         return 0 if update_config() else 1
     elif options['notify']:
+        if geteuid() != 0:
+            # Because only root and termgr can read the certificates.
+            LOGGER.error('You must be root to notify users.')
+            return 3
+
         notify_users()
 
     return 0
