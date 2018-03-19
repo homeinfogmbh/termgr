@@ -100,7 +100,7 @@ class User(TermgrModel):
         try:
             # Per-terminal ACLs override default ACLs.
             return ACL.get((ACL.user == self) & (ACL.terminal == terminal))
-        except DefaultACL.DoesNotExist:
+        except ACL.DoesNotExist:
             try:
                 return DefaultACL.get(
                     (DefaultACL.user == self)
