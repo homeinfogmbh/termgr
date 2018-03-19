@@ -217,13 +217,13 @@ class DefaultACL(TermgrModel):
         on_delete='CASCADE')
     class_ = ForeignKeyField(
         Class, column_name='class', on_update='CASCADE', on_delete='CASCADE')
-    read = BooleanField(default=False)
-    administer = BooleanField(default=False)
-    setup = BooleanField(default=False)
+    read = BooleanField(null=True, default=None)
+    administer = BooleanField(null=True, default=None)
+    setup = BooleanField(null=True, default=None)
 
     @classmethod
-    def add(cls, user, customer, class_, *, read=False, administer=False,
-            setup=False):
+    def add(cls, user, customer, class_, *, read=None, administer=None,
+            setup=None):
         """Adds new default ACLs."""
         try:
             acl = cls.get(
@@ -235,28 +235,17 @@ class DefaultACL(TermgrModel):
             acl.customer = customer
             acl.class_ = class_
 
-        if read is not None:
-            acl.read = read
-
-        if administer is not None:
-            acl.administer = administer
-
-        if setup is not None:
-            acl.setup = setup
-
+        acl.read = read
+        acl.administer = administer
+        acl.setup = setup
         return acl
 
     @classmethod
-    def apply(cls, user=None):
-        """Applies the default ACLs to the current terminals."""
-        sel_expr = True if user is None else cls.user == user
-
-        for default_acl in cls.select().where(sel_expr):
-            for terminal in default_acl.terminals:
-                acl = ACL.add(
-                    default_acl.user, terminal, read=default_acl.read,
-                    administer=default_acl.administer, setup=default_acl.setup)
-                acl.commit()
+    def for_terminal(cls, terminal):
+        """Yields the respective default ACLs for the respective terminal."""
+        return cls.select().where(
+            (cls.customer == terminal.customer)
+            & (cls.class_ == terminal.class_))
 
     @property
     def terminals(self):
@@ -266,6 +255,13 @@ class DefaultACL(TermgrModel):
         return Terminal.select().where(
             (Terminal.customer == self.customer)
             & (Terminal.class_ == self.class_))
+
+    def apply(self):
+        """Applies the default ACLs."""
+        for terminal in self.terminals:
+            ACL.add(
+                self.user, terminal, read=self.read,
+                administer=self.administer, setup=self.setup)
 
     def commit(self):
         """Commits the ACLs."""
