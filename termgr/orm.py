@@ -8,7 +8,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
 from homeinfo.crm import Company, Customer
-from peeweeplus import MySQLDatabase
+from peeweeplus import MySQLDatabase, ChangedConnection
 from terminallib import Class, Terminal
 
 from termgr.config import CONFIG
