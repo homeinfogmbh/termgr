@@ -210,6 +210,10 @@ class ACL(TermgrModel):
 class DefaultACL(TermgrModel):
     """Represents default ACL settings for users."""
 
+    class Meta:
+        """Sets the respective table name."""
+        table_name = 'default_acl'
+
     user = ForeignKeyField(
         User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
     customer = ForeignKeyField(
@@ -315,7 +319,7 @@ class ReportedTerminal(TermgrModel):
     """Lists reported terminals for the respective user."""
 
     class Meta:
-        """Sets the respective terminal name."""
+        """Sets the respective table name."""
         table_name = 'reported_terminal'
 
     user = ForeignKeyField(
