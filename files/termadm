@@ -11,6 +11,7 @@ Usage:
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>]
     termadm reload
+    termadm notify
 
 Options:
     --domain=<domain>           Specifies the domain [default: 1].
@@ -39,7 +40,7 @@ from syslib import run, evaluate
 from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
     Connection, Location, Terminal
 
-from termgr.orm import DefaultACL
+from termgr.notify import notify_users
 
 
 DATE_FORMAT = '%Y-%m-%d'
@@ -132,13 +133,6 @@ def get_state(state_iso):
     return State.get(State.iso == state_iso) if state_iso else None
 
 
-def update_acls(terminal):
-    """Updates the ACLs from the respective default ACLs."""
-
-    for default_acl in DefaultACL.for_terminal(terminal):
-        default_acl.apply()
-
-
 def add_terminal(options):
     """Adds a new terminal."""
 
@@ -214,7 +208,6 @@ def add_terminal(options):
         testing=testing)
 
     if terminal:
-        update_acls(terminal)
         LOGGER.info('Added terminal {}.'.format(terminal))
     else:
         LOGGER.error('Failed to add terminal.')
@@ -264,7 +257,6 @@ def add_terminals(options):
             weather=weather, scheduled=scheduled or scheduled_)
 
         if terminal:
-            update_acls(terminal)
             LOGGER.info('Added terminal {}.'.format(terminal))
         else:
             LOGGER.error('Failed to add terminal.')
@@ -377,6 +369,8 @@ def main(options):
         return relocate(options)
     elif options['reload']:
         return 0 if update_config() else 1
+    elif options['notify']:
+        notify_users()
 
     return 0
 

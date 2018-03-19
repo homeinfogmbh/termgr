@@ -9,6 +9,8 @@ from termgr.config import CONFIG
 from termgr.openvpn import OpenVPNPackager
 from termgr.orm import WatchList, ReportedTerminal
 
+__all__ = ['notify_users']
+
 
 LOGGER = getLogger(__file__)
 MAILER = Mailer(
@@ -86,3 +88,13 @@ def mail_terminals(user):
                 'Terminals without OpenVPN config.', CONFIG['mail']['from'],
                 CONFIG['notify']['admin'], list_)
             MAILER.send([email])
+
+
+def notify_users(users=None):
+    """Notifies the respective users about new terminals."""
+
+    if users is None:
+        users = User
+
+    for user in users:
+        mail_terminals(user)
