@@ -1,7 +1,9 @@
 """ORM models for termgr."""
 
+from datetime import datetime
+
 from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
-    ForeignKeyField
+    ForeignKeyField, DateTimeField
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
@@ -296,3 +298,44 @@ class WatchList(TermgrModel):
             acl.customer = customer
             acl.class_ = class_
             return acl
+
+    @property
+    def terminals(self):
+        """Yields matching, unreported terminals."""
+        return Terminal.select().where(
+            (Terminal.customer == self.customer)
+            & (Terminal.class_ == self.class_)
+            & (Terminal.testing == 0)
+            & (Terminal.reported >> None)).order_by(
+                Terminal.tid)
+
+
+class ReportedTerminal(TermgrModel):
+    """Lists reported terminals for the respective user."""
+
+    class Meta:
+        """Sets the respective terminal name."""
+        table_name = 'reported_terminal'
+
+    user = ForeignKeyField(
+        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    terminal = ForeignKeyField(
+        Terminal, column_name='terminal', on_update='CASCADE',
+        on_delete='CASCADE')
+    timestamp = DateTimeField(default=datetime.now)
+
+    @classmethod
+    def add(cls, user, terminal, timestamp=None):
+        """Marks the respective terminal as reported for the given user."""
+        try:
+            reported_terminal = cls.get(
+                (cls.user == user) & (cls.terminal == terminal))
+        except cls.DoesNotExist:
+            reported_terminal = cls()
+            reported_terminal.user = user
+            reported_terminal.terminal = terminal
+
+        if timestamp is not None:
+            reported_terminal.timestamp = timestamp
+
+        return reported_terminal
