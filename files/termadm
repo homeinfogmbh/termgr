@@ -30,6 +30,7 @@ Options:
 """
 from collections import namedtuple
 from datetime import datetime
+from getpass import getuser
 from logging import INFO, basicConfig, getLogger
 from os import geteuid
 from sys import exit as exit_
@@ -43,11 +44,12 @@ from termgr.notify import notify_users
 
 
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
+LOGGER = getLogger(__file__)
+TERMGR_USER = 'termgr'
 DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
 BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
 OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
-LOGGER = getLogger(__file__)
 
 Addr = namedtuple('Addr', ('street', 'house_number', 'zip_code'))
 TerminalLine = namedtuple('TerminalLine', ('city', 'addr', 'scheduled'))
@@ -370,9 +372,9 @@ def main(options):
     elif options['reload']:
         return 0 if update_config() else 1
     elif options['notify']:
-        if geteuid() != 0:
-            # Because only root and termgr can read the certificates.
-            LOGGER.error('You must be root to notify users.')
+        if getuser() != TERMGR_USER and geteuid() != 0:
+            # Because only termgr and root can read the certificates.
+            LOGGER.error('You must be termgr or root to notify users.')
             return 3
 
         notify_users()
