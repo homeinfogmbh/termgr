@@ -48,7 +48,7 @@ def mail_terminals(user):
     """Mails the respective terminals."""
 
     if user.email is None:
-        LOGGER.error('No email address configured for user.')
+        LOGGER.error('No email address configured for user "%s".', user.name)
 
     terminals = []
     email = EMail(
