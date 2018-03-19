@@ -321,12 +321,13 @@ class WatchList(TermgrModel):
     @property
     def terminals(self):
         """Yields matching, unreported terminals."""
-        return Terminal.select().join(
-            ReportedTerminal, JOIN.LEFT_OUTER).where(
-                (ReportedTerminal.terminal >> None)
-                & (Terminal.customer == self.customer)
-                & (Terminal.class_ == self.class_)
-                & (Terminal.testing == 0)).order_by(Terminal.tid)
+        with ChangedConnection(Terminal, ReportedTerminal):
+            return Terminal.select().join(
+                ReportedTerminal, JOIN.LEFT_OUTER).where(
+                    (ReportedTerminal.terminal >> None)
+                    & (Terminal.customer == self.customer)
+                    & (Terminal.class_ == self.class_)
+                    & (Terminal.testing == 0)).order_by(Terminal.tid)
 
 
 class ReportedTerminal(TermgrModel):
