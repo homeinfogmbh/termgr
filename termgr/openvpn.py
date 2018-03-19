@@ -73,6 +73,16 @@ class OpenVPNPackager(TerminalAware):
             keyfile=self.key_file,
             mtu=self.mtu)
 
+    @property
+    def files(self):
+        """Returns the mandatory files."""
+        return (CA_FILE_PATH, self.key_file_path, self.crt_file_path)
+
+    @property
+    def complete(self):
+        """Checks whether all mandatory files exist."""
+        return all(file.is_file() for file in self.files)
+
     def zip_file(self, file):
         """ZIPs OpenVPN files for Windows devices."""
         with ZipFile(file, mode='w') as zip_file:
