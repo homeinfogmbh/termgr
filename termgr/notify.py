@@ -1,6 +1,7 @@
 """New terminals nosification, ACL setting, OpenVPN key checks and mailing."""
 
 from email.mime.application import MIMEApplication
+from logging import getLogger
 
 from emaillib import Mailer, EMail
 
@@ -9,6 +10,7 @@ from termgr.openvpn import OpenVPNPackager
 from termgr.orm import WatchList, ReportedTerminal
 
 
+LOGGER = getLogger(__file__)
 MAILER = Mailer(
     CONFIG['mail']['host'], CONFIG['mail']['port'],
     CONFIG['mail']['user'], CONFIG['mail']['passwd'])
@@ -42,6 +44,9 @@ def terminal_to_csv_record(terminal, sep=SEP):
 
 def mail_terminals(user):
     """Mails the respective terminals."""
+
+    if user.email is None:
+        LOGGER.error('No email address configured for user.')
 
     terminals = []
     email = EMail(
