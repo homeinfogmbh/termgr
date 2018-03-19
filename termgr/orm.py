@@ -5,7 +5,7 @@ from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-from homeinfo.crm import Company
+from homeinfo.crm import Company, Customer
 from peeweeplus import MySQLDatabase
 from terminallib import Class, Terminal
 
@@ -268,3 +268,31 @@ class DefaultACL(TermgrModel):
             return self.save()
 
         return self.delete_instance()
+
+
+class WatchList(TermgrModel):
+    """Mapping in-between users, customers and terminal
+    classes to notify users about new terminals.
+    """
+
+    user = ForeignKeyField(
+        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    customer = ForeignKeyField(
+        Customer, column_name='customer', on_update='CASCADE',
+        on_delete='CASCADE')
+    class_ = ForeignKeyField(
+        Class, column_name='class', on_update='CASCADE', on_delete='CASCADE')
+
+    @classmethod
+    def add(cls, user, customer, class_):
+        """Adds new default ACLs."""
+        try:
+            return cls.get(
+                (cls.user == user) & (cls.customer == customer)
+                & (cls.class_ == class_))
+        except cls.DoesNotExist:
+            acl = cls()
+            acl.user = user
+            acl.customer = customer
+            acl.class_ = class_
+            return acl
