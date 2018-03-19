@@ -348,6 +348,8 @@ class ReportedTerminal(TermgrModel):
     @classmethod
     def add(cls, user, terminal, timestamp=None):
         """Marks the respective terminal as reported for the given user."""
+        print('Args:', user, terminal, timestamp, flush=True)
+
         try:
             reported_terminal = cls.get(
                 (cls.user == user) & (cls.terminal == terminal))
@@ -355,6 +357,9 @@ class ReportedTerminal(TermgrModel):
             reported_terminal = cls()
             reported_terminal.user = user
             reported_terminal.terminal = terminal
+
+        print('Props:', reported_terminal.user, reported_terminal.terminal,
+              reported_terminal.timestamp, flush=True)
 
         if timestamp is not None:
             reported_terminal.timestamp = timestamp
