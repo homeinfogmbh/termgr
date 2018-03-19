@@ -47,9 +47,6 @@ def terminal_to_csv_record(terminal, sep=SEP):
 def mail_terminals(user):
     """Mails the respective terminals."""
 
-    if user.email is None:
-        LOGGER.error('No email address configured for user "%s".', user.name)
-
     terminals = []
     email = EMail(
         CONFIG['notify']['subject'], CONFIG['mail']['from'], user.email,
@@ -72,22 +69,26 @@ def mail_terminals(user):
             empty = False
 
     if not empty:
-        MAILER.send([email])
-        incomplete = []
-
-        for terminal in terminals:
-            if not OpenVPNPackager(terminal).complete:
-                incomplete.append(terminal)
-
-            reported_terminal = ReportedTerminal.add(user, terminal)
-            reported_terminal.save()
-
-        if incomplete:
-            list_ = ', '.join(str(terminal) for terminal in incomplete)
-            email = EMail(
-                'Terminals without OpenVPN config.', CONFIG['mail']['from'],
-                CONFIG['notify']['admin'], list_)
+        if user.email is None:
+            LOGGER.error(
+                'No email address configured for user "%s".', user.name)
+        else:
             MAILER.send([email])
+            incomplete = []
+
+            for terminal in terminals:
+                if not OpenVPNPackager(terminal).complete:
+                    incomplete.append(terminal)
+
+                reported_terminal = ReportedTerminal.add(user, terminal)
+                reported_terminal.save()
+
+            if incomplete:
+                list_ = ', '.join(str(terminal) for terminal in incomplete)
+                email = EMail(
+                    'Terminals without OpenVPN config.',
+                    CONFIG['mail']['from'], CONFIG['notify']['admin'], list_)
+                MAILER.send([email])
 
 
 def notify_users(users=None):
