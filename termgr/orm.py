@@ -150,19 +150,12 @@ class User(TermgrModel):
         return False
 
 
-class ACL(TermgrModel):
-    """Many-to-many mapping in-between administrators
-    and terminals with certain permissions.
-    """
+class _ACL:
+    """ACL base interface."""
 
-    user = ForeignKeyField(
-        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
-    terminal = ForeignKeyField(
-        Terminal, column_name='terminal', on_update='CASCADE',
-        on_delete='CASCADE')
-    read = BooleanField(default=False)
-    administer = BooleanField(default=False)
-    setup = BooleanField(default=False)
+    read = NotImplemented
+    administer = NotImplemented
+    setup = NotImplemented
 
     def __int__(self):
         """Returns the permissions value."""
@@ -184,6 +177,21 @@ class ACL(TermgrModel):
 
     def __lt__(self, other):
         return int(self) < int(other)
+
+
+class ACL(TermgrModel, _ACL):
+    """Many-to-many mapping in-between administrators
+    and terminals with certain permissions.
+    """
+
+    user = ForeignKeyField(
+        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    terminal = ForeignKeyField(
+        Terminal, column_name='terminal', on_update='CASCADE',
+        on_delete='CASCADE')
+    read = BooleanField(default=False)
+    administer = BooleanField(default=False)
+    setup = BooleanField(default=False)
 
     @classmethod
     def add(cls, user, terminal, *, read=None, administer=None, setup=None):
@@ -214,7 +222,7 @@ class ACL(TermgrModel):
         return self.delete_instance()
 
 
-class DefaultACL(TermgrModel):
+class DefaultACL(TermgrModel, _ACL):
     """Represents default ACL settings for users."""
 
     class Meta:
