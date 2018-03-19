@@ -322,8 +322,7 @@ class WatchList(TermgrModel):
     def terminals(self):
         """Yields matching, unreported terminals."""
         return Terminal.select().join(
-            ReportedTerminal, JOIN.LEFT_OUTER,
-            on=(Terminal.user == ReportedTerminal.user)).where(
+            ReportedTerminal, JOIN.LEFT_OUTER).where(
                 (ReportedTerminal.terminal >> None)
                 & (Terminal.customer == self.customer)
                 & (Terminal.class_ == self.class_)
