@@ -326,8 +326,7 @@ class WatchList(TermgrModel):
                 (ReportedTerminal.terminal >> None)
                 & (Terminal.customer == self.customer)
                 & (Terminal.class_ == self.class_)
-                & (Terminal.testing == 0)
-                & (Terminal.reported >> None)).order_by(Terminal.tid)
+                & (Terminal.testing == 0)).order_by(Terminal.tid)
 
 
 class ReportedTerminal(TermgrModel):
