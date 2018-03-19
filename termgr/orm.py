@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
+from peewee import JOIN, Model, PrimaryKeyField, CharField, BooleanField, \
     ForeignKeyField, DateTimeField
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -302,12 +302,14 @@ class WatchList(TermgrModel):
     @property
     def terminals(self):
         """Yields matching, unreported terminals."""
-        return Terminal.select().where(
-            (Terminal.customer == self.customer)
-            & (Terminal.class_ == self.class_)
-            & (Terminal.testing == 0)
-            & (Terminal.reported >> None)).order_by(
-                Terminal.tid)
+        return Terminal.select().join(
+            ReportedTerminal, JOIN.LEFT_OUTER,
+            on=(Terminal.user == ReportedTerminal.user)).where(
+                (ReportedTerminal.terminal >> None)
+                & (Terminal.customer == self.customer)
+                & (Terminal.class_ == self.class_)
+                & (Terminal.testing == 0)
+                & (Terminal.reported >> None)).order_by(Terminal.tid)
 
 
 class ReportedTerminal(TermgrModel):
