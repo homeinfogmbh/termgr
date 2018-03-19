@@ -17,7 +17,10 @@ __all__ = [
     'AuthenticationError',
     'PermissionsError',
     'User',
-    'ACL']
+    'ACL',
+    'DefaultACL',
+    'WatchList',
+    'ReportedTerminal']
 
 
 _PASSWORD_HASHER = PasswordHasher()
