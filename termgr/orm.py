@@ -95,6 +95,20 @@ class User(TermgrModel):
 
     passwd = property(None, passwd)
 
+    def permissions(self, terminal):
+        """Returns permissions on terminal."""
+        try:
+            # Per-terminal ACLs override default ACLs.
+            return ACL.get((ACL.user == self) & (ACL.terminal == terminal))
+        except DefaultACL.DoesNotExist:
+            try:
+                return DefaultACL.get(
+                    (DefaultACL.user == self)
+                    & (DefaultACL.customer == terminal.customer)
+                    & (DefaultACL.class_ == terminal.class_))
+            except DefaultACL.DoesNotExist:
+                return None
+
     def permit(self, terminal, *, read=None, administer=None, setup=None):
         """Set permissions."""
         if self.root:

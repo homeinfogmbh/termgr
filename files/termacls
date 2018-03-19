@@ -4,7 +4,6 @@
 Usage:
     termacls get [<expr>...] [options]
     termacls set <user> [-GRras] <expr>...
-    termacls setdefaults
 
 Options:
     --grant, -G         Grants the provided permissions.
@@ -22,23 +21,12 @@ from sys import exit as exit_
 from docopt import docopt
 
 from fancylog import LogLevel, Logger
-from terminallib import parse, PrintErrors
+from terminallib import parse, PrintErrors, Terminal
 
-from termgr.orm import ACL, PermissionsError, User, DefaultACL
+from termgr.orm import PermissionsError, User
 
 
 LOGGER = Logger(basename(__file__), level=LogLevel.INFO)
-
-
-def get_permissions(terminals=None, user=None):
-    """Yields ACL records for the respective user"""
-
-    terminal_expr = True if terminals is None else ACL.terminal << terminals
-    user_expr = True if user is None else ACL.user == user
-
-    with PrintErrors():
-        for permission in ACL.select().where(terminal_expr & user_expr):
-            yield permission
 
 
 def list_acls(options):
@@ -54,12 +42,15 @@ def list_acls(options):
         user = None
 
     if options['<expr>']:
-        terminals = set(terminal.id for terminal in parse(*options['<expr>']))
+        terminals = parse(*options['<expr>'])
     else:
-        terminals = None
+        terminals = Terminal
 
-    for permission in get_permissions(terminals=terminals, user=user):
-        print(permission, permission.terminal, permission.user)
+    for terminal in terminals:
+        permissions = user.permissions(terminal)
+
+        if permissions is not None:
+            print(permissions, terminal, user)
 
     return 0
 
@@ -110,9 +101,6 @@ def main(options):
         return list_acls(options)
     elif options['set']:
         return set_acls(options)
-    elif options['setdefaults']:
-        for default_acl in DefaultACL:
-            default_acl.apply()
 
     return 0
 
