@@ -39,6 +39,9 @@ from syslib import run, evaluate
 from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
     Connection, Location, Terminal
 
+from termgr.orm import DefaultACL
+
+
 DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
 BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
@@ -129,6 +132,13 @@ def get_state(state_iso):
     return State.get(State.iso == state_iso) if state_iso else None
 
 
+def update_acls(terminal):
+    """Updates the ACLs from the respective default ACLs."""
+
+    for default_acl in DefaultACL.for_terminal(terminal):
+        default_acl.apply()
+
+
 def add_terminal(options):
     """Adds a new terminal."""
 
@@ -198,13 +208,13 @@ def add_terminal(options):
     else:
         location = None
 
-    # Add new terminal
     terminal = Terminal.add(
         cid, class_, os_, connection, vpn, domain, location=location,
         weather=weather, scheduled=scheduled, annotation=annotation,
         testing=testing)
 
     if terminal:
+        update_acls(terminal)
         LOGGER.info('Added terminal {}.'.format(terminal))
     else:
         LOGGER.error('Failed to add terminal.')
@@ -254,6 +264,7 @@ def add_terminals(options):
             weather=weather, scheduled=scheduled or scheduled_)
 
         if terminal:
+            update_acls(terminal)
             LOGGER.info('Added terminal {}.'.format(terminal))
         else:
             LOGGER.error('Failed to add terminal.')

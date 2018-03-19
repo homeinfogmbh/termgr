@@ -4,6 +4,7 @@
 Usage:
     termacls get [<expr>...] [options]
     termacls set <user> [-GRras] <expr>...
+    termacls setdefaults
 
 Options:
     --grant, -G         Grants the provided permissions.
@@ -21,9 +22,9 @@ from sys import exit as exit_
 from docopt import docopt
 
 from fancylog import LogLevel, Logger
-from terminallib import parse, PrintErrors, Terminal
+from terminallib import parse, PrintErrors
 
-from termgr.orm import ACL, PermissionsError, User
+from termgr.orm import ACL, PermissionsError, User, DefaultACL
 
 
 LOGGER = Logger(basename(__file__), level=LogLevel.INFO)
@@ -109,6 +110,9 @@ def main(options):
         return list_acls(options)
     elif options['set']:
         return set_acls(options)
+    elif options['setdefaults']:
+        for default_acl in DefaultACL:
+            default_acl.apply()
 
     return 0
 
