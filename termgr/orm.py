@@ -95,18 +95,20 @@ class User(TermgrModel):
 
     passwd = property(None, passwd)
 
-    def permissions(self, terminal):
-        """Returns permissions on terminal."""
-        return ACL.get((ACL.user == self) & (ACL.terminal == terminal))
-
     def permit(self, terminal, *, read=None, administer=None, setup=None):
         """Set permissions."""
         if self.root:
             raise PermissionsError('Cannot set permissions for root users.')
 
-        acl = ACL.add(
-            self, terminal, read=read, administer=administer, setup=setup)
-        acl.commit()
+        try:
+            DefaultACL.get(
+                (DefaultACL.user == self)
+                & (DefaultACL.customer == terminal.customer)
+                & (DefaultACL.class_ == terminal.class_))
+        except DefaultACL.DoesNotExist:
+            acl = ACL.add(
+                self, terminal, read=read, administer=administer, setup=setup)
+            acl.commit()
 
     def authorize(self, terminal, *, read=None, administer=None, setup=None):
         """Validate permissions.
@@ -119,28 +121,33 @@ class User(TermgrModel):
         elif self.root:
             return True
 
-        if read is None:
-            read_expr = True
-        else:
-            read_expr = ACL.read == read
+        # Per-terminal ACLs override default ACLs.
+        for acl_pool in (ACL, DefaultACL):
+            if read is None:
+                read_expr = True
+            else:
+                read_expr = acl_pool.read == read
 
-        if administer is None:
-            administer_expr = True
-        else:
-            administer_expr = ACL.administer == administer
+            if administer is None:
+                administer_expr = True
+            else:
+                administer_expr = acl_pool.administer == administer
 
-        if setup is None:
-            setup_expr = True
-        else:
-            setup_expr = ACL.setup == setup
+            if setup is None:
+                setup_expr = True
+            else:
+                setup_expr = acl_pool.setup == setup
 
-        try:
-            ACL.get((ACL.user == self) & (ACL.terminal == terminal)
+            try:
+                acl_pool.get(
+                    (acl_pool.user == self) & (acl_pool.terminal == terminal)
                     & read_expr & administer_expr & setup_expr)
-        except ACL.DoesNotExist:
-            return False
+            except ACL.DoesNotExist:
+                continue
 
-        return True
+            return True
+
+        return False
 
 
 class ACL(TermgrModel):
@@ -221,9 +228,9 @@ class DefaultACL(TermgrModel):
         on_delete='CASCADE')
     class_ = ForeignKeyField(
         Class, column_name='class', on_update='CASCADE', on_delete='CASCADE')
-    read = BooleanField(null=True, default=None)
-    administer = BooleanField(null=True, default=None)
-    setup = BooleanField(null=True, default=None)
+    read = BooleanField(default=False)
+    administer = BooleanField(default=False)
+    setup = BooleanField(default=False)
 
     @classmethod
     def add(cls, user, customer, class_, *, read=None, administer=None,
@@ -259,20 +266,6 @@ class DefaultACL(TermgrModel):
         return Terminal.select().where(
             (Terminal.customer == self.customer)
             & (Terminal.class_ == self.class_))
-
-    def apply(self):
-        """Applies the default ACLs."""
-        for terminal in self.terminals:
-            ACL.add(
-                self.user, terminal, read=self.read,
-                administer=self.administer, setup=self.setup)
-
-    def commit(self):
-        """Commits the ACLs."""
-        if self.read or self.administer or self.setup:
-            return self.save()
-
-        return self.delete_instance()
 
 
 class WatchList(TermgrModel):
