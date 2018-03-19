@@ -22,24 +22,20 @@ Options:
 """
 from getpass import getuser
 from os import geteuid
-from os.path import basename
 from sys import stderr
 
-from fancylog import Logger, LogLevel, TTYAnimator
+from fancylog import DEFAULT_ANIMATION, TTYAnimation, TTYAnimator
 from syslib import Parallelization
 from terminallib import parse, PrintErrors, Terminal
 
 from termgr.ctrl import TerminalsController
 
 
-VERBOSE = False
 TERMGR_USER = 'termgr'
 
 
 def main(options):
     """Runs the terminal manager."""
-
-    logger = Logger(basename(__file__), level=LogLevel.INFO)
 
     if geteuid() == 0:
         print('Refusing to run as root')
@@ -49,10 +45,7 @@ def main(options):
             TERMGR_USER, __file__), file=stderr)
         exit(2)
     else:
-        USER = options['--user'] if options['--user'] else TERMGR_USER
-        VERBOSE = options['--verbose']
-
-        # Get terminals generator
+        # Get terminals generator.
         if not options['<expr>']:
             terminals = Terminal.select().where(
                 ~(Terminal.deployed >> None) &
@@ -61,27 +54,31 @@ def main(options):
             with PrintErrors():
                 terminals = tuple(parse(options['<expr>']))
 
-        # Filter out undeployed terminals
+        # Filter out undeployed terminals.
         if not options['--undeployed']:
             terminals = (t for t in terminals if t.deployed)
 
         ctrl = TerminalsController()
 
-        # Perform selected operation
+        # Perform selected operation.
         if options['update']:
-            template = 'Updating {}: {}'
+            animation = TTYAnimation(
+                'Updating {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(ctrl.update, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
 
             for terminal, *_ in para.failures:
                 print('Failed to update:', str(terminal))
         elif options['stage']:
-            template = 'Staging {}: {}'
+            animation = TTYAnimation(
+                'Staging {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(ctrl.stage, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
 
             for terminal, *_ in para.failures:
@@ -90,40 +87,50 @@ def main(options):
             pkgs = options['<package>']
             asexplicit = options['--asexplicit']
             install = ctrl.install(*pkgs, asexplicit=asexplicit)
-            template = 'Staging {}: {}'
+            animation = TTYAnimation(
+                'Syncing {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(install, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
 
             for terminal, *_ in para.failures:
                 print('Failed to sync:', str(terminal))
         elif options['system-upgrade']:
-            template = 'Upgrading {}: {}'
+            animation = TTYAnimation(
+                'Upgrading {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(ctrl.upgrade, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
 
             for terminal, *_ in para.failures:
                 print('Failed to upgrade:', str(terminal))
         elif options['reboot']:
-            template = 'Rebooting {}: {}'
+            animation = TTYAnimation(
+                'Rebooting {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(ctrl.reboot, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
         elif options['chkres']:
-            template = 'Checking resolution {}: {}'
+            animation = TTYAnimation(
+                'Checking resolution {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(ctrl.chkres, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
         elif options['unlock']:
-            template = 'Unlocking {}: {}'
+            animation = TTYAnimation(
+                'Unlocking {}: {}', DEFAULT_ANIMATION.stages,
+                DEFAULT_ANIMATION.end)
 
             with Parallelization(ctrl.unlock, terminals, single=True) as para:
-                with TTYAnimator(para, template=template):
+                with TTYAnimator(para, animation=animation):
                     para.wait()
 
             for terminal, *_ in para.failures:

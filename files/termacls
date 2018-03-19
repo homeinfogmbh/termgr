@@ -15,18 +15,18 @@ Options:
     --version           Show version.
     -h --help           Show this screen.
 """
-from os.path import basename
+from logging import INFO, basicConfig, getLogger
 from sys import exit as exit_
 
 from docopt import docopt
 
-from fancylog import LogLevel, Logger
 from terminallib import parse, PrintErrors, Terminal
 
 from termgr.orm import PermissionsError, User
 
 
-LOGGER = Logger(basename(__file__), level=LogLevel.INFO)
+LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
+LOGGER = getLogger(__file__)
 
 
 def list_acls(options):
@@ -36,7 +36,7 @@ def list_acls(options):
         try:
             user = User.get(User.name == options['--user'])
         except User.DoesNotExist:
-            LOGGER.error('No such user:', options['--user'])
+            LOGGER.error('No such user: %s.', options['--user'])
             return 3
     else:
         user = None
@@ -61,7 +61,7 @@ def set_acls(options):
     try:
         user = User.get(User.name == options['<user>'])
     except User.DoesNotExist:
-        LOGGER.error('No such user:', options['<user>'])
+        LOGGER.error('No such user: %s.', options['<user>'])
         return 1
 
     if options['--grant'] and options['--revoke']:
@@ -96,6 +96,8 @@ def set_acls(options):
 
 def main(options):
     """Runs the ACL client."""
+
+    basicConfig(level=INFO, format=LOG_FORMAT)
 
     if options['get']:
         return list_acls(options)

@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from pathlib import Path
-from tarfile import open as tarfile_open
+from tarfile import open as TarFile
 from tempfile import TemporaryFile, NamedTemporaryFile
 from zipfile import ZipFile
 
@@ -97,7 +97,7 @@ class OpenVPNPackager(TerminalAware):
 
     def tar_file(self, file):
         """Tar OpenVPN files for POSIX devices."""
-        with tarfile_open(mode='w', fileobj=file) as archive:
+        with TarFile(mode='w', fileobj=file) as archive:
             archive.add(str(self.key_file_path), arcname=self.key_file)
             archive.add(str(self.crt_file_path), arcname=self.crt_file)
             archive.add(str(CA_FILE_PATH), arcname=CA_FILE)

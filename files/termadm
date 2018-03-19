@@ -30,11 +30,10 @@ Options:
 """
 from collections import namedtuple
 from datetime import datetime
+from logging import INFO, basicConfig, getLogger
 from os import geteuid
-from pathlib import Path
 from sys import exit as exit_
 
-from fancylog import LogLevel, Logger
 from homeinfo.crm import Address, State
 from syslib import run, evaluate
 from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
@@ -43,12 +42,12 @@ from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
 from termgr.notify import notify_users
 
 
+LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
 BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
 OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
-
-LOGGER = Logger(Path(__file__).name, level=LogLevel.SUCCESS)
+LOGGER = getLogger(__file__)
 
 Addr = namedtuple('Addr', ('street', 'house_number', 'zip_code'))
 TerminalLine = namedtuple('TerminalLine', ('city', 'addr', 'scheduled'))
@@ -168,7 +167,7 @@ def add_terminal(options):
     try:
         state = get_state(state_iso)
     except State.DoesNotExist:
-        LOGGER.error('No such state: "{}".'.format(state_iso))
+        LOGGER.error('No such state: "%s".', state_iso)
         return 1
 
     # Optional parameters
@@ -179,7 +178,7 @@ def add_terminal(options):
     except TypeError:
         mtu = None
     except ValueError:
-        LOGGER.error('Invalid MTU: {}.'.format(options['--mtu']))
+        LOGGER.error('Invalid MTU: %s.', options['--mtu'])
         return 2
 
     annotation = options['--annotation'] or None
@@ -190,8 +189,7 @@ def add_terminal(options):
     connection = Connection.get(Connection.id == connection_id)
 
     if vpn_key is not None:
-        LOGGER.warning('Divergent OpenVPN key specified: "{}"!'.format(
-            vpn_key))
+        LOGGER.warning('Divergent OpenVPN key specified: "%s"!', vpn_key)
 
     vpn = VPN.add(key=vpn_key, mtu=mtu)
     domain = Domain.get(Domain.id == domain_id)
@@ -208,7 +206,7 @@ def add_terminal(options):
         testing=testing)
 
     if terminal:
-        LOGGER.info('Added terminal {}.'.format(terminal))
+        LOGGER.info('Added terminal %s.', terminal)
     else:
         LOGGER.error('Failed to add terminal.')
 
@@ -257,7 +255,7 @@ def add_terminals(options):
             weather=weather, scheduled=scheduled or scheduled_)
 
         if terminal:
-            LOGGER.info('Added terminal {}.'.format(terminal))
+            LOGGER.info('Added terminal %s.', terminal)
         else:
             LOGGER.error('Failed to add terminal.')
 
@@ -278,8 +276,8 @@ def deploy(options):
             date_time = datetime.strptime(date_string, DATE_FORMAT)
         except ValueError:
             LOGGER.error(
-                'Invalid date time value "{}" or format "{}".'.format(
-                    date_string, DATE_FORMAT))
+                'Invalid date time value "%s" or format "%s".', date_string,
+                DATE_FORMAT)
             return 4
     else:
         date_time = None
@@ -328,7 +326,7 @@ def relocate(options):
     try:
         state = get_state(state_iso)
     except State.DoesNotExist:
-        LOGGER.error('No such state: "{}".'.format(state_iso))
+        LOGGER.error('No such state: "%s".', state_iso)
         return 1
 
     address = Address.add(city, addr=addr, state=state)
@@ -349,6 +347,8 @@ def relocate(options):
 
 def main(options):
     """Runs the terminal administration CLI."""
+
+    basicConfig(level=INFO, format=LOG_FORMAT)
 
     # Bail out iff reload of services
     # is required, but we are not root.
