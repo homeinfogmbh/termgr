@@ -73,9 +73,7 @@ def mail_terminals(user):
         if not OpenVPNPackager(terminal).complete:
             incomplete.append(terminal)
 
-        reported_terminal = ReportedTerminal(user, terminal)
-        print(reported_terminal, reported_terminal.user,
-              reported_terminal.terminal, flush=True)
+        reported_terminal = ReportedTerminal.add(user, terminal)
         reported_terminal.save()
 
     if incomplete:
