@@ -153,11 +153,20 @@ class User(TermgrModel):
             else:
                 setup_expr = acl_pool.setup == setup
 
+            if issubclass(acl_pool, ACL):
+                terminal_expr = acl_pool.terminal == terminal
+            elif issubclass(acl_pool, DefaultACL):
+                terminal_expr = (
+                    (acl_pool.customer == terminal.customer)
+                    & (acl_pool.class_ == terminal.class_))
+            else:
+                terminal_expr = True
+
             try:
                 acl_pool.get(
-                    (acl_pool.user == self) & (acl_pool.terminal == terminal)
-                    & read_expr & administer_expr & setup_expr)
-            except ACL.DoesNotExist:
+                    (acl_pool.user == self) & terminal_expr & read_expr
+                    & administer_expr & setup_expr)
+            except acl_pool.DoesNotExist:
                 continue
 
             return True
