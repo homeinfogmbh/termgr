@@ -137,41 +137,13 @@ class User(TermgrModel):
             return True
 
         # Per-terminal ACLs override default ACLs.
-        for acl_pool in (ACL, DefaultACL):
-            if read is None:
-                read_expr = True
-            else:
-                read_expr = acl_pool.read == read
-
-            if administer is None:
-                administer_expr = True
-            else:
-                administer_expr = acl_pool.administer == administer
-
-            if setup is None:
-                setup_expr = True
-            else:
-                setup_expr = acl_pool.setup == setup
-
-            if issubclass(acl_pool, ACL):
-                terminal_expr = acl_pool.terminal == terminal
-            elif issubclass(acl_pool, DefaultACL):
-                terminal_expr = (
-                    (acl_pool.customer == terminal.customer)
-                    & (acl_pool.class_ == terminal.class_))
-            else:
-                terminal_expr = True
-
-            try:
-                acl_pool.get(
-                    (acl_pool.user == self) & terminal_expr & read_expr
-                    & administer_expr & setup_expr)
-            except acl_pool.DoesNotExist:
-                continue
-
+        if ACL.authorize(self, terminal, read=read, administer=administer,
+                         setup=setup):
             return True
 
-        return False
+        return DefaultACL.authorize(
+            self, terminal.customer, terminal.class_, read=read,
+            administer=administer, setup=setup)
 
 
 class _ACL:
@@ -238,6 +210,34 @@ class ACL(TermgrModel, _ACL):
 
         return acl
 
+    @classmethod
+    def authorize(cls, user, terminal, *, read=None, administer=None,
+                  setup=None):
+        """Authorize via per-terminal ACLs."""
+        if read is None:
+            read_expr = True
+        else:
+            read_expr = cls.read == read
+
+        if administer is None:
+            administer_expr = True
+        else:
+            administer_expr = cls.administer == administer
+
+        if setup is None:
+            setup_expr = True
+        else:
+            setup_expr = cls.setup == setup
+
+        try:
+            cls.get(
+                (cls.user == user) & (cls.terminal == terminal) & read_expr
+                & administer_expr & setup_expr)
+        except cls.DoesNotExist:
+            return False
+
+        return True
+
     def commit(self):
         """Commits the ACLs."""
         if self.read or self.administer or self.setup:
@@ -282,6 +282,35 @@ class DefaultACL(TermgrModel, _ACL):
         acl.administer = administer
         acl.setup = setup
         return acl
+
+    @classmethod
+    def authorize(cls, user, customer, class_, *, read=None, administer=None,
+                  setup=None):
+        """Authorize via default ACLs."""
+        if read is None:
+            read_expr = True
+        else:
+            read_expr = cls.read == read
+
+        if administer is None:
+            administer_expr = True
+        else:
+            administer_expr = cls.administer == administer
+
+        if setup is None:
+            setup_expr = True
+        else:
+            setup_expr = cls.setup == setup
+
+        try:
+            cls.get(
+                (cls.user == user) & (cls.customer == customer)
+                & (cls.class_ == class_) & read_expr & administer_expr
+                & setup_expr)
+        except cls.DoesNotExist:
+            return False
+
+        return True
 
     @classmethod
     def for_terminal(cls, terminal):
