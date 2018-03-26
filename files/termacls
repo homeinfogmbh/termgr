@@ -22,11 +22,27 @@ from docopt import docopt
 
 from terminallib import parse, PrintErrors, Terminal
 
-from termgr.orm import PermissionsError, User
+from termgr.orm import PermissionsError, User, ACL, DefaultACL
 
 
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
+
+
+def _default_acls(terminal):
+    """Yields the default ACLs for the respective terminal."""
+
+    for default_acl in DefaultACL.get(
+            (DefaultACL.customer == terminal.customer)
+            & (DefaultACL.class_ == terminal.class_)):
+        yield (default_acl.user, default_acl)
+
+
+def _explicit_acls(terminal):
+    """Yields the explicit ACLs for the respective terminal."""
+
+    for acl in ACL.select().where(ACL.terminal == terminal):
+        yield (acl.user, acl)
 
 
 def list_acls(options):
@@ -47,10 +63,18 @@ def list_acls(options):
         terminals = Terminal
 
     for terminal in terminals:
-        permissions = user.permissions(terminal)
+        if user is not None:
+            permissions = user.permissions(terminal)
 
-        if permissions is not None:
-            print(permissions, terminal, user)
+            if permissions is not None:
+                print(permissions, terminal, user)
+        else:
+            permissions_ = dict(_default_acls(terminal))
+            explicit_permissions = dict(_explicit_acls(terminal))
+            permissions_.update(explicit_permissions)
+
+            for user, permissions in sorted(permissions_.items()):
+                print(permissions, terminal, user)
 
     return 0
 
