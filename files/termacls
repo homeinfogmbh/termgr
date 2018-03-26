@@ -148,7 +148,7 @@ def set_default(options):
     except ValueError:
         class_expr = (
             (Class.full_name == options['<class>'])
-            || (Class.name == options['<class>']))
+            | (Class.name == options['<class>']))
     else:
         class_expr = Class.id == class_id
 
