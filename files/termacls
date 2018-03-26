@@ -168,6 +168,7 @@ def set_default(options):
         default_acl.customer = customer
         default_acl.class_ = class_
 
+    print(user, customer, class_)
     read, administer, setup = _get_permissions(options)
 
     if read is not None:
