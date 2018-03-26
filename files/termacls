@@ -138,7 +138,7 @@ def set_default(options):
         return 3
 
     try:
-        customer = Customer.find(options['<customer>'])
+        customer = Customer.find(options['<customer>']).get()
     except Customer.DoesNotExist:
         LOGGER.error('No such customer: %s.', options['<customer>'])
         return 2
@@ -168,7 +168,6 @@ def set_default(options):
         default_acl.customer = customer
         default_acl.class_ = class_
 
-    print(user, customer, class_)
     read, administer, setup = _get_permissions(options)
 
     if read is not None:
