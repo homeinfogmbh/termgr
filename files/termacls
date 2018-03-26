@@ -159,16 +159,26 @@ def set_default(options):
         return 1
 
     try:
-        acl = DefaultACL.get(
+        default_acl = DefaultACL.get(
             (DefaultACL.user == user) & (DefaultACL.customer == customer)
             & (DefaultACL.class_ == class_))
     except DefaultACL.DoesNotExist:
-        acl = DefaultACL()
-        acl.user = user
-        acl.customer = customer
-        acl.class_ = class_
+        default_acl = DefaultACL()
+        default_acl.user = user
+        default_acl.customer = customer
+        default_acl.class_ = class_
 
-    acl.read, acl.administer, acl.setup = _get_permissions(options)
+    read, administer, setup = _get_permissions(options)
+
+    if read is not None:
+        default_acl.read = read
+
+    if administer is not None:
+        default_acl.administer = administer
+
+    if setup is not None:
+        default_acl.setup = setup
+
     acl.save()
     return 0
 
