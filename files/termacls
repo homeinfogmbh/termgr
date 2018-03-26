@@ -32,7 +32,7 @@ LOGGER = getLogger(__file__)
 def _default_acls(terminal):
     """Yields the default ACLs for the respective terminal."""
 
-    for default_acl in DefaultACL.get(
+    for default_acl in DefaultACL.select().where(
             (DefaultACL.customer == terminal.customer)
             & (DefaultACL.class_ == terminal.class_)):
         yield (default_acl.user, default_acl)
