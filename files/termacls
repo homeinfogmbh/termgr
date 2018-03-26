@@ -179,7 +179,7 @@ def set_default(options):
     if setup is not None:
         default_acl.setup = setup
 
-    acl.save()
+    default_acl.save()
     return 0
 
 
