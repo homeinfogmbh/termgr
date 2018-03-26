@@ -4,6 +4,7 @@
 Usage:
     termacls get [<expr>...] [options]
     termacls set <user> [-GRras] <expr>...
+    termacls setdefault <user> [-GRras] <customer> <class>
 
 Options:
     --grant, -G         Grants the provided permissions.
@@ -20,13 +21,33 @@ from sys import exit as exit_
 
 from docopt import docopt
 
-from terminallib import parse, PrintErrors, Terminal
+from homeinfo.crm import Customer
+from terminallib import parse, PrintErrors, Terminal, Class
 
 from termgr.orm import PermissionsError, User, ACL, DefaultACL
 
 
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
+
+
+def _get_permissions(options):
+    """"Returns the respective permissions."""
+
+    if options['--grant']:
+        read = True if options['--read'] else None
+        administer = True if options['--administer'] else None
+        setup = True if options['--setup'] else None
+    elif options['--revoke']:
+        read = False if options['--read'] else None
+        administer = False if options['--administer'] else None
+        setup = False if options['--setup'] else None
+    else:
+        read = bool(options['--read'])
+        administer = bool(options['--administer'])
+        setup = bool(options['--setup'])
+
+    return (read, administer, setup)
 
 
 def _default_acls(terminal):
@@ -92,18 +113,7 @@ def set_acls(options):
         print('Error: Cannot grant and revoke at the same time.')
         return 2
 
-    if options['--grant']:
-        read = True if options['--read'] else None
-        administer = True if options['--administer'] else None
-        setup = True if options['--setup'] else None
-    elif options['--revoke']:
-        read = False if options['--read'] else None
-        administer = False if options['--administer'] else None
-        setup = False if options['--setup'] else None
-    else:
-        read = bool(options['--read'])
-        administer = bool(options['--administer'])
-        setup = bool(options['--setup'])
+    read, administer, setup = _get_permissions(options)
 
     with PrintErrors():
         for terminal in parse(*options['<expr>']):
@@ -118,6 +128,51 @@ def set_acls(options):
     return 0
 
 
+def set_default(options):
+    """Sets default ACLs."""
+
+    try:
+        user = User.get(User.name == options['<user>'])
+    except User.DoesNotExist:
+        LOGGER.error('No such user: %s.', options['<user>'])
+        return 3
+
+    try:
+        customer = Customer.find(options['<customer>'])
+    except Customer.DoesNotExist:
+        LOGGER.error('No such customer: %s.', options['<customer>'])
+        return 2
+
+    try:
+        class_id = int(options['<class>'])
+    except ValueError:
+        class_expr = (
+            (Class.full_name == options['<class>'])
+            || (Class.name == options['<class>']))
+    else:
+        class_expr = Class.id == class_id
+
+    try:
+        class_ = Class.get(class_expr)
+    except Class.DoesNotExist:
+        LOGGER.error('No such class: %s.', options['<class>'])
+        return 1
+
+    try:
+        acl = DefaultACL.get(
+            (DefaultACL.user == user) & (DefaultACL.customer == customer)
+            & (DefaultACL.class_ == class_))
+    except DefaultACL.DoesNotExist:
+        acl = DefaultACL()
+        acl.user = user
+        acl.customer = customer
+        acl.class_ = class_
+
+    acl.read, acl.administer, acl.setup = _get_permissions(options)
+    acl.save()
+    return 0
+
+
 def main(options):
     """Runs the ACL client."""
 
@@ -127,6 +182,8 @@ def main(options):
         return list_acls(options)
     elif options['set']:
         return set_acls(options)
+    elif options['setdefault']:
+        return set_default(options)
 
     return 0
 
