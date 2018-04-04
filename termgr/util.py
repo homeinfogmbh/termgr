@@ -8,25 +8,7 @@ __all__ = ['Addr', 'TerminalLine', 'TerminalCSVRecord']
 SEP = ';'
 
 
-def _stringify(value):
-    """Returns the string representation of not-None values."""
-
-    if value is None:
-        return ''
-
-    return str(value)
-
-
-class Addr(namedtuple('Addr', ('street', 'house_number', 'zip_code'))):
-    """An address respresentation."""
-
-    @classmethod
-    def from_address(cls, address):
-        """Creates the respective address tuple from the given address."""
-        if not address:
-            return None
-
-        return cls(address.street, address.house_number, address.zip_code)
+Addr = namedtuple('Addr', ('street', 'house_number', 'zip_code'))
 
 
 TerminalLine = namedtuple('TerminalLine', ('city', 'addr', 'scheduled'))
@@ -38,15 +20,23 @@ class TerminalCSVRecord(namedtuple('TerminalCSVRecord', (
 
     def __str__(self):
         """Returns a CSV representation of the respective terminal."""
-        return SEP.join(map(_stringify, self))
+        return SEP.join(map(lambda col: '' if col is None else str(col), self))
 
     @classmethod
     def from_terminal(cls, terminal):
         """Creates a TerminalCSV record from the respective terminal."""
-        addr = None
+        try:
+            address = terminal.location.address
+        except AttributeError:
+            street = None
+            house_number = None
+            zip_code = None
+            city = None
+        else:
+            street = address.street
+            house_number = address.house_number
+            zip_code = address.zip_code
+            city = address.city
 
-        if terminal.location:
-            addr = Addr.from_address(terminal.location.address)
-
-        return cls(terminal.tid, terminal.customer.cid, address.street,
-                   address.house_number, address.zip_code, address.city)
+        return cls(terminal.tid, terminal.customer.cid, street, house_number,
+                   zip_code, city)
