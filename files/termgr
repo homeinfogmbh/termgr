@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
-"""Command line tool to manage HOMEINFO terminals
+"""termgr.
+
+  Command line tool to manage HOMEINFO terminals.
 
   (C) 2015-2016:  HOMEINFO - Digitale Informationssysteme GmbH
 
