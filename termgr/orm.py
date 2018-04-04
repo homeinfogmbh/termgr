@@ -361,7 +361,7 @@ class WatchList(TermgrModel):
         """Yields matching, unreported terminals."""
         with ChangedConnection(Terminal, ReportedTerminal):
             for terminal in Terminal.select().join(
-                    ReportedTerminal, JOIN.LEFT_OUTER_JOIN).where(
+                    ReportedTerminal, JOIN.LEFT_OUTER).where(
                         (ReportedTerminal.user == self.user)
                         & (ReportedTerminal.terminal >> None)
                         & (Terminal.customer == self.customer)
