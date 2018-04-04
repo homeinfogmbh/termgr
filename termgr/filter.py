@@ -27,4 +27,4 @@ def online(terminals, logger=None):
         if terminal.status:
             yield terminal
         elif logger is not None:
-            logger.warning('Terminal {} is offline'.format(terminal))
+            logger.warning('Terminal {} is offline.'.format(terminal))
