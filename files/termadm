@@ -35,7 +35,6 @@ Options:
     --version                   Show version.
     -h --help                   Show this screen.
 """
-from collections import namedtuple
 from datetime import datetime
 from getpass import getuser
 from logging import INFO, basicConfig, getLogger

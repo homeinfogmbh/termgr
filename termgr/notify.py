@@ -8,6 +8,7 @@ from emaillib import Mailer, EMail
 from termgr.config import CONFIG
 from termgr.openvpn import OpenVPNPackager
 from termgr.orm import User, WatchList, ReportedTerminal
+from termgr.util import TerminalCSVRecord
 
 __all__ = ['notify_users']
 
