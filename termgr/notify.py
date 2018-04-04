@@ -19,23 +19,23 @@ MAILER = Mailer(
 SEP = ';'
 
 
+def terminal_fields(terminal):
+    """Yields fields of the terminal for the CSV file."""
 
-class TerminalCSV(namedtuple('TerminalCSV', ('tid', 'cid', 'addr'))):
-    """A terminal CSV record."""
+    address = None
 
-    def __str__(self):
-        addr_str = '' if self.addr is None else str(self.addr)
-        return SEP.join((str(self.tid), self.cid, addr_str))
+    if terminal.location:
+        address = terminal.location.address
 
-    @classmethod
-    def from_terminal(cls, terminal):
-        """Creates a TerminalCSV record from the respective terminal."""
-        addr = None
+    fields = (str(terminal.tid), terminal.customer.cid)
 
-        if terminal.location:
-            addr = Attr.from_address(terminal.location.address)
+    if address is not None:
+        fields += (address.street or '', address.house_number or '',
+                   address.zip_code or '', address.city or '')
+    else:
+        fields += ('', '', '', '')
 
-        return cls(terminal.tid, terminal.customer.cid, addr)
+    return fields
 
 
 def terminal_to_csv_record(terminal, sep=SEP):
