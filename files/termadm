@@ -370,8 +370,12 @@ def notify(options):
         LOGGER.error('You must be termgr or root to notify users.')
         return 3
 
-    users = tuple(_get_users(options['<user>'])) or None
-    notify_users(users)
+    if options['<user>']:
+        users = tuple(_get_users(options['<user>']))
+    else:
+        users = None
+
+    notify_users(users=users)
     return 0
 
 
