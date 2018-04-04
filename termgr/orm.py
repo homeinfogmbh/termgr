@@ -357,17 +357,26 @@ class WatchList(TermgrModel):
             return acl
 
     @property
+    def blacklist(self):
+        """Yields terminals that were already notified about."""
+        for rterm in ReportedTerminal.select().join(Terminal).where(
+                (ReportedTerminal.user == self.user)
+                & (Terminal.customer == self.customer)
+                & (Terminal.class_ == self.class_)):
+            yield rterm.terminal
+
+    @property
     def terminals(self):
         """Yields matching, unreported terminals."""
+        blacklist = tuple(self.blacklist)
+
         with ChangedConnection(Terminal, ReportedTerminal):
-            for terminal in Terminal.select().join(
-                    ReportedTerminal, JOIN.LEFT_OUTER).where(
-                        (ReportedTerminal.user == self.user)
-                        & (ReportedTerminal.terminal >> None)
-                        & (Terminal.customer == self.customer)
-                        & (Terminal.class_ == self.class_)
-                        & (Terminal.testing == 0)).order_by(Terminal.tid):
-                yield terminal
+            for terminal in Terminal.select().where(
+                    (Terminal.customer == self.customer)
+                    & (Terminal.class_ == self.class_)
+                    & (Terminal.testing == 0)).order_by(Terminal.tid):
+                if terminal not in blacklist:
+                    yield terminal
 
 
 class ReportedTerminal(TermgrModel):
