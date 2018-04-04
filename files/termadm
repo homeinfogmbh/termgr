@@ -48,6 +48,7 @@ from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
     Connection, Location, Terminal
 
 from termgr.notify import notify_users
+from termgr.util import Addr, TerminalLine
 
 
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
@@ -57,9 +58,6 @@ DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
 BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
 OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
-
-Addr = namedtuple('Addr', ('street', 'house_number', 'zip_code'))
-TerminalLine = namedtuple('TerminalLine', ('city', 'addr', 'scheduled'))
 
 
 def update_nagios():
