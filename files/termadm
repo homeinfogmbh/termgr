@@ -18,7 +18,7 @@ Usage:
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>]
     termadm reload
-    termadm notify
+    termadm notify [<user>...]
 
 Options:
     --domain=<domain>           Specifies the domain [default: 1].
@@ -47,6 +47,7 @@ from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
     Connection, Location, Terminal
 
 from termgr.notify import notify_users
+from termgr.orm import User
 from termgr.util import Addr, TerminalLine
 
 
@@ -57,6 +58,16 @@ DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
 BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
 OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
+
+
+def _get_users(users):
+    """Yields the respective users."""
+
+    for user in users:
+        try:
+            yield User.get(User.name == user)
+        except User.DoesNotExist:
+            LOGGER.warning('No such user: %s.', user)
 
 
 def update_nagios():
@@ -351,6 +362,19 @@ def relocate(options):
     return 0
 
 
+def notify(options):
+    """Notifies the respective users."""
+
+    if getuser() != TERMGR_USER and geteuid() != 0:
+        # Because only termgr and root can read the certificates.
+        LOGGER.error('You must be termgr or root to notify users.')
+        return 3
+
+    users = tuple(_get_users(options['<user>'])) or None
+    notify_users(users)
+    return 0
+
+
 def main(options):
     """Runs the terminal administration CLI."""
 
@@ -376,12 +400,7 @@ def main(options):
     elif options['reload']:
         return 0 if update_config() else 1
     elif options['notify']:
-        if getuser() != TERMGR_USER and geteuid() != 0:
-            # Because only termgr and root can read the certificates.
-            LOGGER.error('You must be termgr or root to notify users.')
-            return 3
-
-        notify_users()
+        return notify(options)
 
     return 0
 
