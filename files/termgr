@@ -43,8 +43,7 @@ def main(options):
         print('Refusing to run as root')
         exit(3)
     elif getuser() != TERMGR_USER:
-        print('You must be {} to run {}'.format(
-            TERMGR_USER, __file__), file=stderr)
+        print('You must be', TERMGR_USER, 'to run', __file__, file=stderr)
         exit(2)
     else:
         # Get terminals generator.
