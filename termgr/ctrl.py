@@ -1,10 +1,14 @@
 """Remote terminal controller."""
 
-from fancylog import Logger
+from logging import getLogger
+
 from terminallib import RemoteController
 
 
-__all__ = ['TerminalController', 'TerminalsController']
+__all__ = [
+    'closed_by_remote_host',
+    'TerminalController',
+    'TerminalsController']
 
 
 REBOOT_OPTIONS = {'ServerAliveInterval': 5, 'ServerAliveCountMax': 3}
@@ -19,7 +23,7 @@ REBOOT_COMMANDS = (
     (SYSTEMCTL, 'reboot'))
 
 
-def _closed_by_remote_host(process_result):
+def closed_by_remote_host(process_result):
     """Checks whether the connection was closed by the remote host."""
 
     try:
@@ -70,7 +74,7 @@ class TerminalController(RemoteController):
                 if result:
                     return result
                 elif result.exit_code == 255:
-                    if _closed_by_remote_host(result):
+                    if closed_by_remote_host(result):
                         return result
 
         return result
@@ -149,7 +153,7 @@ class TerminalsController:
     def __init__(self, user='termgr'):
         """Sets terminals, user and logger."""
         self.user = user
-        self.logger = Logger(self.__class__.__name__)
+        self.logger = getLogger(self.__class__.__name__)
 
     def __getattr__(self, attr):
         """Delegates to the respective controller."""

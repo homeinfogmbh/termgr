@@ -1,11 +1,12 @@
 """Terminal administration."""
 
-from fancylog import Logger
+from logging import getLogger
+
 from hipster.appctl import ApplicationHandler
 from hipster.sync import Synchronizer
 from wsgilib import JSON
 
-from termgr.ctrl import TerminalsController
+from termgr.ctrl import closed_by_remote_host, TerminalsController
 from termgr.wsgi.common import DATA, authenticated, authorized
 
 __all__ = ['ROUTES']
@@ -13,11 +14,10 @@ __all__ = ['ROUTES']
 
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
-SSH_TIMEOUT_KEYWORDS = (b'Timeout', b'not responding.')
 CONTROLLER = TerminalsController()
 DIGSIG_KEY_FILE = '/home/termgr/.ssh/digsig'
 APPCTL = ApplicationHandler(keyfile=DIGSIG_KEY_FILE)
-LOGGER = Logger('terminal administration')
+LOGGER = getLogger(__file__)
 
 
 @authenticated
@@ -72,12 +72,12 @@ def reboot(terminal):
 
     if response:
         return 'Rebooted terminal.'
-    elif response.exit_code == 255:     # Timeout.
-        if all(keyword in response.stderr for keyword in SSH_TIMEOUT_KEYWORDS):
-            return ('Probably rebooted terminal.', 202)
+    elif response.exit_code == 255 and closed_by_remote_host(response):
+        return ('Probably rebooted terminal.', 202)
 
     LOGGER.warning(
-        'Unknown SSH error:', response.stderr.decode(), response.exit_code)
+        'Unknown SSH error: %s (%i).', response.stderr.decode(),
+        response.exit_code)
     return ('Failed to reboot terminal.', 500)
 
 
