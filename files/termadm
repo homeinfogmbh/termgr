@@ -349,13 +349,13 @@ def relocate(options):
     if terminal.location is None:
         terminal.location = Location.add(address)
         terminal.save()
-        LOGGER.success('Initially located', terminal, 'at', repr(address))
+        LOGGER.info('Initially located', terminal, 'at', repr(address))
     elif terminal.location.address == address:
         LOGGER.info(terminal, 'is already located at', repr(address))
     else:
         terminal.location.address = address
         terminal.location.save()
-        LOGGER.success('Moved', terminal, 'to', repr(address))
+        LOGGER.info('Moved', terminal, 'to', repr(address))
 
     return 0
 
