@@ -14,6 +14,20 @@ PACMAN = '/usr/bin/pacman'
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
 ADMIN_USER = 'homeinfo'
+REBOOT_COMMANDS = (
+    ('/usr/bin/reboot',), (SYSTEMCTL, 'isolate', 'reboot.target'),
+    (SYSTEMCTL, 'reboot'))
+
+
+def _closed_by_remote_host(process_result):
+    """Checks whether the connection was closed by the remote host."""
+
+    try:
+        text = process_result.stderr.decode()
+    except (AttributeError, ValueError):
+        return False
+
+    return 'Connection' in text and 'closed by remote host' in text
 
 
 class TerminalController(RemoteController):
@@ -49,13 +63,17 @@ class TerminalController(RemoteController):
 
     def reboot(self):
         """Reboots the terminal."""
-        if self.execute('/usr/bin/test', '-x', '/usr/bin/reboot'):
-            command = ('/usr/bin/reboot',)
-        else:
-            command = (SYSTEMCTL, 'isolate', 'reboot.target')
-
         with self.extra_options(REBOOT_OPTIONS):
-            return self.sudo(*command)
+            for reboot_command in REBOOT_COMMANDS:
+                result = self.sudo(*reboot_command)
+
+                if result:
+                    return result
+                elif result.exit_code == 255:
+                    if _closed_by_remote_host(result):
+                        return result
+
+        return result
 
     def cleanup(self):
         """Cleanup local package cache."""
