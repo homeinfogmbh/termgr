@@ -125,12 +125,10 @@ def parse_line(string, date_format=DATE_FORMAT):
         zip_code_city = zip_code_city.strip()
 
         try:
-            *street, house_number = street_houseno.split()
+            street, house_number = street_houseno.rsplit(maxsplit=1)
         except ValueError:
             raise ValueError('Not a street / house number: {}.'.format(
                 street_houseno))
-
-        street = ' '.join(street)
 
         if not street:
             street, house_number = house_number, None
