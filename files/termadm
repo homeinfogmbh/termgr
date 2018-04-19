@@ -43,8 +43,8 @@ from sys import exit as exit_
 
 from homeinfo.crm import Address, State
 from syslib import run, evaluate
-from terminallib import parse, PrintErrors, Class, Domain, OS, VPN, \
-    Connection, Location, Terminal
+from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
+    Location, Terminal
 
 from termgr.notify import notify_users
 from termgr.orm import User
@@ -297,9 +297,8 @@ def deploy(options):
     else:
         date_time = None
 
-    with PrintErrors():
-        for terminal in parse(*options['<expr>']):
-            terminal.deploy(date_time=date_time, force=force)
+    for terminal in get_terminals(options['<expr>']):
+        terminal.deploy(date_time=date_time, force=force)
 
     if not options['--no-reload']:
         update_nagios()
@@ -310,9 +309,8 @@ def deploy(options):
 def undeploy(options):
     """Removed deployment of terminals."""
 
-    with PrintErrors():
-        for terminal in parse(*options['<expr>']):
-            terminal.undeploy()
+    for terminal in get_terminals(*options['<expr>']):
+        terminal.undeploy()
 
     if not options['--no-reload']:
         update_nagios()
@@ -323,11 +321,13 @@ def undeploy(options):
 def relocate(options):
     """Relocates a terminal."""
 
-    with PrintErrors():
-        terminal, *overhead = parse(options['<terminal>'])
+    try:
+        terminal, *overhead = get_terminals(options['<terminal>'])
+    except ValueError:
+        LOGGER.error('No terminal found.')
 
     if overhead:
-        print('Can only relocate one terminal at a time.')
+        LOGGER.error('Can only relocate one terminal at a time.')
         return 1
 
     street = options['<street>']

@@ -29,7 +29,7 @@ from sys import exit as exit_
 from docopt import docopt
 
 from homeinfo.crm import Customer
-from terminallib import parse, PrintErrors, Terminal, Class
+from terminallib import get_terminals, Class
 
 from termgr.orm import PermissionsError, User, ACL, DefaultACL
 
@@ -85,10 +85,7 @@ def list_acls(options):
     else:
         user = None
 
-    if options['<expr>']:
-        terminals = parse(*options['<expr>'])
-    else:
-        terminals = Terminal
+    terminals = get_terminals(options['<expr>'])
 
     for terminal in terminals:
         if user is not None:
@@ -117,20 +114,19 @@ def set_acls(options):
         return 1
 
     if options['--grant'] and options['--revoke']:
-        print('Error: Cannot grant and revoke at the same time.')
+        LOGGER.error('Error: Cannot grant and revoke at the same time.')
         return 2
 
     read, administer, setup = _get_permissions(options)
 
-    with PrintErrors():
-        for terminal in parse(*options['<expr>']):
-            try:
-                user.permit(
-                    terminal, read=read, administer=administer,
-                    setup=setup)
-            except PermissionsError as permission_error:
-                LOGGER.error(permission_error)
-                break
+    for terminal in get_terminals(options['<expr>']):
+        try:
+            user.permit(
+                terminal, read=read, administer=administer,
+                setup=setup)
+        except PermissionsError as permission_error:
+            LOGGER.error(permission_error)
+            break
 
     return 0
 

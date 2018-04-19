@@ -19,125 +19,125 @@ Options:
     -h --help       Show this screen.
     --version       Show version.
     --verbose       Be gassy.
-    --undeployed    Also handle undeployed terminals.
+    --undeployed    Include undeployed terminals.
+    --testing       Include testing terminals.
     --user=<user>   Specify user account for SSH connections.
 """
 from getpass import getuser
+from logging import INFO, basicConfig, getLogger
 from os import geteuid
-from sys import stderr
+from sys import exit as exit_
+
+from docopt import docopt
 
 from fancylog import DEFAULT_ANIMATION, TTYAnimation, TTYAnimator
 from syslib import Parallelization
-from terminallib import parse, PrintErrors, Terminal
+from terminallib import get_terminals
 
 from termgr.ctrl import TerminalsController
 
 
+LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
+LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
 
 
 def main(options):
     """Runs the terminal manager."""
 
+    basicConfig(level=INFO, format=LOG_FORMAT)
+
     if geteuid() == 0:
-        print('Refusing to run as root')
-        exit(3)
+        LOGGER.error('Refusing to run as root.')
+        return 3
     elif getuser() != TERMGR_USER:
-        print('You must be', TERMGR_USER, 'to run', __file__, file=stderr)
-        exit(2)
-    else:
-        # Get terminals generator.
-        if not options['<expr>']:
-            terminals = Terminal.select().where(
-                ~(Terminal.deployed >> None) &
-                (Terminal.testing == 0))
-        else:
-            with PrintErrors():
-                terminals = tuple(parse(options['<expr>']))
+        LOGGER.error('You must be %s to run %s.', TERMGR_USER, __file__)
+        return 2
 
-        # Filter out undeployed terminals.
-        if not options['--undeployed']:
-            terminals = (t for t in terminals if t.deployed)
+    deployed = None if options['--undeployed'] else True
+    terminals = tuple(get_terminals(
+        options['<expr>'], deployed=deployed, testing=options['--testing']))
 
-        ctrl = TerminalsController()
+    ctrl = TerminalsController()
 
-        # Perform selected operation.
-        if options['update']:
-            animation = TTYAnimation(
-                'Updating {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+    # Perform selected operation.
+    if options['update']:
+        animation = TTYAnimation(
+            'Updating {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(ctrl.update, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
+        with Parallelization(ctrl.update, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
 
-            for terminal, *_ in para.failures:
-                print('Failed to update:', str(terminal))
-        elif options['stage']:
-            animation = TTYAnimation(
-                'Staging {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+        for terminal, *_ in para.failures:
+            LOGGER.error('Failed to update %s.', terminal)
+    elif options['stage']:
+        animation = TTYAnimation(
+            'Staging {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(ctrl.stage, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
+        with Parallelization(ctrl.stage, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
 
-            for terminal, *_ in para.failures:
-                print('Failed to stage:', str(terminal))
-        elif options['sync']:
-            pkgs = options['<package>']
-            asexplicit = options['--asexplicit']
-            install = ctrl.install(*pkgs, asexplicit=asexplicit)
-            animation = TTYAnimation(
-                'Syncing {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+        for terminal, *_ in para.failures:
+            LOGGER.error('Failed to stage %s.', terminal)
+    elif options['sync']:
+        pkgs = options['<package>']
+        asexplicit = options['--asexplicit']
+        install = ctrl.install(*pkgs, asexplicit=asexplicit)
+        animation = TTYAnimation(
+            'Syncing {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(install, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
+        with Parallelization(install, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
 
-            for terminal, *_ in para.failures:
-                print('Failed to sync:', str(terminal))
-        elif options['system-upgrade']:
-            animation = TTYAnimation(
-                'Upgrading {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+        for terminal, *_ in para.failures:
+            LOGGER.error('Failed to sync %s.', terminal)
+    elif options['system-upgrade']:
+        animation = TTYAnimation(
+            'Upgrading {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(ctrl.upgrade, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
+        with Parallelization(ctrl.upgrade, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
 
-            for terminal, *_ in para.failures:
-                print('Failed to upgrade:', str(terminal))
-        elif options['reboot']:
-            animation = TTYAnimation(
-                'Rebooting {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+        for terminal, *_ in para.failures:
+            LOGGER.error('Failed to upgrade %s.', terminal)
+    elif options['reboot']:
+        animation = TTYAnimation(
+            'Rebooting {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(ctrl.reboot, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
-        elif options['chkres']:
-            animation = TTYAnimation(
-                'Checking resolution {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+        with Parallelization(ctrl.reboot, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
+    elif options['chkres']:
+        animation = TTYAnimation(
+            'Checking resolution {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(ctrl.chkres, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
-        elif options['unlock']:
-            animation = TTYAnimation(
-                'Unlocking {}: {}', DEFAULT_ANIMATION.stages,
-                DEFAULT_ANIMATION.end)
+        with Parallelization(ctrl.chkres, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
+    elif options['unlock']:
+        animation = TTYAnimation(
+            'Unlocking {}: {}', DEFAULT_ANIMATION.stages,
+            DEFAULT_ANIMATION.end)
 
-            with Parallelization(ctrl.unlock, terminals, single=True) as para:
-                with TTYAnimator(para, animation=animation):
-                    para.wait()
+        with Parallelization(ctrl.unlock, terminals, single=True) as para:
+            with TTYAnimator(para, animation=animation):
+                para.wait()
 
-            for terminal, *_ in para.failures:
-                print('Failed to unlock:', str(terminal))
+        for terminal, *_ in para.failures:
+            LOGGER.error('Failed to unlock %s.', terminal)
+
+    return 0
 
 
 if __name__ == '__main__':
-    from docopt import docopt
-    main(docopt(__doc__))
+    exit_(main(docopt(__doc__)))
