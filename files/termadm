@@ -309,7 +309,7 @@ def deploy(options):
 def undeploy(options):
     """Removed deployment of terminals."""
 
-    for terminal in get_terminals(*options['<expr>']):
+    for terminal in get_terminals(options['<expr>']):
         terminal.undeploy()
 
     if not options['--no-reload']:

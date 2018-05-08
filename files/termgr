@@ -9,9 +9,9 @@
 
 
 Usage:
-    termgr update <expr> [options]
-    termgr stage <expr> [options]
-    termgr sync <expr> <package>... [--asexplicit] [options]
+    termgr update <expr>... [options]
+    termgr stage <expr>... [options]
+    termgr sync <expr>... <package>... [--asexplicit] [options]
     termgr system-upgrade <expr> [options]
     termgr (reboot | chkres | unlock) <expr> [options]
 
