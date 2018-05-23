@@ -24,6 +24,7 @@ __all__ = [
 
 
 _PASSWORD_HASHER = PasswordHasher()
+DATABASE = MySQLDatabase.from_config(CONFIG['db'])
 
 
 class AuthenticationError(Exception):
@@ -45,12 +46,7 @@ class TermgrModel(Model):
 
     class Meta:
         """Configures the database and schema."""
-        database = MySQLDatabase(
-            CONFIG['db']['db'],
-            host=CONFIG['db']['host'],
-            user=CONFIG['db']['user'],
-            passwd=CONFIG['db']['passwd'],
-            closing=True)
+        database = DATABASE
         schema = database.database
 
 
