@@ -32,7 +32,7 @@ def get_terminals(user):
     return terminals
 
 
-def gen_emails(recipient, terminals_):
+def gen_emails(recipient, terminals):
     """Generates the terminals email."""
 
     email = EMail(
@@ -40,15 +40,13 @@ def gen_emails(recipient, terminals_):
         CONFIG['notify']['body'])
     empty = True
 
-    for watchlist, terminals in terminals_.items():
-        filename = watchlist.customer.name or ''
-        filename += '_' + watchlist.class_.name + '.csv'
-        lines = [TerminalCSVRecord.from_terminal(term) for term in terminals]
+    for watchlist, terminals_ in terminals.items():
+        lines = [TerminalCSVRecord.from_terminal(term) for term in terminals_]
 
         if lines:
             # Use DOS line breaks for compatibility with Windows systems.
-            csv_file = '\r\n'.join(str(line) for line in lines)
-            attachment = MIMEApplication(csv_file.encode(), Name=filename)
+            csv = '\r\n'.join(str(line) for line in lines)
+            attachment = MIMEApplication(csv.encode(), Name=watchlist.filename)
             email.attach(attachment)
             empty = False
 
@@ -64,7 +62,8 @@ def mail_terminals(user):
         return False
 
     terminals = get_terminals(user)
-    MAILER.send(user.email, terminals)
+    emails = tuple(gen_emails(user.email, terminals))
+    MAILER.send(emails)
     incomplete = []
 
     for _, terminals_ in terminals:
