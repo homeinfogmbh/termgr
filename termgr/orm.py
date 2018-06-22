@@ -353,6 +353,11 @@ class WatchList(TermgrModel):
             return acl
 
     @property
+    def filename(self):
+        """Returns the appropriate file name."""
+        return self.customer.name + '_' + self.class_.name + '.csv'
+
+    @property
     def notified(self):
         """Yields terminals that were already notified about."""
         for rterm in ReportedTerminal.select().join(Terminal).where(
