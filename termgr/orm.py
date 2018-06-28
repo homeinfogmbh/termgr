@@ -2,13 +2,12 @@
 
 from datetime import datetime
 
-from peewee import JOIN, Model, PrimaryKeyField, CharField, BooleanField, \
-    ForeignKeyField, DateTimeField
-from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
+    ForeignKeyField, DateTimeField
 
 from homeinfo.crm import Company, Customer
-from peeweeplus import MySQLDatabase, ChangedConnection
+from peeweeplus import MySQLDatabase, ChangedConnection, Argon2Field
 from terminallib import Class, Terminal
 
 from termgr.config import CONFIG
@@ -23,7 +22,6 @@ __all__ = [
     'ReportedTerminal']
 
 
-_PASSWORD_HASHER = PasswordHasher()
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
 
 
@@ -57,7 +55,7 @@ class User(TermgrModel):
         Company, column_name='company', on_update='CASCADE',
         on_delete='CASCADE')
     name = CharField(64)
-    pwhash = CharField(255)
+    passwd = Argon2Field()
     email = CharField(255, null=True)
     enabled = BooleanField()
     annotation = CharField(255, null=True)
@@ -77,7 +75,7 @@ class User(TermgrModel):
                 raise AuthenticationError()
 
             try:
-                _PASSWORD_HASHER.verify(user.pwhash, passwd)
+                user.passwd.verify(passwd)
             except VerifyMismatchError:
                 raise AuthenticationError()
 
@@ -85,12 +83,6 @@ class User(TermgrModel):
                 return user
 
         raise AuthenticationError()
-
-    def passwd(self, passwd):
-        """Creates a new password hash."""
-        self.pwhash = _PASSWORD_HASHER.hash(passwd)
-
-    passwd = property(None, passwd)
 
     def permissions(self, terminal):
         """Returns permissions on terminal."""
