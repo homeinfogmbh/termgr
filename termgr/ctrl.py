@@ -98,6 +98,7 @@ class TerminalController(RemoteController):
     def install(self, *pkgs, asexplicit=False):
         """Installs software packages."""
         if asexplicit:
+            print('Command:', '-S', '--asexplicit', *pkgs, flush=True)
             return self.pacman('-S', '--asexplicit', *pkgs)
 
         return self.pacman('-S', *pkgs)
