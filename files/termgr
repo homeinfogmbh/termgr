@@ -85,8 +85,7 @@ def main(options):
             LOGGER.error('Failed to stage %s.', terminal)
     elif options['sync']:
         pkgs = options['<packages>'].split(',')
-        asexplicit = options['--asexplicit']
-        install = ctrl.install(*pkgs, asexplicit=asexplicit)
+        install = ctrl.install(*pkgs, asexplicit=options['--asexplicit'])
         animation = TTYAnimation(
             'Syncing {}: {}', DEFAULT_ANIMATION.stages,
             DEFAULT_ANIMATION.end)
