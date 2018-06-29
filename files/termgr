@@ -16,12 +16,15 @@ Usage:
     termgr (reboot | chkres | unlock) <expr>... [options]
 
 Options:
-    -h --help       Show this screen.
-    --version       Show version.
-    --verbose       Be gassy.
-    --undeployed    Include undeployed terminals.
-    --testing       Include testing terminals.
-    --user=<user>   Specify user account for SSH connections.
+    --help, -h                  Show this screen.
+    --version, -V               Show version.
+    --verbose, -v               Be gassy.
+    --undeployed, -n            Select undeployed terminals.
+    --testing, -t               Select only testing terminals.
+    --classes=<classes>, -c     Select terminals of the respective class.
+    --os=<os>, -o               Select terminals of the respective operating
+                                system.
+    --user=<user>, -u           Specify user account for SSH connections.
 """
 from getpass import getuser
 from logging import INFO, basicConfig, getLogger
@@ -55,8 +58,11 @@ def main(options):
         return 2
 
     deployed = None if options['--undeployed'] else True
+    classes = options['--classes'].split(',') if options['--classes'] else None
+    oss = options['--oss'].split(',') if options['--oss'] else None
     terminals = tuple(get_terminals(
-        options['<expr>'], deployed=deployed, testing=options['--testing']))
+        options['<expr>'], deployed=deployed, testing=options['--testing'],
+        classes=classes, oss=oss))
 
     ctrl = TerminalsController()
 
@@ -140,4 +146,3 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
-

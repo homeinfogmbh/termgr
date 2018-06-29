@@ -41,6 +41,8 @@ from logging import INFO, basicConfig, getLogger
 from os import geteuid
 from sys import exit as exit_
 
+from docopt import docopt
+
 from homeinfo.crm import Address, State
 from syslib import run, evaluate
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
@@ -408,5 +410,4 @@ def main(options):
 
 
 if __name__ == '__main__':
-    from docopt import docopt
     exit_(main(docopt(__doc__)))
