@@ -37,10 +37,10 @@ from fancylog import DEFAULT_ANIMATION, TTYAnimation, TTYAnimator
 from syslib import Parallelization
 from terminallib import get_terminals
 
+from termgr.config import LOG_FORMAT
 from termgr.ctrl import TerminalsController
 
 
-LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
 

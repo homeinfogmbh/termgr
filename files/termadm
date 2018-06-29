@@ -48,12 +48,12 @@ from syslib import run, evaluate
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 
+from termgr.config import LOG_FORMAT
 from termgr.notify import notify_users
 from termgr.orm import User
 from termgr.util import Addr, TerminalLine
 
 
-LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
 DATE_FORMAT = '%Y-%m-%d'
