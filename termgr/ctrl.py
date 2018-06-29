@@ -97,8 +97,6 @@ class TerminalController(RemoteController):
 
     def install(self, *pkgs, asexplicit=False):
         """Installs software packages."""
-        print('Pkgs:', pkgs, 'asexplicit:', asexplicit, flush=True)
-
         if asexplicit:
             return self.pacman('-S', '--asexplicit', *pkgs)
 
@@ -171,5 +169,5 @@ class TerminalsController:
 
     def install(self, *pkgs, asexplicit=False):
         """Callback for the sync command."""
-        return lambda terminal: self._controller(terminal).sync(
+        return lambda terminal: self._controller(terminal).install(
             *pkgs, asexplicit=asexplicit)
