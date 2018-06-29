@@ -11,7 +11,7 @@
 Usage:
     termgr update <expr>... [options]
     termgr stage <expr>... [options]
-    termgr sync <expr>... <packages> [--asexplicit] [options]
+    termgr sync <packages> <expr>... [--asexplicit] [options]
     termgr system-upgrade <expr>... [options]
     termgr (reboot | chkres | unlock) <expr>... [options]
 
