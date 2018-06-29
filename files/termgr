@@ -21,9 +21,9 @@ Options:
     --verbose, -v               Be gassy.
     --undeployed, -n            Select undeployed terminals.
     --testing, -t               Select only testing terminals.
-    --classes=<classes>, -c     Select terminals of the respective class.
-    --os=<os>, -o               Select terminals of the respective operating
-                                system.
+    --classes=<classes>, -c     Select terminals of the respective classes.
+    --oss=<os>, -o              Select terminals of the respective operating
+                                systems.
     --user=<user>, -u           Specify user account for SSH connections.
 """
 from getpass import getuser
