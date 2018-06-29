@@ -167,7 +167,7 @@ class TerminalsController:
         """Checks the resolution."""
         return self._controller(terminal).resolution
 
-    def sync(self, *pkgs, asexplicit=False):
+    def install(self, *pkgs, asexplicit=False):
         """Callback for the sync command."""
         return lambda terminal: self._controller(terminal).sync(
             *pkgs, asexplicit=asexplicit)
