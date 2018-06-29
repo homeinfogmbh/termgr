@@ -11,7 +11,7 @@
 Usage:
     termgr update <expr>... [options]
     termgr stage <expr>... [options]
-    termgr sync <expr>... <package>... [--asexplicit] [options]
+    termgr sync <expr>... <packages> [--asexplicit] [options]
     termgr system-upgrade <expr>... [options]
     termgr (reboot | chkres | unlock) <expr>... [options]
 
@@ -84,7 +84,7 @@ def main(options):
         for terminal, *_ in para.failures:
             LOGGER.error('Failed to stage %s.', terminal)
     elif options['sync']:
-        pkgs = options['<package>']
+        pkgs = options['<packages>'].split(',')
         asexplicit = options['--asexplicit']
         install = ctrl.install(*pkgs, asexplicit=asexplicit)
         animation = TTYAnimation(
@@ -141,3 +141,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
