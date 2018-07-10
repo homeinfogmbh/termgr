@@ -18,6 +18,8 @@ class TerminalCSVRecord(namedtuple('TerminalCSVRecord', (
         'tid', 'cid', 'street', 'house_number', 'zip_code', 'city'))):
     """A terminal CSV record."""
 
+    __slots__ = ()
+
     def __str__(self):
         """Returns a CSV representation of the respective terminal."""
         return SEP.join(map(lambda col: '' if col is None else str(col), self))
