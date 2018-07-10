@@ -28,7 +28,7 @@ from sys import exit as exit_
 
 from docopt import docopt
 
-from homeinfo.crm import Customer
+from mdb import Customer
 from terminallib import get_terminals, Class
 
 from termgr.config import LOG_FORMAT

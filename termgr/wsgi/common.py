@@ -1,6 +1,6 @@
 """Common WSGI functions."""
 
-from homeinfo.crm import Customer
+from mdb import Customer
 from terminallib import Terminal
 from wsgilib import Error, PostData
 

@@ -43,7 +43,7 @@ from sys import exit as exit_
 
 from docopt import docopt
 
-from homeinfo.crm import Address, State
+from mdb import Address, State
 from syslib import run, evaluate
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
     Location, Terminal

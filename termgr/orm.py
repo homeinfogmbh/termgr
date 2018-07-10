@@ -6,7 +6,7 @@ from argon2.exceptions import VerifyMismatchError
 from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
     ForeignKeyField, DateTimeField
 
-from homeinfo.crm import Company, Customer
+from mdb import Company, Customer
 from peeweeplus import MySQLDatabase, ChangedConnection, Argon2Field
 from terminallib import Class, Terminal
 
