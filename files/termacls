@@ -29,6 +29,7 @@ from sys import exit as exit_
 from docopt import docopt
 
 from mdb import Customer
+from syslib import script
 from terminallib import get_terminals, Class
 
 from termgr.config import LOG_FORMAT
@@ -186,6 +187,7 @@ def set_default(options):
     return 0
 
 
+@script
 def main(options):
     """Runs the ACL client."""
 
@@ -203,3 +205,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+

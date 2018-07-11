@@ -34,7 +34,7 @@ from sys import exit as exit_
 from docopt import docopt
 
 from fancylog import DEFAULT_ANIMATION, TTYAnimation, TTYAnimator
-from syslib import Parallelization
+from syslib import script, Parallelization
 from terminallib import get_terminals
 
 from termgr.config import LOG_FORMAT
@@ -45,6 +45,7 @@ LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
 
 
+@script
 def main(options):
     """Runs the terminal manager."""
 
@@ -146,3 +147,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+

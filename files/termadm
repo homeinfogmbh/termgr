@@ -44,7 +44,7 @@ from sys import exit as exit_
 from docopt import docopt
 
 from mdb import Address, State
-from syslib import run, evaluate
+from syslib import run, evaluate, script
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
     Location, Terminal
 
@@ -379,6 +379,7 @@ def notify(options):
     return 0
 
 
+@script
 def main(options):
     """Runs the terminal administration CLI."""
 
@@ -411,3 +412,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
