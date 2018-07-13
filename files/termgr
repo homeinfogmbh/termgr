@@ -9,11 +9,11 @@
 
 
 Usage:
-    termgr update <expr>... [options]
-    termgr stage <expr>... [options]
-    termgr sync <packages> <expr>... [--asexplicit] [options]
-    termgr system-upgrade <expr>... [options]
-    termgr (reboot | chkres | unlock) <expr>... [options]
+    termgr update [<expr>...] [options]
+    termgr stage [<expr>...] [options]
+    termgr sync <packages> [<expr>...] [--asexplicit] [options]
+    termgr system-upgrade [<expr>...] [options]
+    termgr (reboot | chkres | unlock) [<expr>...] [options]
 
 Options:
     --help, -h                  Show this screen.
@@ -147,4 +147,5 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
 
