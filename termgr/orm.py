@@ -4,13 +4,11 @@ from datetime import datetime
 
 from argon2.exceptions import VerifyMismatchError
 from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
-    ForeignKeyField, DateTimeField, DateField
+    ForeignKeyField, DateTimeField
 
 from mdb import Company, Customer
-from peeweeplus import MySQLDatabase, ChangedConnection, CascadingFKField, \
-    Argon2Field
-from terminallib import Class, OS, Location, Terminal
-from timelib import DATE_FORMAT
+from peeweeplus import MySQLDatabase, ChangedConnection, Argon2Field
+from terminallib import Class, Terminal
 
 from termgr.config import CONFIG
 
