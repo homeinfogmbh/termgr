@@ -6,6 +6,9 @@ from termgr.orm import TerminalOrder
 from termgr.wsgi.common import DATA
 
 
+__all__ = ['ROUTES']
+
+
 @authenticated
 @authorized('terminal_order')
 def order():
@@ -14,3 +17,6 @@ def order():
     for order in DATA.json:
         order = TerminalOrder.from_dict(order)
         order.save()
+
+
+ROUTES = (('POST', '/order', order, 'terminal_order'),)
