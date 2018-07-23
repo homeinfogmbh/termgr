@@ -47,6 +47,7 @@ from mdb import Address, State
 from syslib import run, evaluate, script
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
     Location, Terminal
+from timelib import DATE_FORMAT
 
 from termgr.config import LOG_FORMAT
 from termgr.notify import notify_users
@@ -56,7 +57,6 @@ from termgr.util import Addr, TerminalLine
 
 LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
-DATE_FORMAT = '%Y-%m-%d'
 NAGIOSCFG_GEN = '/usr/local/bin/nagioscfg-gen'
 BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
 OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
@@ -412,4 +412,5 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
 

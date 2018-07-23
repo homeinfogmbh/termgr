@@ -4,11 +4,13 @@ from datetime import datetime
 
 from argon2.exceptions import VerifyMismatchError
 from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
-    ForeignKeyField, DateTimeField
+    ForeignKeyField, DateTimeField, DateField
 
 from mdb import Company, Customer
-from peeweeplus import MySQLDatabase, ChangedConnection, Argon2Field
-from terminallib import Class, Terminal
+from peeweeplus import MySQLDatabase, ChangedConnection, CascadingFKField, \
+    Argon2Field
+from terminallib import Class, OS, Location, Terminal
+from timelib import DATE_FORMAT
 
 from termgr.config import CONFIG
 
@@ -401,3 +403,53 @@ class ReportedTerminal(TermgrModel):
             reported_terminal.timestamp = timestamp
 
         return reported_terminal
+
+
+class TerminalOrder(TermgrModel):
+    """Represents a terminal order."""
+
+    user = CascadingFKField(User, column_name='user')
+    issued = DateTimeField()
+    accepted = BooleanField(null=True)
+    customer = ForeignKeyField(Customer, column_name='customer')
+    class_ = ForeignKeyField(Class, column_name='class')
+    os_ = ForeignKeyField(OS, column_name='os')
+    location = ForeignKeyField(Location, column_name='location')
+    annotation = CharField(255, null=True)
+    weather = CharField(16, null=True)
+    scheduled = DateField(null=True)
+
+    @classmethod
+    def add(cls, user, customer, class_, os_, location, annotation=None,
+            weather=None, scheduled=None):
+        """Adds a new terminal order."""
+        order = cls()
+        order.issued = datetime.now().date()
+        order.user = user
+        order.customer = customer
+        order.class_ = class_
+        order.os_ = os_
+        order.location = location
+        order.annotation = annotation
+        order.weather = weather
+        order.scheduled = scheduled
+        order.save()
+        return order
+
+    @classmethod
+    def from_dict(cls, user, dictionary):
+        """Creates a terminal order from the respective JSON-ish dictionary."""
+        customer = Customer.get(Customer.id == dictionary['customer'])
+        class_ = Class.get(Class.id == dictionary.get('class', 3))  # 3 = DDB.
+        os_ = OS.get(OS.id == dictionary.get('os', 1))  # 1 = HIDSL.
+        location = Location.from_dict(dictionary['location'])
+        annotation = dictionary.get('annotation')
+        weather = dictionary.get('weather')
+        scheduled = dictionary.get('scheduled')
+
+        if scheduled is not None:
+            scheduled = datetime.strptime(scheduled, DATE_FORMAT)
+
+        return cls(
+            user, customer, class_, os_, location, annotation=annotation,
+            weather=weather, scheduled=scheduled)
