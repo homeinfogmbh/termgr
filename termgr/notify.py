@@ -66,7 +66,7 @@ def mail_terminals(user):
     MAILER.send(emails)
     incomplete = []
 
-    for _, terminals_ in terminals:
+    for terminals_ in terminals.values():
         for terminal in terminals_:
             if not OpenVPNPackager(terminal).complete:
                 incomplete.append(terminal)
