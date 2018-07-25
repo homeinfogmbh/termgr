@@ -40,5 +40,5 @@ class TerminalCSVRecord(namedtuple('TerminalCSVRecord', (
             zip_code = address.zip_code
             city = address.city
 
-        return cls(terminal.tid, terminal.customer.cid, street, house_number,
+        return cls(terminal.tid, terminal.customer.id, street, house_number,
                    zip_code, city)

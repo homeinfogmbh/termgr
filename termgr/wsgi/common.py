@@ -47,24 +47,16 @@ def get_customer(json=None):
         json = DATA.json
 
     try:
-        cids = json['cid'].split(':')
-    except KeyError:
+        cid = int(json['cid'])
+    except (KeyError, TypeError):
         raise Error('No CID specified.')
+    except ValueError:
+        raise Error('CID must be an interger.')
 
-    customer = None
-
-    for cid in reversed(cids):
-        if customer is None:
-            reseller_match = Customer.reseller >> None
-        else:
-            reseller_match = Customer.reseller == customer
-
-        try:
-            customer = Customer.get((Customer.cid == cid) & reseller_match)
-        except Customer.DoesNotExist:
-            raise Error('No such customer.', status=404)
-
-    return customer
+    try:
+        return Customer.get(Customer.id == cid)
+    except Customer.DoesNotExist:
+        raise Error('No such customer.', status=404)
 
 
 def get_terminal():
