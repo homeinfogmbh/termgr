@@ -27,9 +27,9 @@ class TerminalCSVRecord(namedtuple('TerminalCSVRecord', (
     @classmethod
     def from_terminal(cls, terminal):
         """Creates a TerminalCSV record from the respective terminal."""
-        try:
-            address = terminal.location.address
-        except AttributeError:
+        address = terminal.address
+
+        if address is None:
             street = None
             house_number = None
             zip_code = None

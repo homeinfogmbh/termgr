@@ -25,18 +25,14 @@ def terminals_to_dom(terminals):
         terminal_dom.scheduled = terminal.scheduled
         terminal_dom.deployed = terminal.deployed
         terminal_dom.annotation = terminal.annotation
+        address = terminal.address
 
-        if terminal.location:
+        if address:
             address_dom = dom.Address()
-            address_dom.annotation = terminal.location.annotation
-
-            if terminal.location.address:
-                address = terminal.location.address
-                address_dom.street = address.street
-                address_dom.house_number = address.house_number
-                address_dom.zip_code = address.zip_code
-                address_dom.city = address.city
-
+            address_dom.street = address.street
+            address_dom.house_number = address.house_number
+            address_dom.zip_code = address.zip_code
+            address_dom.city = address.city
             terminal_dom.address = address_dom
 
         terminals_dom.terminal.append(terminal_dom)

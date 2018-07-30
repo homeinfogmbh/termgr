@@ -10,7 +10,7 @@
 
 Usage:
     termadm add <cid> [<street> <house_number> <zip_code> <city> \
-[--state=<state_iso>] [--address-annotation=<annotation>]] \
+[--state=<state_iso>] [--annotation=<annotation>]] \
 [--scheduled=<date>] [options]
     termadm addall <cid> <file> [--scheduled=<date>] [options]
     termadm deploy <expr>... [--date=<date_string>] [--force] [options]
@@ -46,7 +46,7 @@ from docopt import docopt
 from mdb import Address, State
 from syslib import run, evaluate, script
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
-    Location, Terminal
+    Terminal
 from timelib import DATE_FORMAT
 
 from termgr.config import LOG_FORMAT
@@ -174,7 +174,6 @@ def add_terminal(options):
     zip_code = options['<zip_code>']
     city = options['<city>']
     state_iso = options['--state']
-    address_annotation = options['--address-annotation']
 
     if street:
         addr = (street, house_number.rstrip(','), zip_code)
@@ -213,12 +212,11 @@ def add_terminal(options):
 
     if addr is not None:
         address = Address.add(city, addr=addr, state=state)
-        location = Location.add(address, annotation=address_annotation)
     else:
-        location = None
+        address = None
 
     terminal = Terminal.add(
-        cid, class_, os_, connection, vpn, domain, location=location,
+        cid, class_, os_, connection, vpn, domain, address=address,
         weather=weather, scheduled=scheduled, annotation=annotation,
         testing=testing)
 
@@ -266,9 +264,8 @@ def add_terminals(options):
 
         vpn = VPN.add()
         address = Address.add(city, addr=addr, state=None)
-        location = Location.add(address)
         terminal = Terminal.add(
-            cid, class_, os_, connection, vpn, domain, location=location,
+            cid, class_, os_, connection, vpn, domain, address=address,
             weather=weather, scheduled=scheduled or scheduled_)
 
         if terminal:
@@ -337,8 +334,7 @@ def relocate(options):
     zip_code = options['<zip_code>']
     city = options['<city>']
     state_iso = options['--state']
-
-    addr = street, house_number, zip_code
+    addr = (street, house_number, zip_code)
 
     try:
         state = get_state(state_iso)
@@ -348,16 +344,17 @@ def relocate(options):
 
     address = Address.add(city, addr=addr, state=state)
 
-    if terminal.location is None:
-        terminal.location = Location.add(address)
-        terminal.save()
+    if terminal.address is None:
+        terminal.address = address
         LOGGER.info('Initially located', terminal, 'at', repr(address))
-    elif terminal.location.address == address:
+    elif terminal.address == address:
         LOGGER.info(terminal, 'is already located at', repr(address))
     else:
-        terminal.location.address = address
-        terminal.location.save()
-        LOGGER.info('Moved', terminal, 'to', repr(address))
+        address, terminal.address = terminal.address, address
+        terminal.save()
+        LOGGER.info(
+            'Moved', terminal, 'from', repr(address) 'to',
+            repr(terminal.address))
 
     return 0
 
@@ -412,5 +409,3 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
-
-

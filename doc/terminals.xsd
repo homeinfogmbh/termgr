@@ -91,12 +91,5 @@
             <xs:element name="city" type="xs:string"/>
             <xs:element name="zip_code" type="xs:string"/>
         </xs:sequence>
-        <xs:attribute name="annotation" type="xs:string">
-            <xs:annotation>
-                <xs:documentation xml:lang="en">
-                   An optional annotation.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
     </xs:complexType>
 </xs:schema>

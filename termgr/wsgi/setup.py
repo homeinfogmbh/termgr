@@ -13,10 +13,15 @@ __all__ = ['ROUTES']
 def get_location(terminal):
     """Returns the terminal's location."""
 
-    if terminal.location:
-        return terminal.location.to_dict()
+    if terminal.address is None:
+        return {}
 
-    return {}
+    address = terminal.address.to_dict()
+
+    if terminal.annotation:
+        return {'address': address, 'annotation': annotation}
+
+    return {'address': address}
 
 
 def openvpn_data(terminal, windows=False):
