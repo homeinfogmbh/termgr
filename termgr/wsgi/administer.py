@@ -2,12 +2,14 @@
 
 from logging import getLogger
 
+from flask import request
+
 from hipster.appctl import ApplicationHandler
 from hipster.sync import Synchronizer
 from wsgilib import JSON
 
 from termgr.ctrl import closed_by_remote_host, TerminalsController
-from termgr.wsgi.common import DATA, authenticated, authorized
+from termgr.wsgi.common import authenticated, authorized
 
 __all__ = ['ROUTES']
 
@@ -26,7 +28,7 @@ def deploy(terminal):
     """Deploys the respective terminal."""
 
     try:
-        DATA.json['undeploy']
+        request.json['undeploy']
     except KeyError:
         if terminal.deploy():
             return 'Terminal deployed.'
@@ -45,7 +47,7 @@ def application(terminal):
     """Activates and deactivates terminals."""
 
     try:
-        DATA.json['disable']
+        request.json['disable']
     except KeyError:
         if CONTROLLER.enable_application(terminal):
             return 'Digital signage application enabled.'

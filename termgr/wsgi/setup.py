@@ -2,10 +2,12 @@
 
 from os.path import basename
 
+from flask import request
+
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import OpenVPNPackager
-from termgr.wsgi.common import DATA, authenticated, authorized
+from termgr.wsgi.common import authenticated, authorized
 
 __all__ = ['ROUTES']
 
@@ -47,7 +49,7 @@ def openvpn_data(terminal, windows=False):
 def setup_terminal(terminal, action):
     """Posts setup data."""
 
-    windows = DATA.json.get('windows', False)
+    windows = request.json.get('windows', False)
 
     if action == 'terminal_information':
         return JSON(terminal.to_dict())
@@ -57,7 +59,7 @@ def setup_terminal(terminal, action):
         return openvpn_data(terminal, windows=windows)
     elif action == 'serial_number':
         try:
-            serial_number = DATA.json['serial_number']
+            serial_number = request.json['serial_number']
         except KeyError:
             raise Error('No serial number specified.')
 

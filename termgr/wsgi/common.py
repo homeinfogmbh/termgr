@@ -1,13 +1,14 @@
 """Common WSGI functions."""
 
+from flask import request
+
 from mdb import Customer
 from terminallib import Terminal
-from wsgilib import Error, PostData
+from wsgilib import Error
 
 from termgr.orm import AuthenticationError, User
 
 __all__ = [
-    'DATA',
     'get_user',
     'get_customer',
     'get_terminal',
@@ -15,22 +16,19 @@ __all__ = [
     'authorized']
 
 
-DATA = PostData()
 INVALID_CREDENTIALS = Error('Invalid user name and / or password.', status=401)
 
 
 def get_user():
     """Returns the appropriate user."""
 
-    json = DATA.json
-
     try:
-        passwd = json['passwd']
+        passwd = request.json['passwd']
     except KeyError:
         raise INVALID_CREDENTIALS
 
     try:
-        user_name = json['user_name']
+        user_name = request.json['user_name']
     except KeyError:
         raise INVALID_CREDENTIALS
 
@@ -44,7 +42,7 @@ def get_customer(json=None):
     """Returns the respective customer."""
 
     if json is None:
-        json = DATA.json
+        json = request.json
 
     try:
         cid = int(json['cid'])
@@ -62,16 +60,14 @@ def get_customer(json=None):
 def get_terminal():
     """Returns the respective terminal."""
 
-    json = DATA.json
-
     try:
-        tid = json['tid']
+        tid = request.json['tid']
     except KeyError:
         raise Error('No TID specified.')
 
     try:
         return Terminal.get(
-            (Terminal.customer == get_customer(json=json))
+            (Terminal.customer == get_customer(json=request.json))
             & (Terminal.tid == tid))
     except Terminal.DoesNotExist:
         raise Error('No such terminal.', status=404)
