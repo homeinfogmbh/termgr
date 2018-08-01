@@ -63,7 +63,7 @@ termgr.containsIgnoreCase = function (haystack, needle) {
     Returns the user name and password from the respective input fields.
 */
 termgr.getCredentials = function () {
-    return {'user_name': $('#userName').val(), 'passwd': $('#passwd').val()};
+    return {'user_name': jQuery('#userName').val(), 'passwd': jQuery('#passwd').val()};
 };
 
 
@@ -82,26 +82,27 @@ termgr.getData = function (tid, cid) {
     Retrieves the customers and their respective terminals
     from the API and invokes the callback function.
 */
-termgr.getCustomers = function (callback) {
+termgr.getCustomers = function () {
     var credentials = termgr.getCredentials();
 
-    $.ajax({
+    return jQuery.ajax({
         url: termgr.BASE_URL + '/check/list',
         type: 'POST',
         data: JSON.stringify(credentials),
-        success: function (customers) {
+        contentType: 'application/json'
+    }).then(
+        function (customers) {
             termgr.customers = customers;
-            callback(customers);
-        },
-        error: function () {
+        }, function () {
             swal({
                 title: 'Konnte Terminaldaten nicht abfragen.',
                 text: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.',
                 type: 'error'
             });
-            $('#loader').hide();
+
+            jQuery('#loader').hide();
         }
-    });
+    );
 };
 
 
@@ -206,11 +207,11 @@ termgr.listCustomers = function (customers) {
 termgr.listFiltered = function (customers) {
     if (customers == null) {
         var customers = termgr.customers;
-        $('#customerList').hide();
-        $('#loader').show();
+        jQuery('#customerList').hide();
+        jQuery('#loader').show();
     }
 
-    var searchValue = $('#searchField').val();
+    var searchValue = jQuery('#searchField').val();
 
     if (searchValue.length > 0) {
         var keywords = searchValue.split();
@@ -230,10 +231,11 @@ termgr.listFiltered = function (customers) {
 termgr.beep = function (tid, cid) {
     var data = termgr.getData(tid, cid);
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/check/identify',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         error: function () {
             swal({
                 title: 'Fehler.',
@@ -261,10 +263,11 @@ termgr.beep = function (tid, cid) {
 termgr.reboot = function (tid, cid) {
     var data = termgr.getData(tid, cid);
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/administer/reboot',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         error: function (jqXHR) {
             swal({
                 title: 'Das Terminal konnte nicht neu gestartet werden.',
@@ -334,10 +337,11 @@ termgr.queryReboot = function (tid, cid) {
 termgr.enableApplication = function (tid, cid) {
     var data = termgr.getData(tid, cid);
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/administer/application',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         success: function () {
             swal({
                 title: 'OK.',
@@ -367,10 +371,11 @@ termgr.disableApplication = function (tid, cid) {
     var data = termgr.getData(tid, cid);
     data['disable'] = true;
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/administer/application',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         success: function () {
             swal({
                 title: 'OK.',
@@ -399,10 +404,11 @@ termgr.disableApplication = function (tid, cid) {
 termgr.deploy = function (tid, cid) {
     var data = termgr.getData(tid, cid);
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/administer/deploy',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         success: function () {
             swal({
                 title: 'OK.',
@@ -432,10 +438,11 @@ termgr.undeploy = function (tid, cid) {
     var data = termgr.getData(tid, cid);
     data['undeploy'] = true;
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/administer/deploy',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         success: function () {
             swal({
                 title: 'OK.',
@@ -464,10 +471,11 @@ termgr.undeploy = function (tid, cid) {
 termgr.sync = function (tid, cid) {
     var data = termgr.getData(tid, cid);
 
-    $.ajax({
+    jQuery.ajax({
         url: termgr.BASE_URL + '/administer/sync',
         type: 'POST',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         success: function () {
             swal({
                 title: 'OK.',
@@ -599,7 +607,7 @@ termgr.customerEntry = function (customer) {
     caption.innerHTML = customer.name + ' (' + customer.id + ')';
 
     var captionContainer = document.createElement('span');
-    captionContainer.setAttribute('onclick', '$("#terminals_' + customer.id + '").toggle();');
+    captionContainer.setAttribute('onclick', 'jQuery("#terminals_' + customer.id + '").toggle();');
     captionContainer.appendChild(caption);
 
     var terminals = document.createElement('table');
@@ -626,11 +634,11 @@ termgr.customerEntry = function (customer) {
 termgr.initDialog = function (negativeAction, positiveAction) {
     return function (event) {
         // Button that triggered the modal.
-        var button = $(event.relatedTarget);
+        var button = jQuery(event.relatedTarget);
         // Extract info from data-* attributes and convert to string.
         var terminalId = '' + button.data('whatever');
         var [tid, cid] = terminalId.split('.');
-        var modal = $(this)
+        var modal = jQuery(this)
         modal.find('#terminalId').text(terminalId);
 
         var negativeActionButton = modal.find('#negativeAction');
@@ -654,9 +662,9 @@ termgr.initDialog = function (negativeAction, positiveAction) {
     Performs the initial login.
 */
 termgr.login = function () {
-    $('#customerList').hide();
-    $('#loader').show();
-    termgr.getCustomers(termgr.listFiltered);
+    jQuery('#customerList').hide();
+    jQuery('#loader').show();
+    termgr.getCustomers.then(termgr.listFiltered);
 };
 
 
@@ -664,8 +672,8 @@ termgr.login = function () {
     Hides the loader.
 */
 termgr.hideLoader = function () {
-    $('#loader').hide();
-    $('#customerList').show();
+    jQuery('#loader').hide();
+    jQuery('#customerList').show();
 };
 
 
@@ -673,8 +681,8 @@ termgr.hideLoader = function () {
     Runs on document.ready().
 */
 termgr.init = function () {
-    $('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
-    $('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
+    jQuery('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
+    jQuery('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
     var observer = new MutationObserver(termgr.hideLoader);
     var targetNode = document.getElementById('customerList');
     var config = {attributes: false, childList: true};
@@ -682,4 +690,4 @@ termgr.init = function () {
 };
 
 
-$(document).ready(termgr.init)
+jQuery(document).ready(termgr.init)
