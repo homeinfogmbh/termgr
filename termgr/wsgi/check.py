@@ -41,7 +41,7 @@ def dict_terminals(grouped_terminals):
 def authorized_terminals(user):
     """Yields terminals readable by the respective user."""
 
-    for terminal in Terminal:
+    for terminal in Terminal.select().where(~(Terminal.address >> None)):
         if user.authorize(terminal, read=True):
             yield terminal
 
