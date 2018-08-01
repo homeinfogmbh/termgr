@@ -664,7 +664,7 @@ termgr.initDialog = function (negativeAction, positiveAction) {
 termgr.login = function () {
     jQuery('#customerList').hide();
     jQuery('#loader').show();
-    termgr.getCustomers.then(termgr.listFiltered);
+    termgr.getCustomers().then(termgr.listFiltered);
 };
 
 
