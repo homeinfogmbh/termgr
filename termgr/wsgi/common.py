@@ -1,5 +1,8 @@
 """Common WSGI functions."""
 
+from functools import lru_cache
+from json import loads
+
 from flask import request
 
 from mdb import Customer
@@ -9,6 +12,7 @@ from wsgilib import Error
 from termgr.orm import AuthenticationError, User
 
 __all__ = [
+    'get_json',
     'get_user',
     'get_customer',
     'get_terminal',
@@ -19,16 +23,30 @@ __all__ = [
 INVALID_CREDENTIALS = Error('Invalid user name and / or password.', status=401)
 
 
+@lru_cache()
+def get_json(request=request):
+    """Returns the JSON post data."""
+
+    json = request.json
+
+    if json is None:
+        return loads(request.get_data().decode())
+
+    return json
+
+
 def get_user():
     """Returns the appropriate user."""
 
+    json = get_json()
+
     try:
-        passwd = request.json['passwd']
+        passwd = json['passwd']
     except KeyError:
         raise INVALID_CREDENTIALS
 
     try:
-        user_name = request.json['user_name']
+        user_name = json['user_name']
     except KeyError:
         raise INVALID_CREDENTIALS
 
@@ -38,11 +56,10 @@ def get_user():
         raise INVALID_CREDENTIALS
 
 
-def get_customer(json=None):
+def get_customer():
     """Returns the respective customer."""
 
-    if json is None:
-        json = request.json
+    json = get_json()
 
     try:
         cid = int(json['cid'])
@@ -60,14 +77,16 @@ def get_customer(json=None):
 def get_terminal():
     """Returns the respective terminal."""
 
+    json = get_json()
+
     try:
-        tid = request.json['tid']
+        tid = json['tid']
     except KeyError:
         raise Error('No TID specified.')
 
     try:
         return Terminal.get(
-            (Terminal.customer == get_customer(json=request.json))
+            (Terminal.customer == get_customer())
             & (Terminal.tid == tid))
     except Terminal.DoesNotExist:
         raise Error('No such terminal.', status=404)

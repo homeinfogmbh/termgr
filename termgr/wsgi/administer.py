@@ -9,7 +9,7 @@ from hipster.sync import Synchronizer
 from wsgilib import JSON
 
 from termgr.ctrl import closed_by_remote_host, TerminalsController
-from termgr.wsgi.common import authenticated, authorized
+from termgr.wsgi.common import get_json, authenticated, authorized
 
 __all__ = ['ROUTES']
 
@@ -27,8 +27,10 @@ LOGGER = getLogger(__file__)
 def deploy(terminal):
     """Deploys the respective terminal."""
 
+    json = get_json()
+
     try:
-        request.json['undeploy']
+        json['undeploy']
     except KeyError:
         if terminal.deploy():
             return 'Terminal deployed.'
@@ -46,8 +48,10 @@ def deploy(terminal):
 def application(terminal):
     """Activates and deactivates terminals."""
 
+    json = get_json()
+
     try:
-        request.json['disable']
+        json['disable']
     except KeyError:
         if CONTROLLER.enable_application(terminal):
             return 'Digital signage application enabled.'
@@ -67,14 +71,16 @@ def reboot(terminal):
 
     if CONTROLLER.check_login(terminal):
         return ('Admin user is currently logged in.', 503)
-    elif CONTROLLER.pacman(terminal):
+
+    if CONTROLLER.pacman(terminal):
         return ('Package manager is currently running.', 503)
 
     response = CONTROLLER.reboot(terminal)
 
     if response:
         return 'Rebooted terminal.'
-    elif response.exit_code == 255 and closed_by_remote_host(response):
+
+    if response.exit_code == 255 and closed_by_remote_host(response):
         return ('Probably rebooted terminal.', 202)
 
     LOGGER.warning(
