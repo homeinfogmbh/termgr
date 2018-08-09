@@ -2,8 +2,6 @@
 
 from logging import getLogger
 
-from flask import request
-
 from hipster.appctl import ApplicationHandler
 from hipster.sync import Synchronizer
 from wsgilib import JSON
