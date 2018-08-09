@@ -1,6 +1,5 @@
 """Common WSGI functions."""
 
-from functools import lru_cache
 from json import loads
 
 from flask import request
@@ -23,8 +22,7 @@ __all__ = [
 INVALID_CREDENTIALS = Error('Invalid user name and / or password.', status=401)
 
 
-@lru_cache()
-def get_json(request=request):
+def get_json():
     """Returns the JSON post data."""
 
     json = request.json
