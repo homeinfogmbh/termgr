@@ -6,6 +6,8 @@ default: | pull clean bindings install
 
 install:
 	@ ./setup.py install --record $(FILE_LIST)
+	@ mkdir -p /srv/http/de/homeinfo/termgr
+	@ install -m 644 -t /srv/http/de/homeinfo/termgr ./frontend/*
 
 uninstall:
 	@ while read FILE; do echo "Removing: $$FILE"; rm "$$FILE"; done < $(FILE_LIST)
