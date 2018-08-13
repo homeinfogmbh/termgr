@@ -55,6 +55,10 @@ termgr.customer = null;
     Case-insensitively checks whether a string contains another string.
 */
 termgr.containsIgnoreCase = function (haystack, needle) {
+    if (! haystack) {
+        return False;
+    }
+
     return haystack.toLowerCase().indexOf(needle.toLowerCase()) >= 0;
 };
 
