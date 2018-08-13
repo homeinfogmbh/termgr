@@ -144,7 +144,7 @@ termgr.filterCustomer = function (customer, keywords) {
     var customerMatch = true;
 
     for (var i = 0; i < keywords.length; i++) {
-        if (! termgr.containsIgnoreCase(customer.company.name, keywords[i])) {
+        if (! termgr.containsIgnoreCase(customer.name, keywords[i])) {
             customerMatch = false;
             break;
         }
