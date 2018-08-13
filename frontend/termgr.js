@@ -120,7 +120,7 @@ termgr.filterTerminals = function (terminals, cid, keywords) {
             var keyword = keywords[j];
             var matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
             var matchingCid = termgr.containsIgnoreCase('' + cid, keyword);
-            var matchingAddress = termgr.containsIgnoreCase(terminal.address, keyword);
+            var matchingAddress = termgr.containsIgnoreCase(termgr._addressToString(terminal.address), keyword);
 
             if (! (matchingTid || matchingCid || matchingAddress)) {
                 matching = false;
@@ -144,7 +144,7 @@ termgr.filterCustomer = function (customer, keywords) {
     var customerMatch = true;
 
     for (var i = 0; i < keywords.length; i++) {
-        if (! termgr.containsIgnoreCase(customer.name, keywords[i])) {
+        if (! termgr.containsIgnoreCase(customer.company.name, keywords[i])) {
             customerMatch = false;
             break;
         }
@@ -499,6 +499,14 @@ termgr.sync = function (tid, cid) {
 
 
 /*
+    Returns the respective address as a one-line string.
+*/
+termgr._addressToString = function (address) {
+    return address.street + ' ' + address.house_number + ', ' + address.zip_code + ' ' + address.city;
+}
+
+
+/*
     Generates a terminal DOM entry.
 */
 termgr.terminalEntry = function (terminal, cid) {
@@ -511,9 +519,7 @@ termgr.terminalEntry = function (terminal, cid) {
 
     var description = document.createElement('p');
     description.setAttribute('class', 'termgr-terminal-description');
-    var address = terminal.address;
-    var addressString = address.street + ' ' + address.house_number + ', ' + address.zip_code + ' ' + address.city;
-    description.textContent = addressString + ' (' + terminal.tid + '.' + cid + ')';
+    description.textContent = termgr._addressToString(terminal.address) + ' (' + terminal.tid + '.' + cid + ')';
 
     var columnDescription = document.createElement('td');
     columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
