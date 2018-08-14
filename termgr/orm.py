@@ -3,8 +3,8 @@
 from datetime import datetime
 
 from argon2.exceptions import VerifyMismatchError
-from peewee import Model, PrimaryKeyField, CharField, BooleanField, \
-    ForeignKeyField, DateTimeField
+from peewee import Model, ForeignKeyField, CharField, BooleanField, \
+    DateTimeField
 
 from mdb import Company, Customer
 from peeweeplus import MySQLDatabase, ChangedConnection, Argon2Field
@@ -39,8 +39,6 @@ class PermissionsError(Exception):
 
 class TermgrModel(Model):
     """Terminal manager basic Model."""
-
-    id = PrimaryKeyField()
 
     class Meta:
         """Configures the database and schema."""
