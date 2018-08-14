@@ -44,9 +44,12 @@ def get_user():
         raise INVALID_CREDENTIALS
 
     try:
-        user_name = json['user_name']
+        user_name = json['userName']
     except KeyError:
-        raise INVALID_CREDENTIALS
+        try:
+            user_name = json['user_name']
+        except KeyError:
+            raise INVALID_CREDENTIALS
 
     try:
         return User.authenticate(user_name, passwd)
