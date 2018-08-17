@@ -353,7 +353,7 @@ def relocate(options):
         address, terminal.address = terminal.address, address
         terminal.save()
         LOGGER.info(
-            'Moved', terminal, 'from', repr(address) 'to',
+            'Moved', terminal, 'from', repr(address), 'to',
             repr(terminal.address))
 
     return 0
@@ -391,17 +391,23 @@ def main(options):
 
     if options['add']:
         return add_terminal(options)
-    elif options['addall']:
+
+    if options['addall']:
         return add_terminals(options)
-    elif options['deploy']:
+
+    if options['deploy']:
         return deploy(options)
-    elif options['undeploy']:
+
+    if options['undeploy']:
         return undeploy(options)
-    elif options['relocate']:
+
+    if options['relocate']:
         return relocate(options)
-    elif options['reload']:
+
+    if options['reload']:
         return 0 if update_config() else 1
-    elif options['notify']:
+
+    if options['notify']:
         return notify(options)
 
     return 0
