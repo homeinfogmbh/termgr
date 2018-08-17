@@ -54,7 +54,8 @@ def main(options):
     if geteuid() == 0:
         LOGGER.error('Refusing to run as root.')
         return 3
-    elif getuser() != TERMGR_USER:
+
+    if getuser() != TERMGR_USER:
         LOGGER.error('You must be %s to run %s.', TERMGR_USER, __file__)
         return 2
 
