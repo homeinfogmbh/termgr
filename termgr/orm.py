@@ -77,6 +77,10 @@ class User(TermgrModel):
             except VerifyMismatchError:
                 raise AuthenticationError()
 
+            if user.passwd.needs_rehash:
+                user.passwd = passwd
+                user.save()
+
             if user.enabled:
                 return user
 
