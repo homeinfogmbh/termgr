@@ -212,6 +212,7 @@ def add_terminal(options):
 
     if addr is not None:
         address = Address.add(city, addr=addr, state=state)
+        address.save()
     else:
         address = None
 
@@ -264,6 +265,7 @@ def add_terminals(options):
 
         vpn = VPN.add()
         address = Address.add(city, addr=addr, state=None)
+        address.save()
         terminal = Terminal.add(
             cid, class_, os_, connection, vpn, domain, address=address,
             weather=weather, scheduled=scheduled or scheduled_)
@@ -343,6 +345,7 @@ def relocate(options):
         return 1
 
     address = Address.add(city, addr=addr, state=state)
+    address.save()
 
     if terminal.address is None:
         terminal.address = address
@@ -415,3 +418,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
