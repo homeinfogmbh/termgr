@@ -83,7 +83,7 @@ def query_terminals(user):
 
     if request.args.get('json'):
         return JSON([
-            terminal.to_dict(short=True) for terminal in get_terminals(user)])
+            terminal.to_json(short=True) for terminal in get_terminals(user)])
 
     return XML(terminals_to_dom(get_terminals(user)))
 

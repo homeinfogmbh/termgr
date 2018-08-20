@@ -32,7 +32,7 @@ def dict_terminals(grouped_terminals):
             'terminals': [{
                 'tid': terminal.tid,
                 'cid': customer.id,
-                'address': terminal.address.to_dict(),
+                'address': terminal.address.to_json(),
                 'annotation': terminal.annotation}
                           for terminal in terminals]}
         for customer, terminals in grouped_terminals.items()}

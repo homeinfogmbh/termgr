@@ -16,7 +16,7 @@ def get_location(terminal):
     if terminal.address is None:
         return {}
 
-    address = terminal.address.to_dict()
+    address = terminal.address.to_json()
 
     if terminal.annotation:
         return {'address': address, 'annotation': terminal.annotation}
@@ -51,7 +51,7 @@ def setup_terminal(terminal, action):
     windows = json.get('windows', False)
 
     if action == 'terminal_information':
-        return JSON(terminal.to_dict())
+        return JSON(terminal.to_json())
 
     if action == 'location':
         return JSON(get_location(terminal))
