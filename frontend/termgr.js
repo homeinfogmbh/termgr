@@ -56,7 +56,7 @@ termgr.customer = null;
 */
 termgr.containsIgnoreCase = function (haystack, needle) {
     if (! haystack) {
-        return False;
+        return false;
     }
 
     return haystack.toLowerCase().indexOf(needle.toLowerCase()) >= 0;
@@ -506,8 +506,8 @@ termgr.sync = function (tid, cid) {
     Returns the respective address as a one-line string.
 */
 termgr._addressToString = function (address) {
-    return address.street + ' ' + address.house_number + ', ' + address.zip_code + ' ' + address.city;
-}
+    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
+};
 
 
 /*
