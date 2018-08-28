@@ -323,7 +323,7 @@ def relocate(options):
     """Relocates a terminal."""
 
     try:
-        terminal, *overhead = get_terminals(options['<terminal>'])
+        terminal, *overhead = get_terminals([options['<terminal>']])
     except ValueError:
         LOGGER.error('No terminal found.')
         return 1
