@@ -342,7 +342,7 @@ def relocate(options):
     try:
         state = get_state(state_iso)
     except State.DoesNotExist:
-        LOGGER.error('No such state: "%s".', state_iso)
+        LOGGER.error('No such state: %s.', state_iso)
         return 1
 
     address = Address.add(city, addr=addr, state=state)
@@ -352,7 +352,7 @@ def relocate(options):
         terminal.address = address
         LOGGER.info('Initially located %s at %r.', terminal, address)
     elif terminal.address == address:
-        LOGGER.info(terminal, 'is already located at', repr(address))
+        LOGGER.info('%s is already located at %r.', terminal, address)
     else:
         address, terminal.address = terminal.address, address
         terminal.save()
