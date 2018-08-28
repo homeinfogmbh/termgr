@@ -326,6 +326,7 @@ def relocate(options):
         terminal, *overhead = get_terminals(options['<terminal>'])
     except ValueError:
         LOGGER.error('No terminal found.')
+        return 1
 
     if overhead:
         LOGGER.error('Can only relocate one terminal at a time.')
@@ -349,15 +350,14 @@ def relocate(options):
 
     if terminal.address is None:
         terminal.address = address
-        LOGGER.info('Initially located', terminal, 'at', repr(address))
+        LOGGER.info('Initially located %s at %r.', terminal, address)
     elif terminal.address == address:
         LOGGER.info(terminal, 'is already located at', repr(address))
     else:
         address, terminal.address = terminal.address, address
         terminal.save()
         LOGGER.info(
-            'Moved', terminal, 'from', repr(address), 'to',
-            repr(terminal.address))
+            'Moved %s from %r to %r.', terminal, address, terminal.address)
 
     return 0
 
@@ -418,4 +418,3 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
-
