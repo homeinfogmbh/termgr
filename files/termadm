@@ -138,7 +138,8 @@ def parse_line(string, date_format=DATE_FORMAT):
         try:
             zip_code, city = zip_code_city.split()
         except ValueError:
-            raise ValueError('Not a zip code / city: {}.'.format(zip_code_city))
+            raise ValueError('Not a zip code / city: {}.'.format(
+                zip_code_city))
 
     return TerminalLine(city, Addr(street, house_number, zip_code), scheduled)
 
