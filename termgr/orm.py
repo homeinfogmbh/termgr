@@ -3,11 +3,10 @@
 from datetime import datetime
 
 from argon2.exceptions import VerifyMismatchError
-from peewee import Model, ForeignKeyField, CharField, BooleanField, \
-    DateTimeField
+from peewee import ForeignKeyField, CharField, BooleanField, DateTimeField
 
 from mdb import Company, Customer
-from peeweeplus import MySQLDatabase, ChangedConnection, Argon2Field
+from peeweeplus import MySQLDatabase, JSONModel, ChangedConnection, Argon2Field
 from terminallib import Class, Terminal
 
 from termgr.config import CONFIG
@@ -37,7 +36,7 @@ class PermissionsError(Exception):
     pass
 
 
-class TermgrModel(Model):
+class TermgrModel(JSONModel):
     """Terminal manager basic Model."""
 
     class Meta:
