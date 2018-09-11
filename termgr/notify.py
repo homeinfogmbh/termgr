@@ -9,7 +9,6 @@ from emaillib import Mailer, EMail
 from termgr.config import CONFIG
 from termgr.openvpn import OpenVPNPackager
 from termgr.orm import User, WatchList, ReportedTerminal
-from termgr.util import TerminalCSVRecord
 
 __all__ = ['notify_users']
 
@@ -32,7 +31,7 @@ def get_terminals(user):
     return terminals
 
 
-def gen_emails(recipient, terminals):
+def gen_emails(recipient, wl_terminals):
     """Generates the terminals email."""
 
     email = EMail(
@@ -40,8 +39,8 @@ def gen_emails(recipient, terminals):
         CONFIG['notify']['body'])
     empty = True
 
-    for watchlist, terminals_ in terminals.items():
-        lines = [TerminalCSVRecord.from_terminal(term) for term in terminals_]
+    for watchlist, terminals in wl_terminals.items():
+        lines = [terminal.to_csv() for terminal in terminals]
 
         if lines:
             # Use DOS line breaks for compatibility with Windows systems.
