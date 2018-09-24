@@ -12,8 +12,6 @@ from terminallib import Class, Terminal
 from termgr.config import CONFIG
 
 __all__ = [
-    'AuthenticationError',
-    'PermissionsError',
     'ACL',
     'DefaultACL',
     'WatchList',
@@ -21,18 +19,6 @@ __all__ = [
 
 
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
-
-
-class AuthenticationError(Exception):
-    """Indicates an error during authentication process."""
-
-    pass
-
-
-class PermissionsError(Exception):
-    """Indicates error during permission handling."""
-
-    pass
 
 
 class TermgrModel(JSONModel):
