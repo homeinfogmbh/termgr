@@ -8,6 +8,7 @@ from terminallib import Terminal
 from wsgilib import JSON, XML, Error
 
 from termgr import dom
+from termgr.auth import authorize
 from termgr.wsgi.common import authenticated
 
 __all__ = ['ROUTES']
