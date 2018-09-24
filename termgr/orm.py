@@ -2,11 +2,11 @@
 
 from datetime import datetime
 
-from argon2.exceptions import VerifyMismatchError
-from peewee import ForeignKeyField, CharField, BooleanField, DateTimeField
+from peewee import ForeignKeyField, BooleanField, DateTimeField
 
-from mdb import Company, Customer
-from peeweeplus import MySQLDatabase, JSONModel, ChangedConnection, Argon2Field
+from his import Account
+from mdb import Customer
+from peeweeplus import MySQLDatabase, JSONModel, ChangedConnection
 from terminallib import Class, Terminal
 
 from termgr.config import CONFIG
@@ -14,7 +14,6 @@ from termgr.config import CONFIG
 __all__ = [
     'AuthenticationError',
     'PermissionsError',
-    'User',
     'ACL',
     'DefaultACL',
     'WatchList',
@@ -43,96 +42,6 @@ class TermgrModel(JSONModel):
         """Configures the database and schema."""
         database = DATABASE
         schema = database.database
-
-
-class User(TermgrModel):
-    """A generic abstract user."""
-
-    company = ForeignKeyField(
-        Company, column_name='company', on_update='CASCADE',
-        on_delete='CASCADE')
-    name = CharField(64)
-    passwd = Argon2Field()
-    email = CharField(255, null=True)
-    enabled = BooleanField()
-    annotation = CharField(255, null=True)
-    root = BooleanField(default=False)
-
-    def __str__(self):
-        """Returns the user's name."""
-        return self.name
-
-    @classmethod
-    def authenticate(cls, name, passwd):
-        """Authenticate with name and password."""
-        if passwd:
-            try:
-                user = cls.get(cls.name == name)
-            except cls.DoesNotExist:
-                raise AuthenticationError()
-
-            try:
-                user.passwd.verify(passwd)
-            except VerifyMismatchError:
-                raise AuthenticationError()
-
-            if user.passwd.needs_rehash:
-                user.passwd = passwd
-                user.save()
-
-            if user.enabled:
-                return user
-
-        raise AuthenticationError()
-
-    def permissions(self, terminal):
-        """Returns permissions on terminal."""
-        try:
-            # Per-terminal ACLs override default ACLs.
-            return ACL.get((ACL.user == self) & (ACL.terminal == terminal))
-        except ACL.DoesNotExist:
-            try:
-                return DefaultACL.get(
-                    (DefaultACL.user == self)
-                    & (DefaultACL.customer == terminal.customer)
-                    & (DefaultACL.class_ == terminal.class_))
-            except DefaultACL.DoesNotExist:
-                return None
-
-    def permit(self, terminal, *, read=None, administer=None, setup=None):
-        """Set permissions."""
-        if self.root:
-            raise PermissionsError('Cannot set permissions for root users.')
-
-        try:
-            DefaultACL.get(
-                (DefaultACL.user == self)
-                & (DefaultACL.customer == terminal.customer)
-                & (DefaultACL.class_ == terminal.class_))
-        except DefaultACL.DoesNotExist:
-            acl = ACL.add(
-                self, terminal, read=read, administer=administer, setup=setup)
-            acl.commit()
-
-    def authorize(self, terminal, *, read=None, administer=None, setup=None):
-        """Validate permissions.
-        None means "don't care"!
-        """
-        if all(permission is None for permission in (read, administer, setup)):
-            raise PermissionsError('No permissions selected.')
-        elif not self.enabled:
-            return False
-        elif self.root:
-            return True
-
-        # Per-terminal ACLs override default ACLs.
-        if ACL.authorize(self, terminal, read=read, administer=administer,
-                         setup=setup):
-            return True
-
-        return DefaultACL.authorize(
-            self, terminal.customer, terminal.class_, read=read,
-            administer=administer, setup=setup)
 
 
 class _ACL:
@@ -169,8 +78,8 @@ class ACL(TermgrModel, _ACL):
     and terminals with certain permissions.
     """
 
-    user = ForeignKeyField(
-        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    account = ForeignKeyField(
+        Account, column_name='account', on_update='CASCADE', on_delete='CASCADE')
     terminal = ForeignKeyField(
         Terminal, column_name='terminal', on_update='CASCADE',
         on_delete='CASCADE')
@@ -179,13 +88,15 @@ class ACL(TermgrModel, _ACL):
     setup = BooleanField(default=False)
 
     @classmethod
-    def add(cls, user, terminal, *, read=None, administer=None, setup=None):
+    def add(cls, account, terminal, *, read=None, administer=None, setup=None):
         """Adds the respective ACL entry."""
         try:
-            acl = cls.get((cls.user == user) & (cls.terminal == terminal))
+            acl = cls.get(
+                (cls.account == account)
+                & (cls.terminal == terminal))
         except cls.DoesNotExist:
             acl = cls()
-            acl.user = user
+            acl.account = account
             acl.terminal = terminal
 
         if read is not None:
@@ -200,7 +111,7 @@ class ACL(TermgrModel, _ACL):
         return acl
 
     @classmethod
-    def authorize(cls, user, terminal, *, read=None, administer=None,
+    def authorize(cls, account, terminal, *, read=None, administer=None,
                   setup=None):
         """Authorize via per-terminal ACLs."""
         if read is None:
@@ -220,7 +131,9 @@ class ACL(TermgrModel, _ACL):
 
         try:
             cls.get(
-                (cls.user == user) & (cls.terminal == terminal) & read_expr
+                (cls.account == account)
+                & (cls.terminal == terminal)
+                & read_expr
                 & administer_expr & setup_expr)
         except cls.DoesNotExist:
             return False
@@ -242,8 +155,9 @@ class DefaultACL(TermgrModel, _ACL):
         """Sets the respective table name."""
         table_name = 'default_acl'
 
-    user = ForeignKeyField(
-        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    account = ForeignKeyField(
+        Account, column_name='account', on_update='CASCADE',
+        on_delete='CASCADE')
     customer = ForeignKeyField(
         Customer, column_name='customer', on_update='CASCADE',
         on_delete='CASCADE')
@@ -254,16 +168,17 @@ class DefaultACL(TermgrModel, _ACL):
     setup = BooleanField(default=False)
 
     @classmethod
-    def add(cls, user, customer, class_, *, read=None, administer=None,
+    def add(cls, account, customer, class_, *, read=None, administer=None,
             setup=None):
         """Adds new default ACLs."""
         try:
             acl = cls.get(
-                (cls.user == user) & (cls.customer == customer)
+                (cls.account == account)
+                & (cls.customer == customer)
                 & (cls.class_ == class_))
         except cls.DoesNotExist:
             acl = cls()
-            acl.user = user
+            acl.account = account
             acl.customer = customer
             acl.class_ = class_
 
@@ -273,8 +188,8 @@ class DefaultACL(TermgrModel, _ACL):
         return acl
 
     @classmethod
-    def authorize(cls, user, customer, class_, *, read=None, administer=None,
-                  setup=None):
+    def authorize(cls, account, customer, class_, *, read=None,
+                  administer=None, setup=None):
         """Authorize via default ACLs."""
         if read is None:
             read_expr = True
@@ -293,7 +208,7 @@ class DefaultACL(TermgrModel, _ACL):
 
         try:
             cls.get(
-                (cls.user == user) & (cls.customer == customer)
+                (cls.account == account) & (cls.customer == customer)
                 & (cls.class_ == class_) & read_expr & administer_expr
                 & setup_expr)
         except cls.DoesNotExist:
@@ -319,12 +234,12 @@ class DefaultACL(TermgrModel, _ACL):
 
 
 class WatchList(TermgrModel):
-    """Mapping in-between users, customers and terminal
+    """Mapping in-between accounts, customers and terminal
     classes to notify users about new terminals.
     """
 
-    user = ForeignKeyField(
-        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    account = ForeignKeyField(
+        Account, column_name='account', on_update='CASCADE', on_delete='CASCADE')
     customer = ForeignKeyField(
         Customer, column_name='customer', on_update='CASCADE',
         on_delete='CASCADE')
@@ -332,15 +247,15 @@ class WatchList(TermgrModel):
         Class, column_name='class', on_update='CASCADE', on_delete='CASCADE')
 
     @classmethod
-    def add(cls, user, customer, class_):
+    def add(cls, account, customer, class_):
         """Adds new default ACLs."""
         try:
             return cls.get(
-                (cls.user == user) & (cls.customer == customer)
+                (cls.account == account) & (cls.customer == customer)
                 & (cls.class_ == class_))
         except cls.DoesNotExist:
             acl = cls()
-            acl.user = user
+            acl.account = account
             acl.customer = customer
             acl.class_ = class_
             return acl
@@ -354,7 +269,7 @@ class WatchList(TermgrModel):
     def notified(self):
         """Yields terminals that were already notified about."""
         for rterm in ReportedTerminal.select().join(Terminal).where(
-                (ReportedTerminal.user == self.user)
+                (ReportedTerminal.account == self.account)
                 & (Terminal.customer == self.customer)
                 & (Terminal.class_ == self.class_)):
             yield rterm.terminal
@@ -374,28 +289,31 @@ class WatchList(TermgrModel):
 
 
 class ReportedTerminal(TermgrModel):
-    """Lists reported terminals for the respective user."""
+    """Lists reported terminals for the respective account."""
 
     class Meta:
         """Sets the respective table name."""
         table_name = 'reported_terminal'
 
-    user = ForeignKeyField(
-        User, column_name='user', on_update='CASCADE', on_delete='CASCADE')
+    account = ForeignKeyField(
+        Account, column_name='account', on_update='CASCADE',
+        on_delete='CASCADE')
     terminal = ForeignKeyField(
         Terminal, column_name='terminal', on_update='CASCADE',
         on_delete='CASCADE')
     timestamp = DateTimeField(default=datetime.now)
 
     @classmethod
-    def add(cls, user, terminal, timestamp=None):
-        """Marks the respective terminal as reported for the given user."""
+    def add(cls, account, terminal, timestamp=None):
+        """Marks the respective terminal
+        as reported for the given account.
+        """
         try:
             reported_terminal = cls.get(
-                (cls.user == user) & (cls.terminal == terminal))
+                (cls.account == account) & (cls.terminal == terminal))
         except cls.DoesNotExist:
             reported_terminal = cls()
-            reported_terminal.user = user
+            reported_terminal.account = account
             reported_terminal.terminal = terminal
 
         if timestamp is not None:
