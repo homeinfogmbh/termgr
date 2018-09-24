@@ -51,7 +51,7 @@ def authorize(account, terminal, *, read=None, administer=None, setup=None):
     if all(permission is None for permission in (read, administer, setup)):
         raise PermissionsError('No permissions selected.')
 
-    if not account.enabled:
+    if not account.can_login:
         return False
 
     if account.root:

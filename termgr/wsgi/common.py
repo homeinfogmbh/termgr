@@ -59,7 +59,10 @@ def get_account():
     except KeyError:
         raise INVALID_CREDENTIALS
 
-    return account.login(passwd)
+    if account.login(passwd):
+        return account
+
+    raise INVALID_CREDENTIALS
 
 
 def get_customer():
