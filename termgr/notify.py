@@ -5,10 +5,11 @@ from email.mime.application import MIMEApplication
 from logging import getLogger
 
 from emaillib import Mailer, EMail
+from his import Account
 
 from termgr.config import CONFIG
 from termgr.openvpn import OpenVPNPackager
-from termgr.orm import User, WatchList, ReportedTerminal
+from termgr.orm import WatchList, ReportedTerminal
 
 __all__ = ['notify_accounts']
 
@@ -56,7 +57,7 @@ def gen_emails(recipient, wl_terminals):
 def mail_terminals(account):
     """Mails the respective terminals."""
 
-    if user.email is None:
+    if account.email is None:
         LOGGER.error(
             'No email address configured for account "%s".', account.name)
         return False
@@ -91,5 +92,5 @@ def notify_accounts(accounts=None):
     if accounts is None:
         accounts = Account
 
-    for account in users:
+    for account in accounts:
         mail_terminals(account)

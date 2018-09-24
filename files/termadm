@@ -18,7 +18,7 @@ Usage:
     termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
 [--state=<state_iso>]
     termadm reload
-    termadm notify [<user>...]
+    termadm notify [<account>...]
 
 Options:
     --domain=<domain>           Specifies the domain [default: 1].
@@ -43,6 +43,7 @@ from sys import exit as exit_
 
 from docopt import docopt
 
+from his import Account
 from mdb import Address, State
 from syslib import run, evaluate, script
 from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
@@ -51,7 +52,6 @@ from timelib import DATE_FORMAT
 
 from termgr.config import LOG_FORMAT
 from termgr.notify import notify_accounts
-from termgr.orm import User
 from termgr.util import Addr, TerminalLine
 
 
@@ -62,14 +62,14 @@ BINDCFG_GEN = '/usr/local/bin/bindcfg-gen'
 OPENVPNCFG_GEN = '/usr/local/bin/openvpncfg-gen'
 
 
-def _get_users(users):
+def _get_accounts(accounts):
     """Yields the respective users."""
 
-    for user in users:
+    for account in accounts:
         try:
-            yield User.get(User.name == user)
-        except User.DoesNotExist:
-            LOGGER.warning('No such user: %s.', user)
+            yield Account.get(Account.name == account)
+        except Account.DoesNotExist:
+            LOGGER.warning('No such account: %s.', account)
 
 
 def update_nagios():
@@ -371,8 +371,8 @@ def notify(options):
         LOGGER.error('You must be termgr or root to notify users.')
         return 3
 
-    if options['<user>']:
-        accounts = tuple(_get_users(options['<user>']))
+    if options['<account>']:
+        accounts = tuple(_get_accounts(options['<account>']))
     else:
         accounts = None
 

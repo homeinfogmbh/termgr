@@ -9,7 +9,6 @@ from mdb import Customer
 from terminallib import Terminal
 from wsgilib import Error
 
-from termgr.orm import AuthenticationError, User
 
 __all__ = [
     'get_json',
