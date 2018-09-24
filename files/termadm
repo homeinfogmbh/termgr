@@ -50,7 +50,7 @@ from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
 from timelib import DATE_FORMAT
 
 from termgr.config import LOG_FORMAT
-from termgr.notify import notify_users
+from termgr.notify import notify_accounts
 from termgr.orm import User
 from termgr.util import Addr, TerminalLine
 
@@ -372,11 +372,11 @@ def notify(options):
         return 3
 
     if options['<user>']:
-        users = tuple(_get_users(options['<user>']))
+        accounts = tuple(_get_users(options['<user>']))
     else:
-        users = None
+        accounts = None
 
-    notify_users(users=users)
+    notify_accounts(accounts=accounts)
     return 0
 
 
@@ -419,3 +419,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+

@@ -10,8 +10,8 @@
 
 Usage:
     termacls get [<expr>...] [options]
-    termacls set <user> [-GRras] <expr>...
-    termacls setdefault <user> [-GRras] <customer> <class>
+    termacls set <account> [-GRras] <expr>...
+    termacls setdefault <account> [-GRras] <customer> <class>
 
 Options:
     --grant, -G         Grants the provided permissions.
@@ -19,7 +19,7 @@ Options:
     --read, -r          Enable read permission.
     --administer, -a    Enable administration permission.
     --setup, -s         Enable setup permission.
-    --user=<user>       Specifies the user to filter for.
+    --account=<account>       Specifies the account to filter for.
     --version           Show version.
     -h --help           Show this screen.
 """
@@ -28,12 +28,14 @@ from sys import exit as exit_
 
 from docopt import docopt
 
+from his import Account
 from mdb import Customer
 from syslib import script
 from terminallib import get_terminals, Class
 
+from termgr.auth import permissions, permit
 from termgr.config import LOG_FORMAT
-from termgr.orm import PermissionsError, User, ACL, DefaultACL
+from termgr.orm import PermissionsError, ACL, DefaultACL
 
 
 LOGGER = getLogger(__file__)
@@ -64,43 +66,43 @@ def _default_acls(terminal):
     for default_acl in DefaultACL.select().where(
             (DefaultACL.customer == terminal.customer)
             & (DefaultACL.class_ == terminal.class_)):
-        yield (default_acl.user, default_acl)
+        yield (default_acl.account, default_acl)
 
 
 def _explicit_acls(terminal):
     """Yields the explicit ACLs for the respective terminal."""
 
     for acl in ACL.select().where(ACL.terminal == terminal):
-        yield (acl.user, acl)
+        yield (acl.account, acl)
 
 
 def list_acls(options):
     """Lists the requested ACLs."""
 
-    if options['--user']:
+    if options['--account']:
         try:
-            user = User.get(User.name == options['--user'])
-        except User.DoesNotExist:
-            LOGGER.error('No such user: %s.', options['--user'])
+            account = Account.get(Account.name == options['--account'])
+        except Account.DoesNotExist:
+            LOGGER.error('No such account: %s.', options['--account'])
             return 3
     else:
-        user = None
+        account = None
 
     terminals = get_terminals(options['<expr>'])
 
     for terminal in terminals:
-        if user is not None:
-            permissions = user.permissions(terminal)
+        if account is not None:
+            perms = permissions(account(terminal))
 
-            if permissions is not None:
-                print(permissions, terminal, user)
+            if perms is not None:
+                print(perms, terminal, account)
         else:
             permissions_ = dict(_default_acls(terminal))
             explicit_permissions = dict(_explicit_acls(terminal))
             permissions_.update(explicit_permissions)
 
-            for user, permissions in permissions_.items():
-                print(permissions, terminal, user)
+            for account, perms in permissions_.items():
+                print(perms, terminal, account)
 
     return 0
 
@@ -109,9 +111,9 @@ def set_acls(options):
     """Sets the requested ACLs."""
 
     try:
-        user = User.get(User.name == options['<user>'])
-    except User.DoesNotExist:
-        LOGGER.error('No such user: %s.', options['<user>'])
+        account = Account.get(Account.name == options['<account>'])
+    except Account.DoesNotExist:
+        LOGGER.error('No such account: %s.', options['<account>'])
         return 1
 
     if options['--grant'] and options['--revoke']:
@@ -122,8 +124,8 @@ def set_acls(options):
 
     for terminal in get_terminals(options['<expr>']):
         try:
-            user.permit(
-                terminal, read=read, administer=administer,
+            permit(
+                account, terminal, read=read, administer=administer,
                 setup=setup)
         except PermissionsError as permission_error:
             LOGGER.error(permission_error)
@@ -136,9 +138,9 @@ def set_default(options):
     """Sets default ACLs."""
 
     try:
-        user = User.get(User.name == options['<user>'])
-    except User.DoesNotExist:
-        LOGGER.error('No such user: %s.', options['<user>'])
+        account = Account.get(Account.name == options['<account>'])
+    except Account.DoesNotExist:
+        LOGGER.error('No such account: %s.', options['<account>'])
         return 3
 
     try:
@@ -164,11 +166,11 @@ def set_default(options):
 
     try:
         default_acl = DefaultACL.get(
-            (DefaultACL.user == user) & (DefaultACL.customer == customer)
+            (DefaultACL.account == account) & (DefaultACL.customer == customer)
             & (DefaultACL.class_ == class_))
     except DefaultACL.DoesNotExist:
         default_acl = DefaultACL()
-        default_acl.user = user
+        default_acl.account = account
         default_acl.customer = customer
         default_acl.class_ = class_
 

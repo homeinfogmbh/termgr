@@ -10,7 +10,7 @@ from termgr.config import CONFIG
 from termgr.openvpn import OpenVPNPackager
 from termgr.orm import User, WatchList, ReportedTerminal
 
-__all__ = ['notify_users']
+__all__ = ['notify_accounts']
 
 
 LOGGER = getLogger(__file__)
@@ -19,12 +19,12 @@ MAILER = Mailer(
     CONFIG['mail']['user'], CONFIG['mail']['passwd'])
 
 
-def get_terminals(user):
+def get_terminals(account):
     """Generates the terminals email."""
 
     terminals = defaultdict(list)
 
-    for watchlist in WatchList.select().where(WatchList.user == user):
+    for watchlist in WatchList.select().where(WatchList.account == account):
         for terminal in watchlist.terminals:
             terminals[watchlist].append(terminal)
 
@@ -53,15 +53,16 @@ def gen_emails(recipient, wl_terminals):
         yield email
 
 
-def mail_terminals(user):
+def mail_terminals(account):
     """Mails the respective terminals."""
 
     if user.email is None:
-        LOGGER.error('No email address configured for user "%s".', user.name)
+        LOGGER.error(
+            'No email address configured for account "%s".', account.name)
         return False
 
-    terminals = get_terminals(user)
-    emails = tuple(gen_emails(user.email, terminals))
+    terminals = get_terminals(account)
+    emails = tuple(gen_emails(account.email, terminals))
     MAILER.send(emails)
     incomplete = []
 
@@ -70,7 +71,7 @@ def mail_terminals(user):
             if not OpenVPNPackager(terminal).complete:
                 incomplete.append(terminal)
 
-            reported_terminal = ReportedTerminal.add(user, terminal)
+            reported_terminal = ReportedTerminal.add(account, terminal)
             reported_terminal.save()
 
     if incomplete:
@@ -84,11 +85,11 @@ def mail_terminals(user):
     return True
 
 
-def notify_users(users=None):
+def notify_accounts(accounts=None):
     """Notifies the respective users about new terminals."""
 
-    if users is None:
-        users = User
+    if accounts is None:
+        accounts = Account
 
-    for user in users:
-        mail_terminals(user)
+    for account in users:
+        mail_terminals(account)

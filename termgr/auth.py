@@ -32,7 +32,7 @@ def permit(account, terminal, *, read=None, administer=None, setup=None):
     """Set permissions."""
 
     if account.root:
-        raise PermissionsError('Cannot set permissions for root users.')
+        raise PermissionsError('Cannot set permissions for root accounts.')
 
     try:
         DefaultACL.get(

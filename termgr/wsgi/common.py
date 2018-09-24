@@ -4,6 +4,7 @@ from json import loads
 
 from flask import request
 
+from his import Account
 from mdb import Customer
 from terminallib import Terminal
 from wsgilib import Error
@@ -12,14 +13,15 @@ from termgr.orm import AuthenticationError, User
 
 __all__ = [
     'get_json',
-    'get_user',
+    'get_account',
     'get_customer',
     'get_terminal',
     'authenticated',
     'authorized']
 
 
-INVALID_CREDENTIALS = Error('Invalid user name and / or password.', status=401)
+INVALID_CREDENTIALS = Error(
+    'Invalid account name and / or password.', status=401)
 
 
 def get_json():
@@ -33,28 +35,30 @@ def get_json():
     return json
 
 
-def get_user():
-    """Returns the appropriate user."""
+def get_account():
+    """Returns the appropriate account."""
 
     json = get_json()
+
+    try:
+        name = json['userName']
+    except KeyError:
+        try:
+            name = json['user_name']
+        except KeyError:
+            raise INVALID_CREDENTIALS
+
+    try:
+        account = Account.get(Account.name == name)
+    except Account.DoesNotExist:
+        raise INVALID_CREDENTIALS
 
     try:
         passwd = json['passwd']
     except KeyError:
         raise INVALID_CREDENTIALS
 
-    try:
-        user_name = json['userName']
-    except KeyError:
-        try:
-            user_name = json['user_name']
-        except KeyError:
-            raise INVALID_CREDENTIALS
-
-    try:
-        return User.authenticate(user_name, passwd)
-    except AuthenticationError:
-        raise INVALID_CREDENTIALS
+    return account.login(passwd)
 
 
 def get_customer():
@@ -94,11 +98,11 @@ def get_terminal():
 
 
 def authenticated(function):
-    """Enforces a terminal manager user login."""
+    """Enforces a terminal manager account login."""
 
     def wrapper(*args, **kwargs):
-        """Calls the function with additional user parameter."""
-        return function(get_user(), *args, **kwargs)
+        """Calls the function with additional account parameter."""
+        return function(get_account(), *args, **kwargs)
 
     return wrapper
 
@@ -108,12 +112,13 @@ def authorized(read=None, administer=None, setup=None):
 
     def wrap(function):
         """Wraps the actual function."""
-        def wrapper(user, *args, **kwargs):
+        def wrapper(account, *args, **kwargs):
             """Performs terminal check and runs function."""
             terminal = get_terminal()
 
-            if user.authorize(
-                    terminal, read=read, administer=administer, setup=setup):
+            if authorize(
+                    account, terminal, read=read, administer=administer,
+                    setup=setup):
                 return function(terminal, *args, **kwargs)
 
             raise Error('Terminal operation unauthorized.', status=403)

@@ -5,6 +5,7 @@ from collections import defaultdict
 from terminallib import Terminal
 from wsgilib import JSON
 
+from termgr.auth import authorize
 from termgr.ctrl import TerminalController
 from termgr.wsgi.common import authenticated, authorized
 
@@ -38,20 +39,20 @@ def dict_terminals(grouped_terminals):
         for customer, terminals in grouped_terminals.items()}
 
 
-def authorized_terminals(user):
-    """Yields terminals readable by the respective user."""
+def authorized_terminals(account):
+    """Yields terminals readable by the respective account."""
 
     for terminal in Terminal.select().where(~(Terminal.address >> None)):
-        if user.authorize(terminal, read=True):
+        if authorize(account, terminal, read=True):
             yield terminal
 
 
 @authenticated
-def list_terminals(user):
+def list_terminals(account):
     """Checks the terminals."""
 
     return JSON(dict_terminals(group_terminals(
-        authorized_terminals(user))))
+        authorized_terminals(account))))
 
 
 @authenticated

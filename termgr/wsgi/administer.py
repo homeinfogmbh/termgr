@@ -68,7 +68,7 @@ def reboot(terminal):
     """Reboots the respective terminal."""
 
     if CONTROLLER.check_login(terminal):
-        return ('Admin user is currently logged in.', 503)
+        return ('Admin account is currently logged in.', 503)
 
     if CONTROLLER.pacman(terminal):
         return ('Package manager is currently running.', 503)

@@ -56,7 +56,7 @@ def get_scheduled():
     return scheduled.date()
 
 
-def get_terminals(user):
+def get_terminals(account):
     """List terminals of customer with CID."""
 
     scheduled = get_scheduled()
@@ -73,19 +73,20 @@ def get_terminals(user):
         expression &= Terminal.deployed >> None
 
     for terminal in Terminal.select().where(expression):
-        if user.authorize(terminal, read=True):
+        if authorize(account, terminal, read=True):
             yield terminal
 
 
 @authenticated
-def query_terminals(user):
+def query_terminals(account):
     """Lists the respective terminals."""
 
     if request.args.get('json'):
         return JSON([
-            terminal.to_json(short=True) for terminal in get_terminals(user)])
+            terminal.to_json(short=True) for terminal
+            in get_terminals(account)])
 
-    return XML(terminals_to_dom(get_terminals(user)))
+    return XML(terminals_to_dom(get_terminals(account)))
 
 
 ROUTES = (('POST', '/query', query_terminals, 'query_terminals'),)
