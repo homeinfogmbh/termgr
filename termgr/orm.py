@@ -65,7 +65,8 @@ class ACL(TermgrModel, _ACL):
     """
 
     account = ForeignKeyField(
-        Account, column_name='account', on_update='CASCADE', on_delete='CASCADE')
+        Account, column_name='account', on_update='CASCADE',
+        on_delete='CASCADE')
     terminal = ForeignKeyField(
         Terminal, column_name='terminal', on_update='CASCADE',
         on_delete='CASCADE')
@@ -225,7 +226,8 @@ class WatchList(TermgrModel):
     """
 
     account = ForeignKeyField(
-        Account, column_name='account', on_update='CASCADE', on_delete='CASCADE')
+        Account, column_name='account', on_update='CASCADE',
+        on_delete='CASCADE')
     customer = ForeignKeyField(
         Customer, column_name='customer', on_update='CASCADE',
         on_delete='CASCADE')

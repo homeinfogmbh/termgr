@@ -107,4 +107,3 @@ ROUTES = (
     ('POST', '/administer/application', application, 'manage_application'),
     ('POST', '/administer/reboot', reboot, 'reboot_terminal'),
     ('POST', '/administer/sync', sync, 'sync_terminal'))
-
