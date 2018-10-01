@@ -33,9 +33,9 @@ from mdb import Customer
 from syslib import script
 from terminallib import get_terminals, Class
 
-from termgr.auth import permissions, permit
+from termgr.auth import PermissionsError, permissions, permit
 from termgr.config import LOG_FORMAT
-from termgr.orm import PermissionsError, ACL, DefaultACL
+from termgr.orm import ACL, DefaultACL
 
 
 LOGGER = getLogger(__file__)
@@ -209,3 +209,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
