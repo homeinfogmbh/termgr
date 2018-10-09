@@ -11,16 +11,14 @@ __all__ = [
     'TerminalsController']
 
 
-REBOOT_OPTIONS = {'ServerAliveInterval': 5, 'ServerAliveCountMax': 3}
 RESOLUTION_CMD = 'export DISPLAY=:0 \\; xrandr | grep " connected"'
 SUDO = '/usr/bin/sudo'
 PACMAN = '/usr/bin/pacman'
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
 ADMIN_USER = 'homeinfo'
-REBOOT_COMMANDS = (
-    ('/usr/bin/reboot',), (SYSTEMCTL, 'isolate', 'reboot.target'),
-    (SYSTEMCTL, 'reboot'))
+REBOOT_COMMAND = (SYSTEMCTL, 'reboot')
+REBOOT_OPTIONS = {'ServerAliveInterval': 5, 'ServerAliveCountMax': 3}
 
 
 def closed_by_remote_host(process_result):
@@ -68,16 +66,7 @@ class TerminalController(RemoteController):
     def reboot(self):
         """Reboots the terminal."""
         with self.extra_options(REBOOT_OPTIONS):
-            for reboot_command in REBOOT_COMMANDS:
-                result = self.sudo(*reboot_command)
-
-                if result:
-                    return result
-                elif result.exit_code == 255:
-                    if closed_by_remote_host(result):
-                        return result
-
-        return result
+            return self.sudo(*REBOOT_COMMAND)
 
     def cleanup(self):
         """Cleanup local package cache."""
