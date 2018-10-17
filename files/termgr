@@ -53,7 +53,7 @@ def get_terminals(*args, **kwargs):
             try:
                 input('Please hit enter to continue...')
             except (EOFError, KeyboardInterrupt):
-                break
+                return
 
         yield terminal
 
