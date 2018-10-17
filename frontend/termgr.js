@@ -536,6 +536,9 @@ termgr.terminalEntry = function (terminal, cid) {
     btnBeep.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnBeep.setAttribute('type', 'button');
     btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.tid + ', ' + cid + ');');
+    btnBeep.setAttribute('data-toggle', 'tooltip');
+    btnBeep.setAttribute('data-placement', 'bottom');
+    btnBeep.setAttribute('title', 'Beep');
     btnBeep.appendChild(btnBeepIcon);
 
     var btnRebootIcon = document.createElement('i');
@@ -545,6 +548,9 @@ termgr.terminalEntry = function (terminal, cid) {
     btnReboot.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnReboot.setAttribute('type', 'button');
     btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + cid + ');');
+    btnReboot.setAttribute('data-toggle', 'tooltip');
+    btnReboot.setAttribute('data-placement', 'bottom');
+    btnReboot.setAttribute('title', 'Reboot');
     btnReboot.appendChild(btnRebootIcon);
 
     var btnDeployIcon = document.createElement('i');
@@ -576,6 +582,9 @@ termgr.terminalEntry = function (terminal, cid) {
     btnSync.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnSync.setAttribute('type', 'button');
     btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.tid + ', ' + cid + ');');
+    btnSync.setAttribute('data-toggle', 'tooltip');
+    btnSync.setAttribute('data-placement', 'bottom');
+    btnSync.setAttribute('title', 'Synchronize');
     btnSync.appendChild(btnSyncIcon);
 
     var columnButtons = document.createElement('td');
