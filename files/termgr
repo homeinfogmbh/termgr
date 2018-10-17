@@ -51,8 +51,11 @@ def get_terminals(*args, **kwargs):
     for index, terminal in enumerate(_get_terminals(*args, **kwargs), start=1):
         if not index % 10:
             try:
-                input('Please hit enter to continue...')
+                response = input('Please hit enter to continue...')
             except (EOFError, KeyboardInterrupt):
+                return
+
+            if response.strip().lower() in ('stop', 'calcel', 'exit', 'quit'):
                 return
 
         yield terminal
