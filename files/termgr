@@ -35,7 +35,7 @@ from docopt import docopt
 
 from fancylog import DEFAULT_ANIMATION, TTYAnimation, TTYAnimator
 from syslib import script, Parallelization
-from terminallib import get_terminals
+from terminallib import get_terminals as _get_terminals
 
 from termgr.config import LOG_FORMAT
 from termgr.ctrl import TerminalsController
@@ -43,6 +43,19 @@ from termgr.ctrl import TerminalsController
 
 LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
+
+
+def get_terminals(*args, **kwargs):
+    """Yields the respective terminals."""
+
+    for index, terminal in enumerate(_get_terminals(*args, **kwargs), start=1):
+        if not index % 10:
+            try:
+                input('Please hit enter to continue...')
+            except (EOFError, KeyboardInterrupt):
+                break
+
+        yield terminal
 
 
 @script
@@ -62,9 +75,9 @@ def main(options):
     deployed = None if options['--undeployed'] else True
     classes = options['--classes'].split(',') if options['--classes'] else None
     oss = options['--oss'].split(',') if options['--oss'] else None
-    terminals = tuple(get_terminals(
+    terminals = get_terminals(
         options['<expr>'], deployed=deployed, testing=options['--testing'],
-        classes=classes, oss=oss))
+        classes=classes, oss=oss)
 
     ctrl = TerminalsController()
 
