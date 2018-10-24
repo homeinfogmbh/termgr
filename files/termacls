@@ -92,7 +92,7 @@ def list_acls(options):
 
     for terminal in terminals:
         if account is not None:
-            perms = permissions(account(terminal))
+            perms = permissions(account, terminal)
 
             if perms is not None:
                 print(perms, terminal, account)
@@ -209,4 +209,3 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
-
