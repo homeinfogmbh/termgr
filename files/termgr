@@ -45,10 +45,10 @@ LOGGER = getLogger(__file__)
 TERMGR_USER = 'termgr'
 
 
-def parallelize(function, terminals):
+def parallelize(function, terminals, chunk=None):
     """Returns a parallelization for the respective function."""
 
-    return Parallelization(function, terminals, single=True, chunk=10)
+    return Parallelization(function, terminals, single=True, chunk=chunk)
 
 
 def animate(parallelization, template):
@@ -115,7 +115,7 @@ def main(options):
         for terminal, *_ in para.failures:
             LOGGER.error('Failed to upgrade %s.', terminal)
     elif options['reboot']:
-        with parallelize(ctrl.reboot, terminals) as para:
+        with parallelize(ctrl.reboot, terminals, chunk=10) as para:
             with animate(para, 'Rebooting {}: {}'):
                 para.wait()
     elif options['chkres']:
