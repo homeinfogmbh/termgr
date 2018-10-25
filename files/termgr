@@ -25,6 +25,7 @@ Options:
     --oss=<os>, -o              Select terminals of the respective operating
                                 systems.
     --user=<user>, -u           Specify user account for SSH connections.
+    --noconfirm                 Do not prompt every 10 terminals on reboot.
 """
 from getpass import getuser
 from logging import INFO, basicConfig, getLogger
@@ -64,6 +65,7 @@ def main(options):
     """Runs the terminal manager."""
 
     basicConfig(level=INFO, format=LOG_FORMAT)
+    chunk = None if options['--noconfirm'] else 10
 
     if geteuid() == 0:
         LOGGER.error('Refusing to run as root.')
@@ -115,7 +117,7 @@ def main(options):
         for terminal, *_ in para.failures:
             LOGGER.error('Failed to upgrade %s.', terminal)
     elif options['reboot']:
-        with parallelize(ctrl.reboot, terminals, chunk=10) as para:
+        with parallelize(ctrl.reboot, terminals, chunk=chunk) as para:
             with animate(para, 'Rebooting {}: {}'):
                 para.wait()
     elif options['chkres']:
