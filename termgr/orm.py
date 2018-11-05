@@ -30,12 +30,8 @@ class TermgrModel(JSONModel):
         schema = database.database
 
 
-class _ACL:
+class _ACLMixin:
     """ACL base interface."""
-
-    read = NotImplemented
-    administer = NotImplemented
-    setup = NotImplemented
 
     def __int__(self):
         """Returns the permissions value."""
@@ -59,7 +55,7 @@ class _ACL:
         return int(self) < int(other)
 
 
-class ACL(TermgrModel, _ACL):
+class ACL(_ACLMixin, TermgrModel):
     """Many-to-many mapping in-between administrators
     and terminals with certain permissions.
     """
@@ -135,7 +131,7 @@ class ACL(TermgrModel, _ACL):
         return self.delete_instance()
 
 
-class DefaultACL(TermgrModel, _ACL):
+class DefaultACL(_ACLMixin, TermgrModel):
     """Represents default ACL settings for users."""
 
     class Meta:
