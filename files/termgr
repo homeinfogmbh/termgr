@@ -10,9 +10,7 @@
 
 Usage:
     termgr update [<expr>...] [options]
-    termgr stage [<expr>...] [options]
-    termgr sync <packages> [<expr>...] [--asexplicit] [options]
-    termgr system-upgrade [<expr>...] [options]
+    termgr upgrade [<expr>...] [options]
     termgr (reboot | chkres | unlock) [<expr>...] [options]
 
 Options:
@@ -92,26 +90,9 @@ def main(options):
 
         for terminal, *_ in para.failures:
             LOGGER.error('Failed to update %s.', terminal)
-    elif options['stage']:
-        with parallelize(ctrl.stage, terminals) as para:
-            with animate(para, 'Staging {}: {}'):
-                para.wait()
-
-        for terminal, *_ in para.failures:
-            LOGGER.error('Failed to stage %s.', terminal)
-    elif options['sync']:
-        pkgs = options['<packages>'].split(',')
-        install = ctrl.install(*pkgs, asexplicit=options['--asexplicit'])
-
-        with parallelize(install, terminals) as para:
-            with animate(para, 'Syncing {}: {}'):
-                para.wait()
-
-        for terminal, *_ in para.failures:
-            LOGGER.error('Failed to sync %s.', terminal)
-    elif options['system-upgrade']:
+    elif options['upgrade']:
         with parallelize(ctrl.upgrade, terminals) as para:
-            with animate(para, 'Upgrading {}: {}'):
+            with animate(para, 'Staging {}: {}'):
                 para.wait()
 
         for terminal, *_ in para.failures:

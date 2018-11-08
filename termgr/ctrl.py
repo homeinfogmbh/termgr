@@ -63,6 +63,10 @@ class TerminalController(RemoteController):
 
         return self.sudo(PACMAN, '--noconfirm', *args)
 
+    def systemctl(self, *args):
+        """Issues a systemctl command."""
+        return self.sudo(SYSTEMCTL, *args)
+
     def reboot(self):
         """Reboots the terminal."""
         with self.extra_options(REBOOT_OPTIONS):
@@ -73,23 +77,12 @@ class TerminalController(RemoteController):
         return self.pacman('-Sc')
 
     def update(self):
-        """Update package databases."""
-        return self.pacman('-Sy')
-
-    def stage(self):
-        """Stage current packages."""
-        return self.pacman('-Suw')
+        """Downloads package updates."""
+        return self.systemctl('start', 'pacman-update.service')
 
     def upgrade(self):
         """Performs a system upgrade."""
-        return self.pacman('-Su')
-
-    def install(self, *pkgs, asexplicit=False):
-        """Installs software packages."""
-        if asexplicit:
-            return self.pacman('-S', '--asexplicit', *pkgs)
-
-        return self.pacman('-S', *pkgs)
+        return self.systemctl('start', 'pacman-upgrade.service')
 
     def remove(self, *pkgs, cascade=False, nosave=False,
                recursive=False, unneeded=False):
@@ -155,8 +148,3 @@ class TerminalsController:
     def chkres(self, terminal):
         """Checks the resolution."""
         return self._controller(terminal).resolution
-
-    def install(self, *pkgs, asexplicit=False):
-        """Callback for the sync command."""
-        return lambda terminal: self._controller(terminal).install(
-            *pkgs, asexplicit=asexplicit)
