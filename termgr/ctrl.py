@@ -84,6 +84,13 @@ class TerminalController(RemoteController):
         """Performs a system upgrade."""
         return self.systemctl('start', 'pacman-upgrade.service')
 
+    def install(self, *pkgs, asexplicit=False):
+        """Installs software packages."""
+        if asexplicit:
+            return self.pacman('-S', '--asexplicit', *pkgs)
+
+        return self.pacman('-S', *pkgs)
+
     def remove(self, *pkgs, cascade=False, nosave=False,
                recursive=False, unneeded=False):
         """Removes packages."""
@@ -148,3 +155,8 @@ class TerminalsController:
     def chkres(self, terminal):
         """Checks the resolution."""
         return self._controller(terminal).resolution
+
+    def install(self, *pkgs, asexplicit=False):
+        """Callback for the sync command."""
+        return lambda terminal: self._controller(terminal).install(
+            *pkgs, asexplicit=asexplicit)

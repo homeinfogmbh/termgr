@@ -11,6 +11,7 @@
 Usage:
     termgr update [<expr>...] [options]
     termgr upgrade [<expr>...] [options]
+    termgr sync <packages> [<expr>...] [--asexplicit] [options]
     termgr (reboot | chkres | unlock) [<expr>...] [options]
 
 Options:
@@ -97,6 +98,16 @@ def main(options):
 
         for terminal, *_ in para.failures:
             LOGGER.error('Failed to upgrade %s.', terminal)
+    elif options['sync']:
+        pkgs = options['<packages>'].split(',')
+        install = ctrl.install(*pkgs, asexplicit=options['--asexplicit'])
+
+        with parallelize(install, terminals) as para:
+            with animate(para, 'Syncing {}: {}'):
+                para.wait()
+
+        for terminal, *_ in para.failures:
+            LOGGER.error('Failed to sync %s.', terminal)
     elif options['reboot']:
         with parallelize(ctrl.reboot, terminals, chunk=chunk) as para:
             with animate(para, 'Rebooting {}: {}'):
