@@ -82,33 +82,34 @@ def list_acls(options):
 
     if options['--account']:
         try:
-            account = Account.get(Account.name == options['--account'])
+            selected_account = Account.get(
+                Account.name == options['--account'])
         except Account.DoesNotExist:
             LOGGER.error('No such account: %s.', options['--account'])
             return 3
     else:
-        account = None
+        selected_account = None
 
     terminals = get_terminals(options['<expr>'])
 
     for terminal in terminals:
-        if account is not None:
-            perms = permissions(account, terminal)
+        if selected_account is not None:
+            permissions_ = permissions(selected_account, terminal)
 
-            if perms is not None:
-                print(perms, terminal, account)
+            if permissions_ is not None:
+                print(permissions_, terminal, selected_account)
         else:
             permissions_map = defaultdict(list)
 
-            for account, perms in _default_acls(terminal):
-                permissions_map[account].append(perms)
+            for account, permissions_ in _default_acls(terminal):
+                permissions_map[account].append(permissions_)
 
-            for account, perms in _explicit_acls(terminal):
-                permissions_map[account].append(perms)
+            for account, permissions_ in _explicit_acls(terminal):
+                permissions_map[account].append(permissions_)
 
-            for account, perms in permissions_map.items():
-                for perm in perms:
-                    print(perm, terminal, account)
+            for account, permissions_list in permissions_map.items():
+                for permissions_ in permissions_list:
+                    print(permissions_, terminal, account)
 
     return 0
 
