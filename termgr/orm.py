@@ -150,6 +150,10 @@ class DefaultACL(_ACLMixin, TermgrModel):
     administer = BooleanField(default=False)
     setup = BooleanField(default=False)
 
+    def __str__(self):
+        """Suffixes string representation with default marker."""
+        return super().__str__() + ' (default)'
+
     @classmethod
     def add(cls, account, customer, class_, *, read=None, administer=None,
             setup=None):
