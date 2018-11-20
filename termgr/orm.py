@@ -70,6 +70,10 @@ class ACL(_ACLMixin, TermgrModel):
     administer = BooleanField(default=False)
     setup = BooleanField(default=False)
 
+    def __str__(self):
+        """Prefixes string representation with explicit marker."""
+        return super().__str__() + '!'
+
     @classmethod
     def add(cls, account, terminal, *, read=None, administer=None, setup=None):
         """Adds the respective ACL entry."""
@@ -151,8 +155,8 @@ class DefaultACL(_ACLMixin, TermgrModel):
     setup = BooleanField(default=False)
 
     def __str__(self):
-        """Suffixes string representation with default marker."""
-        return super().__str__() + ' (default)'
+        """Prefixes string representation with default marker."""
+        return super().__str__() + '*'
 
     @classmethod
     def add(cls, account, customer, class_, *, read=None, administer=None,
