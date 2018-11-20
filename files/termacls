@@ -23,6 +23,7 @@ Options:
     --version           Show version.
     -h --help           Show this screen.
 """
+from collections import defaultdict
 from logging import INFO, basicConfig, getLogger
 from sys import exit as exit_
 
@@ -97,12 +98,17 @@ def list_acls(options):
             if perms is not None:
                 print(perms, terminal, account)
         else:
-            permissions_ = dict(_default_acls(terminal))
-            explicit_permissions = dict(_explicit_acls(terminal))
-            permissions_.update(explicit_permissions)
+            permissions_map = defaultdict(list)
 
-            for account, perms in permissions_.items():
-                print(perms, terminal, account)
+            for account, perms in _default_acls(terminal):
+                permissions_map[account].append(perms)
+
+            for account, perms in _explicit_acls(terminal):
+                permissions_map[account].append(perms)
+
+            for account, perms in permissions_map.items():
+                for perm in perms:
+                    print(perm, terminal, account)
 
     return 0
 
