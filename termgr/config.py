@@ -1,9 +1,10 @@
 """Terminal setup configuration."""
 
-from configlib import INIParser
+from configlib import loadcfg
+
 
 __all__ = ['CONFIG', 'LOG_FORMAT']
 
 
-CONFIG = INIParser('/etc/termgr.conf')
+CONFIG = loadcfg('termgr.conf')
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
