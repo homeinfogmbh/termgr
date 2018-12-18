@@ -2,7 +2,7 @@
 
 from logging import getLogger
 
-from hipster.appctl import ApplicationHandler
+from hipster.ctrl import SyncController
 from hipster.sync import Synchronizer
 from wsgilib import JSON
 
@@ -16,7 +16,6 @@ SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
 CONTROLLER = TerminalsController()
 DIGSIG_KEY_FILE = '/home/termgr/.ssh/digsig'
-APPCTL = ApplicationHandler(keyfile=DIGSIG_KEY_FILE)
 LOGGER = getLogger(__file__)
 
 
@@ -96,8 +95,9 @@ def sync(terminal):
         result = synchronizer.sync(terminal)
 
     if result:
-        APPCTL.restart(terminal)
-        return 'Terminal synchronizeed.'
+        ctrl = SyncController(terminal, keyfile=DIGSIG_KEY_FILE)
+        ctrl.restart()
+        return 'Terminal synchronized.'
 
     return JSON([str(collector) for collector in result], status=500)
 
