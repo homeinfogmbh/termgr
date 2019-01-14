@@ -37,12 +37,10 @@ termgr.INVALID_CREDENTIALS = function () {
 };
 
 termgr.UNAUTHORIZED = function (what) {
-    var msg = 'Sie sind nicht berechtigt, ' + what + '.';
-
     return function () {
         swal({
             title: 'Fehler.',
-            text: msg,
+            text: 'Sie sind nicht berechtigt, ' + what + '.',
             type: 'error'
         });
     };
@@ -75,7 +73,7 @@ termgr.getCredentials = function () {
     Returns the basic post data for the respective terminal.
 */
 termgr.getData = function (tid, cid) {
-    var data = termgr.getCredentials();
+    const data = termgr.getCredentials();
     data['tid'] = tid;
     data['cid'] = '' + cid;   // Backend needs a string here.
     return data;
@@ -87,7 +85,7 @@ termgr.getData = function (tid, cid) {
     from the API and invokes the callback function.
 */
 termgr.getCustomers = function () {
-    var credentials = termgr.getCredentials();
+    const credentials = termgr.getCredentials();
 
     return jQuery.ajax({
         url: termgr.BASE_URL + '/check/list',
@@ -113,18 +111,14 @@ termgr.getCustomers = function () {
 /*
     Filters the provided terminals by the respective keywords.
 */
-termgr.filterTerminals = function (terminals, cid, keywords) {
-    var filteredTerminals = [];
+termgr.filterTerminals = function* (terminals, cid, keywords) {
+    for (let terminal of terminals) {
+        let matching = true;
 
-    for (var i = 0; i < terminals.length; i++) {
-        var terminal = terminals[i];
-        var matching = true;
-
-        for (var j = 0; j < keywords.length; j++) {
-            var keyword = keywords[j];
-            var matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
-            var matchingCid = termgr.containsIgnoreCase('' + cid, keyword);
-            var matchingAddress = termgr.containsIgnoreCase(termgr._addressToString(terminal.address), keyword);
+        for (let keyword of keywords) {
+            let matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
+            let matchingCid = termgr.containsIgnoreCase('' + cid, keyword);
+            let matchingAddress = termgr.containsIgnoreCase(termgr._addressToString(terminal.address), keyword);
 
             if (! (matchingTid || matchingCid || matchingAddress)) {
                 matching = false;
@@ -133,11 +127,9 @@ termgr.filterTerminals = function (terminals, cid, keywords) {
         }
 
         if (matching) {
-            filteredTerminals.push(terminal);
+            yield terminal;
         }
     }
-
-    return filteredTerminals;
 };
 
 
@@ -145,10 +137,10 @@ termgr.filterTerminals = function (terminals, cid, keywords) {
     Filters the provided customer by the respective keywords.
 */
 termgr.filterCustomer = function (customer, keywords) {
-    var customerMatch = true;
+    let customerMatch = true;
 
-    for (var i = 0; i < keywords.length; i++) {
-        if (! termgr.containsIgnoreCase(customer.name, keywords[i])) {
+    for (let keyword of keywords) {
+        if (! termgr.containsIgnoreCase(customer.name, keyword)) {
             customerMatch = false;
             break;
         }
@@ -158,7 +150,7 @@ termgr.filterCustomer = function (customer, keywords) {
         return customer;
     }
 
-    var terminals = termgr.filterTerminals(customer.terminals, customer.id, keywords);
+    const terminals = Array.from(termgr.filterTerminals(customer.terminals, customer.id, keywords));
 
     if (terminals.length > 0) {
         return {'id': customer.id, 'name': customer.name, 'terminals': terminals};
@@ -172,11 +164,11 @@ termgr.filterCustomer = function (customer, keywords) {
     Filters the provided customers by the respective keywords.
 */
 termgr.filterCustomers = function (customers, keywords) {
-    var filteredCustomers = {};
+    const filteredCustomers = {};
 
-    for (var cidStr in customers) {
+    for (let cidStr in customers) {
         if (customers.hasOwnProperty(cidStr)) {
-            var customer = termgr.filterCustomer(customers[cidStr], keywords);
+            let customer = termgr.filterCustomer(customers[cidStr], keywords);
 
             if (customer != null) {
                 filteredCustomers[cidStr] = customer;
@@ -192,10 +184,10 @@ termgr.filterCustomers = function (customers, keywords) {
     Lists the provided customers.
 */
 termgr.listCustomers = function (customers) {
-    var customerList = document.getElementById('customerList');
+    const customerList = document.getElementById('customerList');
     customerList.innerHTML = '';
 
-    for (var cidStr in customers) {
+    for (let cidStr in customers) {
         if (customers.hasOwnProperty(cidStr)) {
             if (customers[cidStr] != null) {
                 customerList.appendChild(termgr.customerEntry(customers[cidStr]));
@@ -210,15 +202,15 @@ termgr.listCustomers = function (customers) {
 */
 termgr.listFiltered = function (customers) {
     if (customers == null) {
-        var customers = termgr.customers;
+        customers = termgr.customers;
         jQuery('#customerList').hide();
         jQuery('#loader').show();
     }
 
-    var searchValue = jQuery('#searchField').val();
+    const searchValue = jQuery('#searchField').val();
 
     if (searchValue.length > 0) {
-        var keywords = searchValue.split();
+        const keywords = searchValue.split();
 
         if (keywords.length > 0) {
             customers = termgr.filterCustomers(customers, keywords);
@@ -233,7 +225,7 @@ termgr.listFiltered = function (customers) {
     Lets the respective terminal beep.
 */
 termgr.beep = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
 
     jQuery.ajax({
         url: termgr.BASE_URL + '/check/identify',
@@ -265,7 +257,7 @@ termgr.beep = function (tid, cid) {
     Actually performs a reboot of the respective terminal.
 */
 termgr.reboot = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
 
     jQuery.ajax({
         url: termgr.BASE_URL + '/administer/reboot',
@@ -339,7 +331,7 @@ termgr.queryReboot = function (tid, cid) {
     Actually enables the application.
 */
 termgr.enableApplication = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
 
     jQuery.ajax({
         url: termgr.BASE_URL + '/administer/application',
@@ -372,7 +364,7 @@ termgr.enableApplication = function (tid, cid) {
     Actually disables the application.
 */
 termgr.disableApplication = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
     data['disable'] = true;
 
     jQuery.ajax({
@@ -406,7 +398,7 @@ termgr.disableApplication = function (tid, cid) {
     Deploys the respective terminal.
 */
 termgr.deploy = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
 
     jQuery.ajax({
         url: termgr.BASE_URL + '/administer/deploy',
@@ -439,7 +431,7 @@ termgr.deploy = function (tid, cid) {
     Un-deploys the respective terminal.
 */
 termgr.undeploy = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
     data['undeploy'] = true;
 
     jQuery.ajax({
@@ -473,7 +465,7 @@ termgr.undeploy = function (tid, cid) {
     Synchronizes the respective terminal.
 */
 termgr.sync = function (tid, cid) {
-    var data = termgr.getData(tid, cid);
+    const data = termgr.getData(tid, cid);
 
     jQuery.ajax({
         url: termgr.BASE_URL + '/administer/sync',
@@ -514,25 +506,25 @@ termgr._addressToString = function (address) {
     Generates a terminal DOM entry.
 */
 termgr.terminalEntry = function (terminal, cid) {
-    var icon = document.createElement('i');
+    const icon = document.createElement('i');
     icon.setAttribute('class', 'fa fa-tv');
 
-    var columnIcon = document.createElement('td');
+    const columnIcon = document.createElement('td');
     columnIcon.setAttribute('class', 'col-xs-1');
     columnIcon.appendChild(icon);
 
-    var description = document.createElement('p');
+    const description = document.createElement('p');
     description.setAttribute('class', 'termgr-terminal-description');
     description.textContent = termgr._addressToString(terminal.address) + ' (' + terminal.tid + '.' + cid + ')';
 
-    var columnDescription = document.createElement('td');
+    const columnDescription = document.createElement('td');
     columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
     columnDescription.appendChild(description);
 
-    var btnBeepIcon = document.createElement('i');
+    const btnBeepIcon = document.createElement('i');
     btnBeepIcon.setAttribute('class', 'fa fa-volume-up termgr-terminal-icon');
 
-    var btnBeep = document.createElement('button');
+    const btnBeep = document.createElement('button');
     btnBeep.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnBeep.setAttribute('type', 'button');
     btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.tid + ', ' + cid + ');');
@@ -541,10 +533,10 @@ termgr.terminalEntry = function (terminal, cid) {
     btnBeep.setAttribute('title', 'Beep');
     btnBeep.appendChild(btnBeepIcon);
 
-    var btnRebootIcon = document.createElement('i');
+    const btnRebootIcon = document.createElement('i');
     btnRebootIcon.setAttribute('class', 'fa fa-power-off');
 
-    var btnReboot = document.createElement('button');
+    const btnReboot = document.createElement('button');
     btnReboot.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnReboot.setAttribute('type', 'button');
     btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + cid + ');');
@@ -553,10 +545,10 @@ termgr.terminalEntry = function (terminal, cid) {
     btnReboot.setAttribute('title', 'Reboot');
     btnReboot.appendChild(btnRebootIcon);
 
-    var btnDeployIcon = document.createElement('i');
+    const btnDeployIcon = document.createElement('i');
     btnDeployIcon.setAttribute('class', 'fa fa-wrench');
 
-    var btnDeploy = document.createElement('button');
+    const btnDeploy = document.createElement('button');
     btnDeploy.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnDeploy.setAttribute('type', 'button');
     btnDeploy.setAttribute('data-toggle', 'modal');
@@ -564,10 +556,10 @@ termgr.terminalEntry = function (terminal, cid) {
     btnDeploy.setAttribute('data-whatever', terminal.tid + '.' + cid);
     btnDeploy.appendChild(btnDeployIcon);
 
-    var btnApplicationIcon = document.createElement('i');
+    const btnApplicationIcon = document.createElement('i');
     btnApplicationIcon.setAttribute('class', 'fa fa-desktop');
 
-    var btnApplication = document.createElement('button');
+    const btnApplication = document.createElement('button');
     btnApplication.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnApplication.setAttribute('type', 'button');
     btnApplication.setAttribute('data-toggle', 'modal');
@@ -575,10 +567,10 @@ termgr.terminalEntry = function (terminal, cid) {
     btnApplication.setAttribute('data-whatever', terminal.tid + '.' + cid);
     btnApplication.appendChild(btnApplicationIcon);
 
-    var btnSyncIcon = document.createElement('i');
+    const btnSyncIcon = document.createElement('i');
     btnSyncIcon.setAttribute('class', 'fa fa-sync');
 
-    var btnSync = document.createElement('button');
+    const btnSync = document.createElement('button');
     btnSync.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnSync.setAttribute('type', 'button');
     btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.tid + ', ' + cid + ');');
@@ -587,7 +579,7 @@ termgr.terminalEntry = function (terminal, cid) {
     btnSync.setAttribute('title', 'Synchronize');
     btnSync.appendChild(btnSyncIcon);
 
-    var columnButtons = document.createElement('td');
+    const columnButtons = document.createElement('td');
     columnButtons.setAttribute('class', 'col-xs-11');
     columnButtons.appendChild(btnBeep);
     columnButtons.appendChild(btnReboot);
@@ -595,20 +587,20 @@ termgr.terminalEntry = function (terminal, cid) {
     columnButtons.appendChild(btnDeploy);
     columnButtons.appendChild(btnSync);
 
-    var rowButtons = document.createElement('tr');
+    const rowButtons = document.createElement('tr');
     rowButtons.appendChild(columnButtons);
 
-    var rowDescription = document.createElement('tr');
+    const rowDescription = document.createElement('tr');
     rowDescription.appendChild(columnDescription);
 
-    var tableDescriptionAndButtons = document.createElement('table');
+    const tableDescriptionAndButtons = document.createElement('table');
     tableDescriptionAndButtons.appendChild(rowDescription);
     tableDescriptionAndButtons.appendChild(rowButtons);
 
-    var columnDescriptionAndButtons = document.createElement('td');
+    const columnDescriptionAndButtons = document.createElement('td');
     columnDescriptionAndButtons.appendChild(tableDescriptionAndButtons);
 
-    var entry = document.createElement('tr');
+    const entry = document.createElement('tr');
     entry.setAttribute('class', 'row row-centered termgr-terminal-entry');
     entry.appendChild(columnIcon);
     entry.appendChild(columnDescriptionAndButtons);
@@ -621,24 +613,24 @@ termgr.terminalEntry = function (terminal, cid) {
     Generates a customer DOM entry.
 */
 termgr.customerEntry = function (customer) {
-    var caption = document.createElement('h3');
+    const caption = document.createElement('h3');
     caption.setAttribute('class', 'termgr-customer-caption');
     caption.innerHTML = customer.name + ' (' + customer.id + ')';
 
-    var captionContainer = document.createElement('span');
+    const captionContainer = document.createElement('span');
     captionContainer.setAttribute('onclick', 'jQuery("#terminals_' + customer.id + '").toggle();');
     captionContainer.appendChild(caption);
 
-    var terminals = document.createElement('table');
+    const terminals = document.createElement('table');
     terminals.setAttribute('id', 'terminals_' + customer.id);
     terminals.setAttribute('class', 'termgr-customer-terminals');
     terminals.setAttribute('style', 'display:none;');
 
-    for (var i = 0; i < customer.terminals.length; i++) {
-        terminals.appendChild(termgr.terminalEntry(customer.terminals[i], customer.id));
+    for (let terminal of customer.terminals) {
+        terminals.appendChild(termgr.terminalEntry(terminal, customer.id));
     }
 
-    var entry = document.createElement('div');
+    const entry = document.createElement('div');
     entry.setAttribute('class', 'row row-centered termgr-customer-entry');
     entry.appendChild(captionContainer);
     entry.appendChild(terminals);
@@ -653,21 +645,21 @@ termgr.customerEntry = function (customer) {
 termgr.initDialog = function (negativeAction, positiveAction) {
     return function (event) {
         // Button that triggered the modal.
-        var button = jQuery(event.relatedTarget);
+        const button = jQuery(event.relatedTarget);
         // Extract info from data-* attributes and convert to string.
-        var terminalId = '' + button.data('whatever');
-        var [tid, cid] = terminalId.split('.');
-        var modal = jQuery(this)
+        const terminalId = '' + button.data('whatever');
+        const [tid, cid] = terminalId.split('.');
+        const modal = jQuery(this)
         modal.find('#terminalId').text(terminalId);
 
-        var negativeActionButton = modal.find('#negativeAction');
+        const negativeActionButton = modal.find('#negativeAction');
         negativeActionButton.unbind('click');
         negativeActionButton.click(function () {
             negativeAction(tid, cid);
             modal.modal('hide');
         });
 
-        var positiveActionButton = modal.find('#positiveAction');
+        const positiveActionButton = modal.find('#positiveAction');
         positiveActionButton.unbind('click');
         positiveActionButton.click(function () {
             positiveAction(tid, cid);
@@ -702,9 +694,9 @@ termgr.hideLoader = function () {
 termgr.init = function () {
     jQuery('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
     jQuery('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
-    var observer = new MutationObserver(termgr.hideLoader);
-    var targetNode = document.getElementById('customerList');
-    var config = {attributes: false, childList: true};
+    const observer = new MutationObserver(termgr.hideLoader);
+    const targetNode = document.getElementById('customerList');
+    const config = {attributes: false, childList: true};
     observer.observe(targetNode, config);
 };
 
