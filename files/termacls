@@ -14,14 +14,14 @@ Usage:
     termacls setdefault <account> [-GRras] <customer> <class>
 
 Options:
-    --grant, -G         Grants the provided permissions.
-    --revoke, -R        Revokes the provided permissions.
-    --read, -r          Enable read permission.
-    --administer, -a    Enable administration permission.
-    --setup, -s         Enable setup permission.
-    --account=<account>       Specifies the account to filter for.
-    --version           Show version.
-    -h --help           Show this screen.
+    --grant, -G                 Grants the provided permissions.
+    --revoke, -R                Revokes the provided permissions.
+    --read, -r                  Enable read permission.
+    --administer, -a            Enable administration permission.
+    --setup, -s                 Enable setup permission.
+    --account=<account>, -u     Specifies the account to filter for.
+    --version                   Show version.
+    -h --help                   Show this screen.
 """
 from collections import defaultdict
 from logging import INFO, basicConfig, getLogger
@@ -216,3 +216,4 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
+
