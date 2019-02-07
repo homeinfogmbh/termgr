@@ -3,13 +3,11 @@
 from termgr.orm import ACL, DefaultACL
 
 
-__all__ = ['PermissionsError', 'permissions', 'permit', 'authorize']
+__all__ = ['PermissionsError', 'permissions', 'authorize']
 
 
 class PermissionsError(Exception):
     """Indicates error during permission handling."""
-
-    pass
 
 
 def permissions(account, terminal):
@@ -26,23 +24,6 @@ def permissions(account, terminal):
                 & (DefaultACL.class_ == terminal.class_))
         except DefaultACL.DoesNotExist:
             return None
-
-
-def permit(account, terminal, *, read=None, administer=None, setup=None):
-    """Set permissions."""
-
-    if account.root:
-        raise PermissionsError('Cannot set permissions for root accounts.')
-
-    try:
-        DefaultACL.get(
-            (DefaultACL.account == account)
-            & (DefaultACL.customer == terminal.customer)
-            & (DefaultACL.class_ == terminal.class_))
-    except DefaultACL.DoesNotExist:
-        acl = ACL.add(
-            account, terminal, read=read, administer=administer, setup=setup)
-        acl.commit()
 
 
 def authorize(account, terminal, *, read=None, administer=None, setup=None):

@@ -34,7 +34,7 @@ from mdb import Customer
 from syslib import script
 from terminallib import get_terminals, Class
 
-from termgr.auth import PermissionsError, permissions, permit
+from termgr.auth import permissions
 from termgr.config import LOG_FORMAT
 from termgr.orm import ACL, DefaultACL
 
@@ -130,13 +130,9 @@ def set_acls(options):
     read, administer, setup = _get_permissions(options)
 
     for terminal in get_terminals(options['<expr>']):
-        try:
-            permit(
-                account, terminal, read=read, administer=administer,
-                setup=setup)
-        except PermissionsError as permission_error:
-            LOGGER.error(permission_error)
-            break
+        acl = ACL.add(
+            account, terminal, read=read, administer=administer, setup=setup)
+        acl.commit()
 
     return 0
 
@@ -148,13 +144,17 @@ def set_default(options):
         account = Account.get(Account.name == options['<account>'])
     except Account.DoesNotExist:
         LOGGER.error('No such account: %s.', options['<account>'])
-        return 3
+        return 1
+
+    if account.root:
+        LOGGER.warning('Will not set ACL for root account.')
+        return 2
 
     try:
         customer = Customer.find(options['<customer>']).get()
     except Customer.DoesNotExist:
         LOGGER.error('No such customer: %s.', options['<customer>'])
-        return 2
+        return 3
 
     try:
         class_id = int(options['<class>'])
@@ -169,7 +169,7 @@ def set_default(options):
         class_ = Class.get(class_expr)
     except Class.DoesNotExist:
         LOGGER.error('No such class: %s.', options['<class>'])
-        return 1
+        return 4
 
     try:
         default_acl = DefaultACL.get(
@@ -192,7 +192,11 @@ def set_default(options):
     if setup is not None:
         default_acl.setup = setup
 
-    default_acl.save()
+    if default_acl.read or default_acl.administer or default_acl.setup:
+        default_acl.save()
+    else:
+        default_acl.delete_instance()
+
     return 0
 
 
@@ -216,4 +220,3 @@ def main(options):
 
 if __name__ == '__main__':
     exit_(main(docopt(__doc__)))
-
