@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = termgr
+
+[Action]
+Description = Updating ownership of terminal manager directories...
+When = PostTransaction
+Exec = /usr/bin/chown -R termgr.termgr /var/termgr

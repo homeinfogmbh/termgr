@@ -1,0 +1,2 @@
+# Authorized key for password-less login from the server
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID8aFR1cnj3v5iLlkGjNPKQ21RD6N819GII99Ktrwvw4 termgr@srv
