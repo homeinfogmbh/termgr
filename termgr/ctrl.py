@@ -13,7 +13,6 @@ __all__ = [
 
 RESOLUTION_CMD = 'export DISPLAY=:0 \\; xrandr | grep " connected"'
 SUDO = '/usr/bin/sudo'
-PACMAN = '/usr/bin/pacman'
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
 ADMIN_USER = 'homeinfo'
@@ -44,6 +43,11 @@ class TerminalController(RemoteController):
         """Returns the display resolution."""
         return self.execute(RESOLUTION_CMD, shell=True)
 
+    @property
+    def pacman_running(self):
+        """Determines if pacman is (probably) running."""
+        return self.sudo('/usr/bin/test', '-f ', '/var/lib/pacman/db.lck')
+
     def sudo(self, cmd, *args):
         """Execute a command with sudo."""
         return self.execute(SUDO, cmd, *args)
@@ -51,17 +55,6 @@ class TerminalController(RemoteController):
     def identify(self, *args):
         """Lets the terminal beep."""
         return self.sudo('/usr/bin/beep', *args)
-
-    def pacman(self, *args):
-        """Issues a pacman command.
-
-        If no arguments are given, it checks
-        for a running pacman process.
-        """
-        if not args:
-            return self.execute('/usr/bin/pidof', 'pacman')
-
-        return self.sudo(PACMAN, '--noconfirm', *args)
 
     def systemctl(self, *args):
         """Issues a systemctl command."""
@@ -72,10 +65,6 @@ class TerminalController(RemoteController):
         with self.extra_options(REBOOT_OPTIONS):
             return self.sudo(*REBOOT_COMMAND)
 
-    def cleanup(self):
-        """Cleanup local package cache."""
-        return self.pacman('-Sc')
-
     def update(self):
         """Downloads package updates."""
         return self.systemctl('start', 'pacman-update.service')
@@ -84,40 +73,10 @@ class TerminalController(RemoteController):
         """Performs a system upgrade."""
         return self.systemctl('start', 'pacman-upgrade.service')
 
-    def install(self, *pkgs, asexplicit=False):
-        """Installs software packages."""
-        if asexplicit:
-            return self.pacman('-S', '--asexplicit', *pkgs)
-
-        return self.pacman('-S', *pkgs)
-
-    def remove(self, *pkgs, cascade=False, nosave=False,
-               recursive=False, unneeded=False):
-        """Removes packages."""
-        options = []
-
-        if cascade:
-            options.append('--cascade')
-
-        if nosave:
-            options.append('--nosave')
-
-        if recursive:
-            options.append('--recursive')
-
-        if unneeded:
-            options.append('--unneeded')
-
-        for pkg in pkgs:
-            options.append(str(pkg))
-
-        return self.pacman(options, '-R', *options)
-
     def unlock(self):
         """Removes the pacman lockfile."""
         if self.execute('/usr/bin/pidof', 'pacman'):
-            self.logger.error('Pacman is still running on {}.'.format(
-                self.terminal))
+            self.logger.error('Pacman is still running on %s.', self.terminal)
             return False
 
         return self.sudo('/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
@@ -155,8 +114,3 @@ class TerminalsController:
     def chkres(self, terminal):
         """Checks the resolution."""
         return self._controller(terminal).resolution
-
-    def install(self, *pkgs, asexplicit=False):
-        """Callback for the sync command."""
-        return lambda terminal: self._controller(terminal).install(
-            *pkgs, asexplicit=asexplicit)

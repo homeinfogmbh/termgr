@@ -69,7 +69,7 @@ def reboot(terminal):
     if CONTROLLER.check_login(terminal):
         return ('Admin account is currently logged in.', 503)
 
-    if CONTROLLER.pacman(terminal):
+    if CONTROLLER.pacman_running:
         return ('Package manager is currently running.', 503)
 
     response = CONTROLLER.reboot(terminal)

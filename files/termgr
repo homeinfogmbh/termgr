@@ -95,19 +95,6 @@ def main(options):
         with parallelize(ctrl.upgrade, terminals) as para:
             with animate(para, 'Staging {}: {}'):
                 para.wait()
-
-        for terminal, *_ in para.failures:
-            LOGGER.error('Failed to upgrade %s.', terminal)
-    elif options['sync']:
-        pkgs = options['<packages>'].split(',')
-        install = ctrl.install(*pkgs, asexplicit=options['--asexplicit'])
-
-        with parallelize(install, terminals) as para:
-            with animate(para, 'Syncing {}: {}'):
-                para.wait()
-
-        for terminal, *_ in para.failures:
-            LOGGER.error('Failed to sync %s.', terminal)
     elif options['reboot']:
         with parallelize(ctrl.reboot, terminals, chunk=chunk) as para:
             with animate(para, 'Rebooting {}: {}'):
