@@ -41,6 +41,7 @@ from terminallib import Deployment
 from terminallib import OpenVPN
 from terminallib import OperatingSystem
 from terminallib import System
+from terminallib import WireGuard
 
 from termgr.config import LOG_FORMAT
 from termgr.notify import notify_accounts
@@ -161,13 +162,19 @@ def add(options):
         LOGGER.warning('Divergent OpenVPN key specified: "%s"!', vpn_key)
 
     try:
-        openvpn = OpenVPN.add(key=vpn_key, mtu=mtu)
+        openvpn = OpenVPN.generate(key=vpn_key, mtu=mtu)
+    except TerminalConfigError as tce:
+        LOGGER.error(tce)
+        exit(3)
+
+    try:
+        wireguard = WireGuard.generate()
     except TerminalConfigError as tce:
         LOGGER.error(tce)
         exit(3)
 
     system = System(
-        openvpn=openvpn, manufacturer=manufacturer,
+        openvpn=openvpn, wireguard=wireguard, manufacturer=manufacturer,
         operating_system=operating_system, serial_number=serial_number,
         model=model)
     system.save()
