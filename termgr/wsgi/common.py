@@ -6,7 +6,7 @@ from flask import request
 
 from his import Account
 from mdb import Customer
-from terminallib import Terminal
+from terminallib import System
 from wsgilib import Error
 
 from termgr.auth import authorize
@@ -16,7 +16,7 @@ __all__ = [
     'get_json',
     'get_account',
     'get_customer',
-    'get_terminal',
+    'get_system',
     'authenticated',
     'authorized']
 
@@ -71,38 +71,36 @@ def get_customer():
     json = get_json()
 
     try:
-        cid = int(json['cid'])
+        ident = int(json['customer'])
     except (KeyError, TypeError):
         raise Error('No CID specified.')
     except ValueError:
         raise Error('CID must be an interger.')
 
     try:
-        return Customer.get(Customer.id == cid)
+        return Customer[ident]
     except Customer.DoesNotExist:
         raise Error('No such customer.', status=404)
 
 
-def get_terminal():
-    """Returns the respective terminal."""
+def get_system():
+    """Returns the respective system."""
 
     json = get_json()
 
     try:
-        tid = json['tid']
+        ident = json['system']
     except KeyError:
         raise Error('No TID specified.')
 
     try:
-        return Terminal.get(
-            (Terminal.customer == get_customer())
-            & (Terminal.tid == tid))
-    except Terminal.DoesNotExist:
-        raise Error('No such terminal.', status=404)
+        return System[ident]
+    except System.DoesNotExist:
+        raise Error('No such system.', status=404)
 
 
 def authenticated(function):
-    """Enforces a terminal manager account login."""
+    """Enforces an account login."""
 
     def wrapper(*args, **kwargs):
         """Calls the function with additional account parameter."""
@@ -112,20 +110,20 @@ def authenticated(function):
 
 
 def authorized(read=None, administer=None, setup=None):
-    """Enforces a terminal authorization."""
+    """Enforces a system authorization."""
 
     def wrap(function):
         """Wraps the actual function."""
         def wrapper(account, *args, **kwargs):
-            """Performs terminal check and runs function."""
-            terminal = get_terminal()
+            """Performs system check and runs function."""
+            system = get_system()
 
             if authorize(
-                    account, terminal, read=read, administer=administer,
+                    account, system, read=read, administer=administer,
                     setup=setup):
-                return function(terminal, *args, **kwargs)
+                return function(system, *args, **kwargs)
 
-            raise Error('Terminal operation unauthorized.', status=403)
+            raise Error('System operation unauthorized.', status=403)
 
         return wrapper
 
