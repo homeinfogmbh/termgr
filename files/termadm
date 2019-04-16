@@ -9,33 +9,25 @@
 
 
 Usage:
-    termadm add <cid> [<street> <house_number> <zip_code> <city> \
-[--state=<state_iso>] [--annotation=<annotation>]] \
-[--scheduled=<date>] [options]
-    termadm addall <cid> <file> [--scheduled=<date>] [options]
-    termadm deploy <expr>... [--date=<date_string>] [--force] [options]
-    termadm undeploy <expr>... [options]
-    termadm relocate <terminal> <street> <house_number> <zip_code> <city> \
-[--state=<state_iso>]
-    termadm reload
+    termadm add [options]
+    termadm deploy <id> <street> <house_number> <zip_code> <city> [<customer>]
+    termadm undeploy <id>
     termadm notify [<account>...]
+    termadm reload
 
 Options:
-    --domain=<domain>           Specifies the domain [default: 1].
-    --connection=<connection>   Specifies connection type [default: 1].
     --key=<key>                 Explicitly specifies an OpenVPN key to be used.
     --mtu=<mtu>                 Specifies the desired MTU size.
-    --annotation=<annotation>   Specifies an annotation for the terminal.
-    --no-reload                 Do not reload services after terminal creation.
-    --class=<class>             Specifies the termianl class [default: 3].
+    --manufacturer=<cid>        Specifies the hardware manufacturer.
+    --serial-number=<sn>        Specifies the serial number of the hardware.
+    --model=<model>             Specifies the hardware model.
     --os=<os>                   Specifies the termianl OS [default: 1].
-    --weather=<weather>         Specifies the weather to use.
-    --testing                   Mark this terminal as a testing terminal.
-    --date-format=<format>      Specifies the date format to use.
+    --state=<state_iso>         Specifies the respective state.
+    --no-reload                 Do not reload services after terminal creation.
     --version                   Show version.
     -h --help                   Show this screen.
 """
-from datetime import datetime
+from functools import partial
 from getpass import getuser
 from logging import INFO, basicConfig, getLogger
 from os import geteuid
@@ -44,15 +36,16 @@ from sys import exit as exit_
 from docopt import docopt
 
 from his import Account
-from mdb import Address, State
+from mdb import Address, Company, Customer
 from syslib import run, evaluate, script
-from terminallib import get_terminals, Class, Domain, OS, VPN, Connection, \
-    Terminal
-from timelib import DATE_FORMAT
+from terminallib import TerminalConfigError
+from terminallib import Deployment
+from terminallib import OpenVPN
+from terminallib import OperatingSystem
+from terminallib import System
 
 from termgr.config import LOG_FORMAT
 from termgr.notify import notify_accounts
-from termgr.util import Addr, TerminalLine
 
 
 LOGGER = getLogger(__file__)
@@ -72,13 +65,55 @@ def _get_accounts(accounts):
             LOGGER.warning('No such account: %s.', account)
 
 
-def update_nagios():
-    """Generates the Nagios3 configuration."""
+def _customer_by_name(name):
+    """Returns a customer by its name."""
 
-    print('Creating Nagios3 configurations', end='         ', flush=True)
-    nagios_ok = run((NAGIOSCFG_GEN, '--restart'))
-    evaluate(nagios_ok)
-    return nagios_ok
+    select = (Company.name == name) | (Company.abbreviation == name)
+    customer = Customer.select().join(Company).where(select).get()
+    LOGGER.info('Found customer by name: %s.', customer)
+    return customer
+
+
+def _customer_by_id(ident):
+    """Returns a customer by its ID."""
+
+    return Customer[ident]
+
+
+def _get_customer(string):
+    """Returns the respecive customer."""
+
+    if string is None:
+        return None
+
+    try:
+        ident = int(string)
+    except ValueError:
+        function = partial(_customer_by_name, string)
+    else:
+        function = partial(_customer_by_id, ident)
+
+    try:
+        return function()
+    except Customer.DoesNotExist:
+        LOGGER.error('No such customer: %i.', string)
+        exit(2)
+
+
+def _get_system(string):
+    """Returns the respective system."""
+
+    try:
+        ident = int(string)
+    except ValueError:
+        LOGGER.error('Invalid system ID: %s.', string)
+        exit(1)
+
+    try:
+        return System[ident]
+    except System.DoesNotExist:
+        LOGGER.error('No such system: %i.', ident)
+        exit(2)
 
 
 def update_config():
@@ -90,277 +125,97 @@ def update_config():
     print('Generating OpenVPN host configurations', end='  ', flush=True)
     openvpn_ok = run(OPENVPNCFG_GEN)
     evaluate(openvpn_ok)
-    nagios_ok = update_nagios()
-    return bind_ok and openvpn_ok and nagios_ok
+    print('Creating Nagios3 configurations', end='         ', flush=True)
+    nagios_ok = run((NAGIOSCFG_GEN, '--restart'))
+    evaluate(nagios_ok)
+
+    if bind_ok and openvpn_ok and nagios_ok:
+        exit(0)
+
+    exit(1)
 
 
-def read_file(path):
-    """Read non-comment lines from file."""
+def add(options):
+    """Adds a new system."""
 
-    with open(path, 'r') as file:
-        for line in file:
-            sline = line.strip()
-
-            if sline:
-                if not sline.startswith('#'):
-                    yield sline
-
-
-def parse_line(string, date_format=DATE_FORMAT):
-    """Parses an address from a string."""
+    operating_system = options['--os']
 
     try:
-        address, scheduled = string.split('@')
+        operating_system = OperatingSystem(operating_system)
     except ValueError:
-        address = string
-        scheduled = None
-    else:
-        address = address.strip()
-        scheduled = datetime.strptime(scheduled.strip(), date_format).date()
+        LOGGER.error('No such operating system: %s.', operating_system)
+        exit(1)
 
-    try:
-        street_houseno, zip_code_city = address.split(',')
-    except ValueError:
-        street, house_number, zip_code, city = address.split()
-    else:
-        street_houseno = street_houseno.strip()
-        zip_code_city = zip_code_city.strip()
-
-        try:
-            street, house_number = street_houseno.rsplit(maxsplit=1)
-        except ValueError:
-            raise ValueError('Not a street / house number: {}.'.format(
-                street_houseno))
-
-        if not street:
-            street, house_number = house_number, None
-
-        try:
-            zip_code, city = zip_code_city.split()
-        except ValueError:
-            raise ValueError('Not a zip code / city: {}.'.format(
-                zip_code_city))
-
-    return TerminalLine(city, Addr(street, house_number, zip_code), scheduled)
-
-
-def get_state(state_iso):
-    """Gets the state by ISO code."""
-
-    return State.get(State.iso == state_iso) if state_iso else None
-
-
-def add_terminal(options):
-    """Adds a new terminal."""
-
-    # Required options.
-    cid = int(options['<cid>'])
-    class_id = int(options['--class'])
-    os_id = int(options['--os'])
-
-    if options['--scheduled']:
-        scheduled = datetime.strptime(options['--scheduled'], DATE_FORMAT)
-    else:
-        scheduled = None
-
-    # Optional settings.
-    connection_id = int(options['--connection'])
-    domain_id = int(options['--domain'])
-    weather = options['--weather'] or None
-    testing = options['--testing']
-
-    # Optional address.
-    street = options['<street>']
-    house_number = options['<house_number>']
-    zip_code = options['<zip_code>']
-    city = options['<city>']
-    state_iso = options['--state']
-
-    if street:
-        addr = (street, house_number.rstrip(','), zip_code)
-    else:
-        addr = None
-
-    try:
-        state = get_state(state_iso)
-    except State.DoesNotExist:
-        LOGGER.error('No such state: "%s".', state_iso)
-        return 1
-
-    # Optional parameters
+    manufacturer = _get_customer(options['--manufacturer'])
+    serial_number = options['--serial-number']
+    model = options['--model']
     vpn_key = options['--key'] or None
+    mtu = options['--mtu']
 
-    try:
-        mtu = int(options['--mtu'])
-    except TypeError:
-        mtu = None
-    except ValueError:
-        LOGGER.error('Invalid MTU: %s.', options['--mtu'])
-        return 2
-
-    annotation = options['--annotation'] or None
-
-    # Get related ORM instances
-    class_ = Class.get(Class.id == class_id)
-    os_ = OS.get(OS.id == os_id)
-    connection = Connection.get(Connection.id == connection_id)
+    if mtu is not None:
+        try:
+            mtu = int(mtu)
+        except ValueError:
+            LOGGER.error('Invalid MTU: %s.', mtu)
+            exit(2)
 
     if vpn_key is not None:
         LOGGER.warning('Divergent OpenVPN key specified: "%s"!', vpn_key)
 
-    vpn = VPN.add(key=vpn_key, mtu=mtu)
-    domain = Domain.get(Domain.id == domain_id)
+    try:
+        openvpn = OpenVPN.add(key=vpn_key, mtu=mtu)
+    except TerminalConfigError as tce:
+        LOGGER.error(tce)
+        exit(3)
 
-    if addr is not None:
-        address = Address.add(city, addr=addr, state=state)
-        address.save()
-    else:
-        address = None
-
-    terminal = Terminal.add(
-        cid, class_, os_, connection, vpn, domain, address=address,
-        weather=weather, scheduled=scheduled, annotation=annotation,
-        testing=testing)
-
-    if terminal:
-        LOGGER.info('Added terminal %s.', terminal)
-    else:
-        LOGGER.error('Failed to add terminal.')
+    system = System(
+        openvpn=openvpn, manufacturer=manufacturer,
+        operating_system=operating_system, serial_number=serial_number,
+        model=model)
+    system.save()
+    LOGGER.info('Added system: %i', system.id)
 
     if not options['--no-reload']:
         update_config()
 
-    return 0
-
-
-def add_terminals(options):
-    """Adds multiple terminals from a file."""
-
-    cid = int(options['<cid>'])
-    path = options['<file>']
-    class_id = int(options['--class'])
-    os_id = int(options['--os'])
-    connection_id = int(options['--connection'])
-    domain_id = int(options['--domain'])
-    weather = options['--weather'] or None
-    date_format = options['--date-format'] or DATE_FORMAT
-
-    if options['--scheduled']:
-        scheduled = datetime.strptime(options['--scheduled'], date_format)
-    else:
-        scheduled = None
-
-    class_ = Class.get(Class.id == class_id)
-    os_ = OS.get(OS.id == os_id)
-    connection = Connection.get(Connection.id == connection_id)
-    domain = Domain.get(Domain.id == domain_id)
-    retval = 0
-
-    for line in read_file(path):
-        try:
-            city, addr, scheduled_ = parse_line(line, date_format=date_format)
-        except ValueError as error:
-            LOGGER.error(str(error))
-            retval += 1
-            continue
-
-        vpn = VPN.add()
-        address = Address.add(city, addr=addr, state=None)
-        address.save()
-        terminal = Terminal.add(
-            cid, class_, os_, connection, vpn, domain, address=address,
-            weather=weather, scheduled=scheduled or scheduled_)
-
-        if terminal:
-            LOGGER.info('Added terminal %s.', terminal)
-        else:
-            LOGGER.error('Failed to add terminal.')
-
-    if not options['--no-reload']:
-        update_config()
-
-    return retval
+    exit(0)
 
 
 def deploy(options):
-    """Deploys terminals."""
+    """Deploys a system."""
 
-    date_string = options['--date']
-    force = options['--force']
+    system = _get_system(options['<id>'])
+    customer = _get_customer(options['<customer>'])
+    street = options['<street>']
+    house_number = options['<house_number>']
+    zip_code = options['<zip_code>']
+    city = options['<city>']
+    address = Address.add_by_address((street, house_number, zip_code, city))
+    address.save()
 
-    if date_string:
-        try:
-            date_time = datetime.strptime(date_string, DATE_FORMAT)
-        except ValueError:
-            LOGGER.error(
-                'Invalid date time value "%s" or format "%s".', date_string,
-                DATE_FORMAT)
-            return 4
-    else:
-        date_time = None
+    try:
+        deployment = Deployment.get(
+            (Deployment.customer == customer)
+            & (Deployment.address == address))
+    except Deployment.DoesNotExist:
+        deployment = Deployment(customer=customer, address=address)
+        deployment.save()
 
-    for terminal in get_terminals(options['<expr>']):
-        terminal.deploy(date_time=date_time, force=force)
+    if system.relocate(deployment):
+        exit(0)
 
-    if not options['--no-reload']:
-        update_nagios()
-
-    return 0
+    exit(1)
 
 
 def undeploy(options):
     """Removed deployment of terminals."""
 
-    for terminal in get_terminals(options['<expr>']):
-        terminal.undeploy()
+    system = _get_system(options['<id>'])
 
-    if not options['--no-reload']:
-        update_nagios()
+    if system.relocate(None):
+        exit(0)
 
-    return 0
-
-
-def relocate(options):
-    """Relocates a terminal."""
-
-    try:
-        terminal, *overhead = get_terminals([options['<terminal>']])
-    except ValueError:
-        LOGGER.error('No terminal found.')
-        return 1
-
-    if overhead:
-        LOGGER.error('Can only relocate one terminal at a time.')
-        return 2
-
-    street = options['<street>']
-    house_number = options['<house_number>']
-    zip_code = options['<zip_code>']
-    city = options['<city>']
-    state_iso = options['--state']
-    addr = (street, house_number, zip_code)
-
-    try:
-        state = get_state(state_iso)
-    except State.DoesNotExist:
-        LOGGER.error('No such state: %s.', state_iso)
-        return 3
-
-    address = Address.add(city, addr=addr, state=state)
-    address.save()
-
-    if terminal.address is None:
-        terminal.address = address
-        LOGGER.info('Initially located %s at %s.', terminal, address)
-    elif terminal.address == address:
-        LOGGER.info('%s is already located at %s.', terminal, address)
-    else:
-        address, terminal.address = terminal.address, address
-        LOGGER.info(
-            'Moved %s from %s to %s.', terminal, address, terminal.address)
-
-    terminal.save()
-    return 0
+    exit(1)
 
 
 def notify(options):
@@ -369,7 +224,7 @@ def notify(options):
     if getuser() != TERMGR_USER and geteuid() != 0:
         # Because only termgr and root can read the certificates.
         LOGGER.error('You must be termgr or root to notify users.')
-        return 3
+        exit(3)
 
     if options['<account>']:
         accounts = tuple(_get_accounts(options['<account>']))
@@ -377,7 +232,7 @@ def notify(options):
         accounts = None
 
     notify_accounts(accounts=accounts)
-    return 0
+    exit(0)
 
 
 @script
@@ -391,30 +246,20 @@ def main(options):
     if options['add'] or options['deploy'] or options['undeploy']:
         if not options['--no-reload'] and geteuid() != 0:
             LOGGER.error('You must be root to update the related services.')
-            return 3
+            exit(3)
 
     if options['add']:
-        return add_terminal(options)
+        add(options)
+    elif options['deploy']:
+        deploy(options)
+    elif options['undeploy']:
+        undeploy(options)
+    elif options['reload']:
+        update_config()
+    elif options['notify']:
+        notify(options)
 
-    if options['addall']:
-        return add_terminals(options)
-
-    if options['deploy']:
-        return deploy(options)
-
-    if options['undeploy']:
-        return undeploy(options)
-
-    if options['relocate']:
-        return relocate(options)
-
-    if options['reload']:
-        return 0 if update_config() else 1
-
-    if options['notify']:
-        return notify(options)
-
-    return 0
+    exit(0)
 
 
 if __name__ == '__main__':
