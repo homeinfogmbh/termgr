@@ -21,9 +21,7 @@ Options:
     --manufacturer=<cid>        Specifies the hardware manufacturer.
     --serial-number=<sn>        Specifies the serial number of the hardware.
     --model=<model>             Specifies the hardware model.
-    --os=<os>                   Specifies the termianl OS [default: 1].
-    --state=<state_iso>         Specifies the respective state.
-    --no-reload                 Do not reload services after terminal creation.
+    --os=<os>                   Specifies the system's OS.
     --version                   Show version.
     -h --help                   Show this screen.
 """
@@ -174,10 +172,6 @@ def add(options):
         model=model)
     system.save()
     LOGGER.info('Added system: %i', system.id)
-
-    if not options['--no-reload']:
-        update_config()
-
     exit(0)
 
 
