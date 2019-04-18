@@ -46,7 +46,7 @@ def set_serial_number(system):
     """Posts setup data."""
 
     try:
-        serial_number = request.json['serial_number']
+        serial_number = request.json['sn']
     except KeyError:
         raise Error('No serial number specified.')
 
@@ -58,5 +58,5 @@ def set_serial_number(system):
 ROUTES = (
     ('POST', '/setup/info', get_system_info),
     ('POST', '/setup/openvpn', get_openvpn_data),
-    ('POST', '/setup/serial_number', set_serial_number)
+    ('POST', '/setup/sn', set_serial_number)
 )
