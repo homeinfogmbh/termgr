@@ -24,29 +24,21 @@
 */
 'use strict';
 
-var termgr = termgr || {};
+const termgr = {};
 
 termgr.BASE_URL = 'https://termgr.homeinfo.de';
 
 termgr.INVALID_CREDENTIALS = function () {
-    swal({
-        title: 'Fehler.',
-        text: 'Ungültiger Benutzername und / oder Passwort.',
-        type: 'error'
-    });
+    alert('Ungültiger Benutzername und / oder Passwort.');
 };
 
 termgr.UNAUTHORIZED = function (what) {
     return function () {
-        swal({
-            title: 'Fehler.',
-            text: 'Sie sind nicht berechtigt, ' + what + '.',
-            type: 'error'
-        });
+        alert('Sie sind nicht berechtigt, ' + what + '.');
     };
 };
 
-termgr.customer = null;
+termgr.SYSTEMS = [];
 
 
 /*
@@ -57,26 +49,77 @@ termgr.containsIgnoreCase = function (haystack, needle) {
         return false;
     }
 
-    return haystack.toLowerCase().indexOf(needle.toLowerCase()) >= 0;
+    return haystack.toLowerCase().includes(needle.toLowerCase());
 };
 
 
 /*
-    Returns the user name and password from the respective input fields.
+    Returns the respective address as a one-line string.
 */
-termgr.getCredentials = function () {
-    return {'user_name': jQuery('#userName').val(), 'passwd': jQuery('#passwd').val()};
+termgr.addressToString = function (address) {
+    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
 };
 
 
 /*
-    Returns the basic post data for the respective terminal.
+  Makes a request returning a promise.
 */
-termgr.getData = function (tid, cid) {
-    const data = termgr.getCredentials();
-    data['tid'] = tid;
-    data['cid'] = '' + cid;   // Backend needs a string here.
-    return data;
+termgr.makeRequest = function (method, url, data = null, headers = {}) {
+    function parseResponse (response) {
+        try {
+            return JSON.parse(response);
+        } catch (error) {
+            return response;
+        }
+    }
+
+    function executor (resolve, reject) {
+        function onload () {
+            if (this.status >= 200 && this.status < 300) {
+                resolve({
+                    response: xhr.response,
+                    json: parseResponse(xhr.response),
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            } else {
+                reject({
+                    response: xhr.response,
+                    json: parseResponse(xhr.response),
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            }
+        }
+
+        function onerror () {
+            reject({
+                response: xhr.response,
+                json: parseResponse(xhr.response),
+                status: this.status,
+                statusText: xhr.statusText
+            });
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.open(method, url);
+
+        for (const header in headers) {
+            xhr.setRequestHeader(header, headers[header]);
+        }
+
+        xhr.onload = onload;
+        xhr.onerror = onerror;
+
+        if (data == null) {
+            xhr.send();
+        } else {
+            xhr.send(data);
+        }
+    }
+
+    return new Promise(executor);
 };
 
 
@@ -84,25 +127,12 @@ termgr.getData = function (tid, cid) {
     Retrieves the customers and their respective terminals
     from the API and invokes the callback function.
 */
-termgr.getCustomers = function () {
-    const credentials = termgr.getCredentials();
-
-    return jQuery.ajax({
-        url: termgr.BASE_URL + '/check/list',
-        type: 'POST',
-        data: JSON.stringify(credentials),
-        contentType: 'application/json'
-    }).then(
-        function (customers) {
-            termgr.customers = customers;
+termgr.getSystems = function () {
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/check/list').then(
+        function (response) {
+            termgr.SYSTEMS = response.json;
         }, function () {
-            swal({
-                title: 'Konnte Terminaldaten nicht abfragen.',
-                text: 'Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.',
-                type: 'error'
-            });
-
-            jQuery('#loader').hide();
+            alert('Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.');
         }
     );
 };
@@ -111,88 +141,44 @@ termgr.getCustomers = function () {
 /*
     Filters the provided terminals by the respective keywords.
 */
-termgr.filterTerminals = function* (terminals, cid, keywords) {
-    for (let terminal of terminals) {
-        let matching = true;
+termgr.filterSystems = function* (systems, keywords) {
+    for (const system of systems) {
+        let deployment = system.deployment;
 
-        for (let keyword of keywords) {
-            let matchingTid = termgr.containsIgnoreCase('' + terminal.tid, keyword);
-            let matchingCid = termgr.containsIgnoreCase('' + cid, keyword);
-            let matchingAddress = termgr.containsIgnoreCase(termgr._addressToString(terminal.address), keyword);
-
-            if (! (matchingTid || matchingCid || matchingAddress)) {
-                matching = false;
+        for (const keyword of keywords) {
+            if (termgr.containsIgnoreCase('' + system.id, keyword)) {
+                yield system;
                 break;
             }
-        }
 
-        if (matching) {
-            yield terminal;
-        }
-    }
-};
+            if (deployment != null) {
+                if (termgr.containsIgnoreCase('' + deployment.id, keyword)) {
+                    yield system;
+                    break;
+                }
 
+                let address = termgr.addressToString(deployment.address);
 
-/*
-    Filters the provided customer by the respective keywords.
-*/
-termgr.filterCustomer = function (customer, keywords) {
-    let customerMatch = true;
-
-    for (let keyword of keywords) {
-        if (! termgr.containsIgnoreCase(customer.name, keyword)) {
-            customerMatch = false;
-            break;
-        }
-    }
-
-    if (customerMatch) {
-        return customer;
-    }
-
-    const terminals = Array.from(termgr.filterTerminals(customer.terminals, customer.id, keywords));
-
-    if (terminals.length > 0) {
-        return {'id': customer.id, 'name': customer.name, 'terminals': terminals};
-    }
-
-    return null;
-};
-
-
-/*
-    Filters the provided customers by the respective keywords.
-*/
-termgr.filterCustomers = function (customers, keywords) {
-    const filteredCustomers = {};
-
-    for (let cidStr in customers) {
-        if (customers.hasOwnProperty(cidStr)) {
-            let customer = termgr.filterCustomer(customers[cidStr], keywords);
-
-            if (customer != null) {
-                filteredCustomers[cidStr] = customer;
+                if (termgr.containsIgnoreCase(address, keyword)) {
+                    yield system;
+                    break;
+                }
             }
         }
     }
-
-    return filteredCustomers;
 };
 
 
 /*
-    Lists the provided customers.
+    Lists the respective systems.
 */
-termgr.listCustomers = function (customers) {
-    const customerList = document.getElementById('customerList');
-    customerList.innerHTML = '';
+termgr.listSystems = function (systems) {
+    const container = document.getElementById('systems');
+    container.innerHTML = '';
 
-    for (let cidStr in customers) {
-        if (customers.hasOwnProperty(cidStr)) {
-            if (customers[cidStr] != null) {
-                customerList.appendChild(termgr.customerEntry(customers[cidStr]));
-            }
-        }
+    for (const system of systems) {
+        let entry = termgr.terminalEntry(system);
+        container.appendChild(entry);
     }
 };
 
@@ -200,305 +186,134 @@ termgr.listCustomers = function (customers) {
 /*
     Filters customers and terminals and lists them.
 */
-termgr.listFiltered = function (customers) {
-    if (customers == null) {
-        customers = termgr.customers;
-        jQuery('#customerList').hide();
-        jQuery('#loader').show();
-    }
-
-    const searchValue = jQuery('#searchField').val();
+termgr.listFilteredSystems = function () {
+    const searchValue = document.getElementById('searchField').value;
+    let keywords = null;
 
     if (searchValue.length > 0) {
-        const keywords = searchValue.split();
-
-        if (keywords.length > 0) {
-            customers = termgr.filterCustomers(customers, keywords);
-        }
+        keywords = searchValue.split();
     }
 
-    termgr.listCustomers(customers);
+    if (keywords != null) {
+        const systems = Array.from(termgr.filterSystems(termgr.SYSTEMS, keywords));
+        termgr.listSystems(systems);
+    } else {
+        termgr.listSystems(termgr.SYSTEMS);
+    }
 };
 
 
 /*
     Lets the respective terminal beep.
 */
-termgr.beep = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/check/identify',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        error: function () {
-            swal({
-                title: 'Fehler.',
-                text: 'Das Terminal konnte nicht zum Piepen gebracht werden.',
-                type: 'error'
-            });
+termgr.beep = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/check/identify', data, headers).then(
+        function () {
+            alert('Das Terminal sollte gepiept haben.');
         },
-        success: function () {
-            swal({
-                title: 'OK.',
-                text: 'Das Terminal sollte gepiept haben.',
-                type: 'success'
-            });
-        },
-        statusCode: {
-            401: termgr.INVALID_CREDENTIALS
+        function () {
+            alert('Das Terminal konnte nicht zum Piepen gebracht werden.');
         }
-    });
+    );
 };
 
 
 /*
     Actually performs a reboot of the respective terminal.
 */
-termgr.reboot = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/administer/reboot',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        error: function (jqXHR) {
-            swal({
-                title: 'Das Terminal konnte nicht neu gestartet werden.',
-                html: '<pre>' + jqXHR.responseText + '</pre>',
-                type: 'error'
-            });
+termgr.reboot = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/reboot', data, headers).then(
+        function () {
+            alert('Das Terminal wurde wahrscheinlich neu gestartet.');
         },
-        statusCode: {
-            200: function () {
-                swal({
-                    title: 'OK.',
-                    text: 'Das Terminal wurde neu gestartet.',
-                    type: 'success'
-                });
-            },
-            202: function () {
-                swal({
-                    title: 'OK.',
-                    text: 'Das Terminal wurde wahrscheinlich neu gestartet.',
-                    type: 'success'
-                });
-            },
-            401: termgr.INVALID_CREDENTIALS,
-            403: termgr.UNAUTHORIZED('dieses Terminal neu zu starten'),
-            503: function () {
-                swal({
-                    title: 'Zur Zeit nicht möglich.',
-                    text: 'Auf dem Terminal werden aktuell administrative Aufgaben ausgeführt.',
-                    type: 'error'
-                });
+        function (response) {
+            let message = 'Das Terminal konnte nicht neu gestartet werden.';
+
+            if (response.status == 503) {
+                message = 'Auf dem Terminal werden aktuell administrative Aufgaben ausgeführt.';
             }
+
+            alert(message);
         }
-    });
-};
-
-
-/*
-    Reboots a terminal.
-
-    This function will open a popup to
-    confirm or abort the actual reboot.
-*/
-termgr.queryReboot = function (tid, cid) {
-    swal({
-        title: 'Sind Sie sicher?',
-        text: 'Wollen Sie das Terminal ' + tid + '.' + cid + ' wirklich neu starten?',
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ja, neu starten!',
-        cancelButtonText: 'Nein, abbrechen!',
-        confirmButtonClass: 'btn btn-success',
-        cancelButtonClass: 'btn btn-danger',
-        closeOnConfirm: false,
-        closeOnCancel: true,
-        showLoaderOnConfirm: true
-    }, function (confirmed) {
-        if (confirmed) {
-            termgr.reboot(tid, cid);
-        }
-    });
+    );
 };
 
 
 /*
     Actually enables the application.
 */
-termgr.enableApplication = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/administer/application',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function () {
-            swal({
-                title: 'OK.',
-                text: 'Digital Signage Anwendung wurde aktiviert.',
-                type: 'success'
-            });
+termgr.enableApplication = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/application', data, headers).then(
+        function () {
+            alert('Digital Signage Anwendung wurde aktiviert.');
         },
-        error: function () {
-            swal({
-                title: 'Fehler.',
-                text: 'Digital Signage Anwendung konnte nicht aktiviert werden.',
-                type: 'error'
-            });
-        },
-        statusCode: {
-            401: termgr.INVALID_CREDENTIALS,
-            403: termgr.UNAUTHORIZED('auf diesem Terminal die Digital Signage Anwendung zu aktivieren')
+        function () {
+            alert('Digital Signage Anwendung konnte nicht aktiviert werden.');
         }
-    });
+    );
 };
 
 
 /*
     Actually disables the application.
 */
-termgr.disableApplication = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-    data['disable'] = true;
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/administer/application',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function () {
-            swal({
-                title: 'OK.',
-                text: 'Digital Signage Anwendung wurde deaktiviert.',
-                type: 'success'
-            });
+termgr.disableApplication = function (system) {
+    const payload = {'system': system, 'disable': true};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/application', data, headers).then(
+        function () {
+            alert('Digital Signage Anwendung wurde deaktiviert.');
         },
-        error: function () {
-            swal({
-                title: 'Fehler.',
-                text: 'Digital Signage Anwendung konnte nicht deaktiviert werden.',
-                type: 'error'
-            });
-        },
-        statusCode: {
-            401: termgr.INVALID_CREDENTIALS,
-            403: termgr.UNAUTHORIZED('auf diesem Terminal die Digital Signage Anwendung zu deaktivieren')
+        function () {
+            alert('Digital Signage Anwendung konnte nicht deaktiviert werden.');
         }
-    });
+    );
 };
 
 
 /*
     Deploys the respective terminal.
 */
-termgr.deploy = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/administer/deploy',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function () {
-            swal({
-                title: 'OK.',
-                text: 'Terminal wurde als "verbaut" markiert.',
-                type: 'success'
-            });
+termgr.deploy = function (system, address) {
+    const payload = {'system': system, 'address': address};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/deploy', data, headers).then(
+        function () {
+            alert('Terminal wurde als "verbaut" markiert.');
         },
-        error: function () {
-            swal({
-                title: 'Fehler.',
-                text: 'Das Terminal konnte nicht als "verbaut" markiert werden.',
-                type: 'error'
-            });
-        },
-        statusCode: {
-            401: termgr.INVALID_CREDENTIALS,
-            403: termgr.UNAUTHORIZED('dieses Terminal als "verbaut" zu markieren')
+        function () {
+            alert('Das Terminal konnte nicht als "verbaut" markiert werden.');
         }
-    });
-};
-
-
-/*
-    Un-deploys the respective terminal.
-*/
-termgr.undeploy = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-    data['undeploy'] = true;
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/administer/deploy',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function () {
-            swal({
-                title: 'OK.',
-                text: 'Terminal wurde als "nicht verbaut" markiert.',
-                type: 'success'
-            });
-        },
-        error: function () {
-            swal({
-                title: 'Fehler.',
-                text: 'Das Terminal konnte nicht als "nicht verbaut" markiert werden.',
-                type: 'error'
-            });
-        },
-        statusCode: {
-            401: termgr.INVALID_CREDENTIALS,
-            403: termgr.UNAUTHORIZED('dieses Terminal als "nicht verbaut" zu markieren')
-        }
-    });
+    );
 };
 
 
 /*
     Synchronizes the respective terminal.
 */
-termgr.sync = function (tid, cid) {
-    const data = termgr.getData(tid, cid);
-
-    jQuery.ajax({
-        url: termgr.BASE_URL + '/administer/sync',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function () {
-            swal({
-                title: 'OK.',
-                text: 'Terminal wurde synchronisiert.',
-                type: 'success'
-            });
+termgr.sync = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/sync', data, headers).then(
+        function () {
+            alert('Terminal wurde synchronisiert.');
         },
-        error: function () {
-            swal({
-                title: 'Fehler.',
-                text: 'Das Terminal konnte nicht synchronisiert werden.',
-                type: 'error'
-            });
-        },
-        statusCode: {
-            401: termgr.INVALID_CREDENTIALS,
-            403: termgr.UNAUTHORIZED('dieses Terminal zu synchronisieren')
+        function () {
+            alert('Das Terminal konnte nicht synchronisiert werden.');
         }
-    });
-};
-
-
-/*
-    Returns the respective address as a one-line string.
-*/
-termgr._addressToString = function (address) {
-    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
+    );
 };
 
 
@@ -515,7 +330,7 @@ termgr.terminalEntry = function (terminal, cid) {
 
     const description = document.createElement('p');
     description.setAttribute('class', 'termgr-terminal-description');
-    description.textContent = termgr._addressToString(terminal.address) + ' (' + terminal.tid + '.' + cid + ')';
+    description.textContent = termgr.addressToString(terminal.address) + ' (' + terminal.tid + '.' + cid + ')';
 
     const columnDescription = document.createElement('td');
     columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
@@ -640,65 +455,40 @@ termgr.customerEntry = function (customer) {
 
 
 /*
-    Prepares the respective dialog.
-*/
-termgr.initDialog = function (negativeAction, positiveAction) {
-    return function (event) {
-        // Button that triggered the modal.
-        const button = jQuery(event.relatedTarget);
-        // Extract info from data-* attributes and convert to string.
-        const terminalId = '' + button.data('whatever');
-        const [tid, cid] = terminalId.split('.');
-        const modal = jQuery(this)
-        modal.find('#terminalId').text(terminalId);
-
-        const negativeActionButton = modal.find('#negativeAction');
-        negativeActionButton.unbind('click');
-        negativeActionButton.click(function () {
-            negativeAction(tid, cid);
-            modal.modal('hide');
-        });
-
-        const positiveActionButton = modal.find('#positiveAction');
-        positiveActionButton.unbind('click');
-        positiveActionButton.click(function () {
-            positiveAction(tid, cid);
-            modal.modal('hide');
-        });
-    };
-};
-
-
-/*
     Performs the initial login.
 */
-termgr.login = function () {
-    jQuery('#customerList').hide();
-    jQuery('#loader').show();
-    termgr.getCustomers().then(termgr.listFiltered);
+termgr.login = function (event) {
+    event.preventDefault();
+    const account = document.getElementById('userName').value;
+    const passwd = document.getElementById('passwd').value;
+    const payload = {'account': account, 'passwd': passwd};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', 'https://his.homeinfo.de/session', data, headers).then(
+        function () {
+            window.location = 'manage.html';
+        },
+        function () {
+            alert('Ungültiger Benutzername und / oder Passwort.');
+        }
+    );
 };
 
 
 /*
-    Hides the loader.
+    Initialize index.html.
 */
-termgr.hideLoader = function () {
-    jQuery('#loader').hide();
-    jQuery('#customerList').show();
+termgr.initIndex = function () {
+    const login = document.getElementById('login');
+    login.addEventListener('click', termgr.login, false);
 };
 
 
 /*
-    Runs on document.ready().
+    Initialize manage.html.
 */
-termgr.init = function () {
-    jQuery('#applicationDialog').on('show.bs.modal', termgr.initDialog(termgr.disableApplication, termgr.enableApplication));
-    jQuery('#deploymentDialog').on('show.bs.modal', termgr.initDialog(termgr.undeploy, termgr.deploy));
-    const observer = new MutationObserver(termgr.hideLoader);
-    const targetNode = document.getElementById('customerList');
-    const config = {attributes: false, childList: true};
-    observer.observe(targetNode, config);
+termgr.initManage = function () {
+    termgr.getSystems();
+    const filter = document.getElementById('filter');
+    filter.addEventListener('onclick', termgr.listFilteredSystems, false);
 };
-
-
-jQuery(document).ready(termgr.init)

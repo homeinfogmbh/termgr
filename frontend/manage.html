@@ -24,17 +24,27 @@
   <link rel="stylesheet" href="termgr.css">
   <script src="termgr.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', termgr.initIndex);
+    document.addEventListener('DOMContentLoaded', termgr.initManage);
   </script>
 </head>
 
 <div class="w3-container w3-teal">
-  <h1>Login</h1>
+  <h1>Terminal Manager</h1>
 </div>
 
 <form class="w3-container">
-  <input type="text" class="w3-input" id="userName" placeholder="User name.">
-  <input type="password" class="w3-input" id="passwd" placeholder="Password.">
+  <input type="text" class="w3-input" id="searchField" placeholder="Filter...">
   <br/>
-  <button id="login" type="submit" class="w3-button w3-green">Login</button>
+  <button id="filter" type="submit" class="w3-button w3-green">Login</button>
+  <br/>
+  <div class="row-fluid">
+    <table class="table table-hover">
+      <tbody id="systems">
+      </tbody>
+    </table>
+  </div>
+  <hr>
+  <footer>
+    <p>Umsetzung <a href="http://www.homeinfo.de" target="_blank">HOMEINFO GmbH</a> &copy; 2018</p>
+  </footer>
 </form>
