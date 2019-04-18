@@ -128,7 +128,7 @@ termgr.makeRequest = function (method, url, data = null, headers = {}) {
     from the API and invokes the callback function.
 */
 termgr.getSystems = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/check/list').then(
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list').then(
         function (response) {
             termgr.SYSTEMS = response.json;
         }, function () {
