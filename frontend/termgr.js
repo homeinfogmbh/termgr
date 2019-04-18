@@ -177,7 +177,7 @@ termgr.listSystems = function (systems) {
     container.innerHTML = '';
 
     for (const system of systems) {
-        let entry = termgr.terminalEntry(system);
+        let entry = termgr.systemEntry(system);
         container.appendChild(entry);
     }
 };
@@ -210,7 +210,7 @@ termgr.beep = function (system) {
     const payload = {'system': system};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/check/identify', data, headers).then(
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/beep', data, headers).then(
         function () {
             alert('Das Terminal sollte gepiept haben.');
         },
@@ -373,7 +373,7 @@ termgr.systemEntry = function (system) {
     const btnReboot = document.createElement('button');
     btnReboot.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnReboot.setAttribute('type', 'button');
-    btnBeep.addEventListener('click', termgr.partial(termgr.queryReboot, system.id), false);
+    btnReboot.addEventListener('click', termgr.partial(termgr.queryReboot, system.id), false);
     btnReboot.setAttribute('data-toggle', 'tooltip');
     btnReboot.setAttribute('data-placement', 'bottom');
     btnReboot.setAttribute('title', 'Reboot');
@@ -387,7 +387,7 @@ termgr.systemEntry = function (system) {
     btnDeploy.setAttribute('type', 'button');
     btnDeploy.setAttribute('data-toggle', 'modal');
     btnDeploy.setAttribute('data-target', '#deploymentDialog');
-    btnBeep.addEventListener('click', termgr.partial(termgr.toggleDeploy, system.id), false);
+    btnDeploy.addEventListener('click', termgr.partial(termgr.toggleDeploy, system.id), false);
     btnDeploy.appendChild(btnDeployIcon);
 
     const btnApplicationIcon = document.createElement('i');
@@ -398,7 +398,7 @@ termgr.systemEntry = function (system) {
     btnApplication.setAttribute('type', 'button');
     btnApplication.setAttribute('data-toggle', 'modal');
     btnApplication.setAttribute('data-target', '#applicationDialog');
-    btnBeep.addEventListener('click', termgr.partial(termgr.toggleApplication, system.id), false);
+    btnApplication.addEventListener('click', termgr.partial(termgr.toggleApplication, system.id), false);
     btnApplication.appendChild(btnApplicationIcon);
 
     const btnSyncIcon = document.createElement('i');
@@ -407,7 +407,7 @@ termgr.systemEntry = function (system) {
     const btnSync = document.createElement('button');
     btnSync.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnSync.setAttribute('type', 'button');
-    btnBeep.addEventListener('click', termgr.partial(termgr.sync, system.id), false);
+    btnSync.addEventListener('click', termgr.partial(termgr.sync, system.id), false);
     btnSync.setAttribute('data-toggle', 'tooltip');
     btnSync.setAttribute('data-placement', 'bottom');
     btnSync.setAttribute('title', 'Synchronize');
@@ -477,7 +477,7 @@ termgr.initIndex = function () {
     Initialize manage.html.
 */
 termgr.initManage = function () {
-    termgr.getSystems();
+    termgr.getSystems().then(termgr.listFilteredSystems);
     const filter = document.getElementById('filter');
     filter.addEventListener('click', termgr.listFilteredSystems, false);
 };
