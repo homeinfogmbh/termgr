@@ -336,8 +336,8 @@ termgr.systemEntry = function (system) {
     const icon = document.createElement('i');
     icon.setAttribute('class', 'fa fa-tv');
 
-    const columnIcon = document.createElement('td');
-    columnIcon.setAttribute('class', 'col-xs-1');
+    const columnIcon = document.createElement('div');
+    columnIcon.setAttribute('class', 'w3-col s12');
     columnIcon.appendChild(icon);
 
     let descriptionText = ''+ system.id;
@@ -351,8 +351,8 @@ termgr.systemEntry = function (system) {
     description.setAttribute('class', 'termgr-terminal-description');
     description.textContent = descriptionText;
 
-    const columnDescription = document.createElement('td');
-    columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
+    const columnDescription = document.createElement('div');
+    columnDescription.setAttribute('class', 'w3-col s12');
     columnDescription.appendChild(description);
 
     const btnBeepIcon = document.createElement('i');
@@ -413,29 +413,33 @@ termgr.systemEntry = function (system) {
     btnSync.setAttribute('title', 'Synchronize');
     btnSync.appendChild(btnSyncIcon);
 
-    const columnButtons = document.createElement('td');
-    columnButtons.setAttribute('class', 'col-xs-11');
+    const columnButtons = document.createElement('div');
+    columnButtons.setAttribute('class', 'w3-col s12');
     columnButtons.appendChild(btnBeep);
     columnButtons.appendChild(btnReboot);
     columnButtons.appendChild(btnApplication);
     columnButtons.appendChild(btnDeploy);
     columnButtons.appendChild(btnSync);
 
-    const rowButtons = document.createElement('tr');
+    const rowButtons = document.createElement('div');
+    rowButtons.setAttribute('class', 'w3-row');
     rowButtons.appendChild(columnButtons);
 
-    const rowDescription = document.createElement('tr');
+    const rowDescription = document.createElement('div');
+    rowDescription.setAttribute('class', 'w3-row');
     rowDescription.appendChild(columnDescription);
 
-    const tableDescriptionAndButtons = document.createElement('table');
+    const tableDescriptionAndButtons = document.createElement('div');
+    tableDescriptionAndButtons.setAttribute('class', 'w3-container');
     tableDescriptionAndButtons.appendChild(rowDescription);
     tableDescriptionAndButtons.appendChild(rowButtons);
 
-    const columnDescriptionAndButtons = document.createElement('td');
+    const columnDescriptionAndButtons = document.createElement('div');
+    columnDescriptionAndButtons.setAttribute('class', 'w3-col s12');
     columnDescriptionAndButtons.appendChild(tableDescriptionAndButtons);
 
-    const entry = document.createElement('tr');
-    entry.setAttribute('class', 'row row-centered termgr-terminal-entry');
+    const entry = document.createElement('div');
+    entry.setAttribute('class', 'w3-row');
     entry.appendChild(columnIcon);
     entry.appendChild(columnDescriptionAndButtons);
 
