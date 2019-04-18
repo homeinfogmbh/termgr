@@ -1,6 +1,6 @@
 """WSGI services."""
 
-from wsgilib import Application
+from his import Application
 
 from termgr.wsgi import administer, list, setup
 
