@@ -115,7 +115,7 @@ def sync_system(system):
 def beep_system(system):
     """Identifies the respective system by beep test."""
 
-    if SystemController(system).sudo('/usr/bin/beep'):
+    if SystemController(system).identify():
         return 'Display should have beeped.'
 
     return ('Could not get display to beep.', 500)
