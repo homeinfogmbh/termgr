@@ -55,7 +55,7 @@ class SystemController(RemoteController):
 
     def identify(self, *args):
         """Lets the terminal beep."""
-        return self.sudo('/usr/bin/beep', *args)
+        return self.execute('/usr/bin/beep', *args)
 
     def systemctl(self, *args):
         """Issues a systemctl command."""
