@@ -27,9 +27,13 @@ def get_openvpn_data(system):
     """Returns the OpenVPN data for the respective system."""
 
     windows = request.json.get('windows', False)
+    openvpn = system.openvpn
+
+    if openvpn is None:
+        raise Error('Missing OpenVPN coniguration for system.')
 
     try:
-        data, filename = package(system, windows=windows)
+        data, filename = package(openvpn, windows=windows)
     except FileNotFoundError as error:
         raise Error('Missing file: {}'.format(basename(error.filename)),
                     status=500)
