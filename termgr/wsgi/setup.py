@@ -4,10 +4,11 @@ from os.path import basename
 
 from flask import request
 
+from his import authenticated
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
-from termgr.wsgi.common import authenticated, setup
+from termgr.wsgi.common import setup
 
 __all__ = ['ROUTES']
 

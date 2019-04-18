@@ -12,8 +12,8 @@ from terminallib import Deployment
 from wsgilib import JSON
 
 from termgr.ctrl import closed_by_remote_host
-from termgr.ctrl import TerminalController
-from termgr.ctrl import TerminalsController
+from termgr.ctrl import SystemController
+from termgr.ctrl import SystemsController
 from termgr.wsgi.common import get_address, admin, deploy
 
 __all__ = ['ROUTES']
@@ -21,7 +21,7 @@ __all__ = ['ROUTES']
 
 SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
-CONTROLLER = TerminalsController()
+CONTROLLER = SystemsController()
 DIGSIG_KEY_FILE = '/home/termgr/.ssh/digsig'
 LOGGER = getLogger(__file__)
 
@@ -115,7 +115,7 @@ def sync_system(system):
 def beep_system(system):
     """Identifies the respective system by beep test."""
 
-    if TerminalController(system).sudo('/usr/bin/beep'):
+    if SystemController(system).sudo('/usr/bin/beep'):
         return 'Display should have beeped.'
 
     return ('Could not get display to beep.', 500)
