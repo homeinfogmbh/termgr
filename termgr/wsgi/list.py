@@ -1,6 +1,7 @@
 """List systems."""
 
 from his import ACCOUNT, authenticated
+from terminallib import System
 from wsgilib import JSON
 
 from termgr.orm import SystemAdministrator
@@ -11,6 +12,10 @@ __all__ = ['ROUTES']
 
 def get_systems():
     """Groups the respective terminals by customers."""
+
+    if ACCOUNT.root:
+        yield from System
+        return
 
     for sysadmin in SystemAdministrator.select().where(
             SystemAdministrator.account == ACCOUNT.id):
