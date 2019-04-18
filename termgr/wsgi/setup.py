@@ -2,74 +2,60 @@
 
 from os.path import basename
 
+from flask import request
+
 from wsgilib import Error, JSON, Binary
 
-from termgr.openvpn import OpenVPNPackager
-from termgr.wsgi.common import get_json, authenticated, authorized
+from termgr.openvpn import package
+from termgr.wsgi.common import authenticated, setup
 
 __all__ = ['ROUTES']
 
 
-def get_location(terminal):
-    """Returns the terminal's location."""
+@authenticated
+@setup
+def get_system_info(system):
+    """Returns the system information."""
 
-    if terminal.address is None:
-        return {}
-
-    address = terminal.address.to_json()
-
-    if terminal.annotation:
-        return {'address': address, 'annotation': terminal.annotation}
-
-    return {'address': address}
+    return JSON(system.to_json(cascade=True, brief=True))
 
 
-def openvpn_data(terminal, windows=False):
-    """Returns OpenVPN configuration."""
+@authenticated
+@setup
+def get_openvpn_data(system):
+    """Returns the OpenVPN data for the respective system."""
 
-    packager = OpenVPNPackager(terminal)
+    windows = request.json.get('windows', False)
 
     try:
-        data, filename = packager.package(windows=windows)
+        data, filename = package(system, windows=windows)
     except FileNotFoundError as error:
-        raise Error(
-            'Missing file: {}'.format(basename(error.filename)), status=500)
+        raise Error('Missing file: {}'.format(basename(error.filename)),
+                    status=500)
     except PermissionError as error:
-        raise Error(
-            'Cannot access file: {}'.format(basename(error.filename)),
-            status=500)
+        raise Error('Cannot access file: {}'.format(basename(error.filename)),
+                    status=500)
 
     return Binary(data, filename=filename)
 
 
 @authenticated
-@authorized(setup=True)
-def setup_terminal(terminal, action):
+@setup
+def set_serial_number(system):
     """Posts setup data."""
 
-    json = get_json()
-    windows = json.get('windows', False)
+    try:
+        serial_number = request.json['serial_number']
+    except KeyError:
+        raise Error('No serial number specified.')
 
-    if action == 'terminal_information':
-        return JSON(terminal.to_json())
-
-    if action == 'location':
-        return JSON(get_location(terminal))
-
-    if action == 'vpn_data':
-        return openvpn_data(terminal, windows=windows)
-
-    if action == 'serial_number':
-        try:
-            serial_number = json['serial_number']
-        except KeyError:
-            raise Error('No serial number specified.')
-
-        terminal.serial_number = serial_number or None  # Delete iff empty.
-        terminal.save()
-        return 'Set serial number to "{}".'.format(terminal.serial_number)
-
-    raise Error('Action not implemented.')
+    system.serial_number = serial_number or None  # Delete iff empty.
+    system.save()
+    return 'Set serial number to "{}".'.format(system.serial_number)
 
 
-ROUTES = (('POST', '/setup/<action>', setup_terminal, 'setup_terminal'),)
+ROUTES = (
+    ('POST', '/setup/info', get_system_info),
+    ('POST', '/setup/openvpn', get_openvpn_data),
+    ('POST', '/setup/serial_number', set_serial_number)
+)

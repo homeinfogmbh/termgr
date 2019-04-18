@@ -1,14 +1,12 @@
 """Library for terminal OpenVPN management."""
 
-from contextlib import suppress
 from pathlib import Path
 from tarfile import open as TarFile
 from tempfile import TemporaryFile, NamedTemporaryFile
 from zipfile import ZipFile
 
-from terminallib import TerminalAware
 
-__all__ = ['OpenVPNPackager']
+__all__ = ['package']
 
 
 KEY_FILE = '{}.key'
@@ -21,101 +19,95 @@ CA_FILE_PATH = KEYS_DIR.joinpath(CA_FILE)
 MTU = 'tun-mtu {}\n'
 
 
-class OpenVPNPackager(TerminalAware):
-    """Packs client keys."""
+def get_key(openvpn):
+    """Returns the key name."""
 
-    @property
-    def key(self):
-        """Returns the terminal's key name."""
-        with suppress(AttributeError):
-            if self.terminal.vpn.key is not None:
-                return self.terminal.vpn.key
+    return openvpn.key or str(openvpn.id)
 
-        return str(self.terminal)
 
-    @property
-    def key_file(self):
-        """Returns the respective key file."""
-        return KEY_FILE.format(self.key)
+def get_mtu(openvpn):
+    """Returns the respective MTU value."""
 
-    @property
-    def crt_file(self):
-        """Returns the respective certificate file."""
-        return CRT_FILE.format(self.key)
+    if openvpn.mtu is not None:
+        return MTU.format(openvpn.mtu)
 
-    @property
-    def mtu(self):
-        """Returns the respective MTU value."""
-        if self.terminal.vpn is not None:
-            if self.terminal.vpn.mtu is not None:
-                return MTU.format(self.terminal.vpn.mtu)
+    return ''
 
-        return ''
 
-    @property
-    def key_file_path(self):
-        """Returns the absolute path to the key file."""
-        return KEYS_DIR.joinpath(self.key_file)
+def get_configuration(key_file, crt_file, mtu):
+    """Returns the rendered client configuration file."""
 
-    @property
-    def crt_file_path(self):
-        """Returns the absolute path to the certificate file."""
-        return KEYS_DIR.joinpath(self.crt_file)
+    with CFG_TEMP.open('r') as template:
+        template = template.read()
 
-    @property
-    def configuration(self):
-        """Returns the rendered client configuration file."""
-        with CFG_TEMP.open('r') as template:
-            template = template.read()
+    return template.format(crtfile=crt_file, keyfile=key_file, mtu=mtu)
 
-        return template.format(
-            crtfile=self.crt_file,
-            keyfile=self.key_file,
-            mtu=self.mtu)
 
-    @property
-    def files(self):
-        """Returns the mandatory files."""
-        return (CA_FILE_PATH, self.key_file_path, self.crt_file_path)
+def get_files(key_file, crt_file):
+    """Returns the mandatory files."""
 
-    @property
-    def complete(self):
-        """Checks whether all mandatory files exist."""
-        return all(file.is_file() for file in self.files)
+    key_file_path = KEYS_DIR.joinpath(key_file)
+    crt_file_path = KEYS_DIR.joinpath(crt_file)
+    return (CA_FILE_PATH, key_file_path, crt_file_path)
 
-    def zip_file(self, file):
-        """ZIPs OpenVPN files for Windows devices."""
-        with ZipFile(file, mode='w') as zip_file:
-            zip_file.write(str(self.key_file_path), arcname=self.key_file)
-            zip_file.write(str(self.crt_file_path), arcname=self.crt_file)
-            zip_file.write(str(CA_FILE_PATH), arcname=CA_FILE)
 
-            with NamedTemporaryFile(mode='w+') as cfg:
-                cfg.write(self.configuration.replace('\n', '\r\n'))
-                cfg.seek(0)
-                zip_file.write(cfg.name, arcname=CONFIG_FILE.format('.ovpn'))
+def create_zip_file(openvpn, file):
+    """ZIPs OpenVPN files for Windows devices."""
 
-    def tar_file(self, file):
-        """Tar OpenVPN files for POSIX devices."""
-        with TarFile(mode='w', fileobj=file) as archive:
-            archive.add(str(self.key_file_path), arcname=self.key_file)
-            archive.add(str(self.crt_file_path), arcname=self.crt_file)
-            archive.add(str(CA_FILE_PATH), arcname=CA_FILE)
+    key = get_key(openvpn)
+    key_file = KEY_FILE.format(key)
+    crt_file = CRT_FILE.format(key)
+    mtu = get_mtu(openvpn)
+    key_file_path = KEYS_DIR.joinpath(key_file)
+    crt_file_path = KEYS_DIR.joinpath(crt_file)
+    configuration = get_configuration(key_file, crt_file, mtu)
+    configuration = configuration.replace('\n', '\r\n')
 
-            with NamedTemporaryFile(mode='w+') as cfg:
-                cfg.write(self.configuration)
-                cfg.seek(0)
-                archive.add(cfg.name, arcname=CONFIG_FILE.format('.conf'))
+    with ZipFile(file, mode='w') as zip_file:
+        zip_file.write(str(key_file_path), arcname=key_file)
+        zip_file.write(str(crt_file_path), arcname=crt_file)
+        zip_file.write(str(CA_FILE_PATH), arcname=CA_FILE)
 
-    def package(self, windows=False):
-        """Packages the files for the specified client."""
-        with TemporaryFile(mode='w+b') as tmp:
-            if windows:
-                self.zip_file(tmp)
-                filename = '{}.zip'.format(self.key)
-            else:
-                self.tar_file(tmp)
-                filename = '{}.tar'.format(self.key)
+        with NamedTemporaryFile(mode='w+') as cfg:
+            cfg.write(configuration)
+            cfg.seek(0)
+            zip_file.write(cfg.name, arcname=CONFIG_FILE.format('.ovpn'))
 
-            tmp.seek(0)
-            return (tmp.read(), filename)
+
+def create_tar_file(openvpn, file):
+    """Tar OpenVPN files for POSIX devices."""
+
+    key = get_key(openvpn)
+    key_file = KEY_FILE.format(key)
+    crt_file = CRT_FILE.format(key)
+    mtu = get_mtu(openvpn)
+    key_file_path = KEYS_DIR.joinpath(key_file)
+    crt_file_path = KEYS_DIR.joinpath(crt_file)
+    configuration = get_configuration(key_file, crt_file, mtu)
+
+    with TarFile(mode='w', fileobj=file) as tar_file:
+        tar_file.add(str(key_file_path), arcname=key_file)
+        tar_file.add(str(crt_file_path), arcname=crt_file)
+        tar_file.add(str(CA_FILE_PATH), arcname=CA_FILE)
+
+        with NamedTemporaryFile(mode='w+') as cfg:
+            cfg.write(configuration)
+            cfg.seek(0)
+            tar_file.add(cfg.name, arcname=CONFIG_FILE.format('.conf'))
+
+
+def package(openvpn, windows=False):
+    """Packages the files for the specified client."""
+
+    key = get_key(openvpn)
+
+    with TemporaryFile(mode='w+b') as tmp:
+        if windows:
+            create_zip_file(openvpn, tmp)
+            filename = '{}.zip'.format(key)
+        else:
+            create_tar_file(openvpn, tmp)
+            filename = '{}.tar'.format(key)
+
+        tmp.seek(0)
+        return (tmp.read(), filename)

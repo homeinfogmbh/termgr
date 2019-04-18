@@ -1,50 +1,24 @@
 """Common WSGI functions."""
 
+from functools import wraps
+
 from flask import request
 
-from his import Account
+from his import ACCOUNT
 from mdb import Customer
 from terminallib import System
 from wsgilib import Error, JSON
 
-from termgr.auth import authorize
+from termgr.auth import chkadmin, chkdeploy, chksetup
 
 
 __all__ = [
-    'get_account',
     'get_customer',
     'get_system',
     'get_address',
-    'authenticated',
-    'authorized']
-
-
-INVALID_CREDENTIALS = Error(
-    'Invalid account name and / or password.', status=401)
-
-
-def get_account():
-    """Returns the appropriate account."""
-
-    try:
-        name = request.json['userName']
-    except KeyError:
-        raise INVALID_CREDENTIALS
-
-    try:
-        account = Account.get(Account.name == name)
-    except Account.DoesNotExist:
-        raise INVALID_CREDENTIALS
-
-    try:
-        passwd = request.json['passwd']
-    except KeyError:
-        raise INVALID_CREDENTIALS
-
-    if account.login(passwd):
-        return account
-
-    raise INVALID_CREDENTIALS
+    'admin',
+    'setup',
+    'deploy']
 
 
 def get_customer():
@@ -67,7 +41,7 @@ def get_system():
     ident = request.json.get('system')
 
     if ident is None:
-        raise Error('No TID specified.')
+        raise Error('No system specified.')
 
     try:
         return System[ident]
@@ -108,32 +82,47 @@ def get_address():
     return tuple(address)
 
 
-def authenticated(function):
-    """Enforces an account login."""
+def admin(function):
+    """Wraps the actual with admin permission checks."""
 
+    @wraps(function)
     def wrapper(*args, **kwargs):
-        """Calls the function with additional account parameter."""
-        return function(get_account(), *args, **kwargs)
+        system = get_system()
+
+        if chkadmin(ACCOUNT, system):
+            return function(system, *args, **kwargs)
+
+        raise Error('Administration unauthorized.', status=403)
 
     return wrapper
 
 
-def authorized(read=None, administer=None, setup=None):
-    """Enforces a system authorization."""
+def setup(function):
+    """Wraps the actual with setup permission checks."""
 
-    def wrap(function):
-        """Wraps the actual function."""
-        def wrapper(account, *args, **kwargs):
-            """Performs system check and runs function."""
-            system = get_system()
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        system = get_system()
 
-            if authorize(
-                    account, system, read=read, administer=administer,
-                    setup=setup):
-                return function(system, *args, **kwargs)
+        if chksetup(ACCOUNT, system):
+            return function(system, *args, **kwargs)
 
-            raise Error('System operation unauthorized.', status=403)
+        raise Error('Setup operation unauthorized.', status=403)
 
-        return wrapper
+    return wrapper
 
-    return wrap
+
+def deploy(function):
+    """Wraps the actual with deployment permission checks."""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        system = get_system()
+        customer = get_customer()
+
+        if chkdeploy(ACCOUNT, system, customer):
+            return function(system, customer, *args, **kwargs)
+
+        raise Error('Setup operation unauthorized.', status=403)
+
+    return wrapper

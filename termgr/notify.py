@@ -20,74 +20,54 @@ MAILER = Mailer(
     CONFIG['mail']['user'], CONFIG['mail']['passwd'])
 
 
-def get_terminals(account):
+def systems_dict(systems):
     """Generates the terminals email."""
 
-    terminals = defaultdict(list)
+    systems_by_manufacturer = defaultdict(list)
 
-    for watchlist in WatchList.select().where(WatchList.account == account):
-        for terminal in watchlist.terminals:
-            terminals[watchlist].append(terminal)
+    for system in systems:
+        if system.manufacturer is None:
+            continue
 
-    return terminals
+        systems_by_manufacturer[manufacturer].append(system)
+
+    return systems_by_manufacturer
 
 
-def gen_emails(recipient, wl_terminals):
-    """Generates the terminals email."""
+def generate_email(email, systems):
+    """Generates an email for the respective
+    manufacturer's email address.
+    """
 
     email = EMail(
-        CONFIG['notify']['subject'], CONFIG['mail']['from'], recipient,
+        CONFIG['notify']['subject'], CONFIG['mail']['from'], email,
         CONFIG['notify']['body'])
-    empty = True
-
-    for watchlist, terminals in wl_terminals.items():
-        lines = [terminal.to_csv() for terminal in terminals]
-
-        if lines:
-            # Use DOS line breaks for compatibility with Windows systems.
-            csv = '\r\n'.join(str(line) for line in lines)
-            attachment = MIMEApplication(csv.encode(), Name=watchlist.filename)
-            email.attach(attachment)
-            empty = False
-
-    if not empty:
-        yield email
+    records = [
+        (
+            str(system.id),
+            system.created.isoformat(),
+            system.operating_system.value
+        )
+        for system in systems
+    ]
+    csv = '\r\n'.join(','.join(record) for record in records)
+    attachment = MIMEApplication(csv.encode(), Name='systems.csv')
+    email.attach(attachment)
+    return email
 
 
-def mail_terminals(account):
+def generate_emails(systems):
     """Mails the respective terminals."""
 
-    if account.email is None:
-        LOGGER.error(
-            'No email address configured for account "%s".', account.name)
-        return False
-
-    terminals = get_terminals(account)
-    emails = tuple(gen_emails(account.email, terminals))
-    MAILER.send(emails)
-    incomplete = []
-
-    for terminals_ in terminals.values():
-        for terminal in terminals_:
-            if not OpenVPNPackager(terminal).complete:
-                incomplete.append(terminal)
-
-            reported_terminal = ReportedTerminal.add(account, terminal)
-            reported_terminal.save()
-
-    if incomplete:
-        list_ = ', '.join(str(terminal) for terminal in incomplete)
-        email = EMail(
-            'Terminals without OpenVPN config.',
-            CONFIG['mail']['from'], CONFIG['notify']['admin'], list_)
-        MAILER.send([email])
-        return False
-
-    return True
+    for manufacturer, systems in systems_dict(systems):
+        if systems:
+            for manufacturer_email in ManufacturerEmail.select().where(
+                    ManufacturerEmail.manufacturer == manufacturer):
+                yield generate_email(manufacturer_email.email, systems)
 
 
-def notify_accounts(accounts=None):
-    """Notifies the respective users about new terminals."""
+def notify_manufacturers(systems):
+    """Notifies the respective manufacturers about systems."""
 
     if accounts is None:
         accounts = Account

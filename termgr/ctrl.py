@@ -7,8 +7,8 @@ from terminallib import RemoteController
 
 __all__ = [
     'closed_by_remote_host',
-    'TerminalController',
-    'TerminalsController']
+    'SystemController',
+    'SystemsController']
 
 
 RESOLUTION_CMD = 'export DISPLAY=:0 \\; xrandr | grep " connected"'
@@ -18,6 +18,7 @@ DIGSIG_APP = 'application.service'
 ADMIN_USER = 'homeinfo'
 REBOOT_COMMAND = (SYSTEMCTL, 'reboot')
 REBOOT_OPTIONS = {'ServerAliveInterval': 5, 'ServerAliveCountMax': 3}
+LOGGER = getLogger('Controller')
 
 
 def closed_by_remote_host(process_result):
@@ -31,12 +32,12 @@ def closed_by_remote_host(process_result):
     return 'Connection' in text and 'closed by remote host' in text
 
 
-class TerminalController(RemoteController):
-    """Does stuff on remote terminals."""
+class SystemController(RemoteController):
+    """Does stuff on remote system."""
 
-    def __init__(self, terminal, user='termgr', logger=None):
-        """Sets the respective terminal and logger."""
-        super().__init__(user, terminal, logger=logger)
+    def __init__(self, system, user='termgr'):
+        """Sets the respective system and logger."""
+        super().__init__(user, system)
 
     @property
     def resolution(self):
@@ -76,7 +77,7 @@ class TerminalController(RemoteController):
     def unlock(self):
         """Removes the pacman lockfile."""
         if self.execute('/usr/bin/pidof', 'pacman'):
-            self.logger.error('Pacman is still running on %s.', self.terminal)
+            LOGGER.error('Pacman is still running on %s.', self.system)
             return False
 
         return self.sudo('/usr/bin/rm', '-f ', '/var/lib/pacman/db.lck')
@@ -95,13 +96,12 @@ class TerminalController(RemoteController):
         return self.execute('/usr/bin/loginctl', 'user-status', user)
 
 
-class TerminalsController:
+class SystemsController:
     """Processes several terminals in parallel."""
 
     def __init__(self, user='termgr'):
         """Sets terminals, user and logger."""
         self.user = user
-        self.logger = getLogger(self.__class__.__name__)
 
     def __getattr__(self, attr):
         """Delegates to the respective controller."""
@@ -109,7 +109,7 @@ class TerminalsController:
 
     def _controller(self, terminal):
         """Returns a controller for the respective terminal."""
-        return TerminalController(terminal, user=self.user, logger=self.logger)
+        return SystemController(terminal, user=self.user)
 
     def chkres(self, terminal):
         """Checks the resolution."""

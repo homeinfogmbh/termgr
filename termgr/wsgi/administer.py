@@ -2,12 +2,19 @@
 
 from logging import getLogger
 
+from flask import request
+
 from hipster.ctrl import SyncController
 from hipster.sync import Synchronizer
+from his import authenticated
+from mdb import Address
+from terminallib import Deployment
 from wsgilib import JSON
 
-from termgr.ctrl import closed_by_remote_host, TerminalsController
-from termgr.wsgi.common import get_json, authenticated, authorized
+from termgr.ctrl import closed_by_remote_host
+from termgr.ctrl import TerminalController
+from termgr.ctrl import TerminalsController
+from termgr.wsgi.common import get_address, admin, deploy
 
 __all__ = ['ROUTES']
 
@@ -20,90 +27,104 @@ LOGGER = getLogger(__file__)
 
 
 @authenticated
-@authorized(administer=True)
-def deploy(terminal):
-    """Deploys the respective terminal."""
+@deploy
+def deploy_system(system, customer):
+    """Deploys the respective system."""
 
-    json = get_json()
+    address = get_address()
+    address = Address.add_by_address(address)
 
     try:
-        json['undeploy']
-    except KeyError:
-        if terminal.deploy():
-            return 'Terminal deployed.'
+        deployment = Deployment.get(
+            (Deployment.address == address)
+            & (Deployment.customer == customer))
+    except Deployment.DoesNotExist:
+        deployment = Deployment(customer=customer, address=address)
+        deployment.save()
 
-        return 'Terminal already deployed.'
+    if system.relocate(deployment):
+        return 'System has been deployed.'
 
-    if terminal.undeploy():
-        return 'Terminal un-deployed.'
-
-    return 'Terminal is not deployed.'
+    return ('System could not be deployed.', 500)
 
 
 @authenticated
-@authorized(administer=True)
-def application(terminal):
-    """Activates and deactivates terminals."""
-
-    json = get_json()
+@admin
+def toggle_application(system):
+    """Activates and deactivates the
+    digital signage application on the system.
+    """
 
     try:
-        json['disable']
+        request.json['disable']
     except KeyError:
-        if CONTROLLER.enable_application(terminal):
+        if CONTROLLER.enable_application(system):
             return 'Digital signage application enabled.'
 
         return ('Could not enable digital signage application.', 500)
 
-    if CONTROLLER.disable_application(terminal):
+    if CONTROLLER.disable_application(system):
         return 'Digital signage application disabled.'
 
     return ('Could not disable digital signage application.', 500)
 
 
 @authenticated
-@authorized(administer=True)
-def reboot(terminal):
-    """Reboots the respective terminal."""
+@admin
+def reboot_system(system):
+    """Reboots the respective system."""
 
-    if CONTROLLER.check_login(terminal):
+    if CONTROLLER.check_login(system):
         return ('Admin account is currently logged in.', 503)
 
     if CONTROLLER.pacman_running:
         return ('Package manager is currently running.', 503)
 
-    response = CONTROLLER.reboot(terminal)
+    response = CONTROLLER.reboot(system)
 
     if response:
-        return 'Rebooted terminal.'
+        return 'Rebooted system.'
 
     if response.exit_code == 255 and closed_by_remote_host(response):
-        return ('Probably rebooted terminal.', 202)
+        return ('Probably rebooted system.', 202)
 
     LOGGER.warning(
         'Unknown SSH error: %s (%i).', response.stderr.decode(),
         response.exit_code)
-    return ('Failed to reboot terminal.', 500)
+    return ('Failed to reboot system.', 500)
 
 
 @authenticated
-@authorized(administer=True)
-def sync(terminal):
-    """Synchronizes the respective terminal."""
+@admin
+def sync_system(system):
+    """Synchronizes the respective system."""
 
     with Synchronizer(keyfile=DIGSIG_KEY_FILE) as synchronizer:
-        result = synchronizer.sync(terminal)
+        result = synchronizer.sync(system)
 
     if result:
-        ctrl = SyncController(terminal, keyfile=DIGSIG_KEY_FILE)
+        ctrl = SyncController(system, keyfile=DIGSIG_KEY_FILE)
         ctrl.restart()
         return 'Terminal synchronized.'
 
     return JSON([str(collector) for collector in result], status=500)
 
 
+@authenticated
+@admin
+def beep_system(system):
+    """Identifies the respective system by beep test."""
+
+    if TerminalController(system).sudo('/usr/bin/beep'):
+        return 'Display should have beeped.'
+
+    return ('Could not get display to beep.', 500)
+
+
 ROUTES = (
-    ('POST', '/administer/deploy', deploy, 'manage_deployment'),
-    ('POST', '/administer/application', application, 'manage_application'),
-    ('POST', '/administer/reboot', reboot, 'reboot_terminal'),
-    ('POST', '/administer/sync', sync, 'sync_terminal'))
+    ('POST', '/administer/deploy', deploy_system),
+    ('POST', '/administer/application', toggle_application),
+    ('POST', '/administer/reboot', reboot_system),
+    ('POST', '/administer/sync', sync_system),
+    ('POST', '/administer/beep', beep_system)
+)
