@@ -318,9 +318,21 @@ termgr.sync = function (system) {
 
 
 /*
+    Generator function to wrap a function and disable default events.
+*/
+termgr.partial = function (func, ...args) {
+    return function (event) {
+        event.preventDefault();
+        func(...args);
+    };
+};
+
+
+/*
     Generates a terminal DOM entry.
 */
-termgr.terminalEntry = function (terminal, cid) {
+termgr.systemEntry = function (system) {
+    const deployment = system.deployment;
     const icon = document.createElement('i');
     icon.setAttribute('class', 'fa fa-tv');
 
@@ -328,9 +340,16 @@ termgr.terminalEntry = function (terminal, cid) {
     columnIcon.setAttribute('class', 'col-xs-1');
     columnIcon.appendChild(icon);
 
+    let descriptionText = ''+ system.id;
+
+    if (deployment != null) {
+        const address = termgr.addressToString(deployment.address);
+        descriptionText += '(' + address + ')';
+    }
+
     const description = document.createElement('p');
     description.setAttribute('class', 'termgr-terminal-description');
-    description.textContent = termgr.addressToString(terminal.address) + ' (' + terminal.tid + '.' + cid + ')';
+    description.textContent = descriptionText;
 
     const columnDescription = document.createElement('td');
     columnDescription.setAttribute('class', 'col-xs-6 termgr-terminal-description');
@@ -342,7 +361,7 @@ termgr.terminalEntry = function (terminal, cid) {
     const btnBeep = document.createElement('button');
     btnBeep.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnBeep.setAttribute('type', 'button');
-    btnBeep.setAttribute('onclick', 'termgr.beep(' + terminal.tid + ', ' + cid + ');');
+    btnBeep.addEventListener('click', termgr.partial(termgr.beep, system.id), false);
     btnBeep.setAttribute('data-toggle', 'tooltip');
     btnBeep.setAttribute('data-placement', 'bottom');
     btnBeep.setAttribute('title', 'Beep');
@@ -354,7 +373,7 @@ termgr.terminalEntry = function (terminal, cid) {
     const btnReboot = document.createElement('button');
     btnReboot.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnReboot.setAttribute('type', 'button');
-    btnReboot.setAttribute('onclick', 'termgr.queryReboot(' + terminal.tid + ', ' + cid + ');');
+    btnBeep.addEventListener('click', termgr.partial(termgr.queryReboot, system.id), false);
     btnReboot.setAttribute('data-toggle', 'tooltip');
     btnReboot.setAttribute('data-placement', 'bottom');
     btnReboot.setAttribute('title', 'Reboot');
@@ -368,7 +387,7 @@ termgr.terminalEntry = function (terminal, cid) {
     btnDeploy.setAttribute('type', 'button');
     btnDeploy.setAttribute('data-toggle', 'modal');
     btnDeploy.setAttribute('data-target', '#deploymentDialog');
-    btnDeploy.setAttribute('data-whatever', terminal.tid + '.' + cid);
+    btnBeep.addEventListener('click', termgr.partial(termgr.toggleDeploy, system.id), false);
     btnDeploy.appendChild(btnDeployIcon);
 
     const btnApplicationIcon = document.createElement('i');
@@ -379,7 +398,7 @@ termgr.terminalEntry = function (terminal, cid) {
     btnApplication.setAttribute('type', 'button');
     btnApplication.setAttribute('data-toggle', 'modal');
     btnApplication.setAttribute('data-target', '#applicationDialog');
-    btnApplication.setAttribute('data-whatever', terminal.tid + '.' + cid);
+    btnBeep.addEventListener('click', termgr.partial(termgr.toggleApplication, system.id), false);
     btnApplication.appendChild(btnApplicationIcon);
 
     const btnSyncIcon = document.createElement('i');
@@ -388,7 +407,7 @@ termgr.terminalEntry = function (terminal, cid) {
     const btnSync = document.createElement('button');
     btnSync.setAttribute('class', 'btn btn-success termgr-terminal-action');
     btnSync.setAttribute('type', 'button');
-    btnSync.setAttribute('onclick', 'termgr.sync(' + terminal.tid + ', ' + cid + ');');
+    btnBeep.addEventListener('click', termgr.partial(termgr.sync, system.id), false);
     btnSync.setAttribute('data-toggle', 'tooltip');
     btnSync.setAttribute('data-placement', 'bottom');
     btnSync.setAttribute('title', 'Synchronize');
@@ -419,36 +438,6 @@ termgr.terminalEntry = function (terminal, cid) {
     entry.setAttribute('class', 'row row-centered termgr-terminal-entry');
     entry.appendChild(columnIcon);
     entry.appendChild(columnDescriptionAndButtons);
-
-    return entry;
-};
-
-
-/*
-    Generates a customer DOM entry.
-*/
-termgr.customerEntry = function (customer) {
-    const caption = document.createElement('h3');
-    caption.setAttribute('class', 'termgr-customer-caption');
-    caption.innerHTML = customer.name + ' (' + customer.id + ')';
-
-    const captionContainer = document.createElement('span');
-    captionContainer.setAttribute('onclick', 'jQuery("#terminals_' + customer.id + '").toggle();');
-    captionContainer.appendChild(caption);
-
-    const terminals = document.createElement('table');
-    terminals.setAttribute('id', 'terminals_' + customer.id);
-    terminals.setAttribute('class', 'termgr-customer-terminals');
-    terminals.setAttribute('style', 'display:none;');
-
-    for (let terminal of customer.terminals) {
-        terminals.appendChild(termgr.terminalEntry(terminal, customer.id));
-    }
-
-    const entry = document.createElement('div');
-    entry.setAttribute('class', 'row row-centered termgr-customer-entry');
-    entry.appendChild(captionContainer);
-    entry.appendChild(terminals);
 
     return entry;
 };
@@ -490,5 +479,5 @@ termgr.initIndex = function () {
 termgr.initManage = function () {
     termgr.getSystems();
     const filter = document.getElementById('filter');
-    filter.addEventListener('onclick', termgr.listFilteredSystems, false);
+    filter.addEventListener('click', termgr.listFilteredSystems, false);
 };
