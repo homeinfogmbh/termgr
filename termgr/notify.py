@@ -5,13 +5,12 @@ from email.mime.application import MIMEApplication
 from logging import getLogger
 
 from emaillib import Mailer, EMail
-from his import Account
 
 from termgr.config import CONFIG
-from termgr.openvpn import OpenVPNPackager
-from termgr.orm import WatchList, ReportedTerminal
+from termgr.orm import ManufacturerEmail
 
-__all__ = ['notify_accounts']
+
+__all__ = ['notify_manufacturers']
 
 
 LOGGER = getLogger(__file__)
@@ -29,7 +28,7 @@ def systems_dict(systems):
         if system.manufacturer is None:
             continue
 
-        systems_by_manufacturer[manufacturer].append(system)
+        systems_by_manufacturer[system.manufacturer].append(system)
 
     return systems_by_manufacturer
 
@@ -69,8 +68,5 @@ def generate_emails(systems):
 def notify_manufacturers(systems):
     """Notifies the respective manufacturers about systems."""
 
-    if accounts is None:
-        accounts = Account
-
-    for account in accounts:
-        mail_terminals(account)
+    emails = tuple(generate_emails(systems))
+    MAILER.send(emails)

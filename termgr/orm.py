@@ -1,6 +1,6 @@
 """ORM models for termgr."""
 
-from peewee import ForeignKeyField
+from peewee import CharField, ForeignKeyField
 
 from his import Account
 from mdb import Customer
@@ -10,7 +10,7 @@ from terminallib import System
 from termgr.config import CONFIG
 
 
-__all__ = ['SystemAdministrator', 'CustomerAdministrator']
+__all__ = ['SystemAdministrator', 'CustomerAdministrator', 'ManufacturerEmail']
 
 
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
@@ -49,3 +49,15 @@ class CustomerAdministrator(TermgrModel):
     account = ForeignKeyField(
         Account, column_name='account', on_delete='CASCADE',
         on_update='CASCADE')
+
+
+class ManufacturerEmail(TermgrModel):
+    """Maps emails to manufacturer customers."""
+
+    class Meta:     # pylint: disable=C0111,R0903
+        table_name = 'manufacturer_emails'
+
+    manufacturer = ForeignKeyField(
+        Customer, column_name='manufacturer', on_delete='CASCADE',
+        on_update='CASCADE')
+    email = CharField(255)
