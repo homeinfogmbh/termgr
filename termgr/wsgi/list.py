@@ -25,4 +25,4 @@ def list_systems():
         system.to_json(cascade=True, brief=True) for system in get_systems()])
 
 
-ROUTES = (('GET', '/check/list', list_systems),)
+ROUTES = (('GET', '/list', list_systems),)
