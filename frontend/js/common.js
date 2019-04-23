@@ -102,3 +102,12 @@ termgr.checkSession = function (message) {
         }
     };
 };
+
+
+/*
+    Returns the respective URL argument.
+*/
+termgr.getArg = function (key) {
+    const url = new URL(windows.location.href);
+    return url.searchParams.get(key);
+};

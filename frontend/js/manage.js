@@ -28,9 +28,8 @@ var termgr = termgr || {};
     Navigates to the toggle application page.
 */
 termgr.toggleApplication = function (event) {
-    const id = event.target.getAttribute('data-id');
-    localStorage.setItem('termgr.system', JSON.stringify(id));
-    window.location = 'application.html';
+    const system = event.target.getAttribute('data-id');
+    window.location = 'application.html?system=' + system;
 };
 
 
@@ -39,9 +38,8 @@ termgr.toggleApplication = function (event) {
     Opens the deploying view.
 */
 termgr.deploySystem = function (event) {
-    const id = event.target.getAttribute('data-id');
-    localStorage.setItem('termgr.system', JSON.stringify(id));
-    window.location = 'deploy.html';
+    const system = event.target.getAttribute('data-id');
+    window.location = 'deploy.html?system=' + system;
 };
 
 

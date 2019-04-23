@@ -52,7 +52,7 @@ function deploy (system) {
 */
 function init () {
     termgr.startLoading();
-    const id = JSON.parse(localStorage.getItem('termgr.system'));
+    const id = parseInt(termgr.getArg('System'));
     const systemId = document.getElementById('system');
     systemId.textContent = id;
     const getCustomers = termgr.getCustomers().then(
