@@ -75,7 +75,7 @@ def deploy_system(system, customer):
         deployment = Deployment(
             customer=customer,
             address=address,
-            type=type,
+            type=typ,
             connection=connection,
             weather=weather,
             annotation=annotation)
