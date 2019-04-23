@@ -60,6 +60,7 @@ def get_address():
     if address is None:
         return None
 
+    address = dict(address)
     missing_keys = set()
     address = []
 
