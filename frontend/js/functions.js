@@ -206,7 +206,7 @@ termgr.renderCustomers = function (customers) {
     Renders the respective connections.
 */
 termgr.renderConnections = function (connections) {
-    const select = document.getElementById('connections');
+    const select = document.getElementById('connection');
     select.innerHTML = '';
 
     for (const connection of connections) {
@@ -222,7 +222,7 @@ termgr.renderConnections = function (connections) {
     Renders the respective types.
 */
 termgr.renderTypes = function (types) {
-    const select = document.getElementById('types');
+    const select = document.getElementById('type');
     select.innerHTML = '';
 
     for (const type of types) {

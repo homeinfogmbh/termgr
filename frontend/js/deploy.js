@@ -53,6 +53,9 @@ function deploy () {
 */
 function init () {
     termgr.startLoading();
+    const id = JSON.parse(localStorage.getItem('termgr.system'));
+    const systemId = document.getElementById('system');
+    systemId.textContent = id;
     const getCustomers = termgr.getCustomers().then(
         function (response) {
             termgr.renderCustomers(response.json);
@@ -65,7 +68,7 @@ function init () {
     );
     const getTypes = termgr.getTypes().then(
         function (response) {
-            termgr.renderCustomers(response.json);
+            termgr.renderTypes(response.json);
         }
     );
     Promise.all([getCustomers, getConnections, getTypes]).then(termgr.stopLoading);

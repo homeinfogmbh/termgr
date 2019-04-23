@@ -28,7 +28,7 @@ var termgr = termgr || {};
     Initialize manage.html.
 */
 function init () {
-    const id = JSON.parse(localStorage.getItem('homeinfo.system'));
+    const id = JSON.parse(localStorage.getItem('termgr.system'));
     const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, id), false);
     const btnDisable = document.getElementById('disable');

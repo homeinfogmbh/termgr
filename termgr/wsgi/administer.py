@@ -72,7 +72,13 @@ def deploy_system(system, customer):
     try:
         deployment = Deployment.get(select)
     except Deployment.DoesNotExist:
-        deployment = Deployment(customer=customer, address=address)
+        deployment = Deployment(
+            customer=customer,
+            address=address,
+            type=type,
+            connection=connection,
+            weather=weather,
+            annotation=annotation)
         deployment.save()
 
     try:
