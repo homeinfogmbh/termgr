@@ -272,10 +272,12 @@ termgr.deploy = function (system, customer, street, houseNumber, zipCode, city) 
     const payload = {
         system: system,
         customer: customer,
-        street: street,
-        houseNumber: houseNumber,
-        zipCode: zipCode,
-        city: city
+        address: {
+            street: street,
+            houseNumber: houseNumber,
+            zipCode: zipCode,
+            city: city
+        }
     };
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
