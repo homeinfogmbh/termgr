@@ -75,6 +75,3 @@ function init () {
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(deploy), false);
 }
-
-
-document.addEventListener('DOMContentLoaded', init);

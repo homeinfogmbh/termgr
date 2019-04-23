@@ -36,6 +36,3 @@ function init () {
     const systemId = document.getElementById('system');
     systemId.textContent = id;
 }
-
-
-document.addEventListener('DOMContentLoaded', init);
