@@ -187,38 +187,38 @@ termgr.filterSystems = function* (systems, keywords) {
 
             if (deployment != null) {
                 const length = keyword.length;
-                let string, index, match;
+                const copy = JSON.parse(JSON.stringify(system));
+                let match = false;
 
                 // Customer ID.
-                string = '' + deployment.customer.id;
-                index = termgr.indexOf(string, keyword);
+                const customerID = '' + deployment.customer.id;
+                const indexCustomerID = termgr.indexOf(customerID, keyword);
 
-                if (index >= 0) {
-                    match = JSON.parse(JSON.stringify(system));
-                    match.deployment.customer.id = termgr.highlight(string, index, length);
-                    yield match;
-                    break;
+                if (indexCustomerID >= 0) {
+                    copy.deployment.customer.id = termgr.highlight(customerID, indexCustomerID, length);
+                    match = true;
                 }
 
                 // Customer name.
-                string = '' + deployment.customer.name;
-                index = termgr.indexOf(string, keyword);
+                const customerName = deployment.customer.company.name;
+                const indexCustomerName = termgr.indexOf(customerName, keyword);
 
-                if (index >= 0) {
-                    match = JSON.parse(JSON.stringify(system));
-                    match.deployment.customer.name = termgr.highlight(string, index, length);
-                    yield match;
-                    break;
+                if (indexCustomerName >= 0) {
+                    copy.deployment.customer.company.name = termgr.highlight(customerName, indexCustomerName, length);
+                    match = true;
                 }
 
                 // Address.
-                string = termgr.addressToString(deployment.address);
-                index = termgr.indexOf(string, keyword);
+                const address = termgr.addressToString(deployment.address);
+                const indexAddress = termgr.indexOf(address, keyword);
 
-                if (index >= 0) {
-                    match = JSON.parse(JSON.stringify(system));
-                    match.deployment.address = termgr.highlight(string, index, length);
-                    yield match;
+                if (indexAddress >= 0) {
+                    copy.deployment.address = termgr.highlight(address, indexAddress, length);
+                    match = true;
+                }
+
+                if (match) {
+                    yield copy;
                     break;
                 }
             }

@@ -30,22 +30,20 @@ var termgr = termgr || {};
 termgr.systemEntry = function (system) {
     const deployment = system.deployment;
     let address = 'Keine Adresse';
+    let customer = 'Kein Kunde';
 
     if (deployment != null) {
         address = termgr.addressToString(deployment.address);
+        customer = deployment.customer.company.name + ' (' + deployment.customer.id + ')';
     }
 
-    const description = document.createElement('p');
-    description.setAttribute('class', 'termgr-terminal-description');
-    description.innerHTML = address;
+    const rowAddress = document.createElement('div');
+    rowAddress.setAttribute('class', 'w3-row');
+    rowAddress.innerHTML = address;
 
-    const columnDescription = document.createElement('div');
-    columnDescription.setAttribute('class', 'w3-col s12');
-    columnDescription.appendChild(description);
-
-    const rowDescription = document.createElement('div');
-    rowDescription.setAttribute('class', 'w3-row');
-    rowDescription.appendChild(columnDescription);
+    const rowCustomer = document.createElement('div');
+    rowCustomer.setAttribute('class', 'w3-row');
+    rowCustomer.innerHTML = customer;
 
     const btnBeepIcon = document.createElement('i');
     btnBeepIcon.setAttribute('class', 'fa fa-volume-up termgr-terminal-icon');
@@ -110,7 +108,8 @@ termgr.systemEntry = function (system) {
     rowButtons.appendChild(btnSync);
 
     const columnDescriptionAndButtons = document.createElement('td');
-    columnDescriptionAndButtons.appendChild(rowDescription);
+    columnDescriptionAndButtons.appendChild(rowAddress);
+    columnDescriptionAndButtons.appendChild(rowCustomer);
     columnDescriptionAndButtons.appendChild(rowButtons);
 
     const color = (system.id % 2) ? 'w3-light-grey' : 'w3-white';
