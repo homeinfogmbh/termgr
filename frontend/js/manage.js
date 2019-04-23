@@ -49,7 +49,8 @@ termgr.deploySystem = function (event) {
     Reloads the systems.
 */
 function reload () {
-    return termgr.getSystems().then(termgr.listFilteredSystems);
+    termgr.startLoading();
+    return termgr.getSystems().then(termgr.listFilteredSystems).then(termgr.stopLoading);
 }
 
 

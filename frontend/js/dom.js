@@ -61,7 +61,7 @@ termgr.systemEntry = function (system) {
 
     const btnReboot = document.createElement('button');
     btnReboot.setAttribute('class', 'w3-button w3-orange w3-col s2');
-    btnReboot.addEventListener('click', termgr.partial(termgr.queryReboot, system.id), false);
+    btnReboot.addEventListener('click', termgr.partial(termgr.reboot, system.id), false);
     btnReboot.setAttribute('title', 'Reboot');
     btnReboot.appendChild(btnRebootIcon);
 
@@ -72,6 +72,7 @@ termgr.systemEntry = function (system) {
     btnDeploy.setAttribute('class', 'w3-button w3-teal w3-col s2');
     btnDeploy.setAttribute('data-id', system.id);
     btnDeploy.addEventListener('click', termgr.deploySystem);
+    btnReboot.setAttribute('title', 'Verbauen');
     btnDeploy.appendChild(btnDeployIcon);
 
     const btnEnableApplicationIcon = document.createElement('i');
@@ -81,6 +82,7 @@ termgr.systemEntry = function (system) {
     btnEnableApplication.setAttribute('class', 'w3-button w3-khaki w3-col s2');
     btnEnableApplication.setAttribute('data-id', system.id);
     btnEnableApplication.addEventListener('click', termgr.toggleApplication);
+    btnReboot.setAttribute('title', 'Digital Signage Modus umschalten');
     btnEnableApplication.appendChild(btnEnableApplicationIcon);
 
     const btnSyncIcon = document.createElement('i');
@@ -91,7 +93,7 @@ termgr.systemEntry = function (system) {
     btnSync.addEventListener('click', termgr.partial(termgr.sync, system.id), false);
     btnSync.setAttribute('data-toggle', 'tooltip');
     btnSync.setAttribute('data-placement', 'bottom');
-    btnSync.setAttribute('title', 'Synchronize');
+    btnSync.setAttribute('title', 'Synchronisieren');
     btnSync.appendChild(btnSyncIcon);
 
     const idField = document.createElement('span');
