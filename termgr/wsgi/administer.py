@@ -35,8 +35,21 @@ def deploy_system(system, customer):
     address = get_address()
     address = Address.add_by_address(address)
     address.save()
-    typ = Type(request.json['type'])
-    connection = Connection(request.json['connection'])
+
+    try:
+        typ = Type(request.json['type'])
+    except KeyError:
+        return ('No type specified.', 400)
+    except ValueError:
+        return ('Invalid type specified.', 400)
+
+    try:
+        connection = Connection(request.json['connection'])
+    except KeyError:
+        return ('No connection specified.', 400)
+    except ValueError:
+        return ('Invalid connection specified.', 400)
+
     select = (
         (Deployment.address == address)
         & (Deployment.customer == customer)
