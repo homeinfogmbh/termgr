@@ -55,14 +55,14 @@ def deploy_system(system, customer):
         & (Deployment.customer == customer)
         & (Deployment.type == typ)
         & (Deployment.connection == connection))
-    weather = request.json.get('weather') or None
+    weather = request.json.get('weather')
 
     if weather is None:
         select &= Deployment.weather >> None
     else:
         select &= Deployment.weather == weather
 
-    annotation = request.json.get('annotation') or None
+    annotation = request.json.get('annotation')
 
     if annotation is None:
         select &= Deployment.annotation >> None
