@@ -2,7 +2,7 @@
 
 from his import ACCOUNT, authenticated
 from mdb import Customer
-from terminallib import System
+from terminallib import Connection, Type, System
 from wsgilib import JSON
 
 from termgr.orm import CustomerAdministrator, SystemAdministrator
@@ -51,7 +51,23 @@ def list_customers():
         customer.to_json(company=True) for customer in get_customers()])
 
 
+@authenticated
+def list_connections():
+    """Lists available connections."""
+
+    return JSON([connection.value for connection in Connection])
+
+
+@authenticated
+def list_types():
+    """Lists available types."""
+
+    return JSON([typ.value for typ in Type])
+
+
 ROUTES = (
     ('GET', '/list/systems', list_systems),
-    ('GET', '/list/customers', list_customers)
+    ('GET', '/list/customers', list_customers),
+    ('GET', '/list/connections', list_connections),
+    ('GET', '/list/types', list_types)
 )
