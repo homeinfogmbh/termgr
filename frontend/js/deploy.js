@@ -52,7 +52,7 @@ function deploy (system) {
 */
 function init () {
     termgr.startLoading();
-    const id = parseInt(termgr.getArg('System'));
+    const id = parseInt(termgr.getArg('system'));
     const systemId = document.getElementById('system');
     systemId.textContent = id;
     const getCustomers = termgr.getCustomers().then(
