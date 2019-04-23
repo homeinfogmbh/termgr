@@ -8,7 +8,7 @@ from hipster.ctrl import SyncController
 from hipster.sync import Synchronizer
 from his import authenticated
 from mdb import Address
-from terminallib import Deployment
+from terminallib import Connection, Type, Deployment, System
 from wsgilib import JSON
 
 from termgr.ctrl import closed_by_remote_host
@@ -23,6 +23,7 @@ SYSTEMCTL = '/usr/bin/systemctl'
 DIGSIG_APP = 'application.service'
 CONTROLLER = SystemsController()
 DIGSIG_KEY_FILE = '/home/termgr/.ssh/digsig'
+REDEPLOY_TEMP = 'System has been deployed and system #{} has been undeployed.'
 LOGGER = getLogger(__file__)
 
 
@@ -34,19 +35,46 @@ def deploy_system(system, customer):
     address = get_address()
     address = Address.add_by_address(address)
     address.save()
+    typ = Type(request.json['type'])
+    connection = Connection(request.json['connection'])
+    select = (
+        (Deployment.address == address)
+        & (Deployment.customer == customer)
+        & (Deployment.type == typ)
+        & (Deployment.connection == connection))
+    weather = request.json.get('weather') or None
+
+    if weather is None:
+        select &= Deployment.weather >> None
+    else:
+        select &= Deployment.weather == weather
+
+    annotation = request.json.get('annotation') or None
+
+    if annotation is None:
+        select &= Deployment.annotation >> None
+    else:
+        select &= Deployment.annotation == annotation
 
     try:
-        deployment = Deployment.get(
-            (Deployment.address == address)
-            & (Deployment.customer == customer))
+        deployment = Deployment.get(select)
     except Deployment.DoesNotExist:
         deployment = Deployment(customer=customer, address=address)
         deployment.save()
 
-    if system.relocate(deployment):
+    try:
+        current_system = System.get(System.deployment == deployment)
+    except System.DoesNotExist:
+        current_system = None
+    else:
+        current_system.relocate(None)
+
+    system.relocate(deployment)
+
+    if current_system is None:
         return 'System has been deployed.'
 
-    return ('System could not be deployed.', 500)
+    return REDEPLOY_TEMP.format(current_system.id)
 
 
 @authenticated
