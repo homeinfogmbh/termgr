@@ -28,8 +28,8 @@ var termgr = termgr || {};
     Initialize index.html.
 */
 function init () {
-    const account = localStorage.get('termgr.account');
-    const passwd = localStorage.get('termgr.passwd');
+    const account = localStorage.getItem('termgr.account');
+    const passwd = localStorage.getItem('termgr.passwd');
 
     if (account == null || passwd == null) {
         window.location = 'login.html';
