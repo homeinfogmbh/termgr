@@ -52,21 +52,23 @@ function deploy () {
     Initialize deploy.html.
 */
 function init () {
-    termgr.getCustomers().then(
+    termgr.startLoading();
+    const getCustomers = termgr.getCustomers().then(
         function (response) {
             termgr.renderCustomers(response.json);
         }
     );
-    termgr.getConnections().then(
+    const getConnections = termgr.getConnections().then(
         function (response) {
             termgr.renderConnections(response.json);
         }
     );
-    termgr.getTypes().then(
+    const getTypes = termgr.getTypes().then(
         function (response) {
             termgr.renderCustomers(response.json);
         }
     );
+    Promise.all([getCustomers, getConnections, getTypes]).then(termgr.stopLoading);
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(deploy), false);
 }

@@ -45,6 +45,28 @@ termgr.addressToString = function (address) {
 
 
 /*
+    Starts loading.
+*/
+termgr.startLoading = function () {
+    const loader = document.getElementById('loader');
+    const target = document.getElementById('target');
+    target.style.display = 'none';
+    loader.style.display = 'block';
+};
+
+
+/*
+    Stops loading.
+*/
+termgr.stopLoading = function () {
+    const loader = document.getElementById('loader');
+    const target = document.getElementById('target');
+    loader.style.display = 'none';
+    target.style.display = 'block';
+};
+
+
+/*
     Stores the systems in local storage.
 */
 termgr.storeSystems = function (systems) {

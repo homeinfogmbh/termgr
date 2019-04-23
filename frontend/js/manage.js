@@ -57,7 +57,8 @@ function reload () {
     Initialize manage.html.
 */
 function init () {
-    reload();
+    termgr.startLoading();
+    reload().then(termgr.stopLoading);
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', termgr.partial(termgr.listFilteredSystems), false);
     const btnReload = document.getElementById('reload');
