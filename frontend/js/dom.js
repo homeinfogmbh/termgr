@@ -37,7 +37,7 @@ termgr.systemEntry = function (system) {
 
     const description = document.createElement('p');
     description.setAttribute('class', 'termgr-terminal-description');
-    description.textContent = address;
+    description.innerHTML = address;
 
     const columnDescription = document.createElement('div');
     columnDescription.setAttribute('class', 'w3-col s12');
@@ -98,7 +98,7 @@ termgr.systemEntry = function (system) {
 
     const idField = document.createElement('span');
     idField.setAttribute('class', 'w3-col s2');
-    idField.textContent = '#' + system.id;
+    idField.innerHTML = '#' + system.id;
 
     const rowButtons = document.createElement('div');
     rowButtons.setAttribute('class', 'w3-row');

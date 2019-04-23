@@ -25,14 +25,14 @@ var termgr = termgr || {};
 
 
 /*
-    Case-insensitively checks whether a string contains another string.
+    Case-insensitively returns the index of the substring.
 */
-termgr.containsIgnoreCase = function (haystack, needle) {
+termgr.indexOf = function (haystack, needle) {
     if (! haystack) {
         return false;
     }
 
-    return haystack.toLowerCase().includes(needle.toLowerCase());
+    return haystack.toLowerCase().indexOf(needle.toLowerCase());
 };
 
 
@@ -40,7 +40,22 @@ termgr.containsIgnoreCase = function (haystack, needle) {
     Returns the respective address as a one-line string.
 */
 termgr.addressToString = function (address) {
+    if (typeof address == 'string') {
+        return address;
+    }
+
     return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
+};
+
+
+/*
+    Highlights a substring.
+*/
+termgr.highlight = function (string, index, length) {
+    const head = string.substring(0, index);
+    const match = string.substr(index, length);
+    const tail = string.substring(index + length, string.length);
+    return head + '<b>' + match + '</b>' + tail;
 };
 
 
@@ -158,30 +173,52 @@ termgr.filterSystems = function* (systems, keywords) {
         let deployment = system.deployment;
 
         for (const keyword of keywords) {
-            // System ID.
-            if (termgr.containsIgnoreCase('' + system.id, keyword)) {
-                yield system;
-                break;
+            // Exact ID match.
+            if (keyword.startsWith('#')) {
+                const fragments = keyword.split('#');
+                const id = parseInt(fragment[1]);
+
+                if (system.id == id) {
+                    yield system;
+                }
+
+                continue;
             }
 
             if (deployment != null) {
+                const length = keyword.length;
+                let string, index, match;
+
                 // Customer ID.
-                if (termgr.containsIgnoreCase('' + deployment.customer.id, keyword)) {
-                    yield system;
+                string = '' + deployment.customer.id;
+                index = termgr.indexOf(string, keyword);
+
+                if (index >= 0) {
+                    match = JSON.parse(JSON.stringify(system));
+                    match.deployment.customer.id = termgr.highlight(string, index, length);
+                    yield match;
                     break;
                 }
 
                 // Customer name.
-                if (termgr.containsIgnoreCase(deployment.customer.company.name, keyword)) {
-                    yield system;
+                string = '' + deployment.customer.name;
+                index = termgr.indexOf(string, keyword);
+
+                if (index >= 0) {
+                    match = JSON.parse(JSON.stringify(system));
+                    match.deployment.customer.name = termgr.highlight(string, index, length);
+                    yield match;
                     break;
                 }
 
-                let address = termgr.addressToString(deployment.address);
-
                 // Address.
-                if (termgr.containsIgnoreCase(address, keyword)) {
-                    yield system;
+                string = termgr.addressToString(deployment.address);
+                index = termgr.indexOf(string, keyword);
+
+                if (index >= 0) {
+                    match = JSON.parse(JSON.stringify(system));
+                    match.deployment.address = termgr.highlight(string, index, length);
+                    yield match;
                     break;
                 }
             }
