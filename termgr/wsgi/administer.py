@@ -122,13 +122,10 @@ def toggle_application(system):
 def reboot_system(system):
     """Reboots the respective system."""
 
-    administration = CONTROLLER.check_login(system)
-
-    if administration:
-        return (str(administration), 503)
+    if CONTROLLER.check_login(system):
         return ('Admin account is currently logged in.', 503)
 
-    if CONTROLLER.pacman_running:
+    if CONTROLLER.check_pacman():
         return ('Package manager is currently running.', 503)
 
     response = CONTROLLER.reboot(system)

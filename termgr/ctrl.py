@@ -44,8 +44,7 @@ class SystemController(RemoteController):
         """Returns the display resolution."""
         return self.execute(RESOLUTION_CMD, shell=True)
 
-    @property
-    def pacman_running(self):
+    def check_pacman(self):
         """Determines if pacman is (probably) running."""
         return self.sudo('/usr/bin/test', '-f ', '/var/lib/pacman/db.lck')
 
