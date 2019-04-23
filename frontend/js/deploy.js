@@ -24,11 +24,15 @@
 var termgr = termgr || {};
 
 
-/*
-    Gets list of available customers.
-*/
-function getCustomers () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/customers');
+function deploy () {
+    const system = JSON.parse(localStorage.getItem('termgr.system'));
+    const customerSelect = document.getElementById('customer');
+    const customer = customerSelect.options[customerSelect.selectedIndex].value;
+    const street = document.getElementById('street').value.trim();
+    const houseNumber = document.getElementById('houseNumber').value.trim();
+    const zipCode = document.getElementById('zipCode').value.trim();
+    const city = document.getElementById('city').value.trim();
+    return termgr.deploy(system, customer, street, houseNumber, zipCode, city);
 }
 
 
@@ -36,11 +40,9 @@ function getCustomers () {
     Initialize deploy.html.
 */
 function init () {
-    getCustomers.then(renderCustomers);
-    const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.listFilteredSystems), false);
-    const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(reload), false);
+    termgr.getCustomers().then(termgr.renderCustomers);
+    const btnDeploy = document.getElementById('deploy');
+    btnDeploy.addEventListener('click', termgr.partial(deploy), false);
 }
 
 

@@ -29,7 +29,7 @@ var termgr = termgr || {};
 */
 termgr.toggleApplication = function (event) {
     const id = event.target.getAttribute('data-id');
-    localStorage.setItem('homeinfo.system', JSON.stringify(id));
+    localStorage.setItem('termgr.system', JSON.stringify(id));
     window.location = 'application.html';
 };
 
@@ -40,7 +40,7 @@ termgr.toggleApplication = function (event) {
 */
 termgr.deploySystem = function (event) {
     const id = event.target.getAttribute('data-id');
-    localStorage.setItem('homeinfo.system', JSON.stringify(id));
+    localStorage.setItem('termgr.system', JSON.stringify(id));
     window.location = 'deploy.html';
 };
 

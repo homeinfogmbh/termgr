@@ -45,13 +45,12 @@ termgr.addressToString = function (address) {
 
 
 /*
-    Retrieves the customers and their respective terminals
-    from the API and invokes the callback function.
+    Retrieves systems from the API.
 */
 termgr.getSystems = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list').then(
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/systems').then(
         function (response) {
-            localStorage.setItem('homeinfo.systems', JSON.stringify(response.json));
+            localStorage.setItem('termgr.systems', JSON.stringify(response.json));
         },
         termgr.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
     );
@@ -59,26 +58,48 @@ termgr.getSystems = function () {
 
 
 /*
-    Filters the provided terminals by the respective keywords.
+    Retrieves customers from the backend,
+    which the current user is allowed to deploy to.
+*/
+termgr.getCustomers = function () {
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/customers').then(
+        function (response) {
+            localStorage.setItem('termgr.customers', JSON.stringify(response.json));
+        },
+        termgr.checkSession('Die Liste der Kunden konnte nicht abgefragt werden.')
+    );
+};
+
+/*
+    Filters the provided system by the respective keywords.
 */
 termgr.filterSystems = function* (systems, keywords) {
     for (const system of systems) {
         let deployment = system.deployment;
 
         for (const keyword of keywords) {
+            // System ID.
             if (termgr.containsIgnoreCase('' + system.id, keyword)) {
                 yield system;
                 break;
             }
 
             if (deployment != null) {
-                if (termgr.containsIgnoreCase('' + deployment.id, keyword)) {
+                // Customer ID.
+                if (termgr.containsIgnoreCase('' + deployment.customer.id, keyword)) {
+                    yield system;
+                    break;
+                }
+
+                // Customer name.
+                if (termgr.containsIgnoreCase(deployment.customer.company.name, keyword)) {
                     yield system;
                     break;
                 }
 
                 let address = termgr.addressToString(deployment.address);
 
+                // Address.
                 if (termgr.containsIgnoreCase(address, keyword)) {
                     yield system;
                     break;
@@ -104,7 +125,24 @@ termgr.listSystems = function (systems) {
 
 
 /*
-    Filters customers and terminals and lists them.
+    Renders the respective customers.
+*/
+termgr.renderCustomers = function () {
+    const select = document.getElementById('customer');
+    select.innerHTML = '';
+    const customers = JSON.parse(localStorage.getItem('termgr.customers'));
+
+    for (const customer of customers) {
+        let option = document.createElement('option');
+        option.setAttribute('value', customer.id);
+        option.textContent = customer.company.name;
+        select.appendChild(option);
+    }
+};
+
+
+/*
+    Filters systems.
 */
 termgr.listFilteredSystems = function () {
     const searchValue = document.getElementById('searchField').value;
@@ -114,10 +152,10 @@ termgr.listFilteredSystems = function () {
         keywords = searchValue.split();
     }
 
-    const systems = JSON.parse(localStorage.getItem('homeinfo.systems'));
+    let systems = JSON.parse(localStorage.getItem('termgr.systems'));
 
     if (keywords != null) {
-        const systems = Array.from(termgr.filterSystems(systems, keywords));
+        systems = Array.from(termgr.filterSystems(systems, keywords));
         termgr.listSystems(systems);
     } else {
         termgr.listSystems(systems);
@@ -140,7 +178,7 @@ termgr.partial = function (func, ...args) {
 
 
 /*
-    Lets the respective terminal beep.
+    Lets the respective system beep.
 */
 termgr.beep = function (system) {
     const payload = {'system': system};
@@ -148,15 +186,15 @@ termgr.beep = function (system) {
     const headers = {'Content-Type': 'application/json'};
     return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/beep', data, headers).then(
         function () {
-            alert('Das Terminal sollte gepiept haben.');
+            alert('Das System sollte gepiept haben.');
         },
-        termgr.checkSession('Das Terminal konnte nicht zum Piepen gebracht werden.')
+        termgr.checkSession('Das System konnte nicht zum Piepen gebracht werden.')
     );
 };
 
 
 /*
-    Actually performs a reboot of the respective terminal.
+    Actually performs a reboot of the respective system.
 */
 termgr.reboot = function (system) {
     const payload = {'system': system};
@@ -164,13 +202,13 @@ termgr.reboot = function (system) {
     const headers = {'Content-Type': 'application/json'};
     return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/reboot', data, headers).then(
         function () {
-            alert('Das Terminal wurde wahrscheinlich neu gestartet.');
+            alert('Das System wurde wahrscheinlich neu gestartet.');
         },
         function (response) {
-            let message = 'Das Terminal konnte nicht neu gestartet werden.';
+            let message = 'Das System konnte nicht neu gestartet werden.';
 
             if (response.status == 503) {
-                message = 'Auf dem Terminal werden aktuell administrative Aufgaben ausgeführt.';
+                message = 'Auf dem System werden aktuell administrative Aufgaben ausgeführt.';
             }
 
             return termgr.checkSession(message)(response);
@@ -212,23 +250,7 @@ termgr.disableApplication = function (system) {
 
 
 /*
-    Deploys the respective terminal.
-*/
-termgr.deploy = function (system, address) {
-    const payload = {'system': system, 'address': address};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/deploy', data, headers).then(
-        function () {
-            alert('Terminal wurde als "verbaut" markiert.');
-        },
-        termgr.checkSession('Das Terminal konnte nicht als "verbaut" markiert werden.')
-    );
-};
-
-
-/*
-    Synchronizes the respective terminal.
+    Synchronizes the respective system.
 */
 termgr.sync = function (system) {
     const payload = {'system': system};
@@ -236,8 +258,31 @@ termgr.sync = function (system) {
     const headers = {'Content-Type': 'application/json'};
     return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/sync', data, headers).then(
         function () {
-            alert('Terminal wurde synchronisiert.');
+            alert('Das System wurde synchronisiert.');
         },
-        termgr.checkSession('Das Terminal konnte nicht synchronisiert werden.')
+        termgr.checkSession('Das System konnte nicht synchronisiert werden.')
+    );
+};
+
+
+/*
+    Deploys a system.
+*/
+termgr.deploy = function (system, customer, street, houseNumber, zipCode, city) {
+    const payload = {
+        system: system,
+        customer: customer,
+        street: street,
+        houseNumber: houseNumber,
+        zipCode: zipCode,
+        city: city
+    };
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/deploy', data, headers).then(
+        function () {
+            alert('Das System wurde als verbaut gekennzeichnet.');
+        },
+        termgr.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
     );
 };

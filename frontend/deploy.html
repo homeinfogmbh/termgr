@@ -35,26 +35,15 @@
 
 <form class="w3-container">
   <div class="w3-row w3-center">
-    <div class="w3-col l3 s12">
-      <input id="street" type="text" class="w3-input" placeholder="Straße" required>
-    </div>
-    <div class="w3-col l3 s12">
-      <input id="houseNumber" type="text" class="w3-input" placeholder="Hausnummer" required>
-    </div>
-    <div class="w3-col l3 s12">
-      <input id="zipCode" type="text" class="w3-input" placeholder="PLZ" required>
-    </div>
-    <div class="w3-col l3 s12">
-      <input id="city" type="text" class="w3-input" placeholder="Ort" required>
+    <input id="street" type="text" class="w3-input w3-col l3 s12" placeholder="Straße" required>
+    <input id="houseNumber" type="text" class="w3-input w3-col l3 s12" placeholder="Hausnummer" required>
+    <input id="zipCode" type="text" class="w3-input w3-col l3 s12" placeholder="PLZ" required>
+    <input id="city" type="text" class="w3-input w3-col l3 s12" placeholder="Ort" required>
     </div>
   </div>
   <div class="w3-row w3-center">
-    <div class="w3-col s6">
-      <select id="customer" class="w3-input" required>
-    </div>
-    <div class="w3-col s6">
-      <button id="deploy" type="submit" class="w3-button w3-green">Festlegen</button>
-    </div>
+    <select id="customer" class="w3-input w3-col l6 s12" required></select>
+    <button id="deploy" type="submit" class="w3-button w3-green w3-col l6 s12">Festlegen</button>
   </div>
 </form>
 

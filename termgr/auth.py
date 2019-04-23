@@ -48,6 +48,12 @@ def chkdeploy(account, system, customer):
     if account is None or customer is None:
         return False
 
+    if not account.can_login:
+        return False
+
+    if account.root:
+        return True
+
     # Check whether the account may deploy for the target customer.
     try:
         CustomerAdministrator.get(
