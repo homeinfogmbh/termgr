@@ -33,6 +33,7 @@ def deploy_system(system, customer):
 
     address = get_address()
     address = Address.add_by_address(address)
+    address.save()
 
     try:
         deployment = Deployment.get(
