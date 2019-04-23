@@ -32,7 +32,19 @@ function deploy () {
     const houseNumber = document.getElementById('houseNumber').value.trim();
     const zipCode = document.getElementById('zipCode').value.trim();
     const city = document.getElementById('city').value.trim();
-    return termgr.deploy(system, customer, street, houseNumber, zipCode, city);
+    const address = {
+        street: street,
+        houseNumber: houseNumber,
+        zipCode: zipCode,
+        city: city
+    };
+    const connectionSelect = document.getElementById('connection');
+    const connection = connectionSelect.options[connectionSelect.selectedIndex].value;
+    const typeSelect = document.getElementById('type');
+    const type = typeSelect.options[typeSelect.selectedIndex].value;
+    const weather = document.getElementById('weather').value.trim() || null;
+    const annotation = document.getElementById('annotation').value.trim() || null;
+    return termgr.deploy(system, customer, address, connection, type, weather, annotation);
 }
 
 
@@ -40,7 +52,21 @@ function deploy () {
     Initialize deploy.html.
 */
 function init () {
-    termgr.getCustomers().then(termgr.renderCustomers);
+    termgr.getCustomers().then(
+        function (response) {
+            termgr.renderCustomers(response.json);
+        }
+    );
+    termgr.getConnections().then(
+        function (response) {
+            termgr.renderConnections(response.json);
+        }
+    );
+    termgr.getTypes().then(
+        function (response) {
+            termgr.renderCustomers(response.json);
+        }
+    );
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(deploy), false);
 }

@@ -35,11 +35,18 @@
 
 <form class="w3-container">
   <div class="w3-row w3-center">
-    <input id="street" type="text" class="w3-input w3-col l3 s12" placeholder="Straße" required>
-    <input id="houseNumber" type="text" class="w3-input w3-col l3 s12" placeholder="Hausnummer" required>
-    <input id="zipCode" type="text" class="w3-input w3-col l3 s12" placeholder="PLZ" required>
-    <input id="city" type="text" class="w3-input w3-col l3 s12" placeholder="Ort" required>
-    </div>
+    <input id="street" type="text" class="w3-input w3-col l3 s12" placeholder="Straße*" required>
+    <input id="houseNumber" type="text" class="w3-input w3-col l3 s12" placeholder="Hausnummer*" required>
+    <input id="zipCode" type="text" class="w3-input w3-col l3 s12" placeholder="PLZ*" required>
+    <input id="city" type="text" class="w3-input w3-col l3 s12" placeholder="Ort*" required>
+  </div>
+  <div class="w3-row w3-center">
+    <select id="connection" class="w3-input w3-col l6 s12" required></select>
+    <select id="type" class="w3-input w3-col l6 s12" required></select>
+  </div>
+  <div class="w3-row w3-center">
+    <input id="weather" type="text" class="w3-input w3-col l3 s12" placeholder="Wetter">
+    <input id="annotation" type="text" class="w3-input w3-col l3 s12" placeholder="Anmerlung">
   </div>
   <div class="w3-row w3-center">
     <select id="customer" class="w3-input w3-col l6 s12" required></select>

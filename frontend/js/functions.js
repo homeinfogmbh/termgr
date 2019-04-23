@@ -45,12 +45,34 @@ termgr.addressToString = function (address) {
 
 
 /*
+    Stores the systems in local storage.
+*/
+termgr.storeSystems = function (systems) {
+    return localStorage.setItem('termgr.systems', JSON.stringify(systems));
+};
+
+
+/*
+    Loads the systems from local storage.
+*/
+termgr.loadSystems = function () {
+    const raw = localStorage.getItem('termgr.systems');
+
+    if (raw == null) {
+        return [];
+    }
+
+    return JSON.parse(raw);
+};
+
+
+/*
     Retrieves systems from the API.
 */
 termgr.getSystems = function () {
     return termgr.makeRequest('GET', termgr.BASE_URL + '/list/systems').then(
         function (response) {
-            localStorage.setItem('termgr.systems', JSON.stringify(response.json));
+            termgr.storeSystems(response.json);
         },
         termgr.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
     );
@@ -62,13 +84,31 @@ termgr.getSystems = function () {
     which the current user is allowed to deploy to.
 */
 termgr.getCustomers = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/customers').then(
-        function (response) {
-            localStorage.setItem('termgr.customers', JSON.stringify(response.json));
-        },
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/customers').catch(
         termgr.checkSession('Die Liste der Kunden konnte nicht abgefragt werden.')
     );
 };
+
+
+/*
+    Retrieves connections from the backend.
+*/
+termgr.getConnections = function () {
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/connections').catch(
+        termgr.checkSession('Die Liste der Internetverbindungen konnte nicht abgefragt werden.')
+    );
+};
+
+
+/*
+    Retrieves types from the backend.
+*/
+termgr.getTypes = function () {
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/types').catch(
+        termgr.checkSession('Die Liste der Terminal-Typen konnte nicht abgefragt werden.')
+    );
+};
+
 
 /*
     Filters the provided system by the respective keywords.
@@ -127,15 +167,46 @@ termgr.listSystems = function (systems) {
 /*
     Renders the respective customers.
 */
-termgr.renderCustomers = function () {
+termgr.renderCustomers = function (customers) {
     const select = document.getElementById('customer');
     select.innerHTML = '';
-    const customers = JSON.parse(localStorage.getItem('termgr.customers'));
 
     for (const customer of customers) {
         let option = document.createElement('option');
         option.setAttribute('value', customer.id);
         option.textContent = customer.company.name;
+        select.appendChild(option);
+    }
+};
+
+
+/*
+    Renders the respective connections.
+*/
+termgr.renderConnections = function (connections) {
+    const select = document.getElementById('connections');
+    select.innerHTML = '';
+
+    for (const connection of connections) {
+        let option = document.createElement('option');
+        option.setAttribute('value', connection);
+        option.textContent = connection;
+        select.appendChild(option);
+    }
+};
+
+
+/*
+    Renders the respective types.
+*/
+termgr.renderTypes = function (types) {
+    const select = document.getElementById('types');
+    select.innerHTML = '';
+
+    for (const type of types) {
+        let option = document.createElement('option');
+        option.setAttribute('value', type);
+        option.textContent = type;
         select.appendChild(option);
     }
 };
@@ -152,7 +223,7 @@ termgr.listFilteredSystems = function () {
         keywords = searchValue.split();
     }
 
-    let systems = JSON.parse(localStorage.getItem('termgr.systems'));
+    let systems = termgr.loadSystems();
 
     if (keywords != null) {
         systems = Array.from(termgr.filterSystems(systems, keywords));
@@ -268,16 +339,15 @@ termgr.sync = function (system) {
 /*
     Deploys a system.
 */
-termgr.deploy = function (system, customer, street, houseNumber, zipCode, city) {
+termgr.deploy = function (system, customer, address, connection, type, weather, annotation) {
     const payload = {
         system: system,
         customer: customer,
-        address: {
-            street: street,
-            houseNumber: houseNumber,
-            zipCode: zipCode,
-            city: city
-        }
+        address: address,
+        connection: connection,
+        type: type,
+        weather: weather,
+        annotation: annotation
     };
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
