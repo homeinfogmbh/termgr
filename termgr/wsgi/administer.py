@@ -125,7 +125,7 @@ def reboot_system(system):
     if CONTROLLER.check_login(system):
         return ('Admin account is currently logged in.', 503)
 
-    if CONTROLLER.check_pacman():
+    if CONTROLLER.check_pacman(system):
         return ('Package manager is currently running.', 503)
 
     response = CONTROLLER.reboot(system)
