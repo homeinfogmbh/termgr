@@ -25,43 +25,16 @@ var termgr = termgr || {};
 
 
 /*
-    Navigates to the toggle application page.
-*/
-termgr.toggleApplication = function (event) {
-    const id = event.target.getAttribute('data-id');
-    localStorage.setItem('homeinfo.system', JSON.stringify(id));
-    window.location = 'application.html';
-};
-
-
-
-/*
-    Opens the deploying view.
-*/
-termgr.deploySystem = function (event) {
-    const id = event.target.getAttribute('data-id');
-    localStorage.setItem('homeinfo.system', JSON.stringify(id));
-    window.location = 'deploy.html';
-};
-
-
-/*
-    Reloads the systems.
-*/
-function reload () {
-    return termgr.getSystems().then(termgr.listFilteredSystems);
-}
-
-
-/*
     Initialize manage.html.
 */
 function init () {
-    reload();
-    const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.listFilteredSystems), false);
-    const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(reload), false);
+    const id = JSON.parse(localStorage.getItem('homeinfo.system'));
+    const btnEnable = document.getElementById('enable');
+    btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, id), false);
+    const btnDisable = document.getElementById('disable');
+    btnDisable.addEventListener('click', termgr.partial(termgr.disableApplication, id), false);
+    const systemId = document.getElementById('system');
+    systemId.textContent = id;
 }
 
 

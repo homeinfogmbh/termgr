@@ -21,19 +21,7 @@
 'use strict';
 
 
-let termgr = termgr || {};
-
-
-termgr.INVALID_CREDENTIALS = function () {
-    alert('Ungültiger Benutzername und / oder Passwort.');
-};
-
-
-termgr.UNAUTHORIZED = function (what) {
-    return function () {
-        alert('Sie sind nicht berechtigt, ' + what + '.');
-    };
-};
+var termgr = termgr || {};
 
 
 /*
@@ -63,10 +51,9 @@ termgr.addressToString = function (address) {
 termgr.getSystems = function () {
     return termgr.makeRequest('GET', termgr.BASE_URL + '/list').then(
         function (response) {
-            termgr.SYSTEMS = response.json;
-        }, function () {
-            alert('Bitte kontrollieren Sie Ihren Benutzernamen und Ihr Passwort oder versuchen Sie es später noch ein Mal.');
-        }
+            localStorage.setItem('homeinfo.systems', JSON.stringify(response.json));
+        },
+        termgr.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
     );
 };
 
@@ -119,11 +106,7 @@ termgr.listSystems = function (systems) {
 /*
     Filters customers and terminals and lists them.
 */
-termgr.listFilteredSystems = function (event) {
-    if (event != null) {
-        event.preventDefault();
-    }
-
+termgr.listFilteredSystems = function () {
     const searchValue = document.getElementById('searchField').value;
     let keywords = null;
 
@@ -131,11 +114,13 @@ termgr.listFilteredSystems = function (event) {
         keywords = searchValue.split();
     }
 
+    const systems = JSON.parse(localStorage.getItem('homeinfo.systems'));
+
     if (keywords != null) {
-        const systems = Array.from(termgr.filterSystems(termgr.SYSTEMS, keywords));
+        const systems = Array.from(termgr.filterSystems(systems, keywords));
         termgr.listSystems(systems);
     } else {
-        termgr.listSystems(termgr.SYSTEMS);
+        termgr.listSystems(systems);
     }
 };
 
@@ -165,9 +150,7 @@ termgr.beep = function (system) {
         function () {
             alert('Das Terminal sollte gepiept haben.');
         },
-        function () {
-            alert('Das Terminal konnte nicht zum Piepen gebracht werden.');
-        }
+        termgr.checkSession('Das Terminal konnte nicht zum Piepen gebracht werden.')
     );
 };
 
@@ -190,7 +173,7 @@ termgr.reboot = function (system) {
                 message = 'Auf dem Terminal werden aktuell administrative Aufgaben ausgeführt.';
             }
 
-            alert(message);
+            return termgr.checkSession(message)(response);
         }
     );
 };
@@ -199,7 +182,7 @@ termgr.reboot = function (system) {
 /*
     Enables the application.
 */
-termgr.toggleApplication = function (system) {
+termgr.enableApplication = function (system) {
     const payload = {'system': system};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
@@ -207,9 +190,7 @@ termgr.toggleApplication = function (system) {
         function () {
             alert('Digital Signage Anwendung wurde aktiviert.');
         },
-        function () {
-            alert('Digital Signage Anwendung konnte nicht aktiviert werden.');
-        }
+        termgr.checkSession('Digital Signage Anwendung konnte nicht aktiviert werden.')
     );
 };
 
@@ -225,19 +206,8 @@ termgr.disableApplication = function (system) {
         function () {
             alert('Digital Signage Anwendung wurde deaktiviert.');
         },
-        function () {
-            alert('Digital Signage Anwendung konnte nicht deaktiviert werden.');
-        }
+        termgr.checkSession('Digital Signage Anwendung konnte nicht deaktiviert werden.')
     );
-};
-
-
-/*
-    Opens the deploying view.
-*/
-termgr.deploySystem = function (event) {
-    const id = event.target.getAttribute('data-id');
-    window.location = 'deploy.html?id=' + id;
 };
 
 
@@ -252,9 +222,7 @@ termgr.deploy = function (system, address) {
         function () {
             alert('Terminal wurde als "verbaut" markiert.');
         },
-        function () {
-            alert('Das Terminal konnte nicht als "verbaut" markiert werden.');
-        }
+        termgr.checkSession('Das Terminal konnte nicht als "verbaut" markiert werden.')
     );
 };
 
@@ -270,8 +238,6 @@ termgr.sync = function (system) {
         function () {
             alert('Terminal wurde synchronisiert.');
         },
-        function () {
-            alert('Das Terminal konnte nicht synchronisiert werden.');
-        }
+        termgr.checkSession('Das Terminal konnte nicht synchronisiert werden.')
     );
 };

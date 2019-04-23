@@ -21,10 +21,10 @@
 'use strict';
 
 
-let termgr = termgr ||  {};
+var termgr = termgr ||  {};
 
 termgr.BASE_URL = 'https://termgr.homeinfo.de';
-termgr.SYSTEMS = [];
+termgr.UNHANDLED_ERROR = 'Unbehandelter Fehler. Bitte kontaktieren Sie uns.';
 
 
 /*
@@ -86,4 +86,19 @@ termgr.makeRequest = function (method, url, data = null, headers = {}) {
     }
 
     return new Promise(executor);
+};
+
+
+/*
+    Function to make a request and display an error message on error.
+*/
+termgr.checkSession = function (message) {
+    return function (response) {
+        if (response.status == 401 || response.message == 'Session expired.') {
+            alert('Sitzung abgelaufen.');
+            window.location = 'index.html';
+        } else {
+            alert(message);
+        }
+    };
 };

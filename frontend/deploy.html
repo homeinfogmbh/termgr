@@ -21,38 +21,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Terminal Manager</title>
   <link rel="stylesheet" href="css/w3.css">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
   <link rel="stylesheet" href="css/termgr.css">
   <script src="js/common.js"></script>
-  <script src="js/dom.js"></script>
   <script src="js/functions.js"></script>
-  <script src="js/manage.js"></script>
+  <script src="js/deploy.js"></script>
 </head>
 
 <div class="w3-container w3-teal">
-  <h1>Terminal Manager</h1>
+  <h1>Toggle application on system #<span id="system">ID</span></h1>
 </div>
 
 <br/>
 
 <form class="w3-container">
-  <div class="w3-row">
-    <div class="w3-col s7">
-      <input type="text" class="w3-input" id="searchField" placeholder="Filter...">
+  <div class="w3-row w3-center">
+    <div class="w3-col l3 s12">
+      <input id="street" type="text" class="w3-input" placeholder="Straße" required>
     </div>
-    <div class="w3-col s3">
-      <button id="filter" type="submit" class="w3-button w3-green">Filter</button>
+    <div class="w3-col l3 s12">
+      <input id="houseNumber" type="text" class="w3-input" placeholder="Hausnummer" required>
     </div>
-    <div class="w3-col s2">
-      <button id="filter" type="reload" class="w3-button w3-blue">
-        <i class="fa fa-sync-alt"></i>
-      </button>
+    <div class="w3-col l3 s12">
+      <input id="zipCode" type="text" class="w3-input" placeholder="PLZ" required>
+    </div>
+    <div class="w3-col l3 s12">
+      <input id="city" type="text" class="w3-input" placeholder="Ort" required>
+    </div>
+  </div>
+  <div class="w3-row w3-center">
+    <div class="w3-col s6">
+      <select id="customer" class="w3-input" required>
+    </div>
+    <div class="w3-col s6">
+      <button id="deploy" type="submit" class="w3-button w3-green">Festlegen</button>
     </div>
   </div>
 </form>
 
-<br/>
-<div id="systems" class="w3-container"></div>
 <br/>
 
 <div class="w3-container w3-teal">

@@ -21,7 +21,7 @@
 'use strict';
 
 
-let termgr = termgr || {};
+var termgr = termgr || {};
 
 /*
     Performs the initial login.

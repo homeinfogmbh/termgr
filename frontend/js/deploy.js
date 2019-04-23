@@ -25,39 +25,18 @@ var termgr = termgr || {};
 
 
 /*
-    Navigates to the toggle application page.
+    Gets list of available customers.
 */
-termgr.toggleApplication = function (event) {
-    const id = event.target.getAttribute('data-id');
-    localStorage.setItem('homeinfo.system', JSON.stringify(id));
-    window.location = 'application.html';
-};
-
-
-
-/*
-    Opens the deploying view.
-*/
-termgr.deploySystem = function (event) {
-    const id = event.target.getAttribute('data-id');
-    localStorage.setItem('homeinfo.system', JSON.stringify(id));
-    window.location = 'deploy.html';
-};
-
-
-/*
-    Reloads the systems.
-*/
-function reload () {
-    return termgr.getSystems().then(termgr.listFilteredSystems);
+function getCustomers () {
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/customers');
 }
 
 
 /*
-    Initialize manage.html.
+    Initialize deploy.html.
 */
 function init () {
-    reload();
+    getCustomers.then(renderCustomers);
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', termgr.partial(termgr.listFilteredSystems), false);
     const btnReload = document.getElementById('reload');
