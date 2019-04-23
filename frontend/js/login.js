@@ -1,5 +1,5 @@
 /*
-    termgr.js - Terminal Manager front end JavaScript library.
+    termgr.js - Terminal Manager login handling.
 
     (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -23,17 +23,25 @@
 
 var termgr = termgr || {};
 
+
 /*
     Performs the initial login.
 */
-termgr.login = function (event) {
+termgr.doLogin = function (event) {
     event.preventDefault();
-    const account = document.getElementById('userName').value;
+    const account = document.getElementById('account').value;
     const passwd = document.getElementById('passwd').value;
-    const payload = {'account': account, 'passwd': passwd};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', 'https://his.homeinfo.de/session', data, headers).then(
+    const storeCredentials = document.getElementById('storeCredentials').checked;
+
+    if (storeCredentials) {
+        localStorage.setItem('termgr.account', account);
+        localStorage.setItem('termgr.passwd', passwd);
+    } else {
+        localStorage.removeItem('termgr.account');
+        localStorage.removeItem('termgr.passwd');
+    }
+
+    return termgr.login(account, passwd).then(
         function () {
             window.location = 'manage.html';
         },
@@ -49,7 +57,7 @@ termgr.login = function (event) {
 */
 function init () {
     const loginButton = document.getElementById('login');
-    loginButton.addEventListener('click', termgr.login, false);
+    loginButton.addEventListener('click', termgr.doLogin, false);
 }
 
 

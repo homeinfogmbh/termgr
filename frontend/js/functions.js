@@ -1,5 +1,5 @@
 /*
-    termgr.js - Terminal Manager front end JavaScript library.
+    termgr.js - Terminal Manager functions library.
 
     (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -85,6 +85,24 @@ termgr.loadSystems = function () {
     }
 
     return JSON.parse(raw);
+};
+
+
+/*
+    Performs a login.
+*/
+termgr.login = function (account, passwd) {
+    const payload = {'account': account, 'passwd': passwd};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', 'https://his.homeinfo.de/session', data, headers).then(
+        function () {
+            window.location = 'manage.html';
+        },
+        function () {
+            alert('Ungültiger Benutzername und / oder Passwort.');
+        }
+    );
 };
 
 

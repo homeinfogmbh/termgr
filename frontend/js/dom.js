@@ -1,5 +1,5 @@
 /*
-    termgr.js - Terminal Manager front end JavaScript library.
+    termgr.js - Terminal Manager DOM library.
 
     (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
 

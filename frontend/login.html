@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="css/w3.css">
   <link rel="stylesheet" href="css/termgr.css">
   <script src="js/common.js"></script>
-  <script src="js/autologin.js"></script>
+  <script src="js/login.js"></script>
 </head>
 
 <div class="w3-container w3-teal">
@@ -35,6 +35,8 @@
 <form class="w3-container">
   <input type="text" class="w3-input" id="userName" placeholder="Benutzername" required>
   <input type="password" class="w3-input" id="passwd" placeholder="Passwort" required>
+  <input id="storeCredentials" class="w3-check" type="checkbox">
+  <label>Sugar</label>
   <br/>
   <button id="login" type="submit" class="w3-button w3-green">Anmelden</button>
 </form>

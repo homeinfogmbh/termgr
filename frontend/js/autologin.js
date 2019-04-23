@@ -1,5 +1,5 @@
 /*
-    termgr.js - Terminal Manager application toggleing.
+    autologin.js - Terminal Manager automatic login.
 
     (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -25,16 +25,24 @@ var termgr = termgr || {};
 
 
 /*
-    Initialize manage.html.
+    Initialize index.html.
 */
 function init () {
-    const id = JSON.parse(localStorage.getItem('termgr.system'));
-    const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, id), false);
-    const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', termgr.partial(termgr.disableApplication, id), false);
-    const systemId = document.getElementById('system');
-    systemId.textContent = id;
+    const account = localStorage.get('termgr.account');
+    const passwd = localStorage.get('termgr.passwd');
+
+    if (account == null || passwd == null) {
+        window.location = 'login.html';
+    } else {
+        termgr.login(account, passwd).then(
+            function () {
+                window.location = 'manage.html';
+            },
+            function () {
+                window.location = 'login.html';
+            }
+        );
+    }
 }
 
 
