@@ -60,15 +60,14 @@ def get_address():
     if address is None:
         return None
 
-    address = dict(address)
     missing_keys = set()
-    address = []
+    result = []
 
     for key in ('street', 'houseNumber', 'zipCode', 'city'):
         value = address.pop(key, None)
 
         if value:
-            address.append(value)
+            result.append(value)
         else:
             missing_keys.add(key)
 
@@ -80,7 +79,7 @@ def get_address():
         json = {'message': 'Superfluous keys.', 'keys': tuple(address)}
         raise JSON(json, status=400)
 
-    return tuple(address)
+    return tuple(result)
 
 
 def admin(function):
