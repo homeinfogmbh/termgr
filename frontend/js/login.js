@@ -51,3 +51,6 @@ function init () {
     const loginButton = document.getElementById('login');
     loginButton.addEventListener('click', termgr.login, false);
 }
+
+
+document.addEventListener('DOMContentLoaded', init);

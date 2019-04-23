@@ -65,3 +65,6 @@ function init () {
     const btnReload = document.getElementById('reload');
     btnReload.addEventListener('click', termgr.partial(reload), false);
 }
+
+
+document.addEventListener('DOMContentLoaded', init);

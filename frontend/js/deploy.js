@@ -24,8 +24,7 @@
 var termgr = termgr || {};
 
 
-function deploy () {
-    const system = JSON.parse(localStorage.getItem('termgr.system'));
+function deploy (system) {
     const customerSelect = document.getElementById('customer');
     const customer = customerSelect.options[customerSelect.selectedIndex].value;
     const street = document.getElementById('street').value.trim();
@@ -73,5 +72,8 @@ function init () {
     );
     Promise.all([getCustomers, getConnections, getTypes]).then(termgr.stopLoading);
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', termgr.partial(deploy), false);
+    btnDeploy.addEventListener('click', termgr.partial(deploy, id), false);
 }
+
+
+document.addEventListener('DOMContentLoaded', init);
