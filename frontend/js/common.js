@@ -1,7 +1,7 @@
 /*
-    termgr.js - Terminal Manager common JavaScript library.
+    common.js - Terminal Manager common JavaScript library.
 
-    (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -101,13 +101,4 @@ termgr.checkSession = function (message) {
             alert(message);
         }
     };
-};
-
-
-/*
-    Returns the respective URL argument.
-*/
-termgr.getArg = function (key) {
-    const url = new URL(window.location.href);
-    return url.searchParams.get(key);
 };

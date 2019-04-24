@@ -1,7 +1,7 @@
 /*
-    termgr.js - Terminal Manager functions library.
+    functions.js - Terminal Manager functions library.
 
-    (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,41 +22,6 @@
 
 
 var termgr = termgr || {};
-
-
-/*
-    Case-insensitively returns the index of the substring.
-*/
-termgr.indexOf = function (haystack, needle) {
-    if (! haystack) {
-        return false;
-    }
-
-    return haystack.toLowerCase().indexOf(needle.toLowerCase());
-};
-
-
-/*
-    Returns the respective address as a one-line string.
-*/
-termgr.addressToString = function (address) {
-    if (typeof address == 'string') {
-        return address;
-    }
-
-    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
-};
-
-
-/*
-    Highlights a substring.
-*/
-termgr.highlight = function (string, index, length) {
-    const head = string.substring(0, index);
-    const match = string.substr(index, length);
-    const tail = string.substring(index + length, string.length);
-    return head + '<b>' + match + '</b>' + tail;
-};
 
 
 /*
@@ -166,68 +131,6 @@ termgr.getTypes = function () {
 
 
 /*
-    Filters the provided system by the respective keywords.
-*/
-termgr.filterSystems = function* (systems, keywords) {
-    for (const system of systems) {
-        let deployment = system.deployment;
-
-        for (const keyword of keywords) {
-            // Exact ID match.
-            if (keyword.startsWith('#')) {
-                const fragments = keyword.split('#');
-                const id = parseInt(fragment[1]);
-
-                if (system.id == id) {
-                    yield system;
-                }
-
-                continue;
-            }
-
-            if (deployment != null) {
-                const length = keyword.length;
-                const copy = JSON.parse(JSON.stringify(system));
-                let match = false;
-
-                // Customer ID.
-                const customerID = '' + deployment.customer.id;
-                const indexCustomerID = termgr.indexOf(customerID, keyword);
-
-                if (indexCustomerID >= 0) {
-                    copy.deployment.customer.id = termgr.highlight(customerID, indexCustomerID, length);
-                    match = true;
-                }
-
-                // Customer name.
-                const customerName = deployment.customer.company.name;
-                const indexCustomerName = termgr.indexOf(customerName, keyword);
-
-                if (indexCustomerName >= 0) {
-                    copy.deployment.customer.company.name = termgr.highlight(customerName, indexCustomerName, length);
-                    match = true;
-                }
-
-                // Address.
-                const address = termgr.addressToString(deployment.address);
-                const indexAddress = termgr.indexOf(address, keyword);
-
-                if (indexAddress >= 0) {
-                    copy.deployment.address = termgr.highlight(address, indexAddress, length);
-                    match = true;
-                }
-
-                if (match) {
-                    yield copy;
-                    break;
-                }
-            }
-        }
-    }
-};
-
-
-/*
     Lists the respective systems.
 */
 termgr.listSystems = function (systems) {
@@ -290,28 +193,6 @@ termgr.renderTypes = function (types) {
 
 
 /*
-    Filters systems.
-*/
-termgr.listFilteredSystems = function () {
-    const searchValue = document.getElementById('searchField').value;
-    let keywords = null;
-
-    if (searchValue.length > 0) {
-        keywords = searchValue.split();
-    }
-
-    let systems = termgr.loadSystems();
-
-    if (keywords != null) {
-        systems = Array.from(termgr.filterSystems(systems, keywords));
-        termgr.listSystems(systems);
-    } else {
-        termgr.listSystems(systems);
-    }
-};
-
-
-/*
     Function to wrap a function and disable default events.
 */
 termgr.partial = function (func, ...args) {
@@ -366,6 +247,15 @@ termgr.reboot = function (system) {
 
 
 /*
+    Navigates to the toggle application page.
+*/
+termgr.toggleApplication = function (id) {
+    localStorage.setItem('termgr.system', JSON.stringify(id));
+    window.location = 'application.html';
+};
+
+
+/*
     Enables the application.
 */
 termgr.enableApplication = function (system) {
@@ -410,6 +300,16 @@ termgr.sync = function (system) {
         },
         termgr.checkSession('Das System konnte nicht synchronisiert werden.')
     );
+};
+
+
+
+/*
+    Opens the deploying view.
+*/
+termgr.deploySystem = function (id) {
+    localStorage.setItem('termgr.system', JSON.stringify(id));
+    window.location = 'deploy.html';
 };
 
 

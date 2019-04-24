@@ -1,7 +1,7 @@
 /*
-    termgr.js - Terminal Manager systems listing.
+    manage.js - Terminal Manager systems listing.
 
-    (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,25 +22,6 @@
 
 
 var termgr = termgr || {};
-
-
-/*
-    Navigates to the toggle application page.
-*/
-termgr.toggleApplication = function (event) {
-    const system = event.target.getAttribute('data-id');
-    window.location = 'application.html?system=' + system;
-};
-
-
-
-/*
-    Opens the deploying view.
-*/
-termgr.deploySystem = function (event) {
-    const system = event.target.getAttribute('data-id');
-    window.location = 'deploy.html?system=' + system;
-};
 
 
 /*

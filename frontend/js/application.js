@@ -1,7 +1,7 @@
 /*
-    termgr.js - Terminal Manager application toggleing.
+    application.js - Terminal Manager application toggleing.
 
-    (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ var termgr = termgr || {};
     Initialize manage.html.
 */
 function init () {
-    const id = parseInt(termgr.getArg('system'));
+    const id = JSON.parse(localStorage.getItem('termgr.system'));
     const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, id), false);
     const btnDisable = document.getElementById('disable');

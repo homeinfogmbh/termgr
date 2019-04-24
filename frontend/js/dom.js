@@ -1,7 +1,7 @@
 /*
-    termgr.js - Terminal Manager DOM library.
+    dom.js - Terminal Manager DOM library.
 
-    (C) 2018 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ termgr.systemEntry = function (system) {
     let customer = 'Kein Kunde';
 
     if (deployment != null) {
-        address = termgr.addressToString(deployment.address);
+        address = deployment.address;
         customer = deployment.customer.company.name + ' (' + deployment.customer.id + ')';
     }
 
@@ -69,7 +69,7 @@ termgr.systemEntry = function (system) {
     const btnDeploy = document.createElement('button');
     btnDeploy.setAttribute('class', 'w3-button w3-teal w3-col s2');
     btnDeploy.setAttribute('data-id', system.id);
-    btnDeploy.addEventListener('click', termgr.deploySystem);
+    btnDeploy.addEventListener('click', termgr.partial(termgr.deploySystem, system.id), false);
     btnReboot.setAttribute('title', 'Verbauen');
     btnDeploy.appendChild(btnDeployIcon);
 
@@ -79,7 +79,7 @@ termgr.systemEntry = function (system) {
     const btnEnableApplication = document.createElement('button');
     btnEnableApplication.setAttribute('class', 'w3-button w3-khaki w3-col s2');
     btnEnableApplication.setAttribute('data-id', system.id);
-    btnEnableApplication.addEventListener('click', termgr.toggleApplication);
+    btnEnableApplication.addEventListener('click', termgr.partial(termgr.toggleApplication, system.id), false);
     btnReboot.setAttribute('title', 'Digital Signage Modus umschalten');
     btnEnableApplication.appendChild(btnEnableApplicationIcon);
 
