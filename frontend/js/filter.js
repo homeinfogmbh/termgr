@@ -62,8 +62,9 @@ termgr.filterSystems = function* (systems, keyword) {
 
             if (system.id == id) {
                 yield system;
-                continue;
             }
+
+            continue;
         }
 
         let deployment = system.deployment;
