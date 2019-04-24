@@ -33,7 +33,7 @@ termgr.systemEntry = function (system) {
     let customer = 'Kein Kunde';
 
     if (deployment != null) {
-        address = deployment.address;
+        address = termgr.addressToString(deployment.address);
         customer = deployment.customer.company.name + ' (' + deployment.customer.id + ')';
     }
 

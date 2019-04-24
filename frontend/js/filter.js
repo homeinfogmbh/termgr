@@ -24,23 +24,15 @@
 var termgr = termgr || {};
 
 
-termgr.FILTER_PATHS = [
-    ['id'],
-    ['deployment', 'customer', 'id'],
-    ['deployment', 'customer', 'company', 'name'],
-    ['deployment', 'address'],
-];
-
-
 /*
     Case-insensitively returns the index of the substring.
 */
-termgr.indexOf = function (haystack, needle) {
+termgr.includesIgnoreCase = function (haystack, needle) {
     if (! haystack) {
         return false;
     }
 
-    return haystack.toLowerCase().indexOf(needle.toLowerCase());
+    return haystack.toLowerCase().includes(needle.toLowerCase());
 };
 
 
@@ -48,49 +40,7 @@ termgr.indexOf = function (haystack, needle) {
     Returns the respective address as a one-line string.
 */
 termgr.addressToString = function (address) {
-    if (typeof address == 'string') {
-        return address;
-    }
-
     return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
-};
-
-
-/*
-    Highlights a substring.
-*/
-termgr.highlight = function (string, index, length) {
-    const head = string.substring(0, index);
-    const match = string.substr(index, length);
-    const tail = string.substring(index + length, string.length);
-    return head + '<b>' + match + '</b>' + tail;
-};
-
-
-/*
-    Matches a search path on an object.
-*/
-termgr.matchPath = function (obj, path, keyword) {
-    let parent, node;
-
-    for (node of path) {
-        parent = obj;
-        obj = obj[node];
-
-        if (obj == null) {
-            return false;
-        }
-    }
-
-    const string = '' + obj;
-    const index = termgr.indexOf(string, keyword);
-
-    if (index >= 0) {
-        parent[node] = termgr.highlight(string, index, keyword.length);
-        return true;
-    }
-
-    return false;
 };
 
 
@@ -99,20 +49,48 @@ termgr.matchPath = function (obj, path, keyword) {
 */
 termgr.filterSystems = function* (systems, keyword) {
     for (const system of systems) {
-        let match = false;
-        let copy = JSON.parse(JSON.stringify(system));
-
-        // Prepare address as string.
-        if (copy.deployment != null) {
-            copy.deployment.address = termgr.addressToString(copy.deployment.address);
+        // Yield any copy on empty keyword.
+        if (keyword == null || keyword == '') {
+            yield system;
+            continue;
         }
 
-        for (const path of termgr.FILTER_PATHS) {
-            match = match | termgr.matchPath(copy, path, keyword);
+        // Exact ID matching.
+        if (keyword.startsWith('#')) {
+            let fragments = keyword.split('#');
+            let id = parseInt(fragments[1]);
+
+            if (system.id == id) {
+                yield system;
+                continue;
+            }
         }
 
-        if (match) {
-            yield copy;
+        let deployment = system.deployment;
+
+        if (deployment == null) {
+            continue;
+        }
+
+        let cid = '' + deployment.customer.id;
+
+        if (termgr.includesIgnoreCase(cid, keyword)) {
+            yield system;
+            continue;
+        }
+
+        let customerName = deployment.customer.company.name;
+
+        if (termgr.includesIgnoreCase(customerName, keyword)) {
+            yield system;
+            continue;
+        }
+
+        let address = termgr.addressToString(deployment.address);
+
+        if (termgr.includesIgnoreCase(address, keyword)) {
+            yield system;
+            continue;
         }
     }
 };
@@ -122,19 +100,7 @@ termgr.filterSystems = function* (systems, keyword) {
     Filters systems.
 */
 termgr.listFilteredSystems = function () {
-    const searchValue = document.getElementById('searchField').value;
-    let keywords = null;
-
-    if (searchValue.length > 0) {
-        keywords = searchValue.split();
-    }
-
-    let systems = termgr.loadSystems();
-
-    if (keywords != null) {
-        systems = Array.from(termgr.filterSystems(systems, keywords));
-        termgr.listSystems(systems);
-    } else {
-        termgr.listSystems(systems);
-    }
+    const keyword = document.getElementById('searchField').value;
+    const systems = Array.from(termgr.filterSystems(termgr.loadSystems(), keyword));
+    termgr.listSystems(systems);
 };
