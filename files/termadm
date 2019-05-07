@@ -10,7 +10,8 @@
 
 Usage:
     termadm add [options]
-    termadm deploy <id> <street> <house_number> <zip_code> <city> [<customer>]
+    termadm deploy <id> <street> <house_number> <zip_code> <city> \
+[<customer>] [<type>]
     termadm undeploy <id>
     termadm notify [<account>...]
     termadm reload
@@ -40,6 +41,7 @@ from terminallib import Deployment
 from terminallib import OpenVPN
 from terminallib import OperatingSystem
 from terminallib import System
+from terminallib import Type
 from terminallib import WireGuard
 
 from termgr.config import LOG_FORMAT
@@ -94,6 +96,19 @@ def _get_customer(string):
         return function()
     except Customer.DoesNotExist:
         LOGGER.error('No such customer: %i.', string)
+        exit(2)
+
+
+def _get_type(string):
+    """Returns the respective type."""
+
+    if string is None:
+        return None
+
+    try:
+        return Type(string)
+    except ValueError:
+        LOGGER.error('No such type: %i.', string)
         exit(2)
 
 
@@ -185,19 +200,25 @@ def deploy(options):
 
     system = _get_system(options['<id>'])
     customer = _get_customer(options['<customer>'])
+    typ = _get_type(options['<type>'])
     street = options['<street>']
     house_number = options['<house_number>']
     zip_code = options['<zip_code>']
     city = options['<city>']
     address = Address.add_by_address((street, house_number, zip_code, city))
     address.save()
+    select = Deployment.address == address
+
+    if customer is not None:
+        select &= Deployment.customer == customer
+
+    if typ is not None:
+        select &= Deployment.type == typ
 
     try:
-        deployment = Deployment.get(
-            (Deployment.customer == customer)
-            & (Deployment.address == address))
+        deployment = Deployment.get(select)
     except Deployment.DoesNotExist:
-        deployment = Deployment(customer=customer, address=address)
+        deployment = Deployment(customer=customer, type=typ, address=address)
         deployment.save()
 
     if system.relocate(deployment):
