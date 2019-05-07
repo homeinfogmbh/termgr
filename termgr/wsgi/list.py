@@ -39,7 +39,8 @@ def get_customers():
 def list_systems():
     """Lists the available systems."""
 
-    return JSON([system.to_json(cascade=True) for system in get_systems()])
+    return JSON([
+        system.to_json(cascade=True, brief=True) for system in get_systems()])
 
 
 @authenticated
