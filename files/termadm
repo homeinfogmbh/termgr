@@ -3,7 +3,7 @@
 
   Command line tool to administer HOMEINFO terminals.
 
-  (C) 2015-2016:  HOMEINFO - Digitale Informationssysteme GmbH
+  (C) 2015-2019:  HOMEINFO - Digitale Informationssysteme GmbH
 
   Maintainer:     Richard Neumann <r.neumann@homeinfo.de>
 
@@ -26,7 +26,6 @@ Options:
     -h --help                   Show this screen.
 """
 from functools import partial
-from getpass import getuser
 from logging import INFO, basicConfig, getLogger
 from os import geteuid
 from sys import exit as exit_
@@ -44,7 +43,6 @@ from terminallib import System
 from terminallib import WireGuard
 
 from termgr.config import LOG_FORMAT
-from termgr.notify import notify_accounts
 
 
 LOGGER = getLogger(__file__)
@@ -219,23 +217,6 @@ def undeploy(options):
     exit(1)
 
 
-def notify(options):
-    """Notifies the respective users."""
-
-    if getuser() != TERMGR_USER and geteuid() != 0:
-        # Because only termgr and root can read the certificates.
-        LOGGER.error('You must be termgr or root to notify users.')
-        exit(3)
-
-    if options['<account>']:
-        accounts = tuple(_get_accounts(options['<account>']))
-    else:
-        accounts = None
-
-    notify_accounts(accounts=accounts)
-    exit(0)
-
-
 @script
 def main(options):
     """Runs the terminal administration CLI."""
@@ -257,8 +238,6 @@ def main(options):
         undeploy(options)
     elif options['reload']:
         update_config()
-    elif options['notify']:
-        notify(options)
 
     exit(0)
 
