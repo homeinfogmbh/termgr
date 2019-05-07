@@ -40,15 +40,14 @@ def list_systems():
     """Lists the available systems."""
 
     return JSON([
-        system.to_json(cascade=True, brief=True) for system in get_systems()])
+        system.to_json(cascade=2, brief=True) for system in get_systems()])
 
 
 @authenticated
 def list_customers():
     """Groups the respective terminals by customers."""
 
-    return JSON([
-        customer.to_json(company=True) for customer in get_customers()])
+    return JSON([customer.to_json(cascade=1) for customer in get_customers()])
 
 
 @authenticated
