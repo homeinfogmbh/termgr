@@ -40,7 +40,7 @@ def list_systems():
     """Lists the available systems."""
 
     return JSON([
-        system.to_json(cascade=3, brief=True) for system in get_systems()])
+        system.to_json(cascade=2, brief=True) for system in get_systems()])
 
 
 @authenticated
