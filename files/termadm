@@ -223,13 +223,6 @@ def main(options):
 
     basicConfig(level=INFO, format=LOG_FORMAT)
 
-    # Bail out iff reload of services
-    # is required, but we are not root.
-    if options['add'] or options['deploy'] or options['undeploy']:
-        if not options['--no-reload'] and geteuid() != 0:
-            LOGGER.error('You must be root to update the related services.')
-            exit(3)
-
     if options['add']:
         add(options)
     elif options['deploy']:
@@ -237,6 +230,10 @@ def main(options):
     elif options['undeploy']:
         undeploy(options)
     elif options['reload']:
+        if geteuid() != 0:
+            LOGGER.error('You must be root to update the related services.')
+            exit(3)
+
         update_config()
 
     exit(0)
