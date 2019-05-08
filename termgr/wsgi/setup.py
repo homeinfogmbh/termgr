@@ -56,7 +56,7 @@ def set_serial_number(system):
 
     system.serial_number = serial_number or None  # Delete iff empty.
     system.save()
-    return 'Set serial number to "{}".'.format(system.serial_number)
+    return f'Set serial number to "{system.serial_number}".'
 
 
 ROUTES = (
