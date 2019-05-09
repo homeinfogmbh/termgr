@@ -65,7 +65,7 @@ function init () {
     ];
 
     for (const radioButton of radioButtons) {
-        radioButton.addEventListener('click', filter, false);
+        radioButton.addEventListener('change', termgr.partial(filter), false);
     }
 }
 
