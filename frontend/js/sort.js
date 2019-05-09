@@ -27,7 +27,7 @@ var termgr = termgr || {};
 /*
     Returns a compare function.
 */
-termgr.getCompareFunction = function (alice, bob) {
+termgr.compareSystems = function (alice, bob) {
     const desc = document.getElementById('sortDesc').checked;
     console.log('Sorting ' + (desc ? 'descending' : 'ascending'));
     const byId = document.getElementById('sortById').checked;
@@ -76,7 +76,6 @@ termgr.getCompareFunction = function (alice, bob) {
 */
 termgr.sorted = function (systems) {
     systems = Array.from(systems);
-    const compareFunction = termgr.getCompareFunction();
-    systems.sort(compareFunction);
+    systems.sort(termgr.compareSystems);
     return systems;
 };
