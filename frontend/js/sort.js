@@ -27,47 +27,47 @@ var termgr = termgr || {};
 /*
     Returns a compare function.
 */
-termgr.compareSystems = function (alice, bob) {
+termgr.compareSystems = function () {
     const desc = document.getElementById('sortDesc').checked;
-    console.log('Sorting ' + (desc ? 'descending' : 'ascending'));
     const byId = document.getElementById('sortById').checked;
-    console.log('Sorting by ' + (byId ? 'ID' : 'address'));
     const factor = desc ? -1 : 1;
-    let value = 0;
 
-    if (byId) {
-        if (alice.id > bob.id) {
-            value = 1;
-        } else if (bob.id > alice.id) {
-            value = -1;
-        }
-    } else {
-        const deploymentA = alice.deployment;
-        const deploymentB = bob.deployment;
+    return function (alice, bob) {
+        let value = 0;
 
-        if (deploymentA == null) {
-            if (deploymentB == null) {
-                value = 0;
-            }
-
-            value = Infinity;
-        } else if (deploymentB == null) {
-            value = -Infinity;
-        } else {
-            const addressA = termgr.addressToString(deploymentA.address);
-            const addressB = termgr.addressToString(deploymentB.address);
-
-            if (addressA > addressB) {
+        if (byId) {
+            if (alice.id > bob.id) {
                 value = 1;
-            } else if (addressB > addressA) {
+            } else if (bob.id > alice.id) {
                 value = -1;
             }
-        }
-    }
+        } else {
+            const deploymentA = alice.deployment;
+            const deploymentB = bob.deployment;
 
-    value = factor * value;
-    console.log('Sorting value: ' + value);
-    return value;
+            if (deploymentA == null) {
+                if (deploymentB == null) {
+                    value = 0;
+                }
+
+                value = Infinity;
+            } else if (deploymentB == null) {
+                value = -Infinity;
+            } else {
+                const addressA = termgr.addressToString(deploymentA.address);
+                const addressB = termgr.addressToString(deploymentB.address);
+
+                if (addressA > addressB) {
+                    value = 1;
+                } else if (addressB > addressA) {
+                    value = -1;
+                }
+            }
+        }
+
+        value = factor * value;
+        return value;
+    };
 };
 
 
@@ -76,6 +76,7 @@ termgr.compareSystems = function (alice, bob) {
 */
 termgr.sorted = function (systems) {
     systems = Array.from(systems);
-    systems.sort(termgr.compareSystems);
+    const compareFunction = termgr.getCompareFunction();
+    systems.sort(compareFunction);
     return systems;
 };
