@@ -57,8 +57,16 @@ function init () {
     btnFilter.addEventListener('click', termgr.partial(filter), false);
     const btnReload = document.getElementById('reload');
     btnReload.addEventListener('click', termgr.partial(reload), false);
-    const btnSort = document.getElementById('sort');
-    btnSort.addEventListener('click', termgr.partial(filter), false);
+    const radioButtons = [
+        document.getElementById('sortAsc'),
+        document.getElementById('sortDesc'),
+        document.getElementById('sortById'),
+        document.getElementById('sortByAddress')
+    ];
+
+    for (const radioButton of radioButtons) {
+        radioButton.addEventListener('click', termgr.partial(filter), false);
+    }
 }
 
 
