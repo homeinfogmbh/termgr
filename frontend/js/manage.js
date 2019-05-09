@@ -29,7 +29,21 @@ var termgr = termgr || {};
 */
 function reload () {
     termgr.startLoading();
-    return termgr.getSystems().then(termgr.listFilteredSystems).then(termgr.stopLoading);
+    return termgr.getSystems().then(filter).then(termgr.stopLoading);
+}
+
+
+/*
+    Filters, sorts and renders systems.
+*/
+function filter (systems) {
+    if (systems == null) {
+        systems = termgr.loadSystems();
+    }
+
+    systems = termgr.filtered(systems);
+    systems = termgr.sorted(systems);
+    termgr.listSystems(systems);
 }
 
 
@@ -40,9 +54,11 @@ function init () {
     termgr.startLoading();
     reload().then(termgr.stopLoading);
     const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.listFilteredSystems), false);
+    btnFilter.addEventListener('click', termgr.partial(filter), false);
     const btnReload = document.getElementById('reload');
     btnReload.addEventListener('click', termgr.partial(reload), false);
+    const btnSort = document.getElementById('sort');
+    btnSort.addEventListener('click', termgr.partial(filter), false);
 }
 
 

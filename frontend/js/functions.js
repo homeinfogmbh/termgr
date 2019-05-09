@@ -22,6 +22,7 @@
 
 
 var termgr = termgr || {};
+termgr.STORAGE_KEY = 'termgr.systems';
 
 
 /*
@@ -50,7 +51,9 @@ termgr.stopLoading = function () {
     Stores the systems in local storage.
 */
 termgr.storeSystems = function (systems) {
-    return localStorage.setItem('termgr.systems', JSON.stringify(systems));
+    systems = Array.from(systems);
+    const json = JSON.stringify(systems);
+    return localStorage.setItem(termgr.STORAGE_KEY, json);
 };
 
 
@@ -58,7 +61,7 @@ termgr.storeSystems = function (systems) {
     Loads the systems from local storage.
 */
 termgr.loadSystems = function () {
-    const raw = localStorage.getItem('termgr.systems');
+    const raw = localStorage.getItem(termgr.STORAGE_KEY);
 
     if (raw == null) {
         return [];
@@ -92,7 +95,9 @@ termgr.login = function (account, passwd) {
 termgr.getSystems = function () {
     return termgr.makeRequest('GET', termgr.BASE_URL + '/list/systems').then(
         function (response) {
-            termgr.storeSystems(response.json);
+            const systems = response.json;
+            termgr.storeSystems(systems);
+            return systems;
         },
         termgr.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
     );

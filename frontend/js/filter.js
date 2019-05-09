@@ -100,9 +100,8 @@ termgr.filterSystems = function* (systems, keyword) {
 /*
     Filters systems.
 */
-termgr.listFilteredSystems = function () {
+termgr.filtered = function (systems) {
     const keyword = document.getElementById('searchField').value;
-    let systems = termgr.filterSystems(termgr.loadSystems(), keyword);
-    systems = termgr.sorted(systems);
-    termgr.listSystems(systems);
+    systems = termgr.filterSystems(systems, keyword);
+    return Array.from(systems);
 };
