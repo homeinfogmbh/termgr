@@ -76,7 +76,6 @@ termgr.compareSystems = function () {
 */
 termgr.sorted = function (systems) {
     systems = Array.from(systems);
-    const compareFunction = termgr.getCompareFunction();
-    systems.sort(compareFunction);
+    systems.sort(termgr.getCompareFunction());
     return systems;
 };
