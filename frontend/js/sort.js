@@ -29,7 +29,9 @@ var termgr = termgr || {};
 */
 termgr.getCompareFunction = function (alice, bob) {
     const desc = document.getElementById('sortDesc').checked;
+    console.log('Sorting ' + (desc ? 'descending' : 'ascending'));
     const byId = document.getElementById('sortById').checked;
+    console.log('Sorting by ' + (byId ? 'ID' : 'address'));
     const factor = desc ? -1 : 1;
     let value = 0;
 
@@ -63,7 +65,9 @@ termgr.getCompareFunction = function (alice, bob) {
         }
     }
 
-    return factor * value;
+    value = factor * value;
+    console.log('Sorting value: ' + value);
+    return value;
 };
 
 
