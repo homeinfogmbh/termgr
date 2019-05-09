@@ -27,7 +27,7 @@ var termgr = termgr || {};
 /*
     Returns a compare function.
 */
-termgr.compareSystems = function () {
+termgr.getCompareFunction = function () {
     const desc = document.getElementById('sortDesc').checked;
     const byId = document.getElementById('sortById').checked;
     const factor = desc ? -1 : 1;
