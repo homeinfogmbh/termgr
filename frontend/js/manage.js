@@ -38,12 +38,14 @@ function reload () {
 */
 function filter (systems) {
     if (systems == null) {
+        termgr.startLoading();
         systems = termgr.loadSystems();
     }
 
     systems = termgr.filtered(systems);
     systems = termgr.sorted(systems);
     termgr.listSystems(systems);
+    termgr.stopLoading();
 }
 
 
