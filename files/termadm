@@ -29,13 +29,14 @@ Options:
 from functools import partial
 from logging import INFO, basicConfig, getLogger
 from os import geteuid
+from subprocess import run
 from sys import exit as exit_
 
 from docopt import docopt
 
 from his import Account
 from mdb import Address, Company, Customer
-from syslib import run, evaluate, script
+from syslib import evaluate, script
 from terminallib import TerminalConfigError
 from terminallib import Deployment
 from terminallib import OpenVPN
