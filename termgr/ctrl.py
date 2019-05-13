@@ -5,10 +5,7 @@ from logging import getLogger
 from terminallib import RemoteController
 
 
-__all__ = [
-    'closed_by_remote_host',
-    'SystemController',
-    'SystemsController']
+__all__ = ['SystemController', 'SystemsController']
 
 
 RESOLUTION_CMD = 'export DISPLAY=:0 \\; xrandr | grep " connected"'
@@ -19,17 +16,6 @@ ADMIN_USER = 'homeinfo'
 REBOOT_COMMAND = (SYSTEMCTL, 'reboot')
 REBOOT_OPTIONS = {'ServerAliveInterval': 5, 'ServerAliveCountMax': 3}
 LOGGER = getLogger('Controller')
-
-
-def closed_by_remote_host(process_result):
-    """Checks whether the connection was closed by the remote host."""
-
-    try:
-        text = process_result.stderr.decode()
-    except (AttributeError, ValueError):
-        return False
-
-    return 'Connection' in text and 'closed by remote host' in text
 
 
 class SystemController(RemoteController):

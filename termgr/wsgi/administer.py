@@ -1,19 +1,16 @@
 """Terminal administration."""
 
 from logging import getLogger
+from subprocess import CalledProcessError
 
 from flask import request
 
-from hipster.ctrl import SyncController
-from hipster.sync import Synchronizer
+from hipster.sync import sync
 from his import authenticated
 from mdb import Address
-from terminallib import Connection, Type, Deployment, System
-from wsgilib import JSON
+from terminallib import SystemOffline, Connection, Type, Deployment, System
 
-from termgr.ctrl import closed_by_remote_host
-from termgr.ctrl import SystemController
-from termgr.ctrl import SystemsController
+from termgr.ctrl import SystemController, SystemsController
 from termgr.wsgi.common import get_address, admin, deploy
 
 __all__ = ['ROUTES']
@@ -106,15 +103,20 @@ def toggle_application(system):
     try:
         request.json['disable']
     except KeyError:
-        if CONTROLLER.enable_application(system):
-            return 'Digital signage application enabled.'
+        mode = 'enable'
+        function = CONTROLLER.enable_application
+    else:
+        mode = 'disable'
+        function = CONTROLLER.disable_application
 
-        return ('Could not enable digital signage application.', 500)
+    try:
+        function(system)
+    except SystemOffline:
+        return ('System is offline.', 400)
+    except CalledProcessError:
+        return (f'Could not {mode} digital signage application.', 500)
 
-    if CONTROLLER.disable_application(system):
-        return 'Digital signage application disabled.'
-
-    return ('Could not disable digital signage application.', 500)
+    return f'Digital signage application {mode}d.'
 
 
 @authenticated
@@ -128,18 +130,14 @@ def reboot_system(system):
     if CONTROLLER.check_pacman(system):
         return ('Package manager is currently running.', 503)
 
-    response = CONTROLLER.reboot(system)
+    try:
+        CONTROLLER.reboot(system)
+    except SystemOffline:
+        return ('System is offline.', 400)
+    except CalledProcessError:
+        return ('Failed to reboot system.', 500)
 
-    if response:
-        return 'Rebooted system.'
-
-    if response.exit_code == 255 and closed_by_remote_host(response):
-        return ('Probably rebooted system.', 202)
-
-    LOGGER.warning(
-        'Unknown SSH error: %s (%i).', response.stderr.decode(),
-        response.exit_code)
-    return ('Failed to reboot system.', 500)
+    return 'Probably rebooted system.'
 
 
 @authenticated
@@ -147,15 +145,10 @@ def reboot_system(system):
 def sync_system(system):
     """Synchronizes the respective system."""
 
-    with Synchronizer(keyfile=DIGSIG_KEY_FILE) as synchronizer:
-        result = synchronizer.sync(system)
-
-    if result:
-        ctrl = SyncController(system, keyfile=DIGSIG_KEY_FILE)
-        ctrl.restart()
+    if sync(system):
         return 'Terminal synchronized.'
 
-    return JSON([str(collector) for collector in result], status=500)
+    return ('Could not synchronize system.', 500)
 
 
 @authenticated
@@ -163,10 +156,14 @@ def sync_system(system):
 def beep_system(system):
     """Identifies the respective system by beep test."""
 
-    if SystemController(system).identify():
-        return 'Display should have beeped.'
+    try:
+        SystemController(system).identify()
+    except SystemOffline:
+        return ('System is offline.', 400)
+    except CalledProcessError:
+        return ('Could not get display to beep.', 500)
 
-    return ('Could not get display to beep.', 500)
+    return 'Display should have beeped.'
 
 
 ROUTES = (
