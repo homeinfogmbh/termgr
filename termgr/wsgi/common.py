@@ -123,6 +123,6 @@ def deploy(function):
         if chkdeploy(ACCOUNT, system, customer):
             return function(system, customer, *args, **kwargs)
 
-        raise Error('Setup operation unauthorized.', status=403)
+        raise Error('Deployment operation unauthorized.', status=403)
 
     return wrapper
