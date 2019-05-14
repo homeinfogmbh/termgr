@@ -145,10 +145,14 @@ def reboot_system(system):
 def sync_system(system):
     """Synchronizes the respective system."""
 
-    if sync(system):
-        return 'Terminal synchronized.'
+    try:
+        sync(system)
+    except SystemOffline:
+        return ('System is offline.', 400)
+    except CalledProcessError:
+        return ('Could not synchronize system.', 500)
 
-    return ('Could not synchronize system.', 500)
+    return 'Terminal synchronized.'
 
 
 @authenticated
