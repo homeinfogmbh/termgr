@@ -1,5 +1,6 @@
 """Controller for terminal setup."""
 
+from datetime import datetime
 from os.path import basename
 
 from flask import request
@@ -46,21 +47,17 @@ def get_openvpn_data(system):
 
 @authenticated
 @setup
-def set_serial_number(system):
+def finalize(system):
     """Posts setup data."""
 
-    try:
-        serial_number = request.json['sn']
-    except KeyError:
-        raise Error('No serial number specified.')
-
-    system.serial_number = serial_number or None  # Delete iff empty.
+    system.serial_number = request.json.get('sn') or None   # Delete iff empty.
+    system.configured = datetime.now()  # Mark system as configured.
     system.save()
-    return f'Set serial number to "{system.serial_number}".'
+    return 'System finalized.'
 
 
 ROUTES = (
     ('POST', '/setup/info', get_system_info),
     ('POST', '/setup/openvpn', get_openvpn_data),
-    ('POST', '/setup/sn', set_serial_number)
+    ('POST', '/setup/finalize', finalize)
 )
