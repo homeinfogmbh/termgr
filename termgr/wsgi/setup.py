@@ -1,5 +1,6 @@
 """Controller for terminal setup."""
 
+from contextlib import suppress
 from datetime import datetime
 from os.path import basename
 
@@ -50,7 +51,9 @@ def get_openvpn_data(system):
 def finalize(system):
     """Posts setup data."""
 
-    system.serial_number = request.json.get('sn') or None   # Delete iff empty.
+    with suppress(KeyError):
+        system.serial_number = request.json['sn'] or None   # Delete iff empty.
+
     system.configured = datetime.now()  # Mark system as configured.
     system.save()
     return 'System finalized.'
