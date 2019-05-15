@@ -5,7 +5,7 @@ from subprocess import CalledProcessError
 
 from flask import request
 
-from hipster.sync import sync
+from hipster.orm import Queue
 from his import authenticated
 from mdb import Address
 from terminallib import SystemOffline, Connection, Type, Deployment, System
@@ -145,14 +145,8 @@ def reboot_system(system):
 def sync_system(system):
     """Synchronizes the respective system."""
 
-    try:
-        sync(system)
-    except SystemOffline:
-        return ('System is offline.', 400)
-    except CalledProcessError:
-        return ('Could not synchronize system.', 500)
-
-    return 'Terminal synchronized.'
+    Queue.enqueue(system)
+    return ('Synchronization queued.', 202)
 
 
 @authenticated
