@@ -2,7 +2,7 @@
 
 from his import ACCOUNT, authenticated
 from mdb import Customer
-from terminallib import Connection, Type, System
+from terminallib import Connection, Deployment, System, Type
 from wsgilib import JSON
 
 from termgr.orm import CustomerAdministrator, SystemAdministrator
@@ -35,12 +35,31 @@ def get_customers():
         yield customer_admin.customer
 
 
+def get_deployments():
+    """Yields the allowed deployments."""
+
+    if ACCOUNT.root:
+        return Deployment
+
+    customers = set(get_customers())
+    return Deployment.select().where(Deployment.customer << customers)
+
+
 @authenticated
 def list_systems():
     """Lists the available systems."""
 
     return JSON([
         system.to_json(cascade=3, brief=True) for system in get_systems()])
+
+
+@authenticated
+def list_deployments():
+    """Lists available deployments."""
+
+    return JSON([
+        deployment.to_json(systems=True, cascade=2)
+        for deployment in get_deployments()])
 
 
 @authenticated
