@@ -4,49 +4,21 @@ from functools import wraps
 
 from flask import request
 
-from his import ACCOUNT
 from mdb import Customer
-from terminallib import System
+from terminallib import Deployment, System
 from wsgilib import Error, JSON
 
 from termgr.auth import chkadmin, chkdeploy, chksetup
 
 
 __all__ = [
-    'get_customer',
-    'get_system',
     'get_address',
+    'get_customer',
+    'get_deployment',
+    'get_system',
     'admin',
-    'setup',
-    'deploy']
-
-
-def get_customer():
-    """Returns the respective customer."""
-
-    ident = request.json.get('customer')
-
-    if ident is None:
-        raise Error('No customer ID specified.')
-
-    try:
-        return Customer[ident]
-    except Customer.DoesNotExist:
-        raise Error('No such customer.', status=404)
-
-
-def get_system():
-    """Returns the respective system."""
-
-    ident = request.json.get('system')
-
-    if ident is None:
-        raise Error('No system specified.')
-
-    try:
-        return System[ident]
-    except System.DoesNotExist:
-        raise Error('No such system.', status=404)
+    'deploy',
+    'setup']
 
 
 def get_address():
@@ -82,6 +54,48 @@ def get_address():
     return tuple(result)
 
 
+def get_customer():
+    """Returns the respective customer."""
+
+    ident = request.json.get('customer')
+
+    if ident is None:
+        raise Error('No customer ID specified.')
+
+    try:
+        return Customer[ident]
+    except Customer.DoesNotExist:
+        raise Error('No such customer.', status=404)
+
+
+def get_deployment():
+    """Returns the respective deployment."""
+
+    ident = request.json.get('deployment')
+
+    if ident is None:
+        raise Error('No deployment ID specified.')
+
+    try:
+        return Deployment[ident]
+    except Deployment.DoesNotExist:
+        raise Error('No such deployment.', status=404)
+
+
+def get_system():
+    """Returns the respective system."""
+
+    ident = request.json.get('system')
+
+    if ident is None:
+        raise Error('No system specified.')
+
+    try:
+        return System[ident]
+    except System.DoesNotExist:
+        raise Error('No such system.', status=404)
+
+
 def admin(function):
     """Wraps the actual with admin permission checks."""
 
@@ -89,10 +103,26 @@ def admin(function):
     def wrapper(*args, **kwargs):
         system = get_system()
 
-        if chkadmin(ACCOUNT, system):
+        if chkadmin(system):
             return function(system, *args, **kwargs)
 
         raise Error('Administration unauthorized.', status=403)
+
+    return wrapper
+
+
+def deploy(function):
+    """Wraps the actual deployment permission checks."""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        system = get_system()
+        deployment = get_deployment()
+
+        if chkdeploy(system, deployment):
+            return function(system, deployment, *args, **kwargs)
+
+        raise Error('Deployment operation unauthorized.', status=403)
 
     return wrapper
 
@@ -104,25 +134,9 @@ def setup(function):
     def wrapper(*args, **kwargs):
         system = get_system()
 
-        if chksetup(ACCOUNT, system):
+        if chksetup(system):
             return function(system, *args, **kwargs)
 
         raise Error('Setup operation unauthorized.', status=403)
-
-    return wrapper
-
-
-def deploy(function):
-    """Wraps the actual with deployment permission checks."""
-
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        system = get_system()
-        customer = get_customer()
-
-        if chkdeploy(ACCOUNT, system, customer):
-            return function(system, customer, *args, **kwargs)
-
-        raise Error('Deployment operation unauthorized.', status=403)
 
     return wrapper

@@ -7,11 +7,10 @@ from flask import request
 
 from hipster.orm import Queue
 from his import authenticated
-from mdb import Address
-from terminallib import SystemOffline, Connection, Type, Deployment, System
+from terminallib import SystemOffline
 
 from termgr.ctrl import SystemController, SystemsController
-from termgr.wsgi.common import get_address, admin, deploy
+from termgr.wsgi.common import admin, deploy
 
 __all__ = ['ROUTES']
 
@@ -26,71 +25,12 @@ LOGGER = getLogger(__file__)
 
 @authenticated
 @deploy
-def deploy_system(system, customer):
+def deploy_system(system, deployment):
     """Deploys the respective system."""
 
-    address = get_address()
-    address = Address.add_by_address(address)
-    address.save()
-
-    try:
-        typ = Type(request.json['type'])
-    except KeyError:
-        return ('No type specified.', 400)
-    except ValueError:
-        return ('Invalid type specified.', 400)
-
-    try:
-        connection = Connection(request.json['connection'])
-    except KeyError:
-        return ('No connection specified.', 400)
-    except ValueError:
-        return ('Invalid connection specified.', 400)
-
-    select = (
-        (Deployment.address == address)
-        & (Deployment.customer == customer)
-        & (Deployment.type == typ)
-        & (Deployment.connection == connection))
-    weather = request.json.get('weather')
-
-    if weather is None:
-        select &= Deployment.weather >> None
-    else:
-        select &= Deployment.weather == weather
-
-    annotation = request.json.get('annotation')
-
-    if annotation is None:
-        select &= Deployment.annotation >> None
-    else:
-        select &= Deployment.annotation == annotation
-
-    try:
-        deployment = Deployment.get(select)
-    except Deployment.DoesNotExist:
-        deployment = Deployment(
-            customer=customer,
-            address=address,
-            type=typ,
-            connection=connection,
-            weather=weather,
-            annotation=annotation)
-        deployment.save()
-
-    try:
-        current_system = System.get(System.deployment == deployment)
-    except System.DoesNotExist:
-        current_system = None
-    else:
-        current_system.relocate(None)
-
-    system.relocate(deployment)
-
-    if current_system is None:
-        return 'System has been deployed.'
-
-    return REDEPLOY_TEMP.format(current_system.id)
+    exclusive = request.json.get('exclusive', False)
+    system.deploy(deployment, exclusive=exclusive)
+    return 'System has been deployed.'
 
 
 @authenticated
