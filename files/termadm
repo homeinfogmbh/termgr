@@ -222,7 +222,7 @@ def deploy(options):
         deployment = Deployment(customer=customer, type=typ, address=address)
         deployment.save()
 
-    if system.relocate(deployment):
+    if system.deploy(deployment):
         exit(0)
 
     exit(1)
@@ -233,7 +233,7 @@ def undeploy(options):
 
     system = _get_system(options['<id>'])
 
-    if system.relocate(None):
+    if system.deploy(None):
         exit(0)
 
     exit(1)
