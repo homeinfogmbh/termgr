@@ -66,9 +66,7 @@ termgr.customerToString = function (customer) {
     Returns the respective deployment as a one-line string.
 */
 termgr.deploymentToString = function (deployment) {
-    const address = termgr.addressToString(deployment.address);
-    const customer = termgr.customerToString(deployment.customer);
-    return address + ' – ' + deployment.type + ' – ' + customer;
+    return termgr.addressToString(deployment.address);
 };
 
 
