@@ -41,10 +41,8 @@ def _get_deployments():
     if ACCOUNT.root:
         return Deployment
 
-    join_condition = CustomerAdministrator.customer == Deployment.customer
-    return Deployment.select().join(
-        CustomerAdministrator, on=join_condition, join_type='LEFT').where(
-            CustomerAdministrator.account == ACCOUNT.id)
+    customers = set(_get_customers())
+    return Deployment.select().join(Deployment.customer << customers)
 
 
 @authenticated
