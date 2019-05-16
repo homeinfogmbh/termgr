@@ -11,7 +11,7 @@ from termgr.orm import CustomerAdministrator, SystemAdministrator
 __all__ = ['ROUTES']
 
 
-def get_systems():
+def _get_systems():
     """Yields the allowed systems."""
 
     if ACCOUNT.root:
@@ -23,7 +23,7 @@ def get_systems():
         yield sysadmin.system
 
 
-def get_customers():
+def _get_customers():
     """Yields the allowed customers."""
 
     if ACCOUNT.root:
@@ -35,7 +35,7 @@ def get_customers():
         yield customer_admin.customer
 
 
-def get_deployments():
+def _get_deployments():
     """Yields the allowed deployments."""
 
     if ACCOUNT.root:
@@ -52,7 +52,7 @@ def list_systems():
     """Lists the available systems."""
 
     return JSON([
-        system.to_json(cascade=3, brief=True) for system in get_systems()])
+        system.to_json(cascade=3, brief=True) for system in _get_systems()])
 
 
 @authenticated
@@ -61,14 +61,14 @@ def list_deployments():
 
     return JSON([
         deployment.to_json(systems=True, cascade=2)
-        for deployment in get_deployments()])
+        for deployment in _get_deployments()])
 
 
 @authenticated
 def list_customers():
     """Groups the respective terminals by customers."""
 
-    return JSON([customer.to_json(cascade=1) for customer in get_customers()])
+    return JSON([customer.to_json(cascade=1) for customer in _get_customers()])
 
 
 @authenticated
@@ -86,8 +86,9 @@ def list_types():
 
 
 ROUTES = (
-    ('GET', '/list/systems', list_systems),
-    ('GET', '/list/customers', list_customers),
     ('GET', '/list/connections', list_connections),
+    ('GET', '/list/customers', list_customers),
+    ('GET', '/list/deployments', list_deployments),
+    ('GET', '/list/systems', list_systems),
     ('GET', '/list/types', list_types)
 )
