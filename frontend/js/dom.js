@@ -70,7 +70,7 @@ termgr.systemEntry = function (system) {
     btnDeploy.setAttribute('class', 'w3-button w3-teal w3-col s2');
     btnDeploy.setAttribute('data-id', system.id);
     btnDeploy.addEventListener('click', termgr.partial(termgr.deploySystem, system.id), false);
-    btnReboot.setAttribute('title', 'Verbauen');
+    btnDeploy.setAttribute('title', 'Verbauen');
     btnDeploy.appendChild(btnDeployIcon);
 
     const btnEnableApplicationIcon = document.createElement('i');
@@ -80,7 +80,7 @@ termgr.systemEntry = function (system) {
     btnEnableApplication.setAttribute('class', 'w3-button w3-khaki w3-col s2');
     btnEnableApplication.setAttribute('data-id', system.id);
     btnEnableApplication.addEventListener('click', termgr.partial(termgr.toggleApplication, system.id), false);
-    btnReboot.setAttribute('title', 'Digital Signage Modus umschalten');
+    btnEnableApplication.setAttribute('title', 'Digital Signage Modus umschalten');
     btnEnableApplication.appendChild(btnEnableApplicationIcon);
 
     const btnSyncIcon = document.createElement('i');
