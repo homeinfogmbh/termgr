@@ -42,7 +42,7 @@ def _get_deployments():
         return Deployment
 
     customers = set(_get_customers())
-    return Deployment.select().join(Deployment.customer << customers)
+    return Deployment.select().where(Deployment.customer << customers)
 
 
 @authenticated
