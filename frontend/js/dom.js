@@ -226,5 +226,14 @@ termgr.deploymentToTable = function (deployment) {
     valueTimestamp.textContent = deployment.timestamp || 'N/A';
     rowTimestamp.appendChild(valueTimestamp);
     table.appendChild(rowTimestamp);
+    // Systems.
+    const rowSystems = document.createElement('tr');
+    const headerSystems = document.createElement('th');
+    headerSystems.textContent = 'Systeme';
+    rowSystems.appendChild(headerSystems);
+    const valueSystems = document.createElement('td');
+    valueSystems.textContent = deployment.systems.join(', ') || 'N/A';
+    rowSystems.appendChild(valueSystems);
+    table.appendChild(rowSystems);
     return table;
 };
