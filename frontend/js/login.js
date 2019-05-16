@@ -41,14 +41,7 @@ termgr.doLogin = function (event) {
         localStorage.removeItem('termgr.passwd');
     }
 
-    return termgr.login(account, passwd).then(
-        function () {
-            window.location = 'manage.html';
-        },
-        function () {
-            alert('Ungültiger Benutzername und / oder Passwort.');
-        }
-    );
+    return termgr.login(account, passwd);
 };
 
 
