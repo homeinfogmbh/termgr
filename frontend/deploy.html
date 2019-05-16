@@ -22,8 +22,12 @@
   <title>Terminal Manager</title>
   <link rel="stylesheet" href="css/w3.css">
   <link rel="stylesheet" href="css/termgr.css">
+  <link rel="stylesheet" href="css/fontawesome.css">
   <script src="js/common.js"></script>
+  <script src="js/dom.js"></script>
   <script src="js/functions.js"></script>
+  <script src="js/filter.js"></script>
+  <script src="js/sort.js"></script>
   <script src="js/deploy.js"></script>
 </head>
 
@@ -33,27 +37,54 @@
 
 <br/>
 
-<div id="loader" class="loader"></div>
-<form id="target" class="w3-container">
-  <div class="w3-row w3-center">
-    <input id="street" type="text" class="w3-input w3-col l3 s12" placeholder="Straße*" required>
-    <input id="houseNumber" type="text" class="w3-input w3-col l3 s12" placeholder="Hausnummer*" required>
-    <input id="zipCode" type="text" class="w3-input w3-col l3 s12" placeholder="PLZ*" required>
-    <input id="city" type="text" class="w3-input w3-col l3 s12" placeholder="Ort*" required>
+<form class="w3-container">
+  <div class="w3-row">
+    <div class="w3-col s7">
+      <input type="text" class="w3-input" id="searchField" placeholder="Suchbegriff..."/>
+    </div>
+    <div class="w3-col s3">
+      <button id="filter" type="submit" class="w3-button w3-green">Filtern</button>
+    </div>
+    <div class="w3-col s2">
+      <button id="reload" class="w3-button w3-blue" title="Standorte neu laden">
+        <i class="fa fa-sync-alt"></i>
+      </button>
+    </div>
   </div>
-  <div class="w3-row w3-center">
-    <select id="connection" class="w3-input w3-col l6 s12" required></select>
-    <select id="type" class="w3-input w3-col l6 s12" required></select>
+  <br/>
+  <div class="w3-row">
+    <div class="w3-col s6">
+      <input id="sortAsc" class="w3-radio" type="radio" name="order" value="asc" checked="true"/>
+      <label>↓</label>
+      <input id="sortDesc" class="w3-radio" type="radio" name="order" value="desc"/>
+      <label>↑</label>
+    </div>
+    <div class="w3-col s6">
+      <input id="sortById" class="w3-radio" type="radio" name="sorting" value="id" checked="true"/>
+      <label>ID</label>
+      <input id="sortByAddress" class="w3-radio" type="radio" name="sorting" value="address"/>
+      <label>Addresse</label>
+    </div>
   </div>
-  <div class="w3-row w3-center">
-    <input id="weather" type="text" class="w3-input w3-col l3 s12" placeholder="Wetter">
-    <input id="annotation" type="text" class="w3-input w3-col l3 s12" placeholder="Anmerlung">
+  <br/>
+  <div id="target" class="w3-row">
+    <div class="w3-col l12 m12 s12">
+      <select id="deployments" name="deployments"></select>
+    </div>
   </div>
-  <div class="w3-row w3-center">
-    <select id="customer" class="w3-input w3-col l6 s12" required></select>
-    <button id="deploy" type="submit" class="w3-button w3-green w3-col l6 s12">Festlegen</button>
+  <br/>
+  <div class="w3-row">
+    <div class="w3-col s6">
+      <button id="deploy" class="w3-button w3-green" title="Das System an diesem Standort verbauen">Standort setzen</button>
+    </div>
+    <div class="w3-col s6">
+      <input id="exclusive" type="checkbox"/>
+      <label>Andere Systeme entfernen</label>
+    </div>
   </div>
 </form>
+
+<div id="loader" class="loader"></div>
 
 <br/>
 

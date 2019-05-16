@@ -22,7 +22,6 @@
 
 
 var termgr = termgr || {};
-termgr.STORAGE_KEY = 'termgr.systems';
 
 
 /*
@@ -48,12 +47,62 @@ termgr.stopLoading = function () {
 
 
 /*
+    Returns the respective address as a one-line string.
+*/
+termgr.addressToString = function (address) {
+    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
+};
+
+
+/*
+    Returns the respective customer as a one-line string.
+*/
+termgr.customerToString = function (customer) {
+    return customer.company.name  + ' (' + customer.id + ')';
+};
+
+
+/*
+    Returns the respective deployment as a one-line string.
+*/
+termgr.deploymentToString = function (deployment) {
+    const address = termgr.addressToString(deployment.address);
+    const customer = termgr.customerToString(deployment.customer);
+    return address + ' – ' + deployment.type + ' – ' + customer;
+};
+
+
+/*
+    Stores the deployments in local storage.
+*/
+termgr.storeDeployments = function (deployments) {
+    deployments = Array.from(deployments);
+    const json = JSON.stringify(deployments);
+    return localStorage.setItem('termgr.deployments', json);
+};
+
+
+/*
+    Loads the deployments from local storage.
+*/
+termgr.loadDeployments = function () {
+    const raw = localStorage.getItem('termgr.deployments');
+
+    if (raw == null) {
+        return [];
+    }
+
+    return JSON.parse(raw);
+};
+
+
+/*
     Stores the systems in local storage.
 */
 termgr.storeSystems = function (systems) {
     systems = Array.from(systems);
     const json = JSON.stringify(systems);
-    return localStorage.setItem(termgr.STORAGE_KEY, json);
+    return localStorage.setItem('termgr.systems', json);
 };
 
 
@@ -61,7 +110,7 @@ termgr.storeSystems = function (systems) {
     Loads the systems from local storage.
 */
 termgr.loadSystems = function () {
-    const raw = localStorage.getItem(termgr.STORAGE_KEY);
+    const raw = localStorage.getItem('termgr.systems');
 
     if (raw == null) {
         return [];
@@ -85,6 +134,21 @@ termgr.login = function (account, passwd) {
         function () {
             alert('Ungültiger Benutzername und / oder Passwort.');
         }
+    );
+};
+
+
+/*
+    Retrieves deployments from the API.
+*/
+termgr.getDeployments = function () {
+    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/deployments').then(
+        function (response) {
+            const deployments = response.json;
+            termgr.storeDeployments(deployments);
+            return deployments;
+        },
+        termgr.checkSession('Die Liste der Standorte konnte nicht abgefragt werden.')
     );
 };
 
@@ -136,15 +200,31 @@ termgr.getTypes = function () {
 
 
 /*
-    Lists the respective systems.
+    Renders the respective systems.
 */
-termgr.listSystems = function (systems) {
+termgr.renderSystems = function (systems) {
     const container = document.getElementById('systems');
     container.innerHTML = '';
 
     for (const system of systems) {
         let entry = termgr.systemEntry(system);
         container.appendChild(entry);
+    }
+};
+
+
+/*
+    Renders the respective deployments.
+*/
+termgr.renderDeployments = function (deployments) {
+    const select = document.getElementById('deployments');
+    select.innerHTML = '';
+
+    for (const deployment of deployments) {
+        let option = document.createElement('option');
+        option.value = '' + deployment.id;
+        option.textContent = termgr.deploymentToString(deployment);
+        select.appendChild(option);
     }
 };
 
@@ -321,15 +401,11 @@ termgr.deploySystem = function (id) {
 /*
     Deploys a system.
 */
-termgr.deploy = function (system, customer, address, connection, type, weather, annotation) {
+termgr.deploy = function (system, deployment, exclusive = false) {
     const payload = {
         system: system,
-        customer: customer,
-        address: address,
-        connection: connection,
-        type: type,
-        weather: weather,
-        annotation: annotation
+        deployment: deployment,
+        exclusive: exclusive
     };
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};

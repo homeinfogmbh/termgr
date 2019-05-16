@@ -1,5 +1,5 @@
 /*
-    deploy.js - Terminal Manager deployment management.
+    deploy.js - Terminal Manager systems deployment.
 
     (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -24,55 +24,67 @@
 var termgr = termgr || {};
 
 
-function deploy (system) {
-    const customerSelect = document.getElementById('customer');
-    const customer = customerSelect.options[customerSelect.selectedIndex].value;
-    const street = document.getElementById('street').value.trim();
-    const houseNumber = document.getElementById('houseNumber').value.trim();
-    const zipCode = document.getElementById('zipCode').value.trim();
-    const city = document.getElementById('city').value.trim();
-    const address = {
-        street: street,
-        houseNumber: houseNumber,
-        zipCode: zipCode,
-        city: city
-    };
-    const connectionSelect = document.getElementById('connection');
-    const connection = connectionSelect.options[connectionSelect.selectedIndex].value;
-    const typeSelect = document.getElementById('type');
-    const type = typeSelect.options[typeSelect.selectedIndex].value;
-    const weather = document.getElementById('weather').value.trim() || null;
-    const annotation = document.getElementById('annotation').value.trim() || null;
-    return termgr.deploy(system, customer, address, connection, type, weather, annotation);
+/*
+    Reloads the systems.
+*/
+function reload () {
+    termgr.startLoading();
+    return termgr.getDeployments().then(filter).then(termgr.stopLoading);
 }
 
 
 /*
-    Initialize deploy.html.
+    Filters, sorts and renders systems.
+*/
+function filter (deployments) {
+    if (deployments == null) {
+        termgr.startLoading();
+        deployments = termgr.loadDeployments();
+    }
+
+    deployments = termgr.filteredDeployments(deployments);
+    deployments = termgr.sortedDeployments(deployments);
+    termgr.renderDeployments(deployments);
+    termgr.stopLoading();
+}
+
+
+/*
+    Deploys a system.
+*/
+function deploy (system) {
+    const deployment = document.getElementById('deployments').value;
+    const exclusive = document.getElementById('exclusive').checked;
+    termgr.deploy(system, parseInt(deployment), exclusive);
+}
+
+
+/*
+    Initialize manage.html.
 */
 function init () {
     termgr.startLoading();
-    const id = JSON.parse(localStorage.getItem('termgr.system'));
-    const systemId = document.getElementById('system');
-    systemId.textContent = id;
-    const getCustomers = termgr.getCustomers().then(
-        function (response) {
-            termgr.renderCustomers(response.json);
-        }
-    );
-    const getConnections = termgr.getConnections().then(
-        function (response) {
-            termgr.renderConnections(response.json);
-        }
-    );
-    const getTypes = termgr.getTypes().then(
-        function (response) {
-            termgr.renderTypes(response.json);
-        }
-    );
-    Promise.all([getCustomers, getConnections, getTypes]).then(termgr.stopLoading);
+    const system = JSON.parse(localStorage.getItem('termgr.system'));
+    reload().then(termgr.stopLoading);
+    const btnFilter = document.getElementById('filter');
+    btnFilter.addEventListener('click', termgr.partial(filter), false);
+    const btnReload = document.getElementById('reload');
+    btnReload.addEventListener('click', termgr.partial(reload), false);
+    const radioButtons = [
+        document.getElementById('sortAsc'),
+        document.getElementById('sortDesc'),
+        document.getElementById('sortById'),
+        document.getElementById('sortByAddress')
+    ];
+
+    for (const radioButton of radioButtons) {
+        radioButton.addEventListener('change', termgr.partial(filter), false);
+    }
+
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', termgr.partial(deploy, id), false);
+    btnDeploy.addEventListener('click', termgr.partial(deploy, system), false);
+    const systemId = document.getElementById('system');
+    systemId.textContent = system;
 }
 
 

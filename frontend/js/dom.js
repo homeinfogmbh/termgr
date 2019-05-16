@@ -34,7 +34,7 @@ termgr.systemEntry = function (system) {
 
     if (deployment != null) {
         address = termgr.addressToString(deployment.address);
-        customer = deployment.customer.company.name + ' (' + deployment.customer.id + ')';
+        customer = termgr.customerToString(deployment.customer);
     }
 
     const rowAddress = document.createElement('div');

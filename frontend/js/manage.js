@@ -42,9 +42,9 @@ function filter (systems) {
         systems = termgr.loadSystems();
     }
 
-    systems = termgr.filtered(systems);
-    systems = termgr.sorted(systems);
-    termgr.listSystems(systems);
+    systems = termgr.filteredSystems(systems);
+    systems = termgr.sortedSystems(systems);
+    termgr.renderSystems(systems);
     termgr.stopLoading();
 }
 

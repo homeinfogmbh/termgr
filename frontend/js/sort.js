@@ -25,9 +25,9 @@ var termgr = termgr || {};
 
 
 /*
-    Returns a compare function.
+    Returns a compare function for systems.
 */
-termgr.getCompareFunction = function () {
+termgr.compareSystems = function () {
     const desc = document.getElementById('sortDesc').checked;
     const byId = document.getElementById('sortById').checked;
     const factor = desc ? -1 : 1;
@@ -72,9 +72,52 @@ termgr.getCompareFunction = function () {
 
 
 /*
+    Returns a compare functionm for deployments.
+*/
+termgr.compareDeployments = function () {
+    const desc = document.getElementById('sortDesc').checked;
+    const byId = document.getElementById('sortById').checked;
+    const factor = desc ? -1 : 1;
+
+    return function (alice, bob) {
+        let value = 0;
+
+        if (byId) {
+            if (alice.id > bob.id) {
+                value = 1;
+            } else if (bob.id > alice.id) {
+                value = -1;
+            }
+        } else {
+            const addressA = termgr.addressToString(alice.address);
+            const addressB = termgr.addressToString(bob.address);
+
+            if (addressA > addressB) {
+                value = 1;
+            } else if (addressB > addressA) {
+                value = -1;
+            }
+        }
+
+        value = factor * value;
+        return value;
+    };
+};
+
+
+/*
     Sorts the systems.
 */
-termgr.sorted = function (systems) {
-    systems.sort(termgr.getCompareFunction());
+termgr.sortedSystems = function (systems) {
+    systems.sort(termgr.compareSystems());
     return systems;
+};
+
+
+/*
+    Sorts the deployments.
+*/
+termgr.sortedDeployments = function (deployments) {
+    deployments.sort(termgr.compareDeployments());
+    return deployments;
 };

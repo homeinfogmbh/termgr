@@ -37,15 +37,32 @@ termgr.includesIgnoreCase = function (haystack, needle) {
 
 
 /*
-    Returns the respective address as a one-line string.
+    Matches a deployment.
 */
-termgr.addressToString = function (address) {
-    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
+termgr.matchDeployment = function (deployment, keyword) {
+    const cid = '' + deployment.customer.id;
+
+    if (termgr.includesIgnoreCase(cid, keyword)) {
+        return true;
+    }
+
+    const customerName = deployment.customer.company.name;
+
+    if (termgr.includesIgnoreCase(customerName, keyword)) {
+        return true;
+    }
+
+    const address = termgr.addressToString(deployment.address);
+
+    if (termgr.includesIgnoreCase(address, keyword)) {
+        return true;
+    }
+
+    return false;
 };
 
-
 /*
-    Filters the provided system by the respective keywords.
+    Filters the provided systems by the respective keyword.
 */
 termgr.filterSystems = function* (systems, keyword) {
     for (const system of systems) {
@@ -73,24 +90,39 @@ termgr.filterSystems = function* (systems, keyword) {
             continue;
         }
 
-        let cid = '' + deployment.customer.id;
-
-        if (termgr.includesIgnoreCase(cid, keyword)) {
+        if (termgr.matchDeployment(deployment, keyword)) {
             yield system;
             continue;
         }
+    }
+};
 
-        let customerName = deployment.customer.company.name;
 
-        if (termgr.includesIgnoreCase(customerName, keyword)) {
-            yield system;
+/*
+    Filters the provided depoloyments by the respective keyword.
+*/
+termgr.filterDeployments = function* (deployments, keyword) {
+    for (const deployment of deployments) {
+        // Yield any copy on empty keyword.
+        if (keyword == null || keyword == '') {
+            yield deployment;
             continue;
         }
 
-        let address = termgr.addressToString(deployment.address);
+        // Exact ID matching.
+        if (keyword.startsWith('#')) {
+            let fragments = keyword.split('#');
+            let id = parseInt(fragments[1]);
 
-        if (termgr.includesIgnoreCase(address, keyword)) {
-            yield system;
+            if (deployment.id == id) {
+                yield deployment;
+            }
+
+            continue;
+        }
+
+        if (termgr.matchDeployment(deployment, keyword)) {
+            yield deployment;
             continue;
         }
     }
@@ -100,8 +132,18 @@ termgr.filterSystems = function* (systems, keyword) {
 /*
     Filters systems.
 */
-termgr.filtered = function (systems) {
+termgr.filteredSystems = function (systems) {
     const keyword = document.getElementById('searchField').value;
     systems = termgr.filterSystems(systems, keyword);
     return Array.from(systems);
+};
+
+
+/*
+    Filters deployments.
+*/
+termgr.filteredDeployments = function (deployments) {
+    const keyword = document.getElementById('searchField').value;
+    deployments = termgr.filterDeployments(deployments, keyword);
+    return Array.from(deployments);
 };
