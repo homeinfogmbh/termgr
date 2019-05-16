@@ -379,7 +379,7 @@ termgr.sync = function (system) {
     const headers = {'Content-Type': 'application/json'};
     return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/sync', data, headers).then(
         function () {
-            alert('Das System wurde synchronisiert.');
+            alert('Das System wird demnächst synchronisiert.');
         },
         termgr.checkSession('Das System konnte nicht synchronisiert werden.')
     );
