@@ -12,6 +12,7 @@ from terminallib import SystemOffline
 from termgr.ctrl import SystemController, SystemsController
 from termgr.wsgi.common import admin, deploy
 
+
 __all__ = ['ROUTES']
 
 

@@ -12,6 +12,7 @@ from wsgilib import Error, JSON, Binary
 from termgr.openvpn import package
 from termgr.wsgi.common import setup
 
+
 __all__ = ['ROUTES']
 
 
