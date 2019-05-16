@@ -66,7 +66,7 @@ termgr.customerToString = function (customer) {
     Returns the respective deployment as a one-line string.
 */
 termgr.deploymentToString = function (deployment) {
-    return termgr.addressToString(deployment.address);
+    return deployment.id + ': ' + termgr.addressToString(deployment.address);
 };
 
 

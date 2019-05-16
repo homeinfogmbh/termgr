@@ -55,7 +55,28 @@ function filter (deployments) {
 function deploy (system) {
     const deployment = document.getElementById('deployments').value;
     const exclusive = document.getElementById('exclusive').checked;
-    termgr.deploy(system, parseInt(deployment), exclusive);
+    termgr.deploy(system, deployment), exclusive);
+}
+
+
+/*
+    Shows details of the respective deployment.
+*/
+function showDetails () {
+    const deployments = termgr.loadDeployments();
+    const deploymentId = parseInt(document.getElementById('deployments').value);
+    let deployment;
+
+    for (deployment of deployments) {
+        if (deployment.id == deploymentId) {
+            break;
+        }
+    }
+
+    const deploymentDetails = document.getElementById('deploymentDetails');
+    const table = deploymentToTable(deployment);
+    deploymentDetails.innerHTML = '';
+    deploymentDetails.appendChild(table);
 }
 
 
@@ -83,6 +104,8 @@ function init () {
 
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(deploy, system), false);
+    const deploymentsList = document.getElementById('deployments')
+    deploymentsList.addEventListener('change', termgr.partial(showDetails), false);
     const systemId = document.getElementById('system');
     systemId.textContent = system;
 }
