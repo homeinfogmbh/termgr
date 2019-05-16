@@ -29,7 +29,7 @@ var termgr = termgr || {};
 */
 function reload () {
     termgr.startLoading();
-    return termgr.getDeployments().then(filter).then(termgr.stopLoading);
+    return termgr.getDeployments().then(filter).then(showDetails).then(termgr.stopLoading);
 }
 
 
@@ -55,7 +55,7 @@ function filter (deployments) {
 function deploy (system) {
     const deployment = document.getElementById('deployments').value;
     const exclusive = document.getElementById('exclusive').checked;
-    termgr.deploy(system, deployment), exclusive);
+    termgr.deploy(system, deployment, exclusive);
 }
 
 
@@ -74,7 +74,7 @@ function showDetails () {
     }
 
     const deploymentDetails = document.getElementById('deploymentDetails');
-    const table = deploymentToTable(deployment);
+    const table = termgr.deploymentToTable(deployment);
     deploymentDetails.innerHTML = '';
     deploymentDetails.appendChild(table);
 }
