@@ -45,6 +45,7 @@ function filter (deployments) {
     deployments = termgr.filteredDeployments(deployments);
     deployments = termgr.sortedDeployments(deployments);
     termgr.renderDeployments(deployments);
+    showDetails();
     termgr.stopLoading();
 }
 
