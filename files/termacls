@@ -82,10 +82,10 @@ def get_args():
     subparsers = parser.add_subparsers(dest='mode')
     list_parser = subparsers.add_parser('ls', help='list permissions')
     list_parser.add_argument(
-        '-c', '--customers', action='store_true', metavar='customer',
+        '-c', '--customers', action='store_true',
         help='list customer related permissions')
     list_parser.add_argument(
-        '-s', '--systems', action='store_true', metavar='system',
+        '-s', '--systems', action='store_true',
         help='list system related permissions')
     grant_parser = subparsers.add_parser('grant', help='grant permissions')
     grant_parser.add_argument(
