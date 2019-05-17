@@ -134,11 +134,13 @@ def grant(args):
     """Grants permissions."""
 
     for account in args.account:
-        for customer in args.customer:
-            grant_customer(account, customer)
+        if args.customer:
+            for  customer in args.customer:
+                grant_customer(account, customer)
 
-        for system in args.system:
-            grant_system(account, system)
+        if args.system:
+            for system in args.system:
+                grant_system(account, system)
 
 
 def revoke(args):
@@ -154,11 +156,13 @@ def revoke(args):
             system_admin.delte_intance()
     else:
         for account in args.account:
-            for customer in args.customer:
-                revoke_customer(account, customer)
+            if args.customer:
+                for customer in args.customer:
+                    revoke_customer(account, customer)
 
-            for system in args.system:
-                revoke_system(account, system)
+            if args.system:
+                for system in args.system:
+                    revoke_system(account, system)
 
 
 @script
