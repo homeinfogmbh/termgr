@@ -27,16 +27,15 @@ var termgr = termgr || {};
 /*
     Performs the initial login.
 */
-termgr.doLogin = function (event) {
-    event.preventDefault();
+termgr.doLogin = function () {
     const account = document.getElementById('account').value;
     const passwd = document.getElementById('passwd').value;
     const storeCredentials = document.getElementById('storeCredentials').checked;
 
     if (storeCredentials) {
-        termgr.storeCredentials(account, passwd);
+        termgr.storage.credentials.set(account, passwd);
     } else {
-        termgr.clearCredentials();
+        termgr.storage.credentials.clear();
     }
 
     return termgr.login(account, passwd);
@@ -48,7 +47,7 @@ termgr.doLogin = function (event) {
 */
 function init () {
     const loginButton = document.getElementById('login');
-    loginButton.addEventListener('click', termgr.doLogin, false);
+    loginButton.addEventListener('click', termgr.partial(termgr.doLogin), false);
 }
 
 

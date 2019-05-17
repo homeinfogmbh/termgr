@@ -129,7 +129,7 @@ termgr.getDeployments = function () {
     return termgr.makeRequest('GET', termgr.BASE_URL + '/list/deployments').then(
         function (response) {
             const deployments = response.json;
-            termgr.storeDeployments(deployments);
+            termgr.storage.deployments.set(deployments);
             return deployments;
         },
         termgr.checkSession('Die Liste der Standorte konnte nicht abgefragt werden.')
@@ -144,7 +144,7 @@ termgr.getSystems = function () {
     return termgr.makeRequest('GET', termgr.BASE_URL + '/list/systems').then(
         function (response) {
             const systems = response.json;
-            termgr.storeSystems(systems);
+            termgr.storage.systems.set(systems);
             return systems;
         },
         termgr.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')

@@ -59,7 +59,7 @@ termgr.reloadDeployments = function () {
 termgr.listDeployments = function (deployments) {
     if (deployments == null) {
         termgr.startLoading();
-        deployments = termgr.loadDeployments();
+        deployments = termgr.storage.deployments.load();
     }
 
     deployments = termgr.filteredDeployments(deployments);
@@ -106,8 +106,8 @@ termgr.showDeploymentDetails = function () {
 */
 function init () {
     termgr.startLoading();
-    const system = JSON.parse(localStorage.getItem('termgr.system'));
-    const deployments = termgr.loadDeployments();
+    const system = termgr.storage.system.get();
+    const deployments = termgr.storage.deployments.load();
 
     if (deployments == null) {
         termgr.reloadDeployments().then(termgr.stopLoading);

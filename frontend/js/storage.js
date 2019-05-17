@@ -22,12 +22,14 @@
 
 
 var termgr = termgr || {};
+termgr.storage = {};
+termgr.storage.credentials = {};
 
 
 /*
     Stores account name and password.
 */
-termgr.storeCredentials = function (account, passwd) {
+termgr.storage.credentials.set = function (account, passwd) {
     localStorage.setItem('termgr.account', account);
     localStorage.setItem('termgr.passwd', passwd);
 };
@@ -36,7 +38,7 @@ termgr.storeCredentials = function (account, passwd) {
 /*
     Returns account name and password from local storage.
 */
-termgr.getCredentials = function () {
+termgr.storage.credentials.get = function () {
     const account = localStorage.getItem('termgr.account');
     const passwd = localStorage.getItem('termgr.passwd');
     return [account, passwd];
@@ -46,16 +48,19 @@ termgr.getCredentials = function () {
 /*
     Removes account name and password from local storage.
 */
-termgr.clearCredentials = function () {
+termgr.storage.credentials.clear = function () {
     localStorage.removeItem('termgr.account');
     localStorage.removeItem('termgr.passwd');
 };
 
 
+termgr.storage.deployments = {};
+
+
 /*
     Stores the deployments in local storage.
 */
-termgr.storeDeployments = function (deployments) {
+termgr.storage.deployments.set = function (deployments) {
     deployments = Array.from(deployments);
     const json = JSON.stringify(deployments);
     return localStorage.setItem('termgr.deployments', json);
@@ -65,7 +70,7 @@ termgr.storeDeployments = function (deployments) {
 /*
     Loads the deployments from local storage.
 */
-termgr.loadDeployments = function () {
+termgr.storage.deployments.get = function () {
     const raw = localStorage.getItem('termgr.deployments');
 
     if (raw == null) {
@@ -79,15 +84,18 @@ termgr.loadDeployments = function () {
 /*
     Removes the deployments from local storage.
 */
-termgr.clearDeployments = function () {
+termgr.storage.deployments.clear = function () {
     localStorage.removeItem('termgr.deployments');
 };
+
+
+termgr.storage.systems = {};
 
 
 /*
     Stores the systems in local storage.
 */
-termgr.storeSystems = function (systems) {
+termgr.storage.systems.set = function (systems) {
     systems = Array.from(systems);
     const json = JSON.stringify(systems);
     return localStorage.setItem('termgr.systems', json);
@@ -97,7 +105,7 @@ termgr.storeSystems = function (systems) {
 /*
     Loads the systems from local storage.
 */
-termgr.loadSystems = function () {
+termgr.storage.systems.get = function () {
     const raw = localStorage.getItem('termgr.systems');
 
     if (raw == null) {
@@ -111,16 +119,50 @@ termgr.loadSystems = function () {
 /*
     Removes the systems from local storage.
 */
-termgr.clearSystems = function () {
+termgr.storage.systems.clear = function () {
     localStorage.removeItem('termgr.systems');
+};
+
+
+termgr.storage.system = {};
+
+
+/*
+     Stores the system ID in local storage.
+*/
+termgr.storage.system.set = function (system) {
+    localStorage.setItem('termgr.system', JSON.stringify(system));
+};
+
+
+/*
+    Loads the system ID from local storage.
+*/
+termgr.storage.system.get = function () {
+    const raw = localStorage.getItem('termgr.system');
+
+    if (raw == null) {
+        return null;
+    }
+
+    return JSON.parse(raw);
+};
+
+
+/*
+    Removes the system ID from local storage.
+*/
+termgr.storage.system.clear = function () {
+    localStorage.removeItem('termgr.system');
 };
 
 
 /*
     Clears all storage items.
 */
-termgr.clearStorage = function () {
-    termgr.clearCredentials();
-    termgr.clearDeployments();
-    termgr.clearSystems();
+termgr.storage.clear = function () {
+    termgr.storage.credentials.clear();
+    termgr.storage.deployments.clear();
+    termgr.storage.systems.clear();
+    termgr.storage.system.clear();
 };

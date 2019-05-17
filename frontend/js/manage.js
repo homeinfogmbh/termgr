@@ -67,8 +67,8 @@ termgr.reboot = function (system) {
 /*
     Navigates to the toggle application page.
 */
-termgr.toggleApplication = function (id) {
-    localStorage.setItem('termgr.system', JSON.stringify(id));
+termgr.toggleApplication = function (system) {
+    termgr.storage.system.set(system);
     window.location = 'application.html';
 };
 
@@ -92,8 +92,8 @@ termgr.sync = function (system) {
 /*
     Opens the deploying view.
 */
-termgr.deploySystem = function (id) {
-    localStorage.setItem('termgr.system', JSON.stringify(id));
+termgr.deploySystem = function (system) {
+    termgr.storage.system.set(system);
     window.location = 'deploy.html';
 };
 
@@ -113,7 +113,7 @@ termgr.reloadSystems = function () {
 termgr.listSystems = function (systems) {
     if (systems == null) {
         termgr.startLoading();
-        systems = termgr.loadSystems();
+        systems = termgr.storage.systems.load();
     }
 
     systems = termgr.filteredSystems(systems);

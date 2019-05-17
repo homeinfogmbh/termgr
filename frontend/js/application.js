@@ -60,13 +60,13 @@ termgr.disableApplication = function (system) {
     Initialize manage.html.
 */
 function init () {
-    const id = JSON.parse(localStorage.getItem('termgr.system'));
+    const system = termgr.storage.system.get();
     const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, id), false);
+    btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, system), false);
     const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', termgr.partial(termgr.disableApplication, id), false);
+    btnDisable.addEventListener('click', termgr.partial(termgr.disableApplication, system), false);
     const systemId = document.getElementById('system');
-    systemId.textContent = id;
+    systemId.textContent = system;
 }
 
 
