@@ -1,27 +1,6 @@
 #! /usr/bin/env python3
-"""termacls.
-
-  Command line tool to administer HOMEINFO terminals ACLs.
-
-  (C) 2015-2016:  HOMEINFO - Digitale Informationssysteme GmbH
-
-  Maintainer:     Richard Neumann <r.neumann@homeinfo.de>
-
-
-Usage:
-    termacls get [<expr>...] [options]
-    termacls set <account> [-GRras] <expr>...
-    termacls setdefault <account> [-GRras] <customer> <class>
-
-Options:
-    --grant, -G                 Grants the provided permissions.
-    --revoke, -R                Revokes the provided permissions.
-    --read, -r                  Enable read permission.
-    --administer, -a            Enable administration permission.
-    --setup, -s                 Enable setup permission.
-    --account=<account>, -u     Specifies the account to filter for.
-    --version                   Show version.
-    -h --help                   Show this screen.
+"""Command line tool to administer
+permissions on customers and systems.
 """
 from argparse import ArgumentParser
 from logging import DEBUG, INFO, basicConfig, getLogger
