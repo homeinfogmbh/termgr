@@ -47,16 +47,16 @@ termgr.deploy = function (system, deployment, exclusive = false) {
 /*
     Reloads the systems.
 */
-function reload () {
+termgr.reloadDeployments = function () {
     termgr.startLoading();
-    return termgr.getDeployments().then(filter).then(showDetails).then(termgr.stopLoading);
-}
+    return termgr.getDeployments().then(termgr.listDeployments).then(termgr.showDeploymentDetails).then(termgr.stopLoading);
+};
 
 
 /*
     Filters, sorts and renders systems.
 */
-function filter (deployments) {
+termgr.listDeployments = function (deployments) {
     if (deployments == null) {
         termgr.startLoading();
         deployments = termgr.loadDeployments();
@@ -65,25 +65,25 @@ function filter (deployments) {
     deployments = termgr.filteredDeployments(deployments);
     deployments = termgr.sortedDeployments(deployments);
     termgr.renderDeployments(deployments);
-    showDetails();
+    termgr.showDeploymentDetails();
     termgr.stopLoading();
-}
+};
 
 
 /*
     Deploys a system.
 */
-function deploy (system) {
+termgr.deploySystem = function (system) {
     const deployment = document.getElementById('deployments').value;
     const exclusive = document.getElementById('exclusive').checked;
     termgr.deploy(system, deployment, exclusive);
-}
+};
 
 
 /*
     Shows details of the respective deployment.
 */
-function showDetails () {
+termgr.showDeploymentDetails = function () {
     const deployments = termgr.loadDeployments();
     const deploymentId = parseInt(document.getElementById('deployments').value);
     let deployment;
@@ -98,7 +98,7 @@ function showDetails () {
     const table = termgr.deploymentToTable(deployment);
     deploymentDetails.innerHTML = '';
     deploymentDetails.appendChild(table);
-}
+};
 
 
 /*
@@ -110,15 +110,15 @@ function init () {
     const deployments = termgr.loadDeployments();
 
     if (deployments == null) {
-        reload().then(termgr.stopLoading);
+        termgr.reloadDeployments().then(termgr.stopLoading);
     } else {
-        filter(deployments);
+        termgr.listDeployments(deployments);
     }
 
     const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(filter), false);
+    btnFilter.addEventListener('click', termgr.partial(termgr.listDeployments), false);
     const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(reload), false);
+    btnReload.addEventListener('click', termgr.partial(termgr.reloadDeployments), false);
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
@@ -127,13 +127,13 @@ function init () {
     ];
 
     for (const radioButton of radioButtons) {
-        radioButton.addEventListener('change', termgr.partial(filter), false);
+        radioButton.addEventListener('change', termgr.partial(termgr.listDeployments), false);
     }
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', termgr.partial(deploy, system), false);
+    btnDeploy.addEventListener('click', termgr.partial(termgr.deploySystem, system), false);
     const deploymentsList = document.getElementById('deployments');
-    deploymentsList.addEventListener('change', termgr.partial(showDetails), false);
+    deploymentsList.addEventListener('change', termgr.partial(termgr.showDeploymentDetails), false);
     const systemId = document.getElementById('system');
     systemId.textContent = system;
 }

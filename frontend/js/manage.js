@@ -101,16 +101,16 @@ termgr.deploySystem = function (id) {
 /*
     Reloads the systems.
 */
-function reload () {
+termgr.reloadSystems = function () {
     termgr.startLoading();
-    return termgr.getSystems().then(filter).then(termgr.stopLoading);
-}
+    return termgr.getSystems().then(termgr.listSystems).then(termgr.stopLoading);
+};
 
 
 /*
     Filters, sorts and renders systems.
 */
-function filter (systems) {
+termgr.listSystems = function (systems) {
     if (systems == null) {
         termgr.startLoading();
         systems = termgr.loadSystems();
@@ -120,7 +120,7 @@ function filter (systems) {
     systems = termgr.sortedSystems(systems);
     termgr.renderSystems(systems);
     termgr.stopLoading();
-}
+};
 
 
 /*
@@ -128,11 +128,11 @@ function filter (systems) {
 */
 function init () {
     termgr.startLoading();
-    reload().then(termgr.stopLoading);
+    termgr.reloadSystems().then(termgr.stopLoading);
     const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(filter), false);
+    btnFilter.addEventListener('click', termgr.partial(termgr.listSystems), false);
     const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(reload), false);
+    btnReload.addEventListener('click', termgr.partial(termgr.reloadSystems), false);
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
@@ -141,7 +141,7 @@ function init () {
     ];
 
     for (const radioButton of radioButtons) {
-        radioButton.addEventListener('change', termgr.partial(filter), false);
+        radioButton.addEventListener('change', termgr.partial(termgr.listSystems), false);
     }
 }
 
