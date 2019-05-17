@@ -77,6 +77,14 @@ termgr.loadDeployments = function () {
 
 
 /*
+    Removes the deployments from local storage.
+*/
+termgr.clearDeployments = function () {
+    localStorage.removeItem('termgr.deployments');
+};
+
+
+/*
     Stores the systems in local storage.
 */
 termgr.storeSystems = function (systems) {
@@ -97,4 +105,22 @@ termgr.loadSystems = function () {
     }
 
     return JSON.parse(raw);
+};
+
+
+/*
+    Removes the systems from local storage.
+*/
+termgr.clearSystems = function () {
+    localStorage.removeItem('termgr.systems');
+};
+
+
+/*
+    Clears all storage items.
+*/
+termgr.clearStorage = function () {
+    termgr.clearCredentials();
+    termgr.clearDeployments();
+    termgr.clearSystems();
 };
