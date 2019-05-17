@@ -25,6 +25,26 @@ var termgr = termgr || {};
 
 
 /*
+    Deploys a system.
+*/
+termgr.deploy = function (system, deployment, exclusive = false) {
+    const payload = {
+        system: system,
+        deployment: deployment,
+        exclusive: exclusive
+    };
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/deploy', data, headers).then(
+        function () {
+            alert('Das System wurde als verbaut gekennzeichnet.');
+        },
+        termgr.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
+    );
+};
+
+
+/*
     Reloads the systems.
 */
 function reload () {

@@ -34,11 +34,9 @@ termgr.doLogin = function (event) {
     const storeCredentials = document.getElementById('storeCredentials').checked;
 
     if (storeCredentials) {
-        localStorage.setItem('termgr.account', account);
-        localStorage.setItem('termgr.passwd', passwd);
+        termgr.storeCredentials(account, passwd);
     } else {
-        localStorage.removeItem('termgr.account');
-        localStorage.removeItem('termgr.passwd');
+        termgr.clearCredentials();
     }
 
     return termgr.login(account, passwd);

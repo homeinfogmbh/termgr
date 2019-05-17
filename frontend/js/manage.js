@@ -25,6 +25,80 @@ var termgr = termgr || {};
 
 
 /*
+    Lets the respective system beep.
+*/
+termgr.beep = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/beep', data, headers).then(
+        function () {
+            alert('Das System sollte gepiept haben.');
+        },
+        termgr.checkSession('Das System konnte nicht zum Piepen gebracht werden.')
+    );
+};
+
+
+/*
+    Actually performs a reboot of the respective system.
+*/
+termgr.reboot = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/reboot', data, headers).then(
+        function () {
+            alert('Das System wurde wahrscheinlich neu gestartet.');
+        },
+        function (response) {
+            let message = 'Das System konnte nicht neu gestartet werden.';
+
+            if (response.status == 503) {
+                message = 'Auf dem System werden aktuell administrative Aufgaben ausgeführt.';
+            }
+
+            return termgr.checkSession(message)(response);
+        }
+    );
+};
+
+
+/*
+    Navigates to the toggle application page.
+*/
+termgr.toggleApplication = function (id) {
+    localStorage.setItem('termgr.system', JSON.stringify(id));
+    window.location = 'application.html';
+};
+
+
+/*
+    Synchronizes the respective system.
+*/
+termgr.sync = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/sync', data, headers).then(
+        function () {
+            alert('Das System wird demnächst synchronisiert.');
+        },
+        termgr.checkSession('Das System konnte nicht synchronisiert werden.')
+    );
+};
+
+
+/*
+    Opens the deploying view.
+*/
+termgr.deploySystem = function (id) {
+    localStorage.setItem('termgr.system', JSON.stringify(id));
+    window.location = 'deploy.html';
+};
+
+
+/*
     Reloads the systems.
 */
 function reload () {

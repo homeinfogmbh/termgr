@@ -25,6 +25,38 @@ var termgr = termgr || {};
 
 
 /*
+    Enables the application.
+*/
+termgr.enableApplication = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/application', data, headers).then(
+        function () {
+            alert('Digital Signage Anwendung wurde aktiviert.');
+        },
+        termgr.checkSession('Digital Signage Anwendung konnte nicht aktiviert werden.')
+    );
+};
+
+
+/*
+    Disables the application.
+*/
+termgr.disableApplication = function (system) {
+    const payload = {'system': system, 'disable': true};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/application', data, headers).then(
+        function () {
+            alert('Digital Signage Anwendung wurde deaktiviert.');
+        },
+        termgr.checkSession('Digital Signage Anwendung konnte nicht deaktiviert werden.')
+    );
+};
+
+
+/*
     Initialize manage.html.
 */
 function init () {
