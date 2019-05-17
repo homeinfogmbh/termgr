@@ -135,11 +135,15 @@ def grant(args):
 
     for account in args.account:
         if args.customer:
-            for  customer in args.customer:
+            for customer in args.customer:
+                LOGGER.debug(
+                    'Granting %s permissions on %i.', account, customer.id)
                 grant_customer(account, customer)
 
         if args.system:
             for system in args.system:
+                LOGGER.debug(
+                    'Granting %s permissions on #%i.', account, system.id)
                 grant_system(account, system)
 
 
@@ -158,10 +162,16 @@ def revoke(args):
         for account in args.account:
             if args.customer:
                 for customer in args.customer:
+                    LOGGER.debug(
+                        'Revoking permissions of %s on %i.', account,
+                        customer.id)
                     revoke_customer(account, customer)
 
             if args.system:
                 for system in args.system:
+                    LOGGER.debug(
+                        'Revoking permissions of %s on #%i.', account,
+                        system.id)
                     revoke_system(account, system)
 
 
