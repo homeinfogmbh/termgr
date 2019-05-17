@@ -84,7 +84,7 @@ termgr.deployment.deploy = function (system) {
     Shows details of the respective deployment.
 */
 termgr.deployment.renderDetails = function () {
-    const deployments = termgr.loadDeployments();
+    const deployments = termgr.storage.deployments.get();
     const deploymentId = parseInt(document.getElementById('deployments').value);
     let deployment;
 
