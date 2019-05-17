@@ -1,6 +1,7 @@
 """Remote terminal controller."""
 
 from logging import getLogger
+from subprocess import CalledProcessError
 
 from terminallib import RemoteController
 
@@ -32,7 +33,10 @@ class SystemController(RemoteController):
 
     def check_pacman(self):
         """Determines if pacman is (probably) running."""
-        return self.sudo('/usr/bin/test', '-f ', '/var/lib/pacman/db.lck')
+        try:
+            return self.sudo('/usr/bin/test', '-f ', '/var/lib/pacman/db.lck')
+        except CalledProcessError:
+            return False
 
     def sudo(self, cmd, *args):
         """Execute a command with sudo."""
@@ -69,8 +73,7 @@ class SystemController(RemoteController):
 
     def enable_application(self):
         """Enables the application."""
-        result = self.sudo(SYSTEMCTL, 'enable', '--now', DIGSIG_APP)
-        return result
+        return self.sudo(SYSTEMCTL, 'enable', '--now', DIGSIG_APP)
 
     def disable_application(self):
         """Disables the application."""
@@ -78,7 +81,10 @@ class SystemController(RemoteController):
 
     def check_login(self, user=ADMIN_USER):
         """Checks whether the respective user is logged in."""
-        return self.execute('/usr/bin/loginctl', 'user-status', user)
+        try:
+            return self.execute('/usr/bin/loginctl', 'user-status', user)
+        except CalledProcessError:
+            return False
 
 
 class SystemsController:
