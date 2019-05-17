@@ -111,7 +111,7 @@ termgr.api.login = function (account, passwd) {
     const payload = {'account': account, 'passwd': passwd};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', 'https://his.homeinfo.de/session', data, headers).then(
+    return termgr.api.makeRequest('POST', 'https://his.homeinfo.de/session', data, headers).then(
         function () {
             window.location = 'manage.html';
         },
@@ -126,7 +126,7 @@ termgr.api.login = function (account, passwd) {
     Retrieves deployments from the API.
 */
 termgr.api.getDeployments = function () {
-    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/deployments').then(
+    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/deployments').then(
         function (response) {
             const deployments = response.json;
             termgr.storage.deployments.set(deployments);
@@ -141,7 +141,7 @@ termgr.api.getDeployments = function () {
     Retrieves systems from the API.
 */
 termgr.api.getSystems = function () {
-    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/systems').then(
+    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/systems').then(
         function (response) {
             const systems = response.json;
             termgr.storage.systems.set(systems);
@@ -157,7 +157,7 @@ termgr.api.getSystems = function () {
     which the current user is allowed to deploy to.
 */
 termgr.api.getCustomers = function () {
-    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/customers').catch(
+    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/customers').catch(
         termgr.api.checkSession('Die Liste der Kunden konnte nicht abgefragt werden.')
     );
 };
@@ -167,7 +167,7 @@ termgr.api.getCustomers = function () {
     Retrieves connections from the backend.
 */
 termgr.api.getConnections = function () {
-    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/connections').catch(
+    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/connections').catch(
         termgr.api.checkSession('Die Liste der Internetverbindungen konnte nicht abgefragt werden.')
     );
 };
@@ -177,7 +177,7 @@ termgr.api.getConnections = function () {
     Retrieves types from the backend.
 */
 termgr.api.getTypes = function () {
-    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/types').catch(
+    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/types').catch(
         termgr.api.checkSession('Die Liste der Terminal-Typen konnte nicht abgefragt werden.')
     );
 };
