@@ -72,7 +72,7 @@ termgr.manage.render = function (systems) {
 termgr.manage.list = function (systems) {
     if (systems == null) {
         termgr.loader.start();
-        systems = termgr.storage.systems.load();
+        systems = termgr.storage.systems.get();
     }
 
     systems = termgr.filter.systems(systems);

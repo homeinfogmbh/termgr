@@ -59,7 +59,7 @@ termgr.deployment.render = function (deployments) {
 termgr.deployment.list = function (deployments) {
     if (deployments == null) {
         termgr.loader.start();
-        deployments = termgr.storage.deployments.load();
+        deployments = termgr.storage.deployments.get();
     }
 
     deployments = termgr.filter.deployments(deployments);
