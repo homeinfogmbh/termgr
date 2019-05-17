@@ -107,7 +107,7 @@ termgr.deployment.renderDetails = function () {
 termgr.deployment.init = function () {
     termgr.loader.start();
     const system = termgr.storage.system.get();
-    const deployments = termgr.storage.deployments.load();
+    const deployments = termgr.storage.deployments.get();
 
     if (deployments == null) {
         termgr.deployment.reload().then(termgr.loader.stop);
