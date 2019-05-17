@@ -168,7 +168,7 @@ def main():
     args = get_args()
     basicConfig(level=DEBUG if args.verbose else INFO, format=LOG_FORMAT)
 
-    if args.mode == 'ls':
+    if args.mode == 'list':
         list_(args)
     elif args.mode == 'grant':
         grant(args)
