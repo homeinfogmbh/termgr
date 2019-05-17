@@ -22,77 +22,22 @@
 
 
 var termgr = termgr || {};
-
-
-/*
-    Lets the respective system beep.
-*/
-termgr.beep = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/beep', data, headers).then(
-        function () {
-            alert('Das System sollte gepiept haben.');
-        },
-        termgr.checkSession('Das System konnte nicht zum Piepen gebracht werden.')
-    );
-};
-
-
-/*
-    Actually performs a reboot of the respective system.
-*/
-termgr.reboot = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/reboot', data, headers).then(
-        function () {
-            alert('Das System wurde wahrscheinlich neu gestartet.');
-        },
-        function (response) {
-            let message = 'Das System konnte nicht neu gestartet werden.';
-
-            if (response.status == 503) {
-                message = 'Auf dem System werden aktuell administrative Aufgaben ausgeführt.';
-            }
-
-            return termgr.checkSession(message)(response);
-        }
-    );
-};
+termgr.manage = {};
 
 
 /*
     Navigates to the toggle application page.
 */
-termgr.toggleApplication = function (system) {
+termgr.manage.application = function (system) {
     termgr.storage.system.set(system);
     window.location = 'application.html';
 };
 
 
 /*
-    Synchronizes the respective system.
-*/
-termgr.sync = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/sync', data, headers).then(
-        function () {
-            alert('Das System wird demnächst synchronisiert.');
-        },
-        termgr.checkSession('Das System konnte nicht synchronisiert werden.')
-    );
-};
-
-
-/*
     Opens the deploying view.
 */
-termgr.deploySystem = function (system) {
+termgr.manage.deploy = function (system) {
     termgr.storage.system.set(system);
     window.location = 'deploy.html';
 };
@@ -101,38 +46,52 @@ termgr.deploySystem = function (system) {
 /*
     Reloads the systems.
 */
-termgr.reloadSystems = function () {
-    termgr.startLoading();
-    return termgr.getSystems().then(termgr.listSystems).then(termgr.stopLoading);
+termgr.manage.reload = function () {
+    termgr.loader.start();
+    return termgr.api.getSystems().then(termgr.manage.list).then(termgr.loader.stop);
+};
+
+
+/*
+    Renders the respective systems.
+*/
+termgr.manage.render = function (systems) {
+    const container = document.getElementById('systems');
+    container.innerHTML = '';
+
+    for (const system of systems) {
+        let entry = termgr.dom.systemEntry(system);
+        container.appendChild(entry);
+    }
 };
 
 
 /*
     Filters, sorts and renders systems.
 */
-termgr.listSystems = function (systems) {
+termgr.manage.list = function (systems) {
     if (systems == null) {
-        termgr.startLoading();
+        termgr.loader.start();
         systems = termgr.storage.systems.load();
     }
 
-    systems = termgr.filteredSystems(systems);
-    systems = termgr.sortedSystems(systems);
-    termgr.renderSystems(systems);
-    termgr.stopLoading();
+    systems = termgr.filter.systems(systems);
+    systems = termgr.sort.systems(systems);
+    termgr.manage.render(systems);
+    termgr.loader.stop();
 };
 
 
 /*
     Initialize manage.html.
 */
-function init () {
-    termgr.startLoading();
-    termgr.reloadSystems().then(termgr.stopLoading);
+termgr.manage.init = function () {
+    termgr.loader.start();
+    termgr.manage.reload().then(termgr.loader.stop);
     const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.listSystems), false);
+    btnFilter.addEventListener('click', termgr.partial(termgr.manage.list), false);
     const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(termgr.reloadSystems), false);
+    btnReload.addEventListener('click', termgr.partial(termgr.manage.reload), false);
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
@@ -141,9 +100,9 @@ function init () {
     ];
 
     for (const radioButton of radioButtons) {
-        radioButton.addEventListener('change', termgr.partial(termgr.listSystems), false);
+        radioButton.addEventListener('change', termgr.partial(termgr.manage.list), false);
     }
-}
+};
 
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', termgr.manage.init);

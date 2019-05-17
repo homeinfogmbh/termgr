@@ -22,52 +22,21 @@
 
 
 var termgr = termgr || {};
-
-
-/*
-    Enables the application.
-*/
-termgr.enableApplication = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/application', data, headers).then(
-        function () {
-            alert('Digital Signage Anwendung wurde aktiviert.');
-        },
-        termgr.checkSession('Digital Signage Anwendung konnte nicht aktiviert werden.')
-    );
-};
-
-
-/*
-    Disables the application.
-*/
-termgr.disableApplication = function (system) {
-    const payload = {'system': system, 'disable': true};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.makeRequest('POST', termgr.BASE_URL + '/administer/application', data, headers).then(
-        function () {
-            alert('Digital Signage Anwendung wurde deaktiviert.');
-        },
-        termgr.checkSession('Digital Signage Anwendung konnte nicht deaktiviert werden.')
-    );
-};
+termgr.application = {};
 
 
 /*
     Initialize manage.html.
 */
-function init () {
+termgr.application.init = function () {
     const system = termgr.storage.system.get();
-    const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', termgr.partial(termgr.enableApplication, system), false);
-    const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', termgr.partial(termgr.disableApplication, system), false);
     const systemId = document.getElementById('system');
     systemId.textContent = system;
-}
+    const btnEnable = document.getElementById('enable');
+    btnEnable.addEventListener('click', termgr.partial(termgr.api.application.enable, system), false);
+    const btnDisable = document.getElementById('disable');
+    btnDisable.addEventListener('click', termgr.partial(termgr.api.application.disable, system), false);
+};
 
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', termgr.application.init);

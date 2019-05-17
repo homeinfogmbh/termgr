@@ -1,5 +1,5 @@
 /*
-    autologin.js - Terminal Manager automatic login.
+    loader.js - Terminal Manager loading animation.
 
     (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -22,28 +22,26 @@
 
 
 var termgr = termgr || {};
-termgr.autologin = {};
+termgr.loader = {};
 
 
 /*
-    Initialize index.html.
+    Starts loading.
 */
-termgr.autologin.init = function () {
-    const [account, passwd] = termgr.storage.credentials.get();
-
-    if (account == null || passwd == null) {
-        window.location = 'login.html';
-    } else {
-        termgr.login(account, passwd).then(
-            function () {
-                window.location = 'manage.html';
-            },
-            function () {
-                window.location = 'login.html';
-            }
-        );
-    }
+termgr.loader.start = function () {
+    const loader = document.getElementById('loader');
+    const target = document.getElementById('target');
+    target.style.display = 'none';
+    loader.style.display = 'block';
 };
 
 
-document.addEventListener('DOMContentLoaded', termgr.autologin.init);
+/*
+    Stops loading.
+*/
+termgr.loader.stop = function () {
+    const loader = document.getElementById('loader');
+    const target = document.getElementById('target');
+    loader.style.display = 'none';
+    target.style.display = 'block';
+};

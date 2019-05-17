@@ -25,28 +25,6 @@ var termgr = termgr || {};
 
 
 /*
-    Starts loading.
-*/
-termgr.startLoading = function () {
-    const loader = document.getElementById('loader');
-    const target = document.getElementById('target');
-    target.style.display = 'none';
-    loader.style.display = 'block';
-};
-
-
-/*
-    Stops loading.
-*/
-termgr.stopLoading = function () {
-    const loader = document.getElementById('loader');
-    const target = document.getElementById('target');
-    loader.style.display = 'none';
-    target.style.display = 'block';
-};
-
-
-/*
     Returns the respective address as a one-line string.
 */
 termgr.addressToString = function (address) {
@@ -67,84 +45,6 @@ termgr.customerToString = function (customer) {
 */
 termgr.deploymentToString = function (deployment) {
     return deployment.id + ': ' + termgr.addressToString(deployment.address);
-};
-
-
-/*
-    Renders the respective systems.
-*/
-termgr.renderSystems = function (systems) {
-    const container = document.getElementById('systems');
-    container.innerHTML = '';
-
-    for (const system of systems) {
-        let entry = termgr.systemEntry(system);
-        container.appendChild(entry);
-    }
-};
-
-
-/*
-    Renders the respective deployments.
-*/
-termgr.renderDeployments = function (deployments) {
-    const select = document.getElementById('deployments');
-    select.innerHTML = '';
-
-    for (const deployment of deployments) {
-        let option = document.createElement('option');
-        option.value = '' + deployment.id;
-        option.textContent = termgr.deploymentToString(deployment);
-        select.appendChild(option);
-    }
-};
-
-
-/*
-    Renders the respective customers.
-*/
-termgr.renderCustomers = function (customers) {
-    const select = document.getElementById('customer');
-    select.innerHTML = '';
-
-    for (const customer of customers) {
-        let option = document.createElement('option');
-        option.setAttribute('value', customer.id);
-        option.textContent = customer.company.name;
-        select.appendChild(option);
-    }
-};
-
-
-/*
-    Renders the respective connections.
-*/
-termgr.renderConnections = function (connections) {
-    const select = document.getElementById('connection');
-    select.innerHTML = '';
-
-    for (const connection of connections) {
-        let option = document.createElement('option');
-        option.setAttribute('value', connection);
-        option.textContent = connection;
-        select.appendChild(option);
-    }
-};
-
-
-/*
-    Renders the respective types.
-*/
-termgr.renderTypes = function (types) {
-    const select = document.getElementById('type');
-    select.innerHTML = '';
-
-    for (const type of types) {
-        let option = document.createElement('option');
-        option.setAttribute('value', type);
-        option.textContent = type;
-        select.appendChild(option);
-    }
 };
 
 

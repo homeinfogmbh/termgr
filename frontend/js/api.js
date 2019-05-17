@@ -22,15 +22,15 @@
 
 
 var termgr = termgr ||  {};
+termgr.api = {};
 
-termgr.BASE_URL = 'https://termgr.homeinfo.de';
-termgr.UNHANDLED_ERROR = 'Unbehandelter Fehler. Bitte kontaktieren Sie uns.';
+termgr.api.BASE_URL = 'https://termgr.homeinfo.de';
 
 
 /*
   Makes a request returning a promise.
 */
-termgr.makeRequest = function (method, url, data = null, headers = {}) {
+termgr.api.makeRequest = function (method, url, data = null, headers = {}) {
     function parseResponse (response) {
         try {
             return JSON.parse(response);
@@ -92,7 +92,7 @@ termgr.makeRequest = function (method, url, data = null, headers = {}) {
 /*
     Function to make a request and display an error message on error.
 */
-termgr.checkSession = function (message) {
+termgr.api.checkSession = function (message) {
     return function (response) {
         if (response.status == 401 || response.message == 'Session expired.') {
             alert('Sitzung abgelaufen.');
@@ -107,7 +107,7 @@ termgr.checkSession = function (message) {
 /*
     Performs a login.
 */
-termgr.login = function (account, passwd) {
+termgr.api.login = function (account, passwd) {
     const payload = {'account': account, 'passwd': passwd};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
@@ -125,14 +125,14 @@ termgr.login = function (account, passwd) {
 /*
     Retrieves deployments from the API.
 */
-termgr.getDeployments = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/deployments').then(
+termgr.api.getDeployments = function () {
+    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/deployments').then(
         function (response) {
             const deployments = response.json;
             termgr.storage.deployments.set(deployments);
             return deployments;
         },
-        termgr.checkSession('Die Liste der Standorte konnte nicht abgefragt werden.')
+        termgr.api.checkSession('Die Liste der Standorte konnte nicht abgefragt werden.')
     );
 };
 
@@ -140,14 +140,14 @@ termgr.getDeployments = function () {
 /*
     Retrieves systems from the API.
 */
-termgr.getSystems = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/systems').then(
+termgr.api.getSystems = function () {
+    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/systems').then(
         function (response) {
             const systems = response.json;
             termgr.storage.systems.set(systems);
             return systems;
         },
-        termgr.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
+        termgr.api.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
     );
 };
 
@@ -156,9 +156,9 @@ termgr.getSystems = function () {
     Retrieves customers from the backend,
     which the current user is allowed to deploy to.
 */
-termgr.getCustomers = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/customers').catch(
-        termgr.checkSession('Die Liste der Kunden konnte nicht abgefragt werden.')
+termgr.api.getCustomers = function () {
+    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/customers').catch(
+        termgr.api.checkSession('Die Liste der Kunden konnte nicht abgefragt werden.')
     );
 };
 
@@ -166,9 +166,9 @@ termgr.getCustomers = function () {
 /*
     Retrieves connections from the backend.
 */
-termgr.getConnections = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/connections').catch(
-        termgr.checkSession('Die Liste der Internetverbindungen konnte nicht abgefragt werden.')
+termgr.api.getConnections = function () {
+    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/connections').catch(
+        termgr.api.checkSession('Die Liste der Internetverbindungen konnte nicht abgefragt werden.')
     );
 };
 
@@ -176,8 +176,119 @@ termgr.getConnections = function () {
 /*
     Retrieves types from the backend.
 */
-termgr.getTypes = function () {
-    return termgr.makeRequest('GET', termgr.BASE_URL + '/list/types').catch(
-        termgr.checkSession('Die Liste der Terminal-Typen konnte nicht abgefragt werden.')
+termgr.api.getTypes = function () {
+    return termgr.makeRequest('GET', termgr.api.BASE_URL + '/list/types').catch(
+        termgr.api.checkSession('Die Liste der Terminal-Typen konnte nicht abgefragt werden.')
+    );
+};
+
+
+termgr.api.application = {};
+
+
+/*
+    Enables the application.
+*/
+termgr.api.application.enable = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/application', data, headers).then(
+        function () {
+            alert('Digital Signage Anwendung wurde aktiviert.');
+        },
+        termgr.api.checkSession('Digital Signage Anwendung konnte nicht aktiviert werden.')
+    );
+};
+
+
+/*
+    Disables the application.
+*/
+termgr.api.application.disable = function (system) {
+    const payload = {'system': system, 'disable': true};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/application', data, headers).then(
+        function () {
+            alert('Digital Signage Anwendung wurde deaktiviert.');
+        },
+        termgr.api.checkSession('Digital Signage Anwendung konnte nicht deaktiviert werden.')
+    );
+};
+
+
+/*
+    Deploys a system.
+*/
+termgr.api.deploy = function (system, deployment, exclusive = false) {
+    const payload = {
+        system: system,
+        deployment: deployment,
+        exclusive: exclusive
+    };
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/deploy', data, headers).then(
+        function () {
+            alert('Das System wurde als verbaut gekennzeichnet.');
+        },
+        termgr.api.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
+    );
+};
+
+
+/*
+    Lets the respective system beep.
+*/
+termgr.api.beep = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/beep', data, headers).then(
+        function () {
+            alert('Das System sollte gepiept haben.');
+        },
+        termgr.api.checkSession('Das System konnte nicht zum Piepen gebracht werden.')
+    );
+};
+
+
+/*
+    Actually performs a reboot of the respective system.
+*/
+termgr.api.reboot = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/reboot', data, headers).then(
+        function () {
+            alert('Das System wurde wahrscheinlich neu gestartet.');
+        },
+        function (response) {
+            let message = 'Das System konnte nicht neu gestartet werden.';
+
+            if (response.status == 503) {
+                message = 'Auf dem System werden aktuell administrative Aufgaben ausgeführt.';
+            }
+
+            return termgr.api.checkSession(message)(response);
+        }
+    );
+};
+
+
+/*
+    Synchronizes the respective system.
+*/
+termgr.api.sync = function (system) {
+    const payload = {'system': system};
+    const data = JSON.stringify(payload);
+    const headers = {'Content-Type': 'application/json'};
+    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/sync', data, headers).then(
+        function () {
+            alert('Das System wird demnächst synchronisiert.');
+        },
+        termgr.api.checkSession('Das System konnte nicht synchronisiert werden.')
     );
 };

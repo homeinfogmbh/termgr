@@ -22,12 +22,13 @@
 
 
 var termgr = termgr || {};
+termgr.login = {};
 
 
 /*
     Performs the initial login.
 */
-termgr.doLogin = function () {
+termgr.login.login = function () {
     const account = document.getElementById('account').value;
     const passwd = document.getElementById('passwd').value;
     const storeCredentials = document.getElementById('storeCredentials').checked;
@@ -38,17 +39,17 @@ termgr.doLogin = function () {
         termgr.storage.credentials.clear();
     }
 
-    return termgr.login(account, passwd);
+    return termgr.api.login(account, passwd);
 };
 
 
 /*
     Initialize index.html.
 */
-function init () {
+termgr.login.init = function () {
     const loginButton = document.getElementById('login');
-    loginButton.addEventListener('click', termgr.partial(termgr.doLogin), false);
-}
+    loginButton.addEventListener('click', termgr.partial(termgr.login.login), false);
+};
 
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', termgr.login.init);

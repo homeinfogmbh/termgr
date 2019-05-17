@@ -22,12 +22,13 @@
 
 
 var termgr = termgr || {};
+termgr.dom = {};
 
 
 /*
     Generates a terminal DOM entry.
 */
-termgr.systemEntry = function (system) {
+termgr.dom.systemEntry = function (system) {
     const deployment = system.deployment;
     let address = 'Keine Adresse';
     let customer = 'Kein Kunde';
@@ -50,7 +51,7 @@ termgr.systemEntry = function (system) {
 
     const btnBeep = document.createElement('button');
     btnBeep.setAttribute('class', 'w3-button w3-blue w3-col s2');
-    btnBeep.addEventListener('click', termgr.partial(termgr.beep, system.id), false);
+    btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system.id), false);
     btnBeep.setAttribute('title', 'Beep');
     btnBeep.appendChild(btnBeepIcon);
 
@@ -59,7 +60,7 @@ termgr.systemEntry = function (system) {
 
     const btnReboot = document.createElement('button');
     btnReboot.setAttribute('class', 'w3-button w3-orange w3-col s2');
-    btnReboot.addEventListener('click', termgr.partial(termgr.reboot, system.id), false);
+    btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system.id), false);
     btnReboot.setAttribute('title', 'Reboot');
     btnReboot.appendChild(btnRebootIcon);
 
@@ -69,7 +70,7 @@ termgr.systemEntry = function (system) {
     const btnDeploy = document.createElement('button');
     btnDeploy.setAttribute('class', 'w3-button w3-teal w3-col s2');
     btnDeploy.setAttribute('data-id', system.id);
-    btnDeploy.addEventListener('click', termgr.partial(termgr.deploySystem, system.id), false);
+    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.deploy, system.id), false);
     btnDeploy.setAttribute('title', 'Verbauen');
     btnDeploy.appendChild(btnDeployIcon);
 
@@ -79,7 +80,7 @@ termgr.systemEntry = function (system) {
     const btnEnableApplication = document.createElement('button');
     btnEnableApplication.setAttribute('class', 'w3-button w3-khaki w3-col s2');
     btnEnableApplication.setAttribute('data-id', system.id);
-    btnEnableApplication.addEventListener('click', termgr.partial(termgr.toggleApplication, system.id), false);
+    btnEnableApplication.addEventListener('click', termgr.partial(termgr.manage.application, system.id), false);
     btnEnableApplication.setAttribute('title', 'Digital Signage Modus umschalten');
     btnEnableApplication.appendChild(btnEnableApplicationIcon);
 
@@ -88,7 +89,7 @@ termgr.systemEntry = function (system) {
 
     const btnSync = document.createElement('button');
     btnSync.setAttribute('class', 'w3-button w3-grey w3-col s2');
-    btnSync.addEventListener('click', termgr.partial(termgr.sync, system.id), false);
+    btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system.id), false);
     btnSync.setAttribute('data-toggle', 'tooltip');
     btnSync.setAttribute('data-placement', 'bottom');
     btnSync.setAttribute('title', 'Synchronisieren');
@@ -124,7 +125,7 @@ termgr.systemEntry = function (system) {
 /*
     Converts a deployment into a table.
 */
-termgr.deploymentToTable = function (deployment) {
+termgr.dom.deploymentToTable = function (deployment) {
     const table = document.createElement('table');
     table.setAttribute('class', 'w3-table-all');
     // ID.

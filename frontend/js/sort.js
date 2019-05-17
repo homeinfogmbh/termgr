@@ -22,12 +22,13 @@
 
 
 var termgr = termgr || {};
+termgr.sort = {};
 
 
 /*
     Returns a compare function for systems.
 */
-termgr.compareSystems = function () {
+termgr.sort.compareSystems = function () {
     const desc = document.getElementById('sortDesc').checked;
     const byId = document.getElementById('sortById').checked;
     const factor = desc ? -1 : 1;
@@ -74,7 +75,7 @@ termgr.compareSystems = function () {
 /*
     Returns a compare functionm for deployments.
 */
-termgr.compareDeployments = function () {
+termgr.sort.compareDeployments = function () {
     const desc = document.getElementById('sortDesc').checked;
     const byId = document.getElementById('sortById').checked;
     const factor = desc ? -1 : 1;
@@ -108,8 +109,8 @@ termgr.compareDeployments = function () {
 /*
     Sorts the systems.
 */
-termgr.sortedSystems = function (systems) {
-    systems.sort(termgr.compareSystems());
+termgr.sort.systems = function (systems) {
+    systems.sort(termgr.sort.compareSystems());
     return systems;
 };
 
@@ -117,7 +118,7 @@ termgr.sortedSystems = function (systems) {
 /*
     Sorts the deployments.
 */
-termgr.sortedDeployments = function (deployments) {
-    deployments.sort(termgr.compareDeployments());
+termgr.sort.deployments = function (deployments) {
+    deployments.sort(termgr.sort.compareDeployments());
     return deployments;
 };
