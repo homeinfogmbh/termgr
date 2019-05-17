@@ -34,6 +34,16 @@ termgr.storeCredentials = function (account, passwd) {
 
 
 /*
+    Returns account name and password from local storage.
+*/
+termgr.getCredentials = function () {
+    const account = localStorage.getItem('termgr.account');
+    const passwd = localStorage.getItem('termgr.passwd');
+    return [account, passwd];
+};
+
+
+/*
     Removes account name and password from local storage.
 */
 termgr.clearCredentials = function () {

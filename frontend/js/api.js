@@ -21,7 +21,87 @@
 'use strict';
 
 
-var termgr = termgr || {};
+var termgr = termgr ||  {};
+
+termgr.BASE_URL = 'https://termgr.homeinfo.de';
+termgr.UNHANDLED_ERROR = 'Unbehandelter Fehler. Bitte kontaktieren Sie uns.';
+
+
+/*
+  Makes a request returning a promise.
+*/
+termgr.makeRequest = function (method, url, data = null, headers = {}) {
+    function parseResponse (response) {
+        try {
+            return JSON.parse(response);
+        } catch (error) {
+            return response;
+        }
+    }
+
+    function executor (resolve, reject) {
+        function onload () {
+            if (this.status >= 200 && this.status < 300) {
+                resolve({
+                    response: xhr.response,
+                    json: parseResponse(xhr.response),
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            } else {
+                reject({
+                    response: xhr.response,
+                    json: parseResponse(xhr.response),
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            }
+        }
+
+        function onerror () {
+            reject({
+                response: xhr.response,
+                json: parseResponse(xhr.response),
+                status: this.status,
+                statusText: xhr.statusText
+            });
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.open(method, url);
+
+        for (const header in headers) {
+            xhr.setRequestHeader(header, headers[header]);
+        }
+
+        xhr.onload = onload;
+        xhr.onerror = onerror;
+
+        if (data == null) {
+            xhr.send();
+        } else {
+            xhr.send(data);
+        }
+    }
+
+    return new Promise(executor);
+};
+
+
+/*
+    Function to make a request and display an error message on error.
+*/
+termgr.checkSession = function (message) {
+    return function (response) {
+        if (response.status == 401 || response.message == 'Session expired.') {
+            alert('Sitzung abgelaufen.');
+            window.location = 'index.html';
+        } else {
+            alert(message);
+        }
+    };
+};
 
 
 /*
