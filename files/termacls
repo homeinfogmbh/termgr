@@ -75,12 +75,12 @@ def get_args():
 
     parser = ArgumentParser(description='Terminal permissions manager.')
     parser.add_argument(
-        'account', nargs='+', type=get_account, metavar='account',
-        help="the administrator's HIS account")
-    parser.add_argument(
         '-v', '--verbose', action='store_true', help='turn on verbose logging')
     subparsers = parser.add_subparsers(dest='mode')
-    list_parser = subparsers.add_parser('ls', help='list permissions')
+    list_parser = subparsers.add_parser('list', help='list permissions')
+    list_parser.add_argument(
+        'account', nargs='*', type=get_account, metavar='account',
+        help="the administrator's HIS account")
     list_parser.add_argument(
         '-c', '--customers', action='store_true',
         help='list customer related permissions')
@@ -89,12 +89,18 @@ def get_args():
         help='list system related permissions')
     grant_parser = subparsers.add_parser('grant', help='grant permissions')
     grant_parser.add_argument(
+        'account', nargs='+', type=get_account, metavar='account',
+        help="the administrator's HIS account")
+    grant_parser.add_argument(
         '-c', '--customer', nargs='*', type=get_customer, metavar='customer',
         help='grant permissions to deploy for these customers')
     grant_parser.add_argument(
         '-s', '--system', nargs='*', type=get_system, metavar='system',
         help='grant permissions to administer these system')
     revoke_parser = subparsers.add_parser('revoke', help='revoke permissions')
+    revoke_parser.add_argument(
+        'account', nargs='+', type=get_account, metavar='account',
+        help="the administrator's HIS account")
     revoke_parser.add_argument(
         '-c', '--customer', nargs='*', type=get_customer, metavar='customer',
         help='revoke permissions to deploy for these customers')
@@ -109,15 +115,17 @@ def get_args():
 def list_(args):
     """Lists permissions."""
 
+    accounts = args.account or Account
+
     if args.customers:
         for customer_admin in CustomerAdministrator.select().where(
-                CustomerAdministrator.account << args.account):
+                CustomerAdministrator.account << accounts):
             print(f'{customer_admin.account.name}:',
                   customer_admin.customer_id)
 
     if args.systems:
         for system_admin in SystemAdministrator.select().where(
-                SystemAdministrator.account << args.account):
+                SystemAdministrator.account << accounts):
             print(f'{system_admin.account.name}:',
                   system_admin.system_id)
 
