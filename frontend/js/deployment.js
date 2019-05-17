@@ -131,7 +131,7 @@ termgr.deployment.init = function () {
     }
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', termgr.partial(termgr.deploySystem, system), false);
+    btnDeploy.addEventListener('click', termgr.partial(termgr.deployment.deploy, system), false);
     const deploymentsList = document.getElementById('deployments');
     deploymentsList.addEventListener('change', termgr.partial(termgr.deployment.renderDetails), false);
     const systemId = document.getElementById('system');
