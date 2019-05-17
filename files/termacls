@@ -23,200 +23,150 @@ Options:
     --version                   Show version.
     -h --help                   Show this screen.
 """
-from collections import defaultdict
-from logging import INFO, basicConfig, getLogger
-from sys import exit as exit_
-
-from docopt import docopt
+from argparse import ArgumentParser
+from logging import DEBUG, INFO, basicConfig, getLogger
+from pathlib import Path
 
 from his import Account
 from mdb import Customer
 from syslib import script
-from terminallib import get_terminals, Class
+from terminallib import System
 
-from termgr.auth import permissions
 from termgr.config import LOG_FORMAT
-from termgr.orm import ACL, DefaultACL
+from termgr.orm import CustomerAdministrator, SystemAdministrator
+from termgr.permissions import grant_system
+from termgr.permissions import revoke_system
+from termgr.permissions import grant_customer
+from termgr.permissions import revoke_customer
 
 
-LOGGER = getLogger(__file__)
+LOGGER = getLogger(Path(__file__).name)
 
 
-def _get_permissions(options):
-    """"Returns the respective permissions."""
-
-    if options['--grant']:
-        read = True if options['--read'] else None
-        administer = True if options['--administer'] else None
-        setup = True if options['--setup'] else None
-    elif options['--revoke']:
-        read = False if options['--read'] else None
-        administer = False if options['--administer'] else None
-        setup = False if options['--setup'] else None
-    else:
-        read = bool(options['--read'])
-        administer = bool(options['--administer'])
-        setup = bool(options['--setup'])
-
-    return (read, administer, setup)
-
-
-def _default_acls(terminal):
-    """Yields the default ACLs for the respective terminal."""
-
-    for default_acl in DefaultACL.select().where(
-            (DefaultACL.customer == terminal.customer)
-            & (DefaultACL.class_ == terminal.class_)):
-        yield (default_acl.account, default_acl)
-
-
-def _explicit_acls(terminal):
-    """Yields the explicit ACLs for the respective terminal."""
-
-    for acl in ACL.select().where(ACL.terminal == terminal):
-        yield (acl.account, acl)
-
-
-def list_acls(options):
-    """Lists the requested ACLs."""
-
-    if options['--account']:
-        try:
-            selected_account = Account.get(
-                Account.name == options['--account'])
-        except Account.DoesNotExist:
-            LOGGER.error('No such account: %s.', options['--account'])
-            return 3
-    else:
-        selected_account = None
-
-    terminals = get_terminals(options['<expr>'])
-
-    for terminal in terminals:
-        if selected_account is not None:
-            permissions_ = permissions(selected_account, terminal)
-
-            if permissions_ is not None:
-                print(permissions_, terminal, selected_account)
-        else:
-            permissions_map = defaultdict(list)
-
-            for account, permissions_ in _default_acls(terminal):
-                permissions_map[account].append(permissions_)
-
-            for account, permissions_ in _explicit_acls(terminal):
-                permissions_map[account].append(permissions_)
-
-            for account, permissions_list in permissions_map.items():
-                for permissions_ in permissions_list:
-                    print(permissions_, terminal, account)
-
-    return 0
-
-
-def set_acls(options):
-    """Sets the requested ACLs."""
+def get_account(name):
+    """Returns the respective account."""
 
     try:
-        account = Account.get(Account.name == options['<account>'])
+        return Account.get(Account.name == name)
     except Account.DoesNotExist:
-        LOGGER.error('No such account: %s.', options['<account>'])
-        return 1
-
-    if options['--grant'] and options['--revoke']:
-        LOGGER.error('Error: Cannot grant and revoke at the same time.')
-        return 2
-
-    read, administer, setup = _get_permissions(options)
-
-    for terminal in get_terminals(options['<expr>']):
-        acl = ACL.add(
-            account, terminal, read=read, administer=administer, setup=setup)
-        acl.commit()
-
-    return 0
+        raise ValueError(f'No such account: "{name}".')
 
 
-def set_default(options):
-    """Sets default ACLs."""
+def get_customer(cid):
+    """Returns the respective system."""
 
     try:
-        account = Account.get(Account.name == options['<account>'])
-    except Account.DoesNotExist:
-        LOGGER.error('No such account: %s.', options['<account>'])
-        return 1
-
-    if account.root:
-        LOGGER.warning('Will not set ACL for root account.')
-        return 2
-
-    try:
-        customer = Customer.find(options['<customer>']).get()
+        return Customer[int(cid)]
     except Customer.DoesNotExist:
-        LOGGER.error('No such customer: %s.', options['<customer>'])
-        return 3
+        raise ValueError(f'No such customer: "{cid}".')
+
+
+def get_system(ident):
+    """Returns the respective system."""
 
     try:
-        class_id = int(options['<class>'])
-    except ValueError:
-        class_expr = (
-            (Class.full_name == options['<class>'])
-            | (Class.name == options['<class>']))
+        return System[int(ident)]
+    except System.DoesNotExist:
+        raise ValueError(f'No such system: "{ident}')
+
+
+def get_args():
+    """"Returns the CLI arguments."""
+
+    parser = ArgumentParser(description='Terminal permissions manager.')
+    parser.add_argument(
+        'account', nargs='+', type=get_account, metavar='account',
+        help="the administrator's HIS account")
+    parser.add_argument(
+        '-v', '--verbose', action='store_true', help='turn on verbose logging')
+    subparsers = parser.add_subparsers(dest='mode')
+    list_parser = subparsers.add_parser('ls', help='list permissions')
+    list_parser.add_argument(
+        '-c', '--customers', action='store_true', metavar='customer',
+        help='list customer related permissions')
+    list_parser.add_argument(
+        '-s', '--systems', action='store_true', metavar='system',
+        help='list system related permissions')
+    grant_parser = subparsers.add_parser('grant', help='grant permissions')
+    grant_parser.add_argument(
+        '-c', '--customer', nargs='*', type=get_customer, metavar='customer',
+        help='grant permissions to deploy for these customers')
+    grant_parser.add_argument(
+        '-s', '--system', nargs='*', type=get_system, metavar='system',
+        help='grant permissions to administer these system')
+    revoke_parser = subparsers.add_parser('revoke', help='revoke permissions')
+    revoke_parser.add_argument(
+        '-c', '--customer', nargs='*', type=get_customer, metavar='customer',
+        help='revoke permissions to deploy for these customers')
+    revoke_parser.add_argument(
+        '-s', '--system', nargs='*', type=get_system, metavar='system',
+        help='revoke permissions to administer these system')
+    revoke_parser.add_argument(
+        '--all', action='store_true', help='revokes all permissions')
+    return parser.parse_args()
+
+
+def list_(args):
+    """Lists permissions."""
+
+    if args.customers:
+        for customer_admin in CustomerAdministrator.select().where(
+                CustomerAdministrator.account << args.account):
+            print(f'{customer_admin.account.name}:',
+                  customer_admin.customer_id)
+
+    if args.systems:
+        for system_admin in SystemAdministrator.select().where(
+                SystemAdministrator.account << args.account):
+            print(f'{system_admin.account.name}:',
+                  system_admin.system_id)
+
+
+def grant(args):
+    """Grants permissions."""
+
+    for account in args.account:
+        for customer in args.customer:
+            grant_customer(account, customer)
+
+        for system in args.system:
+            grant_system(account, system)
+
+
+def revoke(args):
+    """Revokes permissions."""
+
+    if args.all:
+        for customer_admin in CustomerAdministrator.select().where(
+                CustomerAdministrator.account << args.account):
+            customer_admin.delete_instance()
+
+        for system_admin in SystemAdministrator.select().where(
+                SystemAdministrator.account << args.account):
+            system_admin.delte_intance()
     else:
-        class_expr = Class.id == class_id
+        for account in args.account:
+            for customer in args.customer:
+                revoke_customer(account, customer)
 
-    try:
-        class_ = Class.get(class_expr)
-    except Class.DoesNotExist:
-        LOGGER.error('No such class: %s.', options['<class>'])
-        return 4
-
-    try:
-        default_acl = DefaultACL.get(
-            (DefaultACL.account == account) & (DefaultACL.customer == customer)
-            & (DefaultACL.class_ == class_))
-    except DefaultACL.DoesNotExist:
-        default_acl = DefaultACL()
-        default_acl.account = account
-        default_acl.customer = customer
-        default_acl.class_ = class_
-
-    read, administer, setup = _get_permissions(options)
-
-    if read is not None:
-        default_acl.read = read
-
-    if administer is not None:
-        default_acl.administer = administer
-
-    if setup is not None:
-        default_acl.setup = setup
-
-    if default_acl.read or default_acl.administer or default_acl.setup:
-        default_acl.save()
-    else:
-        default_acl.delete_instance()
-
-    return 0
+            for system in args.system:
+                revoke_system(account, system)
 
 
 @script
-def main(options):
+def main():
     """Runs the ACL client."""
 
-    basicConfig(level=INFO, format=LOG_FORMAT)
+    args = get_args()
+    basicConfig(level=DEBUG if args.verbose else INFO, format=LOG_FORMAT)
 
-    if options['get']:
-        return list_acls(options)
-
-    if options['set']:
-        return set_acls(options)
-
-    if options['setdefault']:
-        return set_default(options)
-
-    return 0
+    if args.mode == 'ls':
+        list_(args)
+    elif args.mode == 'grant':
+        grant(args)
+    elif args.mode == 'revoke':
+        revoke(args)
 
 
 if __name__ == '__main__':
-    exit_(main(docopt(__doc__)))
+    main()
