@@ -74,7 +74,7 @@ termgr.storage.deployments.get = function () {
     const raw = localStorage.getItem('termgr.deployments');
 
     if (raw == null) {
-        return [];
+        return null;
     }
 
     return JSON.parse(raw);
@@ -109,7 +109,7 @@ termgr.storage.systems.get = function () {
     const raw = localStorage.getItem('termgr.systems');
 
     if (raw == null) {
-        return [];
+        return null;
     }
 
     return JSON.parse(raw);
