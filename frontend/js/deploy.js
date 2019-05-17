@@ -107,7 +107,14 @@ function showDetails () {
 function init () {
     termgr.startLoading();
     const system = JSON.parse(localStorage.getItem('termgr.system'));
-    reload().then(termgr.stopLoading);
+    const deployments = termgr.loadDeployments();
+
+    if (deployments == null) {
+        reload().then(termgr.stopLoading);
+    } else {
+        filter(deployments);
+    }
+
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', termgr.partial(filter), false);
     const btnReload = document.getElementById('reload');
@@ -125,7 +132,7 @@ function init () {
 
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(deploy, system), false);
-    const deploymentsList = document.getElementById('deployments')
+    const deploymentsList = document.getElementById('deployments');
     deploymentsList.addEventListener('change', termgr.partial(showDetails), false);
     const systemId = document.getElementById('system');
     systemId.textContent = system;
