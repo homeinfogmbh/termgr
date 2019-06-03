@@ -140,3 +140,4 @@ def notify_todays_deployments():
 
     emails = get_html_emails('Verbaute HOMEINFO Systeme', html)
     MAILER.send(emails)
+    return True
