@@ -94,7 +94,8 @@ def notify_manufacturers(systems):
 def notify_todays_deployments():
     """Notifies the adminstrators about deployments."""
 
-    deployments = tuple(Deployments.of_today())
+    deployments = tuple(Deployments.of_today().order_by(
+        Deployment.timestamp.desc()))
 
     if not deployments:
         return False
