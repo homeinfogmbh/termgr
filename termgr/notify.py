@@ -105,7 +105,7 @@ def notify_todays_deployments():
     SubElement(body, 'br')
     SubElement(body, 'br')
     text = SubElement(body, 'span')
-    text.text = 'Das folgende HOMEINFO System wurde verbaut:'
+    text.text = 'die folgenden HOMEINFO System wurden heute verbaut:'
     SubElement(body, 'br')
     SubElement(body, 'br')
     table = SubElement(body, 'table', attrib={'border': '1'})
