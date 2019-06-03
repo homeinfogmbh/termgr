@@ -96,7 +96,7 @@ def notify_todays_deployments():
 
     deployments = tuple(Deployments.of_today())
 
-    if not systems:
+    if not deployments:
         return False
 
     html = Element('html')
