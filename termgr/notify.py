@@ -24,7 +24,7 @@ MAILER = Mailer(
 def admins():
     """Yields admins's emails."""
 
-    emails_ = CONFIG['mail']['admins'].split(',')
+    emails_ = CONFIG['notify']['admins'].split(',')
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
