@@ -77,10 +77,9 @@ class Deployments(TermgrModel):
         Account, column_name='account', on_update='CASCADE',
         on_delete='CASCADE')
     system = ForeignKeyField(
-        System, column_name='system', non_update='CASCADE',
-        on_delete='CASCADE')
+        System, column_name='system', on_update='CASCADE', on_delete='CASCADE')
     deployment = ForeignKeyField(
-        Deployment, column_name='deployment', non_update='CASCADE',
+        Deployment, column_name='deployment', on_update='CASCADE',
         on_delete='CASCADE')
     timestamp = DateTimeField(default=datetime.now)
 
