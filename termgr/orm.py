@@ -1,16 +1,23 @@
 """ORM models for termgr."""
 
-from peewee import CharField, ForeignKeyField
+from datetime import date, datetime, timedelta
+from xml.etree.ElementTree import Element, SubElement
+
+from peewee import CharField, DateTimeField, ForeignKeyField
 
 from his import Account
 from mdb import Customer
 from peeweeplus import MySQLDatabase, JSONModel
-from terminallib import System
+from terminallib import Deployment, System
 
 from termgr.config import CONFIG
 
 
-__all__ = ['SystemAdministrator', 'CustomerAdministrator', 'ManufacturerEmail']
+__all__ = [
+    'SystemAdministrator',
+    'CustomerAdministrator',
+    'ManufacturerEmail',
+    'Deployments']
 
 
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
@@ -61,3 +68,56 @@ class ManufacturerEmail(TermgrModel):
         Customer, column_name='manufacturer', on_delete='CASCADE',
         on_update='CASCADE')
     email = CharField(255)
+
+
+class Deployments(TermgrModel):
+    """Deployment actions of technitians."""
+
+    account = ForeignKeyField(
+        Account, column_name='account', on_update='CASCADE',
+        on_delete='CASCADE')
+    system = ForeignKeyField(
+        System, column_name='system', non_update='CASCADE',
+        on_delete='CASCADE')
+    deployment = ForeignKeyField(
+        Deployment, column_name='deployment', non_update='CASCADE',
+        on_delete='CASCADE')
+    timestamp = DateTimeField(default=datetime.now)
+
+    @classmethod
+    def add(cls, account, system, deployment, timestamp=None):
+        """Creates and saves a new record."""
+        record = cls(
+            account=account.id, system=system, deployment=deployment,
+            timestamp=timestamp)
+        record.save()
+        return record
+
+    @classmethod
+    def of_today(cls):
+        """Yields deployments that were made today."""
+        today = date.today()
+        start = datetime(today.year, today.month, today.day)
+        tomorrow = today + timedelta(days=1)
+        end = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
+        return cls.select().where(
+            (cls.timestamp >= start) & (cls.timestamp < end))
+
+    def to_html_table_row(self):
+        """Returns an HTML DOM."""
+        row = Element('tr')
+        column = SubElement(row, 'td')
+        column.text = self.account.full_name or self.account.name
+        column = SubElement(row, 'td')
+        column.text = str(self.system.id)
+        column = SubElement(row, 'td')
+        column.text = self.deployment.customer.name
+        column = SubElement(row, 'td')
+        column.text = str(self.deployment.customer.id)
+        column = SubElement(row, 'td')
+        column.text = self.deployment.type.value
+        column = SubElement(row, 'td')
+        column.text = str(self.deployment.address)
+        column = SubElement(row, 'td')
+        column.text = self.timestamp.isoformat()
+        return row

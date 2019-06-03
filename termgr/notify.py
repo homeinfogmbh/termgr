@@ -9,10 +9,10 @@ from emaillib import Mailer, EMail
 from functoolsplus import coerce
 
 from termgr.config import CONFIG
-from termgr.orm import ManufacturerEmail
+from termgr.orm import Deployments, ManufacturerEmail
 
 
-__all__ = ['notify_manufacturers', 'notify_deployment']
+__all__ = ['notify_manufacturers', 'notify_todays_deployments']
 
 
 LOGGER = getLogger(__file__)
@@ -91,7 +91,7 @@ def notify_manufacturers(systems):
     MAILER.send(emails)
 
 
-def notify_deployment(account, system, deployment):
+def notify_todays_deployments():
     """Notifies the adminstrators about deployments."""
 
     html = Element('html')
@@ -108,7 +108,7 @@ def notify_deployment(account, system, deployment):
     text.text = 'Das folgende HOMEINFO System wurde verbaut:'
     SubElement(body, 'br')
     SubElement(body, 'br')
-    table = SubElement(body, 'table')
+    table = SubElement(body, 'table', attrib={'border': '1'})
     row = SubElement(table, 'tr')
     header = SubElement(row, 'th')
     header.text = 'Techniker'
@@ -122,18 +122,11 @@ def notify_deployment(account, system, deployment):
     header.text = 'Typ'
     header = SubElement(row, 'th')
     header.text = 'Standort'
-    row = SubElement(table, 'tr')
-    column = SubElement(row, 'td')
-    column.text = account.full_name or account.name
-    column = SubElement(row, 'td')
-    column.text = str(system.id)
-    column = SubElement(row, 'td')
-    column.text = deployment.customer.name
-    column = SubElement(row, 'td')
-    column.text = str(deployment.customer.id)
-    column = SubElement(row, 'td')
-    column.text = deployment.type.value
-    column = SubElement(row, 'td')
-    column.text = str(deployment.address)
+    header = SubElement(row, 'th')
+    header.text = 'Zeitstempel'
+
+    for deployment in Deployments.of_today():
+        table.append(deployment.to_html_table_row())
+
     emails = get_html_emails('Ein HOMEINFO System wurde verbaut', html)
     MAILER.send(emails)

@@ -9,6 +9,6 @@ setup(
     author_email='info@homeinfo.de',
     maintainer='Richard Neumann',
     maintainer_email='r.neumann@homeinfo.de',
-    packages=['termgr', 'termgr.wsgi'],
-    scripts=['files/termacls', 'files/termgr', 'files/termadm'],
+    packages=['termgr', 'termgr.cli', 'termgr.wsgi'],
+    scripts=['files/termacls', 'files/termadm'],
     description=('Homeinfo Terminal Manager'))
