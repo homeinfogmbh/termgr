@@ -114,7 +114,7 @@ def notify_todays_deployments():
     if len(deployments) == 1:
         text.text = 'das folgende HOMEINFO System wurde heute verbaut:'
     else:
-        text.text = 'die folgenden HOMEINFO System wurden heute verbaut:'
+        text.text = 'die folgenden HOMEINFO Systeme wurden heute verbaut:'
 
     SubElement(body, 'br')
     SubElement(body, 'br')
