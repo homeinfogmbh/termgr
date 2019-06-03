@@ -10,6 +10,7 @@ from his import ACCOUNT, authenticated
 from terminallib import SystemOffline
 
 from termgr.ctrl import SystemController, SystemsController
+from termgr.notify import notify_todays_deployments
 from termgr.orm import Deployments
 from termgr.wsgi.common import admin, deploy
 
@@ -33,6 +34,7 @@ def deploy_system(system, deployment):
     exclusive = request.json.get('exclusive', False)
     system.deploy(deployment, exclusive=exclusive)
     Deployments.add(ACCOUNT, system, deployment)
+    notify_todays_deployments()
     return 'System has been deployed.'
 
 
