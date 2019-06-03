@@ -79,10 +79,8 @@ def get_html_emails(subject, html):
     """Send emails to admins."""
 
     html = tostring(html, encoding='unicode', method='html')
-    print('HTML:', html, flush=True)
 
     for admin in admins():
-        print('ADMIN:', admin, flush=True)
         yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
 
 
@@ -138,5 +136,4 @@ def notify_deployment(account, system, deployment):
     column = SubElement(row, 'td')
     column.text = str(deployment.address)
     emails = get_html_emails('Ein HOMEINFO System wurde verbaut', html)
-    print('EMAILS:', emails, flush=True)
     MAILER.send(emails)
