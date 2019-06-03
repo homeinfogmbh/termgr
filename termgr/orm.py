@@ -88,7 +88,7 @@ class Deployments(TermgrModel):
         """Creates and saves a new record."""
         record = cls(
             account=account.id, system=system, deployment=deployment,
-            timestamp=timestamp)
+            timestamp=timestamp or datetime.now())
         record.save()
         return record
 
