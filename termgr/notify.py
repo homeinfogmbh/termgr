@@ -94,6 +94,11 @@ def notify_manufacturers(systems):
 def notify_todays_deployments():
     """Notifies the adminstrators about deployments."""
 
+    deployments = tuple(Deployments.of_today())
+
+    if not systems:
+        return False
+
     html = Element('html')
     header = SubElement(html, 'header')
     SubElement(header, 'meta', attrib={'charset': 'UTF-8'})
@@ -105,7 +110,12 @@ def notify_todays_deployments():
     SubElement(body, 'br')
     SubElement(body, 'br')
     text = SubElement(body, 'span')
-    text.text = 'die folgenden HOMEINFO System wurden heute verbaut:'
+
+    if len(deployments) == 1:
+        text.text = 'das folgende HOMEINFO System wurde heute verbaut:'
+    else:
+        text.text = 'die folgenden HOMEINFO System wurden heute verbaut:'
+
     SubElement(body, 'br')
     SubElement(body, 'br')
     table = SubElement(body, 'table', attrib={'border': '1'})
@@ -125,8 +135,8 @@ def notify_todays_deployments():
     header = SubElement(row, 'th')
     header.text = 'Zeitstempel'
 
-    for deployment in Deployments.of_today():
+    for deployment in deployments:
         table.append(deployment.to_html_table_row())
 
-    emails = get_html_emails('Ein HOMEINFO System wurde verbaut', html)
+    emails = get_html_emails('Verbaute HOMEINFO Systeme', html)
     MAILER.send(emails)
