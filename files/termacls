@@ -2,7 +2,7 @@
 """Command line tool to administer
 permissions on customers and systems.
 """
-from termgr.cli.termacls import main
+from termgr.termacls import main
 
 
 if __name__ == '__main__':
