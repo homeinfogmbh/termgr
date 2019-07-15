@@ -140,5 +140,5 @@ def notify_todays_deployments():
         table.append(deployment.to_html_table_row())
 
     emails = get_html_emails('Verbaute HOMEINFO Systeme', html)
-    MAILER.send(emails)
+    MAILER.send(emails, background=False)
     return True
