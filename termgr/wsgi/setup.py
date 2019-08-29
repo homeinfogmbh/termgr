@@ -21,7 +21,7 @@ __all__ = ['ROUTES']
 def get_system_info(system):
     """Returns the system information."""
 
-    return JSON(system.to_json(cascade=True, brief=True))
+    return JSON(system.to_json(brief=True))
 
 
 @authenticated
