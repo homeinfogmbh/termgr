@@ -1,9 +1,0 @@
-#! /usr/bin/env python3
-"""Command line tool to administer
-permissions on customers and systems.
-"""
-from termgr.termacls import main
-
-
-if __name__ == '__main__':
-    main()
