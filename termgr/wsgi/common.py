@@ -4,10 +4,13 @@ from functools import wraps
 
 from flask import request
 
+from his import ACCOUNT
 from terminallib import Deployment, System
 from wsgilib import Error
 
-from termgr.auth import chkadmin, chkdeploy, chksetup
+from termacls import can_administer_system
+from termacls import can_deploy
+from termacls import can_setup_system
 
 
 __all__ = ['admin', 'deploy', 'setup']
@@ -48,7 +51,7 @@ def admin(function):
     def wrapper(*args, **kwargs):
         system = _get_system()
 
-        if chkadmin(system):
+        if can_administer_system(ACCOUNT, system):
             return function(system, *args, **kwargs)
 
         raise Error('Administration unauthorized.', status=403)
@@ -64,7 +67,7 @@ def deploy(function):
         system = _get_system()
         deployment = _get_deployment()
 
-        if chkdeploy(system, deployment):
+        if can_deploy(ACCOUNT, system, deployment):
             return function(system, deployment, *args, **kwargs)
 
         raise Error('Deployment operation unauthorized.', status=403)
@@ -79,7 +82,7 @@ def setup(function):
     def wrapper(*args, **kwargs):
         system = _get_system()
 
-        if chksetup(system):
+        if can_setup_system(ACCOUNT, system):
             return function(system, *args, **kwargs)
 
         raise Error('Setup operation unauthorized.', status=403)

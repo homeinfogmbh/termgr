@@ -152,37 +152,6 @@ termgr.api.getSystems = function () {
 };
 
 
-/*
-    Retrieves customers from the backend,
-    which the current user is allowed to deploy to.
-*/
-termgr.api.getCustomers = function () {
-    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/customers').catch(
-        termgr.api.checkSession('Die Liste der Kunden konnte nicht abgefragt werden.')
-    );
-};
-
-
-/*
-    Retrieves connections from the backend.
-*/
-termgr.api.getConnections = function () {
-    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/connections').catch(
-        termgr.api.checkSession('Die Liste der Internetverbindungen konnte nicht abgefragt werden.')
-    );
-};
-
-
-/*
-    Retrieves types from the backend.
-*/
-termgr.api.getTypes = function () {
-    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/types').catch(
-        termgr.api.checkSession('Die Liste der Terminal-Typen konnte nicht abgefragt werden.')
-    );
-};
-
-
 termgr.api.application = {};
 
 
