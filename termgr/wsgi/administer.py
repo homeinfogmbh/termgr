@@ -1,7 +1,6 @@
 """Terminal administration."""
 
-from logging import getLogger
-from subprocess import CalledProcessError
+from functools import partial
 
 from flask import request
 
@@ -9,21 +8,12 @@ from hipster.orm import Queue
 from his import ACCOUNT, authenticated
 from terminallib import SystemOffline
 
-from termgr.ctrl import SystemController, SystemsController
 from termgr.notify import notify_todays_deployments
 from termgr.orm import Deployments
 from termgr.wsgi.common import admin, deploy
 
 
 __all__ = ['ROUTES']
-
-
-SYSTEMCTL = '/usr/bin/systemctl'
-DIGSIG_APP = 'application.service'
-CONTROLLER = SystemsController()
-DIGSIG_KEY_FILE = '/home/termgr/.ssh/digsig'
-REDEPLOY_TEMP = 'System has been deployed and system #{} has been undeployed.'
-LOGGER = getLogger(__file__)
 
 
 @authenticated
@@ -48,20 +38,16 @@ def toggle_application(system):
     try:
         request.json['disable']
     except KeyError:
-        mode = 'enable'
-        function = CONTROLLER.enable_application
+        function = partial(system.application, True)
     else:
-        mode = 'disable'
-        function = CONTROLLER.disable_application
+        function = partial(system.application, False)
 
     try:
-        function(system)
+        response = function()
     except SystemOffline:
         return ('System is offline.', 400)
-    except CalledProcessError:
-        return (f'Could not {mode} digital signage application.', 500)
 
-    return f'Digital signage application {mode}d.'
+    return (response.text, response.status_code)
 
 
 @authenticated
@@ -69,20 +55,15 @@ def toggle_application(system):
 def reboot_system(system):
     """Reboots the respective system."""
 
-    if CONTROLLER.check_login(system):
-        return ('Admin account is currently logged in.', 503)
-
-    if CONTROLLER.check_pacman(system):
-        return ('Package manager is currently running.', 503)
-
     try:
-        CONTROLLER.reboot(system)
+        response = system.reboot()
     except SystemOffline:
         return ('System is offline.', 400)
-    except CalledProcessError:
-        return ('Failed to reboot system.', 500)
 
-    return 'Probably rebooted system.'
+    if response is None:
+        return 'Probably rebooted system.'
+
+    return (response.text, response.status_code)
 
 
 @authenticated
@@ -100,13 +81,11 @@ def beep_system(system):
     """Identifies the respective system by beep test."""
 
     try:
-        SystemController(system).identify()
+        response = system.beep()
     except SystemOffline:
         return ('System is offline.', 400)
-    except CalledProcessError:
-        return ('Could not get display to beep.', 500)
 
-    return 'Display should have beeped.'
+    return (response.text, response.status_code)
 
 
 ROUTES = (
