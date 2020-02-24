@@ -58,7 +58,7 @@ def get_wireguard_data(system):
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
         'server_pubkey': CONFIG['WireGuard']['pubkey'],
         'allowed_ips': [str(SERVER) + '/32'],
-        'psk': system.wireguard.psk,
+        'psk': CONFIG['WireGuard']['psk'],
         'gateway': str(SERVER),
         'destination': str(NETWORK),
         'pubkey': system.wireguard.pubkey,
