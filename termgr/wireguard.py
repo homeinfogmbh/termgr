@@ -10,7 +10,7 @@ from termgr.common import SystemdUnit
 from termgr.config import CONFIG, LOGGER
 
 
-__all__ = ['get_wireguard_config', 'update_units']
+__all__ = ['get_wireguard_config', 'write_units', 'update_wireguard']
 
 
 NETDEV_UNIT_FILE = Path('/etc/systemd/network/terminals.netdev')
@@ -109,7 +109,7 @@ def write_units():
     write_network()
 
 
-def update_units():
+def update_wireguard():
     """Updates the network units via sudo."""
 
     return check_call(('/usr/bin/sudo', '/usr/local/bin/termgr', 'mkwg'))

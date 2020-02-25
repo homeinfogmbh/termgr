@@ -10,7 +10,7 @@ from his import authenticated
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
-from termgr.wireguard import get_wireguard_config
+from termgr.wireguard import get_wireguard_config, update_wireguard
 from termgr.wsgi.common import setup
 
 
@@ -68,6 +68,7 @@ def finalize(system):
     system.wireguard.pubkey = request.json.get('wg_pubkey')
     system.wireguard.save()
     system.save()
+    update_wireguard()
     return 'System finalized.'
 
 

@@ -7,7 +7,7 @@ from subprocess import check_call
 from sys import exit    # pylint: disable=W0622
 
 from termgr.config import LOG_FORMAT, LOGGER, SYSTEMD_NETWORKD
-from termgr.wireguard import update_units
+from termgr.wireguard import write_units
 
 
 __all__ = ['main']
@@ -34,6 +34,6 @@ def main():
             exit(1)
 
         LOGGER.info('Updating WireGuard configuration.')
-        update_units()
+        write_units()
         LOGGER.info('Restarting %s.', SYSTEMD_NETWORKD)
         check_call(('/bin/systemctl', 'restart', SYSTEMD_NETWORKD))
