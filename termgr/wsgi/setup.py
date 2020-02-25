@@ -7,11 +7,10 @@ from os.path import basename
 from flask import request
 
 from his import authenticated
-from terminallib.orm.wireguard import NETWORK, SERVER
 from wsgilib import Error, JSON, Binary
 
-from termgr.config import CONFIG
 from termgr.openvpn import package
+from termgr.wireguard import get_wireguard_config
 from termgr.wsgi.common import setup
 
 
@@ -54,31 +53,7 @@ def get_openvpn_data(system):
 def get_wireguard_data(system):
     """Returns the WireGuard configuration for the respective system."""
 
-    routes = [{
-        'destination': str(NETWORK),
-        'gateway': str(SERVER),
-        'gateway_onlink': True
-    }]
-
-    # Read additional routes.
-    for route in CONFIG['WireGuard']['routes'].split(','):
-        destination, gateway = route.strip().split('via')
-        routes.append({
-            'destination': destination.strip(),
-            'gateway': gateway.strip(),
-            'gateway_onlink': True
-        })
-
-    return JSON({
-        'ipaddress': str(system.wireguard.ipv4address) + '/32',
-        'server_pubkey': CONFIG['WireGuard']['pubkey'],
-        'psk': CONFIG['WireGuard'].get('psk'),
-        'pubkey': system.wireguard.pubkey,
-        'endpoint': CONFIG['WireGuard']['endpoint'],
-        'routes': routes,
-        'persistent_keepalive': CONFIG.getint(
-            'WireGuard', 'persistent_keepalive')
-    })
+    JSON(get_wireguard_config(system))
 
 
 @authenticated
