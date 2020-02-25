@@ -55,8 +55,8 @@ def get_wireguard_data(system):
     """Returns the WireGuard configuration for the respective system."""
 
     routes = [{
-        'gateway': str(SERVER),
         'destination': str(NETWORK),
+        'gateway': str(SERVER),
         'gateway_onlink': True
     }]
 
