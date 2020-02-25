@@ -53,7 +53,7 @@ def get_openvpn_data(system):
 def get_wireguard_data(system):
     """Returns the WireGuard configuration for the respective system."""
 
-    JSON(get_wireguard_config(system))
+    return JSON(get_wireguard_config(system))
 
 
 @authenticated
@@ -68,12 +68,7 @@ def finalize(system):
     system.wireguard.pubkey = request.json.get('wg_pubkey')
     system.wireguard.save()
     system.save()
-
-    try:
-        update_wireguard()
-    except Exception as error:
-        return (str(error), 500)
-
+    update_wireguard()
     return 'System finalized.'
 
 
