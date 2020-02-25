@@ -68,7 +68,12 @@ def finalize(system):
     system.wireguard.pubkey = request.json.get('wg_pubkey')
     system.wireguard.save()
     system.save()
-    update_wireguard()
+
+    try:
+        update_wireguard()
+    except Exception as error:
+        return (str(error), 500)
+
     return 'System finalized.'
 
 
