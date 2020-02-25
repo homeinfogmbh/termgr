@@ -72,10 +72,12 @@ def get_wireguard_data(system):
     return JSON({
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
         'server_pubkey': CONFIG['WireGuard']['pubkey'],
-        'psk': CONFIG['WireGuard']['psk'],
+        'psk': CONFIG['WireGuard'].get('psk'),
         'pubkey': system.wireguard.pubkey,
         'endpoint': CONFIG['WireGuard']['endpoint'],
-        'routes': routes
+        'routes': routes,
+        'persistent_keepalive': CONFIG.getint(
+            'WireGuard', 'persistent_keepalive')
     })
 
 
