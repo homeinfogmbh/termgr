@@ -54,15 +54,28 @@ def get_openvpn_data(system):
 def get_wireguard_data(system):
     """Returns the WireGuard configuration for the respective system."""
 
+    routes = [{
+        'gateway': str(SERVER),
+        'destination': str(NETWORK),
+        'gateway_onlink': True
+    }]
+
+    # Read additional routes.
+    for route in CONFIG['WireGuard']['routes'].split(','):
+        destination, gateway = route.strip().split('via')
+        routes.append({
+            'destination': destination.strip(),
+            'gateway': gateway.strip(),
+            'gateway_onlink': True
+        })
+
     return JSON({
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
         'server_pubkey': CONFIG['WireGuard']['pubkey'],
-        'allowed_ips': [str(SERVER) + '/32'],
         'psk': CONFIG['WireGuard']['psk'],
-        'gateway': str(SERVER),
-        'destination': str(NETWORK),
         'pubkey': system.wireguard.pubkey,
-        'endpoint': CONFIG['WireGuard']['endpoint']
+        'endpoint': CONFIG['WireGuard']['endpoint'],
+        'routes': routes
     })
 
 
