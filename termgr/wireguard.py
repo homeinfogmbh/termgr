@@ -1,6 +1,5 @@
 """Wireguard configuration."""
 
-from pathlib import Path
 from subprocess import check_call
 from tempfile import NamedTemporaryFile
 
@@ -12,10 +11,6 @@ from termgr.config import CONFIG
 
 
 __all__ = ['get_wireguard_config', 'update_peers', 'update_wireguard']
-
-
-NETDEV_UNIT_FILE = Path('/etc/systemd/network/terminals.netdev')
-NETWORK_UNIT_FILE = Path('/etc/systemd/network/terminals.network')
 
 
 def get_systems():
