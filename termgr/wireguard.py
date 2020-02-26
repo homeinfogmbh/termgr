@@ -1,6 +1,5 @@
 """Wireguard configuration."""
 
-from subprocess import check_call
 from tempfile import NamedTemporaryFile
 
 from terminallib import System, WireGuard
@@ -10,7 +9,10 @@ from wgtools import clear_peers, set as wg_set
 from termgr.config import CONFIG
 
 
-__all__ = ['get_wireguard_config', 'update_peers', 'update_wireguard']
+__all__ = ['get_wireguard_config', 'update_peers']
+
+
+WG = ('/usr/bin/sudo', '/usr/bin/wg')
 
 
 def get_systems():
@@ -73,7 +75,7 @@ def _add_peers(psk=None):
             peers[system.wireguard.pubkey]['preshared-key'] = psk
 
     if peers:
-        wg_set(CONFIG['WireGuard']['devname'], peers=peers)
+        wg_set(CONFIG['WireGuard']['devname'], peers=peers, _wg=WG)
 
 
 def add_peers():
@@ -96,9 +98,3 @@ def update_peers():
 
     clear_peers(CONFIG['WireGuard']['devname'])
     add_peers()
-
-
-def update_wireguard():
-    """Updates the WireGuard peers."""
-
-    check_call(('/usr/bin/sudo', '/usr/local/bin/termgr', 'mkwg'))
