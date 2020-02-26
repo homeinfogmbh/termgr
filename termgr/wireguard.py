@@ -96,5 +96,5 @@ def add_peers():
 def update_peers():
     """Adds a peer to the terminals network."""
 
-    clear_peers(CONFIG['WireGuard']['devname'])
+    clear_peers(CONFIG['WireGuard']['devname'], _wg=WG)
     add_peers()
