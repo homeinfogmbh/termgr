@@ -81,7 +81,7 @@ def _add_peers(psk=None):
 def add_peers():
     """Adds all terminal network peers."""
 
-    psk = CONFIG['WireGuard']['psk']
+    psk = CONFIG['WireGuard'].get('psk')
 
     if psk:
         with NamedTemporaryFile('w+') as tmp:
