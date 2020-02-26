@@ -74,7 +74,8 @@ def _add_peers(psk=None):
         if psk:
             peers[system.wireguard.pubkey]['preshared-key'] = psk
 
-    return wg_set(CONFIG['WireGuard']['devname'], peers=peers)
+    if peers:
+        wg_set(CONFIG['WireGuard']['devname'], peers=peers)
 
 
 def add_peers():
