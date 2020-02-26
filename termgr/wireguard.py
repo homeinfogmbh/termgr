@@ -52,14 +52,12 @@ def get_wireguard_config(system):
     for the specified system.
     """
 
-    endpoint = CONFIG['WireGuard']['endpoint']
-    port = CONFIG.getint('WireGuard', 'port')
     return {
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
         'server_pubkey': CONFIG['WireGuard']['pubkey'],
         'psk': CONFIG['WireGuard'].get('psk'),
         'pubkey': system.wireguard.pubkey,
-        'endpoint': f'{endpoint}:{port}',
+        'endpoint': CONFIG['WireGuard']['endpoint'],
         'routes': list(get_client_routes()),
         'persistent_keepalive': CONFIG.getint(
             'WireGuard', 'persistent_keepalive')
