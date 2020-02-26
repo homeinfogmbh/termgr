@@ -67,9 +67,7 @@ def _add_peers(psk=None):
 
     for system in get_systems():
         allowed_ips = [str(system.wireguard.ipv4address) + '/32'] + common_ips
-        peers[system.wireguard.pubkey] = {
-            'allowed-ips': ','.join(allowed_ips)
-        }
+        peers[system.wireguard.pubkey] = {'allowed-ips': allowed_ips}
 
         if psk:
             peers[system.wireguard.pubkey]['preshared-key'] = psk
