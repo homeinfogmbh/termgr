@@ -84,11 +84,11 @@ def add_peers():
     psk = CONFIG['WireGuard']['psk']
 
     if psk:
-        with NamedTemporaryFile('w+') as file:
-            psk.write(psk)
-            psk.flush()
-            psk.seek(0)
-            return _add_peers(psk=file.name)
+        with NamedTemporaryFile('w+') as tmp:
+            tmp.write(psk)
+            tmp.flush()
+            tmp.seek(0)
+            return _add_peers(psk=tmp.name)
 
     return _add_peers()
 
