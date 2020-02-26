@@ -7,7 +7,7 @@ from subprocess import check_call
 from sys import exit    # pylint: disable=W0622
 
 from termgr.config import LOG_FORMAT, LOGGER, SYSTEMD_NETWORKD
-from termgr.wireguard import write_units
+from termgr.wireguard import update_peers
 
 
 __all__ = ['main']
@@ -33,7 +33,7 @@ def main():
             LOGGER.error('You need to be root to run this script.')
             exit(1)
 
-        LOGGER.info('Updating WireGuard configuration.')
-        write_units()
+        LOGGER.info('Updating WireGuard peers.')
+        update_peers()
         LOGGER.info('Restarting %s.', SYSTEMD_NETWORKD)
         check_call(('/bin/systemctl', 'restart', SYSTEMD_NETWORKD))

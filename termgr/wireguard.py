@@ -2,15 +2,16 @@
 
 from pathlib import Path
 from subprocess import check_call
+from tempfile import NamedTemporaryFile
 
 from terminallib import System, WireGuard
 from terminallib.orm.wireguard import NETWORK, SERVER
+from wgtools import clear_peers, set as wg_set
 
-from termgr.common import SystemdUnit
-from termgr.config import CONFIG, LOGGER
+from termgr.config import CONFIG
 
 
-__all__ = ['get_wireguard_config', 'write_units', 'update_wireguard']
+__all__ = ['get_wireguard_config', 'update_peers', 'update_wireguard']
 
 
 NETDEV_UNIT_FILE = Path('/etc/systemd/network/terminals.netdev')
@@ -33,86 +34,6 @@ def get_configured_routes():
             'gateway': gateway.strip(),
             'gateway_onlink': True
         }
-
-
-def get_netdev_items():
-    """Returns the server netdev."""
-
-    unit = SystemdUnit()
-    unit.add_section('NetDev')
-    unit['NetDev']['Name'] = CONFIG['WireGuard']['devname']
-    unit['NetDev']['Kind'] = 'wireguard'
-    unit['NetDev']['Description'] = CONFIG['WireGuard']['description']
-    unit.add_section('WireGuard')
-    unit['WireGuard']['ListenPort'] = CONFIG['WireGuard']['port']
-    unit['WireGuard']['PrivateKey'] = CONFIG['WireGuard']['private_key']
-    yield unit
-
-    psk = CONFIG['WireGuard'].get('psk')
-    allowed_ips = [route['destination'] for route in get_configured_routes()]
-
-    for system in get_systems():
-        unit = SystemdUnit()
-        unit.add_section('WireGuardPeer')
-        unit['WireGuardPeer']['PublicKey'] = system.wireguard.pubkey
-
-        if psk:
-            unit['WireGuardPeer']['PresharedKey'] = psk
-
-        my_ips = [str(system.wireguard.ipv4address) + '/32'] + allowed_ips
-        unit['WireGuardPeer']['AllowedIPs'] = ', '.join(my_ips)
-        yield unit
-
-
-def write_netdev():
-    """Writes the netdev configuration."""
-
-    with NETDEV_UNIT_FILE.open('w') as netdev:
-        for unit in get_netdev_items():
-            unit.write(netdev)
-
-
-def get_network_unit():
-    """Returns a network unit."""
-
-    unit = SystemdUnit()
-    unit.add_section('Match')
-    unit['Match']['Name'] = CONFIG['WireGuard']['devname']
-    unit.add_section('Network')
-    unit['Network']['Address'] = str(SERVER) + '/32'
-    bind_carrier = CONFIG['WireGuard'].get('bind_carrier')
-
-    if bind_carrier:
-        unit['Network']['BindCarrier'] = bind_carrier
-
-    unit.add_section('Route')
-    unit['Route']['Destination'] = str(NETWORK)
-    unit['Route']['Gateway'] = str(SERVER)
-    return unit
-
-
-def write_network():
-    """Writes the network configuration."""
-
-    unit = get_network_unit()
-
-    with NETWORK_UNIT_FILE.open('w') as network:
-        unit.write(network)
-
-
-def write_units():
-    """Write unit files."""
-
-    LOGGER.info('Writing netdev file.')
-    write_netdev()
-    LOGGER.info('Writing network file.')
-    write_network()
-
-
-def update_wireguard():
-    """Updates the network units via sudo."""
-
-    return check_call(('/usr/bin/sudo', '/usr/local/bin/termgr', 'mkwg'))
 
 
 def get_client_routes():
@@ -143,3 +64,49 @@ def get_wireguard_config(system):
         'persistent_keepalive': CONFIG.getint(
             'WireGuard', 'persistent_keepalive')
     }
+
+
+def _add_peers(psk=None):
+    """Adds all terminal peers with the respective psk."""
+
+    common_ips = [route['destination'] for route in get_configured_routes()]
+    peers = {}
+
+    for system in get_systems():
+        allowed_ips = [str(system.wireguard.ipv4address) + '/32'] + common_ips
+        peers[system.wireguard.pubkey] = {
+            'allowed-ips': ','.join(allowed_ips)
+        }
+
+        if psk:
+            peers[system.wireguard.pubkey]['preshared-key'] = psk
+
+    return wg_set(CONFIG['WireGuard']['devname'], peers=peers)
+
+
+def add_peers():
+    """Adds all terminal network peers."""
+
+    psk = CONFIG['WireGuard']['psk']
+
+    if psk:
+        with NamedTemporaryFile('w+') as file:
+            psk.write(psk)
+            psk.flush()
+            psk.seek(0)
+            return _add_peers(psk=file.name)
+
+    return _add_peers()
+
+
+def update_peers():
+    """Adds a peer to the terminals network."""
+
+    clear_peers(CONFIG['WireGuard']['devname'])
+    add_peers()
+
+
+def update_wireguard():
+    """Updates the WireGuard peers."""
+
+    check_call(('/usr/bin/sudo', '/usr/local/bin/termgr', 'mkwg'))
