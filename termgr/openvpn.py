@@ -70,7 +70,7 @@ def create_zip_file(openvpn, file):
 
         with NamedTemporaryFile(mode='w+') as cfg:
             cfg.write(configuration)
-            cfg.seek(0)
+            cfg.flush()
             zip_file.write(cfg.name, arcname=CONFIG_FILE.format('.ovpn'))
 
 
@@ -92,7 +92,7 @@ def create_tar_file(openvpn, file):
 
         with NamedTemporaryFile(mode='w+') as cfg:
             cfg.write(configuration)
-            cfg.seek(0)
+            cfg.flush()
             tar_file.add(cfg.name, arcname=CONFIG_FILE.format('.conf'))
 
 
@@ -109,5 +109,6 @@ def package(openvpn, windows=False):
             create_tar_file(openvpn, tmp)
             filename = '{}.tar'.format(key)
 
+        tmp.flush()
         tmp.seek(0)
         return (tmp.read(), filename)
