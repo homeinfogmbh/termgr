@@ -71,7 +71,8 @@ def generate_manufacturer_emails(systems):
         if systems:
             for manufacturer_email in ManufacturerEmail.select().where(
                     ManufacturerEmail.manufacturer == manufacturer):
-                yield generate_manufacturer_email(manufacturer_email.email, systems)
+                yield generate_manufacturer_email(
+                    manufacturer_email.email, systems)
 
 
 @coerce(tuple)
