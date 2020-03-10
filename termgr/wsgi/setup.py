@@ -7,6 +7,7 @@ from os.path import basename
 from flask import request
 
 from his import authenticated
+from terminallib.enumerations import operating_system
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
@@ -63,6 +64,12 @@ def finalize(system):
 
     with suppress(KeyError):
         system.serial_number = request.json['sn'] or None   # Delete iff empty.
+
+    with suppress(KeyError):
+        system.operating_system = operating_system(request.json['os'])
+
+    with suppress(KeyError):
+        system.model = request.json['model']
 
     system.configured = datetime.now()  # Mark system as configured.
     system.wireguard.pubkey = request.json.get('wg_pubkey')
