@@ -87,7 +87,6 @@ def add_peers():
         with NamedTemporaryFile('w+') as tmp:
             tmp.write(psk)
             tmp.flush()
-            tmp.seek(0)
             return _add_peers(psk=tmp.name)
 
     return _add_peers()
