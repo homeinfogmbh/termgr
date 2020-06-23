@@ -30,6 +30,31 @@ def get_args():
     return parser.parse_args()
 
 
+def retrieve_data(login_data, vpn_data, path):
+    """Retrieves OpenVPN data for the respective system."""
+
+    with session() as sess:
+        response = sess.post(HIS_LOGIN_URL, json=login_data)
+
+        if response.status_code != 200:
+            LOGGER.error('Error during login.')
+            LOGGER.debug(response.content)
+            exit(2)
+
+        response = sess.post(TERMGR_VPN_URL, json=vpn_data)
+
+        if response.status_code != 200:
+            LOGGER.error('Error during VPN data retrieval.')
+            LOGGER.debug(response.content)
+            exit(3)
+
+        if path:
+            with path.open('wb') as file:
+                file.write(response.content)
+        else:
+            stdout.buffer.write(response.content)
+
+
 def main():
     """Main script."""
 
@@ -54,28 +79,8 @@ def main():
         exit(1)
 
     login_data = {'account': user, 'passwd': passwd}
-
-    with session() as sess:
-        response = sess.post(HIS_LOGIN_URL, json=login_data)
-
-        if response.status_code != 200:
-            LOGGER.error('Error during login.')
-            LOGGER.debug(response.content)
-            exit(2)
-
-        vpn_data = {'system': args.system, 'windows': args.windows}
-        response = sess.post(TERMGR_VPN_URL, json=vpn_data)
-
-        if response.status_code != 200:
-            LOGGER.error('Error during VPN data retrieval.')
-            LOGGER.debug(response.content)
-            exit(3)
-
-        if args.file:
-            with args.file.open('wb') as file:
-                file.write(response.content)
-        else:
-            stdout.buffer.write(response.content)
+    vpn_data = {'system': args.system, 'windows': args.windows}
+    retrieve_data(login_data, vpn_data, args.file)
 
 
 if __name__ == '__main__':
