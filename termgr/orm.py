@@ -6,9 +6,9 @@ from xml.etree.ElementTree import Element, SubElement
 from peewee import CharField, DateTimeField, ForeignKeyField
 
 from his import Account
+from hwdb import Deployment, System
 from mdb import Customer
 from peeweeplus import MySQLDatabase, JSONModel
-from terminallib import Deployment, System
 
 from termgr.config import CONFIG
 

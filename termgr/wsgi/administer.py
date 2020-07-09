@@ -6,7 +6,7 @@ from flask import request
 
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated
-from terminallib import SystemOffline
+from hwdb import SystemOffline
 
 from termgr.notify import notify_todays_deployments
 from termgr.orm import Deployments

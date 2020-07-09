@@ -2,8 +2,8 @@
 
 from tempfile import NamedTemporaryFile
 
-from terminallib import System, WireGuard
-from terminallib.orm.wireguard import NETWORK, SERVER
+from hwdb import System, WireGuard
+from hwdb.orm.wireguard import NETWORK, SERVER
 from wgtools import clear_peers, set as wg_set
 
 from termgr.config import CONFIG

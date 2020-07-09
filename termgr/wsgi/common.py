@@ -5,7 +5,7 @@ from functools import wraps
 from flask import request
 
 from his import ACCOUNT
-from terminallib import Deployment, System
+from hwdb import Deployment, System
 from wsgilib import Error
 
 from termacls import can_administer_system
