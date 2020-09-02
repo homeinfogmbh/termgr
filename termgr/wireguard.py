@@ -2,8 +2,7 @@
 
 from tempfile import NamedTemporaryFile
 
-from hwdb import System, WireGuard
-from hwdb.orm.wireguard import NETWORK, SERVER
+from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System, WireGuard
 from wgtools import clear_peers, set as wg_set
 
 from termgr.config import CONFIG
@@ -37,8 +36,8 @@ def get_client_routes():
     """Yields configured routes."""
 
     yield {
-        'destination': str(NETWORK),
-        'gateway': str(SERVER),
+        'destination': str(WIREGUARD_NETWORK),
+        'gateway': str(WIREGUARD_SERVER),
         'gateway_onlink': True
     }
     yield from get_configured_routes()

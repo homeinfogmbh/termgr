@@ -7,7 +7,7 @@ from os.path import basename
 from flask import request
 
 from his import authenticated
-from hwdb.pseudotypes import operating_system
+from hwdb import operating_system
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
