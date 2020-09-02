@@ -17,7 +17,7 @@ WG = ('/usr/bin/sudo', '/usr/bin/wg')
 def get_systems():
     """Yields WireGuard enabled systems."""
 
-    return System.select().join(WireGuard).where(~ (WireGuard.pubkey >> None))
+    return System.select().join(WireGuard).where(~(WireGuard.pubkey >> None))
 
 
 def get_configured_routes():
