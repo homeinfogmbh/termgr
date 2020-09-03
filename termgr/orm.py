@@ -3,40 +3,27 @@
 from datetime import date, datetime, timedelta
 from xml.etree.ElementTree import Element, SubElement
 
-from peewee import CharField, DateTimeField, ForeignKeyField
+from peewee import DateTimeField, ForeignKeyField
 
 from his import Account
 from hwdb import Deployment, System
-from mdb import Customer
 from peeweeplus import MySQLDatabase, JSONModel
 
 from termgr.config import CONFIG
 
 
-__all__ = ['ManufacturerEmail', 'Deployments']
+__all__ = ['Deployments']
 
 
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
 
 
-class TermgrModel(JSONModel):
+class TermgrModel(JSONModel):   # pylint: disable=R0903
     """Terminal manager basic Model."""
 
     class Meta:     # pylint: disable=C0111,R0903
         database = DATABASE
         schema = database.database
-
-
-class ManufacturerEmail(TermgrModel):
-    """Maps emails to manufacturer customers."""
-
-    class Meta:     # pylint: disable=C0111,R0903
-        table_name = 'manufacturer_emails'
-
-    manufacturer = ForeignKeyField(
-        Customer, column_name='manufacturer', on_delete='CASCADE',
-        on_update='CASCADE')
-    email = CharField(255)
 
 
 class Deployments(TermgrModel):
@@ -87,5 +74,5 @@ class Deployments(TermgrModel):
         column = SubElement(row, 'td')
         column.text = str(self.deployment.address)
         column = SubElement(row, 'td')
-        column.text = self.timestamp.isoformat()
+        column.text = self.timestamp.isoformat()    # pylint: disable=E1101
         return row

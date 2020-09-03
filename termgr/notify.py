@@ -1,7 +1,5 @@
 """New terminals nosification, ACL setting, OpenVPN key checks and mailing."""
 
-from collections import defaultdict
-from email.mime.application import MIMEApplication
 from logging import getLogger
 from xml.etree.ElementTree import tostring, Element, SubElement
 
@@ -9,10 +7,10 @@ from emaillib import Mailer, EMail
 from functoolsplus import coerce
 
 from termgr.config import CONFIG
-from termgr.orm import Deployments, ManufacturerEmail
+from termgr.orm import Deployments
 
 
-__all__ = ['notify_manufacturers', 'notify_todays_deployments']
+__all__ = ['notify_todays_deployments']
 
 
 LOGGER = getLogger(__file__)
@@ -28,53 +26,6 @@ def admins():
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
-def systems_dict(systems):
-    """Generates the terminals email."""
-
-    systems_by_manufacturer = defaultdict(list)
-
-    for system in systems:
-        if system.manufacturer is None:
-            continue
-
-        systems_by_manufacturer[system.manufacturer].append(system)
-
-    return systems_by_manufacturer
-
-
-def generate_manufacturer_email(email, systems):
-    """Generates an email for the respective
-    manufacturer's email address.
-    """
-
-    email = EMail(
-        CONFIG['notify']['subject'], CONFIG['mail']['from'], email,
-        CONFIG['notify']['body'])
-    records = [
-        (
-            str(system.id),
-            system.created.isoformat(),
-            system.operating_system.value
-        )
-        for system in systems
-    ]
-    csv = '\r\n'.join(','.join(record) for record in records)
-    attachment = MIMEApplication(csv.encode(), Name='systems.csv')
-    email.attach(attachment)
-    return email
-
-
-def generate_manufacturer_emails(systems):
-    """Mails the respective terminals."""
-
-    for manufacturer, systems in systems_dict(systems):  # pylint:disable=R1704
-        if systems:
-            for manufacturer_email in ManufacturerEmail.select().where(
-                    ManufacturerEmail.manufacturer == manufacturer):
-                yield generate_manufacturer_email(
-                    manufacturer_email.email, systems)
-
-
 @coerce(tuple)
 def get_html_emails(subject, html):
     """Send emails to admins."""
@@ -83,13 +34,6 @@ def get_html_emails(subject, html):
 
     for admin in admins():
         yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
-
-
-def notify_manufacturers(systems):
-    """Notifies the respective manufacturers about systems."""
-
-    emails = tuple(generate_manufacturer_emails(systems))
-    MAILER.send(emails)
 
 
 def notify_todays_deployments():
