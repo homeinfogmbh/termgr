@@ -53,9 +53,8 @@ termgr.deploymentToString = function (deployment) {
 */
 termgr.partial = function (func, ...args) {
     return function (event) {
-        if (event != null) {
+        if (event != null)
             event.preventDefault();
-        }
 
         return func(...args);
     };

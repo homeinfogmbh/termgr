@@ -41,21 +41,20 @@ termgr.api.makeRequest = function (method, url, data = null, headers = {}) {
 
     function executor (resolve, reject) {
         function onload () {
-            if (this.status >= 200 && this.status < 300) {
+            if (this.status >= 200 && this.status < 300)
                 resolve({
                     response: xhr.response,
                     json: parseResponse(xhr.response),
                     status: this.status,
                     statusText: xhr.statusText
                 });
-            } else {
+            else
                 reject({
                     response: xhr.response,
                     json: parseResponse(xhr.response),
                     status: this.status,
                     statusText: xhr.statusText
                 });
-            }
         }
 
         function onerror () {
@@ -71,18 +70,16 @@ termgr.api.makeRequest = function (method, url, data = null, headers = {}) {
         xhr.withCredentials = true;
         xhr.open(method, url);
 
-        for (const header in headers) {
+        for (const header in headers)
             xhr.setRequestHeader(header, headers[header]);
-        }
 
         xhr.onload = onload;
         xhr.onerror = onerror;
 
-        if (data == null) {
+        if (data == null)
             xhr.send();
-        } else {
+        else
             xhr.send(data);
-        }
     }
 
     return new Promise(executor);
@@ -237,9 +234,8 @@ termgr.api.reboot = function (system) {
         function (response) {
             let message = 'Das System konnte nicht neu gestartet werden.';
 
-            if (response.status == 503) {
+            if (response.status == 503)
                 message = 'Auf dem System werden aktuell administrative Aufgaben ausgeführt.';
-            }
 
             return termgr.api.checkSession(message)(response);
         }

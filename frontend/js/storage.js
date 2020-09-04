@@ -73,9 +73,8 @@ termgr.storage.deployments.set = function (deployments) {
 termgr.storage.deployments.get = function () {
     const raw = localStorage.getItem('termgr.deployments');
 
-    if (raw == null) {
+    if (raw == null)
         return null;
-    }
 
     return JSON.parse(raw);
 };
@@ -108,9 +107,8 @@ termgr.storage.systems.set = function (systems) {
 termgr.storage.systems.get = function () {
     const raw = localStorage.getItem('termgr.systems');
 
-    if (raw == null) {
+    if (raw == null)
         return null;
-    }
 
     return JSON.parse(raw);
 };
@@ -141,9 +139,8 @@ termgr.storage.system.set = function (system) {
 termgr.storage.system.get = function () {
     const raw = localStorage.getItem('termgr.system');
 
-    if (raw == null) {
+    if (raw == null)
         return null;
-    }
 
     return JSON.parse(raw);
 };

@@ -99,9 +99,8 @@ termgr.manage.init = function () {
         document.getElementById('sortByAddress')
     ];
 
-    for (const radioButton of radioButtons) {
+    for (const radioButton of radioButtons)
         radioButton.addEventListener('change', termgr.partial(termgr.manage.list), false);
-    }
 };
 
 

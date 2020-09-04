@@ -29,9 +29,8 @@ termgr.filter = {};
     Case-insensitively returns the index of the substring.
 */
 termgr.filter.includesIgnoreCase = function (haystack, needle) {
-    if (! haystack) {
+    if (! haystack)
         return false;
-    }
 
     return haystack.toLowerCase().includes(needle.toLowerCase());
 };
@@ -43,21 +42,18 @@ termgr.filter.includesIgnoreCase = function (haystack, needle) {
 termgr.filter.matchDeployment = function (deployment, keyword) {
     const cid = '' + deployment.customer.id;
 
-    if (termgr.filter.includesIgnoreCase(cid, keyword)) {
+    if (termgr.filter.includesIgnoreCase(cid, keyword))
         return true;
-    }
 
     const customerName = deployment.customer.company.name;
 
-    if (termgr.filter.includesIgnoreCase(customerName, keyword)) {
+    if (termgr.filter.includesIgnoreCase(customerName, keyword))
         return true;
-    }
 
     const address = termgr.addressToString(deployment.address);
 
-    if (termgr.filter.includesIgnoreCase(address, keyword)) {
+    if (termgr.filter.includesIgnoreCase(address, keyword))
         return true;
-    }
 
     return false;
 };
@@ -78,18 +74,16 @@ termgr.filter._systems = function* (systems, keyword) {
             let fragments = keyword.split('#');
             let id = parseInt(fragments[1]);
 
-            if (system.id == id) {
+            if (system.id == id)
                 yield system;
-            }
 
             continue;
         }
 
         let deployment = system.deployment;
 
-        if (deployment == null) {
+        if (deployment == null)
             continue;
-        }
 
         if (termgr.filter.matchDeployment(deployment, keyword)) {
             yield system;
@@ -115,9 +109,8 @@ termgr.filter._deployments = function* (deployments, keyword) {
             let fragments = keyword.split('#');
             let id = parseInt(fragments[1]);
 
-            if (deployment.id == id) {
+            if (deployment.id == id)
                 yield deployment;
-            }
 
             continue;
         }

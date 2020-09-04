@@ -89,9 +89,8 @@ termgr.deployment.renderDetails = function () {
     let deployment;
 
     for (deployment of deployments) {
-        if (deployment.id == deploymentId) {
+        if (deployment.id == deploymentId)
             break;
-        }
     }
 
     const deploymentDetails = document.getElementById('deploymentDetails');
@@ -109,11 +108,10 @@ termgr.deployment.init = function () {
     const system = termgr.storage.system.get();
     const deployments = termgr.storage.deployments.get();
 
-    if (deployments == null) {
+    if (deployments == null)
         termgr.deployment.reload().then(termgr.loader.stop);
-    } else {
+    else
         termgr.deployment.list(deployments);
-    }
 
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', termgr.partial(termgr.deployment.list), false);
@@ -126,9 +124,8 @@ termgr.deployment.init = function () {
         document.getElementById('sortByAddress')
     ];
 
-    for (const radioButton of radioButtons) {
+    for (const radioButton of radioButtons)
         radioButton.addEventListener('change', termgr.partial(termgr.deployment.list), false);
-    }
 
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(termgr.deployment.deploy, system), false);

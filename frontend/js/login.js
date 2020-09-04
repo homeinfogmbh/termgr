@@ -33,11 +33,10 @@ termgr.login.login = function () {
     const passwd = document.getElementById('passwd').value;
     const storeCredentials = document.getElementById('storeCredentials').checked;
 
-    if (storeCredentials) {
+    if (storeCredentials)
         termgr.storage.credentials.set(account, passwd);
-    } else {
+    else
         termgr.storage.credentials.clear();
-    }
 
     return termgr.api.login(account, passwd);
 };
