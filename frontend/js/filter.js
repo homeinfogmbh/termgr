@@ -97,18 +97,28 @@ termgr.filter._systems = function* (systems, keyword) {
     Filters the provided depoloyments by the respective keyword.
 */
 termgr.filter._deployments = function* (deployments, keyword) {
+    let fragments = null;
+    let id = null;
+
+    // Determine ID for possible exact ID matching.
+    if (keyword.startsWith('#')) {
+            fragments = keyword.split('#');
+            id = parseInt(fragments[1]);
+    } else if (keyword.endsWith('!')) {
+            fragments = keyword.split('!');
+            id = parseInt(fragments[0]);
+    }
+
+
     for (const deployment of deployments) {
-        // Yield any copy on empty keyword.
+        // Yield any deployment on empty keyword.
         if (keyword == null || keyword == '') {
             yield deployment;
             continue;
         }
 
         // Exact ID matching.
-        if (keyword.startsWith('#')) {
-            let fragments = keyword.split('#');
-            let id = parseInt(fragments[1]);
-
+        if (id != null) {
             if (deployment.id == id)
                 yield deployment;
 
