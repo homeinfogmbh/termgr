@@ -147,7 +147,7 @@ termgr.filter._deployments = function* (deployments, keyword) {
     Filters systems.
 */
 termgr.filter.systems = function (systems) {
-    const keyword = document.getElementById('searchField').value;
+    const keyword = document.getElementById('searchField').value.trim();
     systems = termgr.filter._systems(systems, keyword);
     return Array.from(systems);
 };
@@ -157,7 +157,7 @@ termgr.filter.systems = function (systems) {
     Filters deployments.
 */
 termgr.filter.deployments = function (deployments) {
-    const keyword = document.getElementById('searchField').value;
+    const keyword = document.getElementById('searchField').value.trim();
     deployments = termgr.filter._deployments(deployments, keyword);
     return Array.from(deployments);
 };
