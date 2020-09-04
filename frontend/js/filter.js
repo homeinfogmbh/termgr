@@ -58,10 +58,34 @@ termgr.filter.matchDeployment = function (deployment, keyword) {
     return false;
 };
 
+
+/*
+    Extracts the ID from a filter keyword.
+*/
+termgr.filter._extractId = function (keyword) {
+    let fragments = null;
+
+    // Determine ID for possible exact ID matching.
+    if (keyword.startsWith('#')) {
+        fragments = keyword.split('#');
+        return parseInt(fragments[1]);
+    }
+
+    if (keyword.endsWith('!')) {
+        fragments = keyword.split('!');
+        return parseInt(fragments[0]);
+    }
+
+    return null;
+};
+
+
 /*
     Filters the provided systems by the respective keyword.
 */
 termgr.filter._systems = function* (systems, keyword) {
+    const id = termgr.filter._extractId(keyword);
+
     for (const system of systems) {
         // Yield any copy on empty keyword.
         if (keyword == null || keyword == '') {
@@ -70,10 +94,7 @@ termgr.filter._systems = function* (systems, keyword) {
         }
 
         // Exact ID matching.
-        if (keyword.startsWith('#')) {
-            let fragments = keyword.split('#');
-            let id = parseInt(fragments[1]);
-
+        if (id != null) {
             if (system.id == id)
                 yield system;
 
@@ -97,18 +118,7 @@ termgr.filter._systems = function* (systems, keyword) {
     Filters the provided depoloyments by the respective keyword.
 */
 termgr.filter._deployments = function* (deployments, keyword) {
-    let fragments = null;
-    let id = null;
-
-    // Determine ID for possible exact ID matching.
-    if (keyword.startsWith('#')) {
-            fragments = keyword.split('#');
-            id = parseInt(fragments[1]);
-    } else if (keyword.endsWith('!')) {
-            fragments = keyword.split('!');
-            id = parseInt(fragments[0]);
-    }
-
+    const id = termgr.filter._extractId(keyword);
 
     for (const deployment of deployments) {
         // Yield any deployment on empty keyword.
