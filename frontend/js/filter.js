@@ -65,7 +65,6 @@ termgr.filter.matchDeployment = function (deployment, keyword) {
 termgr.filter._extractId = function (keyword) {
     let fragments = null;
 
-    // Determine ID for possible exact ID matching.
     if (keyword.startsWith('#')) {
         fragments = keyword.split('#');
         return parseInt(fragments[1]);
@@ -94,7 +93,7 @@ termgr.filter._systems = function* (systems, keyword) {
         }
 
         // Exact ID matching.
-        if (id != null) {
+        if (id != null && id != NaN) {
             if (system.id == id)
                 yield system;
 
@@ -128,7 +127,7 @@ termgr.filter._deployments = function* (deployments, keyword) {
         }
 
         // Exact ID matching.
-        if (id != null) {
+        if (id != null && id != NaN) {
             if (deployment.id == id)
                 yield deployment;
 
