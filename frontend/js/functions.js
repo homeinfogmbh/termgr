@@ -59,3 +59,14 @@ termgr.partial = function (func, ...args) {
         return func(...args);
     };
 };
+
+
+/*
+    Enumerates an iterable.
+*/
+termgr.enumerate = function* (iterable, start = 0) {
+    for (const item of iterable) {
+        yield [start, item];
+        start++;
+    }
+};

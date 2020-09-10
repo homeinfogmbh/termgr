@@ -28,7 +28,7 @@ termgr.dom = {};
 /*
     Generates a terminal DOM entry.
 */
-termgr.dom.systemEntry = function (system) {
+termgr.dom.systemEntry = function (system, index) {
     const deployment = system.deployment;
     let address = 'Keine Adresse';
     let customer = 'Kein Kunde';
@@ -113,7 +113,7 @@ termgr.dom.systemEntry = function (system) {
     columnDescriptionAndButtons.appendChild(rowCustomer);
     columnDescriptionAndButtons.appendChild(rowButtons);
 
-    const color = (system.id % 2) ? 'w3-light-grey' : 'w3-white';
+    const color = (index % 2) ? 'w3-light-grey' : 'w3-white';
     const entry = document.createElement('tr');
     entry.setAttribute('class', 'w3-hover-green ' + color);
     entry.appendChild(columnDescriptionAndButtons);
