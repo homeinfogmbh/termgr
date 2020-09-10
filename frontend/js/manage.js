@@ -59,7 +59,7 @@ termgr.manage.render = function (systems) {
     const container = document.getElementById('systems');
     container.innerHTML = '';
 
-    for (const [index, system] of termgr.enumrate(systems)) {
+    for (const [index, system] of termgr.enumerate(systems)) {
         let entry = termgr.dom.systemEntry(system, index);
         container.appendChild(entry);
     }
