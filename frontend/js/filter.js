@@ -105,10 +105,8 @@ termgr.filter._systems = function* (systems, keyword) {
         if (deployment == null)
             continue;
 
-        if (termgr.filter.matchDeployment(deployment, keyword)) {
+        if (termgr.filter.matchDeployment(deployment, keyword))
             yield system;
-            continue;
-        }
     }
 };
 
@@ -134,10 +132,8 @@ termgr.filter._deployments = function* (deployments, keyword) {
             continue;
         }
 
-        if (termgr.filter.matchDeployment(deployment, keyword)) {
+        if (termgr.filter.matchDeployment(deployment, keyword))
             yield deployment;
-            continue;
-        }
     }
 };
 
