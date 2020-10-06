@@ -1,5 +1,6 @@
 """Terminal administration."""
 
+from datetime import datetime
 from functools import partial
 
 from flask import request
@@ -31,22 +32,25 @@ def deploy_system(system, deployment):
 @authenticated
 @admin
 def toggle_application(system):
-    """Activates and deactivates the
-    digital signage application on the system.
+    """Activates and deactivates the digital signage application
+    on the system and marks the system as fitted / non-fitted.
     """
 
     try:
         request.json['disable']
     except KeyError:
         function = partial(system.application, True)
+        system.fitted = datetime.now()
     else:
         function = partial(system.application, False)
+        system.fitted = None
 
     try:
         response = function()
     except SystemOffline:
         return ('System is offline.', 400)
 
+    system.save()
     return (response.text, response.status_code)
 
 
