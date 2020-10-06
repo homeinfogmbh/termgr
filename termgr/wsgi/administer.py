@@ -39,11 +39,12 @@ def toggle_application(system):
     try:
         request.json['disable']
     except KeyError:
-        function = partial(system.application, True)
-        system.fitted = datetime.now()
+        state = True
     else:
-        function = partial(system.application, False)
-        system.fitted = None
+        state = False
+
+    function = partial(system.application, state)
+    system.fitted = state
 
     try:
         response = function()
