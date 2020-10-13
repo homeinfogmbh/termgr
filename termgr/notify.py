@@ -4,7 +4,6 @@ from logging import getLogger
 from xml.etree.ElementTree import tostring, Element, SubElement
 
 from emaillib import Mailer, EMail
-from functoolsplus import coerce
 
 from termgr.config import CONFIG
 from termgr.orm import Deployments
@@ -26,7 +25,6 @@ def admins():
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
-@coerce(tuple)
 def get_html_emails(subject, html):
     """Send emails to admins."""
 
@@ -39,8 +37,7 @@ def get_html_emails(subject, html):
 def notify_todays_deployments():
     """Notifies the adminstrators about deployments."""
 
-    deployments = tuple(Deployments.of_today().order_by(
-        Deployments.timestamp.desc()))
+    deployments = Deployments.of_today().order_by(Deployments.timestamp.desc())
 
     if not deployments:
         return False
