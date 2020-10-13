@@ -12,10 +12,22 @@ from termgr.orm import Deployments
 __all__ = ['notify_todays_deployments']
 
 
+HEADERS = (
+    'Techniker',
+    'System',
+    'Kunde',
+    'Kundennummer',
+    'Typ',
+    'Standort',
+    'Zeitstempel'
+)
 LOGGER = getLogger(__file__)
 MAILER = Mailer(
-    CONFIG['mail']['host'], CONFIG['mail']['port'],
-    CONFIG['mail']['user'], CONFIG['mail']['passwd'])
+    CONFIG['mail']['host'],
+    CONFIG['mail']['port'],
+    CONFIG['mail']['user'],
+    CONFIG['mail']['passwd']
+)
 
 
 def admins():
@@ -63,20 +75,10 @@ def notify_todays_deployments():
     SubElement(body, 'br')
     table = SubElement(body, 'table', attrib={'border': '1'})
     row = SubElement(table, 'tr')
-    header = SubElement(row, 'th')
-    header.text = 'Techniker'
-    header = SubElement(row, 'th')
-    header.text = 'System'
-    header = SubElement(row, 'th')
-    header.text = 'Kunde'
-    header = SubElement(row, 'th')
-    header.text = 'Kundennummer'
-    header = SubElement(row, 'th')
-    header.text = 'Typ'
-    header = SubElement(row, 'th')
-    header.text = 'Standort'
-    header = SubElement(row, 'th')
-    header.text = 'Zeitstempel'
+
+    for header in HEADERS:
+        header_column = SubElement(row, 'th')
+        header_column.text = header
 
     for deployment in deployments:
         table.append(deployment.to_html_table_row())
