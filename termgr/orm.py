@@ -16,6 +16,15 @@ __all__ = ['Deployments']
 
 
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
+HTML_TABLE_HEADERS = (
+    'Techniker',
+    'System',
+    'Kunde',
+    'Kundennummer',
+    'Typ',
+    'Standort',
+    'Zeitstempel'
+)
 
 
 class TermgrModel(JSONModel):   # pylint: disable=R0903
@@ -56,21 +65,34 @@ class Deployments(TermgrModel):
         condition = (cls.timestamp >= today) & (cls.timestamp < tomorrow)
         return cls.select().where(condition)
 
-    def to_html_table_row(self):
-        """Returns an HTML DOM."""
+    @classmethod
+    def html_table_header(cls):
+        """Returns an HTML DOM of the table header."""
         row = Element('tr')
-        column = SubElement(row, 'td')
-        column.text = self.account.full_name or self.account.name
-        column = SubElement(row, 'td')
-        column.text = str(self.system.id)
-        column = SubElement(row, 'td')
-        column.text = self.deployment.customer.name
-        column = SubElement(row, 'td')
-        column.text = str(self.deployment.customer.id)
-        column = SubElement(row, 'td')
-        column.text = self.deployment.type.value
-        column = SubElement(row, 'td')
-        column.text = str(self.deployment.address)
-        column = SubElement(row, 'td')
-        column.text = self.timestamp.isoformat()    # pylint: disable=E1101
+
+        for text in HTML_TABLE_HEADERS:
+            header = SubElement(row, 'th')
+            header.text = text
+
+        return row
+
+    @property
+    def html_table_columns(self):
+        """Yields the column contents for the HTML table representation."""
+        yield self.account.full_name or self.account.name
+        yield str(self.system.id)
+        yield self.deployment.customer.name
+        yield str(self.deployment.customer.id)
+        yield self.deployment.type.value
+        yield str(self.deployment.address)
+        yield self.timestamp.isoformat()    # pylint: disable=E1101
+
+    def to_html_table_row(self):
+        """Returns an HTML DOM of a table row."""
+        row = Element('tr')
+
+        for column in self.html_table_columns:
+            table_column = SubElement(row, 'td')
+            table_column.text = column
+
         return row

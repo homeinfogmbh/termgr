@@ -74,11 +74,7 @@ def notify_todays_deployments():
     SubElement(body, 'br')
     SubElement(body, 'br')
     table = SubElement(body, 'table', attrib={'border': '1'})
-    row = SubElement(table, 'tr')
-
-    for header in HEADERS:
-        header_column = SubElement(row, 'th')
-        header_column.text = header
+    table.append(Deployments.html_table_header())
 
     for deployment in deployments:
         table.append(deployment.to_html_table_row())
