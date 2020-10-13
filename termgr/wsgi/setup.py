@@ -41,10 +41,10 @@ def get_openvpn_data(system):
         data, filename = package(openvpn, windows=windows)
     except FileNotFoundError as error:
         raise Error('Missing file: {}'.format(basename(error.filename)),
-                    status=500)
+                    status=500) from None
     except PermissionError as error:
         raise Error('Cannot access file: {}'.format(basename(error.filename)),
-                    status=500)
+                    status=500) from None
 
     return Binary(data, filename=filename)
 

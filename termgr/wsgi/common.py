@@ -27,7 +27,7 @@ def _get_deployment():
     try:
         return Deployment[ident]
     except Deployment.DoesNotExist:
-        raise Error('No such deployment.', status=404)
+        raise Error('No such deployment.', status=404) from None
 
 
 def _get_system():
@@ -41,7 +41,7 @@ def _get_system():
     try:
         return System[ident]
     except System.DoesNotExist:
-        raise Error('No such system.', status=404)
+        raise Error('No such system.', status=404) from None
 
 
 def admin(function):
