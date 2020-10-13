@@ -57,8 +57,6 @@ def notify_todays_deployments():
     html = Element('html')
     header = SubElement(html, 'header')
     SubElement(header, 'meta', attrib={'charset': 'UTF-8'})
-    title = SubElement(header, 'title')
-    title.text = 'Ein HOMEINFO System wurde verbaut'
     body = SubElement(html, 'body')
     salutation = SubElement(body, 'p')
     salutation.text = 'Sehr geehrter Administrator,'
