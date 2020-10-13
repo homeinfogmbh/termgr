@@ -1,6 +1,5 @@
 """Terminal administration."""
 
-from datetime import datetime
 from functools import partial
 
 from flask import request
@@ -9,7 +8,7 @@ from hipster.orm import Queue
 from his import ACCOUNT, authenticated
 from hwdb import SystemOffline
 
-from termgr.notify import notify_todays_deployments
+from termgr.notify import notify
 from termgr.orm import Deployments
 from termgr.wsgi.common import admin, deploy
 
@@ -25,7 +24,7 @@ def deploy_system(system, deployment):
     exclusive = request.json.get('exclusive', False)
     system.deploy(deployment, exclusive=exclusive)
     Deployments.add(ACCOUNT, system, deployment)
-    notify_todays_deployments()
+    notify()
     return 'System has been deployed.'
 
 

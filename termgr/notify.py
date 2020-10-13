@@ -9,7 +9,7 @@ from termgr.config import CONFIG
 from termgr.orm import Deployments
 
 
-__all__ = ['notify_todays_deployments']
+__all__ = ['notify']
 
 
 HEADERS = (
@@ -46,10 +46,14 @@ def get_html_emails(subject, html):
         yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
 
 
-def notify_todays_deployments():
+def notify(deployments=None, order=True):
     """Notifies the adminstrators about deployments."""
 
-    deployments = Deployments.of_today().order_by(Deployments.timestamp.desc())
+    if deployments is None:
+        deployments = Deployments.of_today()
+
+    if order:
+        deployments = deployments.order_by(Deployments.timestamp.desc())
 
     if not deployments:
         return False
