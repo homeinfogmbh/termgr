@@ -52,11 +52,9 @@ class Deployments(TermgrModel):
     def of_today(cls):
         """Yields deployments that were made today."""
         today = date.today()
-        start = datetime(today.year, today.month, today.day)
         tomorrow = today + timedelta(days=1)
-        end = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
-        return cls.select().where(
-            (cls.timestamp >= start) & (cls.timestamp < end))
+        condition = (cls.timestamp >= today) & (cls.timestamp < tomorrow)
+        return cls.select().where(condition)
 
     def to_html_table_row(self):
         """Returns an HTML DOM."""
