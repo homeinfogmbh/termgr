@@ -60,19 +60,15 @@ def notify_todays_deployments():
     title = SubElement(header, 'title')
     title.text = 'Ein HOMEINFO System wurde verbaut'
     body = SubElement(html, 'body')
-    salutation = SubElement(body, 'span')
+    salutation = SubElement(body, 'p')
     salutation.text = 'Sehr geehrter Administrator,'
-    SubElement(body, 'br')
-    SubElement(body, 'br')
-    text = SubElement(body, 'span')
+    text = SubElement(body, 'p')
 
     if len(deployments) == 1:
         text.text = 'das folgende HOMEINFO System wurde heute verbaut:'
     else:
         text.text = 'die folgenden HOMEINFO Systeme wurden heute verbaut:'
 
-    SubElement(body, 'br')
-    SubElement(body, 'br')
     table = SubElement(body, 'table', attrib={'border': '1'})
     table.append(Deployments.html_table_header())
 
