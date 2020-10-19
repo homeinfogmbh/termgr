@@ -22,7 +22,8 @@ def deploy_system(system, deployment):
     """Deploys the respective system."""
 
     exclusive = request.json.get('exclusive', False)
-    system.deploy(deployment, exclusive=exclusive)
+    fitted = request.json.get('exclusive', False)
+    system.deploy(deployment, exclusive=exclusive, fitted=fitted)
     Deployments.add(ACCOUNT, system, deployment)
     notify()
     return 'System has been deployed.'
@@ -35,7 +36,7 @@ def toggle_application(system):
     on the system and marks the system as fitted / non-fitted.
     """
 
-    state = request.json.get('state')
+    state = request.json.get('state', False)
     function = partial(system.application, state)
     system.fitted = state
 
