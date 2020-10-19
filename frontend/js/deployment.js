@@ -41,7 +41,7 @@ termgr.deployment.reload = function () {
     Renders the respective deployments.
 */
 termgr.deployment.render = function (deployments) {
-    const system = termgr.storage.system.get();
+    const system = termgr.storage.system.load();
     const select = document.getElementById('deployments');
     select.innerHTML = '';
 
