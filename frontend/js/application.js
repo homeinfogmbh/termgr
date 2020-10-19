@@ -33,9 +33,9 @@ termgr.application.init = function () {
     const systemId = document.getElementById('system');
     systemId.textContent = system;
     const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', termgr.partial(termgr.api.application.enable, system), false);
+    btnEnable.addEventListener('click', termgr.partial(termgr.api.application.enable, system, true), false);
     const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', termgr.partial(termgr.api.application.disable, system), false);
+    btnDisable.addEventListener('click', termgr.partial(termgr.api.application.disable, system, false), false);
 };
 
 

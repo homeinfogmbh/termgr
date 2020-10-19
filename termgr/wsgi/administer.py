@@ -35,13 +35,7 @@ def toggle_application(system):
     on the system and marks the system as fitted / non-fitted.
     """
 
-    try:
-        request.json['disable']
-    except KeyError:
-        state = True
-    else:
-        state = False
-
+    state = request.json.get('state')
     function = partial(system.application, state)
     system.fitted = state
 

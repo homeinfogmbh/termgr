@@ -153,33 +153,17 @@ termgr.api.application = {};
 
 
 /*
-    Enables the application.
+    Enables or disables the application.
 */
-termgr.api.application.enable = function (system) {
-    const payload = {'system': system};
+termgr.api.application = function (system, state) {
+    const payload = {'system': system, 'state': state};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
     return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/application', data, headers).then(
         function () {
-            alert('Digital Signage Anwendung wurde aktiviert.');
+            alert('Digital Signage Anwendung wurde ' + state ? 'aktiviert' : 'deaktiviert' + '.');
         },
-        termgr.api.checkSession('Digital Signage Anwendung konnte nicht aktiviert werden.')
-    );
-};
-
-
-/*
-    Disables the application.
-*/
-termgr.api.application.disable = function (system) {
-    const payload = {'system': system, 'disable': true};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/application', data, headers).then(
-        function () {
-            alert('Digital Signage Anwendung wurde deaktiviert.');
-        },
-        termgr.api.checkSession('Digital Signage Anwendung konnte nicht deaktiviert werden.')
+        termgr.api.checkSession('Digital Signage Anwendung konnte nicht ' + state ? 'aktiviert' : 'deaktiviert' + ' werden.')
     );
 };
 
