@@ -52,7 +52,8 @@ termgr.deployment.render = function (deployments) {
         select.appendChild(option);
     }
 
-    select.value = system.deployment.id || null;
+    if (system.deployment)
+      select.value = system.deployment.id;
 };
 
 
