@@ -52,10 +52,11 @@ termgr.deployment.render = function (deployments) {
         select.appendChild(option);
     }
 
-    console.log('DEBUG: ' + system.deployment);
+    console.log('DEBUG 1: ' + system);
+    console.log('DEBUG 2: ' + system.deployment);
 
     if (system.deployment) {
-        console.log('DEBUG: ' + system.deployment.id);
+        console.log('DEBUG 3: ' + system.deployment.id);
         select.value = '' + system.deployment.id;
     }
 };
