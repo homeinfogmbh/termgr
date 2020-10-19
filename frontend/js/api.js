@@ -159,11 +159,12 @@ termgr.api.application = function (system, state) {
     const payload = {'system': system, 'state': state};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
+    const stateText = state ? 'aktiviert' : 'deaktiviert';
     return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/application', data, headers).then(
         function () {
-            alert('Digital Signage Anwendung wurde ' + state ? 'aktiviert' : 'deaktiviert' + '.');
+            alert('Digital Signage Anwendung wurde ' + stateText + '.');
         },
-        termgr.api.checkSession('Digital Signage Anwendung konnte nicht ' + state ? 'aktiviert' : 'deaktiviert' + ' werden.')
+        termgr.api.checkSession('Digital Signage Anwendung konnte nicht ' + stateText + ' werden.')
     );
 };
 
