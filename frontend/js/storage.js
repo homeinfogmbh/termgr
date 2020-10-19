@@ -147,9 +147,9 @@ termgr.storage.system.get = function () {
 
 
 /*
-     Loads the system data from local storage.
+     Loads the current system's data from local storage.
 */
-termgr.storage.system.load = function () {
+termgr.storage.system.current = function () {
     const systemId = termgr.storage.system.get();
 
     if (systemId == null)
