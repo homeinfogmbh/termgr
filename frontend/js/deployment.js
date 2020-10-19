@@ -41,6 +41,7 @@ termgr.deployment.reload = function () {
     Renders the respective deployments.
 */
 termgr.deployment.render = function (deployments) {
+    const system = termgr.storage.system.get();
     const select = document.getElementById('deployments');
     select.innerHTML = '';
 
@@ -50,6 +51,8 @@ termgr.deployment.render = function (deployments) {
         option.textContent = termgr.deploymentToString(deployment);
         select.appendChild(option);
     }
+
+    select.value = system.deployment.id || null;
 };
 
 
