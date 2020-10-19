@@ -76,7 +76,8 @@ termgr.deployment.list = function (deployments) {
 termgr.deployment.deploy = function (system) {
     const deployment = document.getElementById('deployments').value;
     const exclusive = document.getElementById('exclusive').checked;
-    return termgr.api.deploy(system, deployment, exclusive);
+    const fitted = document.getElementById('fitted').checked;
+    return termgr.api.deploy(system, deployment, exclusive, fitted);
 };
 
 

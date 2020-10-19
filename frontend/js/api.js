@@ -25,6 +25,7 @@ var termgr = termgr ||  {};
 termgr.api = {};
 
 termgr.api.BASE_URL = 'https://termgr.homeinfo.de';
+termgr.api.LOGIN_URL ='https://his.homeinfo.de/session'
 
 
 /*
@@ -87,7 +88,8 @@ termgr.api.makeRequest = function (method, url, data = null, headers = {}) {
 
 
 /*
-    Function to make a request and display an error message on error.
+    Checks whether an error occured due to an expired
+    session or displays the given error message otherwise.
 */
 termgr.api.checkSession = function (message) {
     return function (response) {
@@ -102,13 +104,13 @@ termgr.api.checkSession = function (message) {
 
 
 /*
-    Performs a login.
+    Performs a HIS SSO login.
 */
 termgr.api.login = function (account, passwd) {
     const payload = {'account': account, 'passwd': passwd};
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', 'https://his.homeinfo.de/session', data, headers).then(
+    return termgr.api.makeRequest('POST', termgr.api.LOGIN_URL, data, headers).then(
         function () {
             window.location = 'manage.html';
         },
@@ -172,11 +174,12 @@ termgr.api.application = function (system, state) {
 /*
     Deploys a system.
 */
-termgr.api.deploy = function (system, deployment, exclusive = false) {
+termgr.api.deploy = function (system, deployment, exclusive = false, fitted = false) {
     const payload = {
-        system: system,
-        deployment: deployment,
-        exclusive: exclusive
+        'system': system,
+        'deployment': deployment,
+        'exclusive': exclusive,
+        'fitted': fitted
     };
     const data = JSON.stringify(payload);
     const headers = {'Content-Type': 'application/json'};
@@ -206,7 +209,7 @@ termgr.api.beep = function (system) {
 
 
 /*
-    Actually performs a reboot of the respective system.
+    Reboots the respective system.
 */
 termgr.api.reboot = function (system) {
     const payload = {'system': system};
