@@ -210,7 +210,7 @@ termgr.api.deploy = function (system, deployment, exclusive = false, fitted = fa
     };
     return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/deploy', json).then(
         function () {
-            alert(stateTexts.join(' '));
+            alert(stateTexts.join('\n'));
         },
         termgr.api.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
     );
