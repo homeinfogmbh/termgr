@@ -51,7 +51,7 @@ termgr.manage.init = function () {
     const system = termgr.storage.system.current();
 
     const systemId = document.getElementById('system');
-    systemId.textContent = system;
+    systemId.textContent = system.id;
 
     const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', termgr.partial(termgr.api.application, system.id, true), false);
