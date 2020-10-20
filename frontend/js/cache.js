@@ -51,7 +51,7 @@ termgr.cache.Cache = class {
     }
 
     refresh () {
-        return refreshFunction().then(this.update);
+        return this.refreshFunction().then(this.update);
     }
 
     load (force = false) {
