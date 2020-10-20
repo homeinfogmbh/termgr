@@ -125,14 +125,12 @@ termgr.api.login = function (account, passwd) {
     Performs a HIS SSO logout.
 */
 termgr.api.logout = function () {
-    return termgr.api.makeRequest('DELETE', termgr.api.LOGIN_URL + '/!', data, headers).then(
+    return termgr.api.makeRequest('DELETE', termgr.api.LOGIN_URL + '/!').then(
         function () {
             termgr.storage.clear();
             window.location = 'login.html';
         },
-        function () {
-            termgr.api.checkSession('Logout konnte nicht durchgeführt werden.');
-        }
+        termgr.api.checkSession('Logout konnte nicht durchgeführt werden.')
     );
 };
 
