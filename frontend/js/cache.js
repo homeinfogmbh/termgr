@@ -83,7 +83,7 @@ termgr.cache.Cache = class {
         const timestamp = Date.parse(json['timestamp']);
         const now = new Date();
 
-        if ((now - timestamp) < this.lifetime) {
+        if ((now - timestamp) > this.lifetime) {
             this.log('Cache miss.');
             return this.refresh();
         }
