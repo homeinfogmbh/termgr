@@ -48,8 +48,6 @@ termgr.manage.checkLastSync = function (lastSync) {
     Sets up system-related data.
 */
 termgr.manage.setup = function (system) {
-    console.log('DEBUG: ' + JSON.stringify(system));
-
     const systemId = document.getElementById('system');
     systemId.textContent = system.id;
 
