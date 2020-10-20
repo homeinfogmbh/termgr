@@ -49,6 +49,7 @@ termgr.manage.checkLastSync = function (lastSync) {
 */
 termgr.manage.init = function () {
     const system = termgr.storage.system.current();
+    console.log('DEBUG: ' + JSON.stringify(system));
 
     const systemId = document.getElementById('system');
     systemId.textContent = system.id;
