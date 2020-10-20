@@ -48,8 +48,8 @@ termgr.cache.credentials.clear = function () {
 };
 
 
-termgr.cache.deployments = new termgr.cache.Cache('termgr.deployments', termgr.api.getDeployments);
-termgr.cache.systems = new termgr.cache.Cache('termgr.systems', termgr.api.getSystems);
+termgr.cache.deployments = new homeinfo.caching.Cache('termgr.deployments', termgr.api.getDeployments);
+termgr.cache.systems = new homeinfo.caching.Cache('termgr.systems', termgr.api.getSystems);
 
 
 /*
