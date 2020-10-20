@@ -79,6 +79,7 @@ termgr.deployment.updateDetails = function () {
     Filters, sorts and renders systems.
 */
 termgr.deployment.list = function (force = false) {
+    termgr.loader.start();
     return termgr.cache.deployments.getValue(force).then(
         termgr.filter.deployments).then(
         termgr.sort.deployments).then(
@@ -104,8 +105,12 @@ termgr.deployment.deploy = function (system) {
     Initialize deploy.html.
 */
 termgr.deployment.init = function () {
-    termgr.loader.start();
     const system = termgr.cache.system.get();
+
+    const systemId = document.getElementById('system');
+    systemId.textContent = system;
+
+    termgr.deployment.list();
 
     const btnLogout = document.getElementById('logout');
     btnLogout.addEventListener('click', termgr.partial(termgr.api.logout), false);
@@ -127,8 +132,6 @@ termgr.deployment.init = function () {
     btnDeploy.addEventListener('click', termgr.partial(termgr.deployment.deploy, system), false);
     const deploymentsList = document.getElementById('deployments');
     deploymentsList.addEventListener('change', termgr.partial(termgr.deployment.updateDetails), false);
-    const systemId = document.getElementById('system');
-    systemId.textContent = system;
 };
 
 
