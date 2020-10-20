@@ -29,74 +29,6 @@ termgr.api.LOGIN_URL ='https://his.homeinfo.de/session'
 
 
 /*
-  Makes a request returning a promise.
-*/
-termgr.api.makeRequest = function (method, url, data = null, headers = {}) {
-    function parseResponse (response) {
-        try {
-            return JSON.parse(response);
-        } catch (error) {
-            return response;
-        }
-    }
-
-    function executor (resolve, reject) {
-        function onload () {
-            if (this.status >= 200 && this.status < 300)
-                resolve({
-                    response: xhr.response,
-                    json: parseResponse(xhr.response),
-                    status: this.status,
-                    statusText: xhr.statusText
-                });
-            else
-                reject({
-                    response: xhr.response,
-                    json: parseResponse(xhr.response),
-                    status: this.status,
-                    statusText: xhr.statusText
-                });
-        }
-
-        function onerror () {
-            reject({
-                response: xhr.response,
-                json: parseResponse(xhr.response),
-                status: this.status,
-                statusText: xhr.statusText
-            });
-        }
-
-        const xhr = new XMLHttpRequest();
-        xhr.withCredentials = true;
-        xhr.open(method, url);
-
-        for (const header in headers)
-            xhr.setRequestHeader(header, headers[header]);
-
-        xhr.onload = onload;
-        xhr.onerror = onerror;
-
-        if (data == null)
-            xhr.send();
-        else
-            xhr.send(data);
-    }
-
-    return new Promise(executor);
-};
-
-
-/*
-    Makes a JSON POST request.
-*/
-termgr.api.postJSON = function (url, json, headers = {}) {
-    headers['Content-Type'] = 'application/json';
-    return termgr.api.makeRequest('POST', url, JSON.stringify(json), headers);
-}
-
-
-/*
     Checks whether an error occured due to an expired
     session or displays the given error message otherwise.
 */
@@ -117,7 +49,7 @@ termgr.api.checkSession = function (message) {
 */
 termgr.api.login = function (account, passwd) {
     const json = {'account': account, 'passwd': passwd};
-    return termgr.api.postJSON(termgr.api.LOGIN_URL, json).then(
+    return homeinfo.requests.postJSON(termgr.api.LOGIN_URL, json).then(
         function () {
             window.location = 'list.html';
         },
@@ -132,7 +64,7 @@ termgr.api.login = function (account, passwd) {
     Performs a HIS SSO logout.
 */
 termgr.api.logout = function () {
-    return termgr.api.makeRequest('DELETE', termgr.api.LOGIN_URL + '/!').then(
+    return homeinfo.requests.delete(termgr.api.LOGIN_URL + '/!').then(
         function () {
             termgr.cache.clear();
             window.location = 'login.html';
@@ -146,7 +78,7 @@ termgr.api.logout = function () {
     Retrieves deployments from the API.
 */
 termgr.api.getDeployments = function () {
-    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/deployments').then(
+    return homeinfo.requests.get(termgr.api.BASE_URL + '/list/deployments').then(
         response => response.json,
         termgr.api.checkSession('Die Liste der Standorte konnte nicht abgerufen werden.')
     );
@@ -163,7 +95,7 @@ termgr.api.getSystem = function (id) {
     if (id == null)
         return Promise.reject('Kein System angegeben.');
 
-    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/systems/' + id).then(
+    return homeinfo.requests.get(termgr.api.BASE_URL + '/list/systems/' + id).then(
         response => response.json,
         termgr.api.checkSession('Das angegebene System konnte nicht abgerufen werden.')
     );
@@ -174,7 +106,7 @@ termgr.api.getSystem = function (id) {
     Retrieves systems from the API.
 */
 termgr.api.getSystems = function () {
-    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/systems').then(
+    return homeinfo.requests.get(termgr.api.BASE_URL + '/list/systems').then(
         response => response.json,
         termgr.api.checkSession('Die Liste der Systeme konnte nicht abgerufen werden.')
     );
@@ -190,7 +122,7 @@ termgr.api.application = {};
 termgr.api.application = function (system, state) {
     const stateText = state ? 'aktiviert' : 'deaktiviert';
     const json = {'system': system, 'state': state};
-    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/application', json).then(
+    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/application', json).then(
         function () {
             alert('Digital Signage Anwendung wurde ' + stateText + '.');
         },
@@ -217,7 +149,7 @@ termgr.api.deploy = function (system, deployment, exclusive = false, fitted = fa
         'exclusive': exclusive,
         'fitted': fitted
     };
-    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/deploy', json).then(
+    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/deploy', json).then(
         function () {
             alert(stateTexts.join('\n'));
         },
@@ -232,7 +164,7 @@ termgr.api.deploy = function (system, deployment, exclusive = false, fitted = fa
 termgr.api.fit = function (system, fitted = true) {
     const stateText = fitted ? 'verbaut' : 'nicht verbaut';
     const json = {'system': system, 'fitted': fitted};
-    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/fit', json).then(
+    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/fit', json).then(
         function () {
             alert('Das System wurde als ' + stateText + ' gekennzeichnet.');
         },
@@ -246,7 +178,7 @@ termgr.api.fit = function (system, fitted = true) {
 */
 termgr.api.beep = function (system) {
     const json = {'system': system};
-    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/beep', json).then(
+    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/beep', json).then(
         function () {
             alert('Das System sollte gepiept haben.');
         },
@@ -260,7 +192,7 @@ termgr.api.beep = function (system) {
 */
 termgr.api.reboot = function (system) {
     const json = {'system': system};
-    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/reboot', json).then(
+    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/reboot', json).then(
         function () {
             alert('Das System wurde wahrscheinlich neu gestartet.');
         },
@@ -281,7 +213,7 @@ termgr.api.reboot = function (system) {
 */
 termgr.api.sync = function (system) {
     const json = {'system': system};
-    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/sync', json).then(
+    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/sync', json).then(
         function () {
             alert('Das System wird demnächst synchronisiert.');
         },
