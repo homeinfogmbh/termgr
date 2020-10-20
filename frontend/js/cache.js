@@ -25,6 +25,16 @@ var termgr = termgr || {};
 termgr.cache = {};
 
 
+termgr.cache.update = function (cache) {
+    return function (value) {
+        const now = new Date();
+        const json = {'timestamp': now.toString(), 'value': value};
+        const raw = JSON.stringify(json);
+        localStorage.setItem(cache.key, raw);
+    };
+};
+
+
 /*
     JSON data cache.
 */
@@ -43,15 +53,8 @@ termgr.cache.Cache = class {
         return this.getTimestamp();
     }
 
-    update (value) {
-        const now = new Date();
-        const json = {'timestamp': now.toString(), 'value': value};
-        const raw = JSON.stringify(json);
-        localStorage.setItem(this.key, raw);
-    }
-
     refresh () {
-        return this.refreshFunction().then(this.update);
+        return this.refreshFunction().then(termgr.cache.update(this));
     }
 
     load (force = false) {
