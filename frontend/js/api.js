@@ -1,7 +1,7 @@
 /*
     api.js - Terminal Manager API library.
 
-    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -116,6 +116,21 @@ termgr.api.login = function (account, passwd) {
         },
         function () {
             alert('Ungültiger Benutzername und / oder Passwort.');
+        }
+    );
+};
+
+
+/*
+    Performs a HIS SSO logout.
+*/
+termgr.api.logout = function () {
+    return termgr.api.makeRequest('DELETE', termgr.api.LOGIN_URL + '/!', data, headers).then(
+        function () {
+            window.location = 'login.html';
+        },
+        function () {
+            termgr.api.checkSession('Logout konnte nicht durchgeführt werden.');
         }
     );
 };

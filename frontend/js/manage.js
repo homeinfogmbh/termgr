@@ -1,7 +1,7 @@
 /*
     manage.js - Terminal Manager systems listing.
 
-    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,6 +88,8 @@ termgr.manage.list = function (systems) {
 termgr.manage.init = function () {
     termgr.loader.start();
     termgr.manage.reload().then(termgr.loader.stop);
+    const btnLogout = document.getElementById('logout');
+    btnLogout.addEventListener('click', termgr.partial(termgr.api.logout), false);
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', termgr.partial(termgr.manage.list), false);
     const btnReload = document.getElementById('reload');

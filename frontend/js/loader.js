@@ -1,7 +1,7 @@
 /*
     loader.js - Terminal Manager loading animation.
 
-    (C) 2019 HOMEINFO - Digitale Informationssysteme GmbH
+    (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
