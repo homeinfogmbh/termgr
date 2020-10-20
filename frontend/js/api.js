@@ -152,7 +152,24 @@ termgr.api.getDeployments = function () {
             termgr.storage.deployments.set(deployments);
             return deployments;
         },
-        termgr.api.checkSession('Die Liste der Standorte konnte nicht abgefragt werden.')
+        termgr.api.checkSession('Die Liste der Standorte konnte nicht abgerufen werden.')
+    );
+};
+
+
+/*
+    Retrieves a specific system from the API.
+*/
+termgr.api.getSystem = function (id) {
+    if (id == null)
+        id = termgr.storage.system.get();
+
+    if (id == null)
+        return Promise.reject('Kein System angegeben.');
+
+    return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/systems/' + id).then(
+        response => response.json,
+        termgr.api.checkSession('Das angegebene System konnte nicht abgerufen werden.')
     );
 };
 
@@ -167,7 +184,7 @@ termgr.api.getSystems = function () {
             termgr.storage.systems.set(systems);
             return systems;
         },
-        termgr.api.checkSession('Die Liste der Systeme konnte nicht abgefragt werden.')
+        termgr.api.checkSession('Die Liste der Systeme konnte nicht abgerufen werden.')
     );
 };
 

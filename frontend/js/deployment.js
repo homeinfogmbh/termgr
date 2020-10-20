@@ -26,62 +26,25 @@ termgr.deployment = {};
 
 
 /*
-    Reloads the systems.
-*/
-termgr.deployment.reload = function () {
-    termgr.loader.start();
-    return termgr.api.getDeployments().then(
-        termgr.deployment.render).then(
-        termgr.deployment.renderDetails).then(
-        termgr.loader.stop);
-};
-
-
-/*
     Renders the respective deployments.
 */
 termgr.deployment.render = function (deployments) {
-    const system = termgr.storage.system.current();
-    const select = document.getElementById('deployments');
-    select.innerHTML = '';
+    return termgr.api.getSystem().then(
+        function (system) {
+            const select = document.getElementById('deployments');
+            select.innerHTML = '';
 
-    for (const deployment of deployments) {
-        let option = document.createElement('option');
-        option.value = '' + deployment.id;
-        option.textContent = termgr.deploymentToString(deployment);
-        select.appendChild(option);
-    }
+            for (const deployment of deployments) {
+                let option = document.createElement('option');
+                option.value = '' + deployment.id;
+                option.textContent = termgr.deploymentToString(deployment);
+                select.appendChild(option);
+            }
 
-    if (system.deployment)
-        select.value = '' + system.deployment.id;
-};
-
-
-/*
-    Filters, sorts and renders systems.
-*/
-termgr.deployment.list = function (deployments) {
-    if (deployments == null) {
-        termgr.loader.start();
-        deployments = termgr.storage.deployments.get();
-    }
-
-    deployments = termgr.filter.deployments(deployments);
-    deployments = termgr.sort.deployments(deployments);
-    termgr.deployment.render(deployments);
-    termgr.deployment.renderDetails();
-    termgr.loader.stop();
-};
-
-
-/*
-    Deploys a system.
-*/
-termgr.deployment.deploy = function (system) {
-    const deployment = document.getElementById('deployments').value;
-    const exclusive = document.getElementById('exclusive').checked;
-    const fitted = document.getElementById('fitted').checked;
-    return termgr.api.deploy(system, deployment, exclusive, fitted);
+            if (system.deployment)
+                select.value = '' + system.deployment.id;
+        }
+    );
 };
 
 
@@ -106,6 +69,41 @@ termgr.deployment.renderDetails = function () {
 
 
 /*
+    Filters, sorts and renders systems.
+*/
+termgr.deployment.list = function (deployments) {
+    if (deployments == null)
+        deployments = termgr.storage.deployments.get();
+
+    deployments = termgr.filter.deployments(deployments);
+    deployments = termgr.sort.deployments(deployments);
+    return termgr.deployment.render(deployments).then(
+        termgr.deployment.renderDetails).then(
+        termgr.loader.stop);
+};
+
+
+/*
+    Reloads the systems.
+*/
+termgr.deployment.reload = function () {
+    termgr.loader.start();
+    return termgr.api.getDeployments().then(termgr.deployment.list);
+};
+
+
+/*
+    Deploys a system.
+*/
+termgr.deployment.deploy = function (system) {
+    const deployment = document.getElementById('deployments').value;
+    const exclusive = document.getElementById('exclusive').checked;
+    const fitted = document.getElementById('fitted').checked;
+    return termgr.api.deploy(system, deployment, exclusive, fitted);
+};
+
+
+/*
     Initialize deploy.html.
 */
 termgr.deployment.init = function () {
@@ -114,7 +112,7 @@ termgr.deployment.init = function () {
     const deployments = termgr.storage.deployments.get();
 
     if (deployments == null)
-        termgr.deployment.reload().then(termgr.loader.stop);
+        termgr.deployment.reload();
     else
         termgr.deployment.list(deployments);
 

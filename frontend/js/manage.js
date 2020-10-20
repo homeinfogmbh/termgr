@@ -45,10 +45,9 @@ termgr.manage.checkLastSync = function (lastSync) {
 
 
 /*
-    Initializes the management page.
+    Sets up system-related data.
 */
-termgr.manage.init = function () {
-    const system = termgr.storage.system.current();
+termgr.manage.setup = function (system) {
     console.log('DEBUG: ' + JSON.stringify(system));
 
     const systemId = document.getElementById('system');
@@ -77,6 +76,14 @@ termgr.manage.init = function () {
     const btnSync = document.getElementById('sync');
     btnSync.classList.add(termgr.manage.checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
     btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system.id), false);
+};
+
+
+/*
+    Initializes the management page.
+*/
+termgr.manage.init = function () {
+    termgr.api.getSystem().then(termgr.manage.setup);
 };
 
 

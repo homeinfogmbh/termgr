@@ -147,24 +147,6 @@ termgr.storage.system.get = function () {
 
 
 /*
-     Loads the current system's data from local storage.
-*/
-termgr.storage.system.current = function () {
-    const systemId = termgr.storage.system.get();
-
-    if (systemId == null)
-        return null;
-
-    for (const system of termgr.storage.systems.get()) {
-        if (system.id == systemId)
-            return system;
-    }
-
-    return null;
-};
-
-
-/*
     Removes the system ID from local storage.
 */
 termgr.storage.system.clear = function () {
