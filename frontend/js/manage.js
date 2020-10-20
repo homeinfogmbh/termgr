@@ -42,25 +42,25 @@ termgr.manage.init = function () {
     const systemId = document.getElementById('system');
     systemId.textContent = system;
 
-    const btnEnable = document.getElementById('logout');
+    const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', termgr.partial(termgr.api.application, system, true), false);
 
-    const btnDisable = document.getElementById('logout');
+    const btnDisable = document.getElementById('disable');
     btnDisable.addEventListener('click', termgr.partial(termgr.api.application, system, false), false);
 
-    const btnReboot = document.getElementById('logout');
+    const btnReboot = document.getElementById('reboot');
     btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system), false);
 
-    const btnBeep = document.getElementById('logout');
+    const btnBeep = document.getElementById('beep');
     btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system), false);
 
-    const btnDeploy = document.getElementById('logout');
+    const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment), false);
 
-    const btnFit = document.getElementById('logout');
+    const btnFit = document.getElementById('fit');
     btnFit.addEventListener('click', termgr.partial(termgr.api.fit, system), false);
 
-    const btnSync = document.getElementById('logout');
+    const btnSync = document.getElementById('sync');
     btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system), false);
 };
 
