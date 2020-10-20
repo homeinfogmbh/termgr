@@ -72,7 +72,7 @@ termgr.cache.Cache = class {
         }
 
         try {
-            const json = JSON.parse(value);
+            const json = JSON.parse(raw);
         } catch (error) {
             this.log('Invalid cache content.');
             return this.refresh();
