@@ -31,6 +31,17 @@ def deploy_system(system, deployment):
 
 @authenticated
 @admin
+def fit_system(system):
+    """Marks a system as fitted."""
+
+    system.fitted = fitted = request.json.get('fitted', False)
+    system.save()
+    text = 'fitted' if fitted else 'unfitted'
+    return f'System has been {text}.'
+
+
+@authenticated
+@admin
 def toggle_application(system):
     """Activates and deactivates the digital signage application
     on the system and marks the system as fitted / non-fitted.
@@ -89,6 +100,7 @@ def beep_system(system):
 
 ROUTES = (
     ('POST', '/administer/deploy', deploy_system),
+    ('POST', '/administer/fit', fit_system),
     ('POST', '/administer/application', toggle_application),
     ('POST', '/administer/reboot', reboot_system),
     ('POST', '/administer/sync', sync_system),
