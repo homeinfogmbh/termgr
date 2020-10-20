@@ -68,7 +68,7 @@ termgr.manage.init = function () {
 
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
-    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment.id), false);
+    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment), false);
 
     const btnFit = document.getElementById('fit');
     btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
