@@ -88,6 +88,15 @@ termgr.api.makeRequest = function (method, url, data = null, headers = {}) {
 
 
 /*
+    Makes a JSON POST request.
+*/
+termgr.api.postJSON = function (url, json, headers = {}) {
+    headers['Content-Type'] = 'application/json';
+    return termgr.api.makeRequest('POST', url, JSON.stringify(json), headers);
+}
+
+
+/*
     Checks whether an error occured due to an expired
     session or displays the given error message otherwise.
 */
@@ -107,12 +116,10 @@ termgr.api.checkSession = function (message) {
     Performs a HIS SSO login.
 */
 termgr.api.login = function (account, passwd) {
-    const payload = {'account': account, 'passwd': passwd};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', termgr.api.LOGIN_URL, data, headers).then(
+    const json = {'account': account, 'passwd': passwd};
+    return termgr.api.postJSON(termgr.api.LOGIN_URL, json).then(
         function () {
-            window.location = 'manage.html';
+            window.location = 'list.html';
         },
         function () {
             alert('Ungültiger Benutzername und / oder Passwort.');
@@ -172,11 +179,9 @@ termgr.api.application = {};
     Enables or disables the application.
 */
 termgr.api.application = function (system, state) {
-    const payload = {'system': system, 'state': state};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
     const stateText = state ? 'aktiviert' : 'deaktiviert';
-    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/application', data, headers).then(
+    const json = {'system': system, 'state': state};
+    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/application', json).then(
         function () {
             alert('Digital Signage Anwendung wurde ' + stateText + '.');
         },
@@ -189,17 +194,38 @@ termgr.api.application = function (system, state) {
     Deploys a system.
 */
 termgr.api.deploy = function (system, deployment, exclusive = false, fitted = false) {
-    const payload = {
+    const stateTexts = ['Der Standort wurde gesetzt.'];
+
+    if (exclusive)
+        stateTexts.push('Andere Systeme wurden vom Standort entfernt.');
+
+    if (fitted)
+        stateTexts.push('Das System wurde als verbaut markiert.');
+
+    const json = {
         'system': system,
         'deployment': deployment,
         'exclusive': exclusive,
         'fitted': fitted
     };
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/deploy', data, headers).then(
+    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/deploy', json).then(
         function () {
-            alert('Das System wurde als verbaut gekennzeichnet.');
+            alert(stateTexts.join(' '));
+        },
+        termgr.api.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
+    );
+};
+
+
+/*
+    Deploys a system.
+*/
+termgr.api.fit = function (system, fitted = true) {
+    const stateText = fitted ? 'verbaut' : 'nicht verbaut';
+    const json = {'system': system, 'fitted': fitted};
+    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/fit', json).then(
+        function () {
+            alert('Das System wurde als ' + stateText + ' gekennzeichnet.');
         },
         termgr.api.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
     );
@@ -210,10 +236,8 @@ termgr.api.deploy = function (system, deployment, exclusive = false, fitted = fa
     Lets the respective system beep.
 */
 termgr.api.beep = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/beep', data, headers).then(
+    const json = {'system': system};
+    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/beep', json).then(
         function () {
             alert('Das System sollte gepiept haben.');
         },
@@ -226,10 +250,8 @@ termgr.api.beep = function (system) {
     Reboots the respective system.
 */
 termgr.api.reboot = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/reboot', data, headers).then(
+    const json = {'system': system};
+    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/reboot', json).then(
         function () {
             alert('Das System wurde wahrscheinlich neu gestartet.');
         },
@@ -249,10 +271,8 @@ termgr.api.reboot = function (system) {
     Synchronizes the respective system.
 */
 termgr.api.sync = function (system) {
-    const payload = {'system': system};
-    const data = JSON.stringify(payload);
-    const headers = {'Content-Type': 'application/json'};
-    return termgr.api.makeRequest('POST', termgr.api.BASE_URL + '/administer/sync', data, headers).then(
+    const json = {'system': system};
+    return termgr.api.postJSON(termgr.api.BASE_URL + '/administer/sync', json).then(
         function () {
             alert('Das System wird demnächst synchronisiert.');
         },

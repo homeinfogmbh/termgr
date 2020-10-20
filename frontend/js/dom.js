@@ -38,85 +38,22 @@ termgr.dom.systemEntry = function (system, index) {
         customer = termgr.customerToString(deployment.customer);
     }
 
-    const rowAddress = document.createElement('div');
-    rowAddress.setAttribute('class', 'w3-row');
-    rowAddress.innerHTML = address;
+    const colId = document.createElement('td');
+    colId.innerHTML = '#' + system.id;
 
-    const rowCustomer = document.createElement('div');
-    rowCustomer.setAttribute('class', 'w3-row');
-    rowCustomer.innerHTML = customer;
+    const colAddress = document.createElement('td');
+    colAddress.innerHTML = address;
 
-    const btnBeepIcon = document.createElement('i');
-    btnBeepIcon.setAttribute('class', 'fa fa-volume-up termgr-terminal-icon');
-
-    const btnBeep = document.createElement('button');
-    btnBeep.setAttribute('class', 'w3-button w3-blue w3-col s2');
-    btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system.id), false);
-    btnBeep.setAttribute('title', 'Beep');
-    btnBeep.appendChild(btnBeepIcon);
-
-    const btnRebootIcon = document.createElement('i');
-    btnRebootIcon.setAttribute('class', 'fa fa-power-off');
-
-    const btnReboot = document.createElement('button');
-    btnReboot.setAttribute('class', 'w3-button w3-orange w3-col s2');
-    btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system.id), false);
-    btnReboot.setAttribute('title', 'Reboot');
-    btnReboot.appendChild(btnRebootIcon);
-
-    const btnDeployIcon = document.createElement('i');
-    btnDeployIcon.setAttribute('class', 'fa fa-wrench');
-
-    const btnDeploy = document.createElement('button');
-    btnDeploy.setAttribute('class', 'w3-button w3-teal w3-col s2');
-    btnDeploy.setAttribute('data-id', system.id);
-    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.deploy, system.id), false);
-    btnDeploy.setAttribute('title', 'Verbauen');
-    btnDeploy.appendChild(btnDeployIcon);
-
-    const btnEnableApplicationIcon = document.createElement('i');
-    btnEnableApplicationIcon.setAttribute('class', 'fa fa-desktop');
-
-    const btnEnableApplication = document.createElement('button');
-    btnEnableApplication.setAttribute('class', 'w3-button w3-khaki w3-col s2');
-    btnEnableApplication.setAttribute('data-id', system.id);
-    btnEnableApplication.addEventListener('click', termgr.partial(termgr.manage.application, system.id), false);
-    btnEnableApplication.setAttribute('title', 'Digital Signage Modus umschalten');
-    btnEnableApplication.appendChild(btnEnableApplicationIcon);
-
-    const btnSyncIcon = document.createElement('i');
-    btnSyncIcon.setAttribute('class', 'fa fa-sync');
-
-    const btnSync = document.createElement('button');
-    btnSync.setAttribute('class', 'w3-button w3-grey w3-col s2');
-    btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system.id), false);
-    btnSync.setAttribute('data-toggle', 'tooltip');
-    btnSync.setAttribute('data-placement', 'bottom');
-    btnSync.setAttribute('title', 'Synchronisieren');
-    btnSync.appendChild(btnSyncIcon);
-
-    const idField = document.createElement('span');
-    idField.setAttribute('class', 'w3-col s2');
-    idField.innerHTML = '#' + system.id;
-
-    const rowButtons = document.createElement('div');
-    rowButtons.setAttribute('class', 'w3-row');
-    rowButtons.appendChild(idField);
-    rowButtons.appendChild(btnBeep);
-    rowButtons.appendChild(btnReboot);
-    rowButtons.appendChild(btnEnableApplication);
-    rowButtons.appendChild(btnDeploy);
-    rowButtons.appendChild(btnSync);
-
-    const columnDescriptionAndButtons = document.createElement('td');
-    columnDescriptionAndButtons.appendChild(rowAddress);
-    columnDescriptionAndButtons.appendChild(rowCustomer);
-    columnDescriptionAndButtons.appendChild(rowButtons);
+    const colCustomer = document.createElement('td');
+    colCustomer.innerHTML = customer;
 
     const color = (index % 2) ? 'w3-light-grey' : 'w3-white';
     const entry = document.createElement('tr');
     entry.setAttribute('class', 'w3-hover-green ' + color);
-    entry.appendChild(columnDescriptionAndButtons);
+    entry.appendChild(colId);
+    entry.appendChild(colAddress);
+    entry.appendChild(colCustomer);
+    entry.addEventListener('click', termgr.partial(termgr.list.select, system.id), false);
 
     return entry;
 };
@@ -221,7 +158,7 @@ termgr.dom.deploymentToTable = function (deployment) {
     // Timestamp.
     const rowTimestamp = document.createElement('tr');
     const headerTimestamp = document.createElement('th');
-    headerTimestamp.textContent = 'Zeitstempel';
+    headerTimestamp.textContent = 'Erstellungsdatum';
     rowTimestamp.appendChild(headerTimestamp);
     const valueTimestamp = document.createElement('td');
     valueTimestamp.textContent = deployment.timestamp || 'N/A';

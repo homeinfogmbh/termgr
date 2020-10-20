@@ -36,7 +36,7 @@ termgr.autologin.init = function () {
     } else {
         termgr.api.login(account, passwd).then(
             function () {
-                window.location = 'manage.html';
+                window.location = 'list.html';
             },
             function () {
                 window.location = 'login.html';

@@ -1,5 +1,5 @@
 /*
-    manage.js - Terminal Manager systems listing.
+    manage.js - Terminal Manager systems management.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -26,83 +26,42 @@ termgr.manage = {};
 
 
 /*
-    Navigates to the toggle application page.
+    Navigates to the deployment page.
 */
-termgr.manage.application = function (system) {
-    termgr.storage.system.set(system);
-    window.location = 'application.html';
-};
-
-
-/*
-    Opens the deploying view.
-*/
-termgr.manage.deploy = function (system) {
-    termgr.storage.system.set(system);
+termgr.manage.loadDeployment = function () {
     window.location = 'deploy.html';
 };
 
 
 /*
-    Reloads the systems.
-*/
-termgr.manage.reload = function () {
-    termgr.loader.start();
-    return termgr.api.getSystems().then(termgr.manage.list).then(termgr.loader.stop);
-};
-
-
-/*
-    Renders the respective systems.
-*/
-termgr.manage.render = function (systems) {
-    const container = document.getElementById('systems');
-    container.innerHTML = '';
-
-    for (let i = 0; i < systems.length; i++) {
-        let entry = termgr.dom.systemEntry(systems[i], i);
-        container.appendChild(entry);
-    }
-};
-
-
-/*
-    Filters, sorts and renders systems.
-*/
-termgr.manage.list = function (systems) {
-    if (systems == null) {
-        termgr.loader.start();
-        systems = termgr.storage.systems.get();
-    }
-
-    systems = termgr.filter.systems(systems);
-    systems = termgr.sort.systems(systems);
-    termgr.manage.render(systems);
-    termgr.loader.stop();
-};
-
-
-/*
-    Initialize manage.html.
+    Initializes the management page.
 */
 termgr.manage.init = function () {
-    termgr.loader.start();
-    termgr.manage.reload().then(termgr.loader.stop);
-    const btnLogout = document.getElementById('logout');
-    btnLogout.addEventListener('click', termgr.partial(termgr.api.logout), false);
-    const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.manage.list), false);
-    const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(termgr.manage.reload), false);
-    const radioButtons = [
-        document.getElementById('sortAsc'),
-        document.getElementById('sortDesc'),
-        document.getElementById('sortById'),
-        document.getElementById('sortByAddress')
-    ];
+    const system = termgr.storage.system.get();
 
-    for (const radioButton of radioButtons)
-        radioButton.addEventListener('change', termgr.partial(termgr.manage.list), false);
+    const systemId = document.getElementById('system');
+    systemId.textContent = system;
+
+    const btnEnable = document.getElementById('logout');
+    btnEnable.addEventListener('click', termgr.partial(termgr.api.application, system, true), false);
+
+    const btnDisable = document.getElementById('logout');
+    btnDisable.addEventListener('click', termgr.partial(termgr.api.application, system, false), false);
+
+    const btnReboot = document.getElementById('logout');
+    btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system), false);
+
+    const btnBeep = document.getElementById('logout');
+    btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system), false);
+
+    const btnDeploy = document.getElementById('logout');
+    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment), false);
+
+    const btnFit = document.getElementById('logout');
+    btnFit.addEventListener('click', termgr.partial(termgr.api.fit, system), false);
+
+    const btnSync = document.getElementById('logout');
+    btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system), false);
 };
 
 

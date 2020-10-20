@@ -25,40 +25,44 @@
   <link rel="stylesheet" href="css/fontawesome.css">
   <script src="js/api.js"></script>
   <script src="js/dom.js"></script>
-  <script src="js/filter.js"></script>
   <script src="js/functions.js"></script>
+  <script src="js/filter.js"></script>
   <script src="js/loader.js"></script>
   <script src="js/sort.js"></script>
   <script src="js/storage.js"></script>
-  <script src="js/deployment.js"></script>
+  <script src="js/list.js"></script>
 </head>
 
 <div class="w3-container w3-teal">
-  <h1>System #<span id="system">ID</span> zuordnen</h1>
+  <h1>Terminal Manager</h1>
 </div>
 
 <br/>
 
 <form class="w3-container">
   <div class="w3-row">
-    <div class="w3-col s5">
+    <div class="w3-col m6">
       <input type="text" class="w3-input" id="searchField" placeholder="Suchbegriff...">
+      <small>Tipp: Benutze <code>#&lt;id&gt;</code> oder <code>&lt;id&gt;!</code> um direkt nach IDs zu suchen.</small>
     </div>
-    <div class="w3-col s3">
-      <button id="filter" type="submit" class="w3-button w3-green">Filtern</button>
-    </div>
-    <div class="w3-col s2">
-      <button id="reload" class="w3-button w3-blue" title="Standorte neu laden">
-        <i class="fa fa-sync-alt"></i>
-      </button>
-    </div>
-    <div class="w3-col s2">
-      <button id="logout" class="w3-button w3-orange" title="Abmelden">
-        <i class="fa fa-sign-out-alt"></i>
-      </button>
+    <div class="w3-col m6">
+      <div class="w3-row">
+        <div class="w3-col s6">
+          <button id="filter" type="submit" class="w3-button w3-green">Filtern</button>
+        </div>
+        <div class="w3-col s3">
+          <button id="reload" class="w3-button w3-blue" title="Systeme neu laden">
+            <i class="fa fa-sync-alt"></i>
+          </button>
+        </div>
+        <div class="w3-col s3">
+          <button id="logout" class="w3-button w3-orange" title="Abmelden">
+            <i class="fa fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-  <br/>
   <div class="w3-row">
     <div class="w3-col s6">
       <input id="sortAsc" class="w3-radio" type="radio" name="order" value="asc" checked>
@@ -73,44 +77,14 @@
       <label>Addresse</label>
     </div>
   </div>
-  <br/>
-  <div id="target">
-    <div class="w3-row">
-      <div class="w3-col s12">
-        <select id="deployments" name="deployments"></select>
-      </div>
-    </div>
-    <br/>
-    <div class="w3-row">
-      <div id="deploymentDetails" class="w3-col s12">
-      </div>
-    </div>
-    <br/>
-    <div class="w3-row">
-      <div class="w3-col m6">
-        <input id="exclusive" type="checkbox">
-        <label>Andere Systeme entfernen.</label>
-      </div>
-      <div class="w3-col m6">
-        <input id="fitted" type="checkbox">
-        <label>System wurde eingebaut.</label>
-      </div>
-    </div>
-    <div class="w3-row">
-      <div class="w3-col m12 w3-center">
-        <button id="deploy" class="w3-button w3-green" title="Das System diesem Standort zuordnen">Standort setzen</button>
-      </div>
-    </div>
-  </div>
-  <br/>
-  <div class="w3-row">
-    <div class="w3-col s12 w3-center">
-      <a href="list.html">← Zurück</a>
-    </div>
-  </div>
 </form>
 
+<br/>
+
 <div id="loader" class="loader"></div>
+<div id="target">
+  <table id="systems" class="w3-table w3-hoverable"></table>
+</div>
 
 <br/>
 

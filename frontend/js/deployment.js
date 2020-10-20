@@ -106,7 +106,7 @@ termgr.deployment.renderDetails = function () {
 
 
 /*
-    Initialize manage.html.
+    Initialize deploy.html.
 */
 termgr.deployment.init = function () {
     termgr.loader.start();
