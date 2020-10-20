@@ -34,34 +34,48 @@ termgr.manage.loadDeployment = function () {
 
 
 /*
+    Checks the last sync.
+*/
+termgr.manage.checkLastSync = function (lastSync) {
+    lastSync = Date.parse(lastSync);
+    const now = new Date();
+    const diff = now - lastSync;    // Milliseconds.
+    return diff < 3600000;
+};
+
+
+/*
     Initializes the management page.
 */
 termgr.manage.init = function () {
-    const system = termgr.storage.system.get();
+    const system = termgr.storage.system.current();
 
     const systemId = document.getElementById('system');
     systemId.textContent = system;
 
     const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', termgr.partial(termgr.api.application, system, true), false);
+    btnEnable.addEventListener('click', termgr.partial(termgr.api.application, system.id, true), false);
 
     const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', termgr.partial(termgr.api.application, system, false), false);
+    btnDisable.addEventListener('click', termgr.partial(termgr.api.application, system.id, false), false);
 
     const btnReboot = document.getElementById('reboot');
-    btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system), false);
+    btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system.id), false);
 
     const btnBeep = document.getElementById('beep');
-    btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system), false);
+    btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system.id), false);
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment), false);
+    btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
+    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment.id), false);
 
     const btnFit = document.getElementById('fit');
-    btnFit.addEventListener('click', termgr.partial(termgr.api.fit, system), false);
+    btnDeploy.classList.add(system.fitted ? 'w3-green' : 'w3-red');
+    btnFit.addEventListener('click', termgr.partial(termgr.api.fit, system.id), false);
 
     const btnSync = document.getElementById('sync');
-    btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system), false);
+    btnDeploy.classList.add(termgr.manage.checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
+    btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system.id), false);
 };
 
 
