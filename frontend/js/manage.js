@@ -71,11 +71,11 @@ termgr.manage.init = function () {
     btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment.id), false);
 
     const btnFit = document.getElementById('fit');
-    btnDeploy.classList.add(system.fitted ? 'w3-green' : 'w3-red');
+    btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
     btnFit.addEventListener('click', termgr.partial(termgr.api.fit, system.id), false);
 
     const btnSync = document.getElementById('sync');
-    btnDeploy.classList.add(termgr.manage.checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
+    btnSync.classList.add(termgr.manage.checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
     btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system.id), false);
 };
 
