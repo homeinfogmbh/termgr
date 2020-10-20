@@ -34,9 +34,9 @@ termgr.login.login = function () {
     const storeCredentials = document.getElementById('storeCredentials').checked;
 
     if (storeCredentials)
-        termgr.storage.credentials.set(account, passwd);
+        termgr.cache.credentials.set(account, passwd);
     else
-        termgr.storage.credentials.clear();
+        termgr.cache.credentials.clear();
 
     return termgr.api.login(account, passwd);
 };

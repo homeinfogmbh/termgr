@@ -51,8 +51,7 @@ termgr.deployment.render = function (deployments) {
 /*
     Shows details of the respective deployment.
 */
-termgr.deployment.renderDetails = function () {
-    const deployments = termgr.storage.deployments.get();
+termgr.deployment.renderDetails = function (deployments) {
     const deploymentId = parseInt(document.getElementById('deployments').value);
     let deployment;
 
@@ -69,26 +68,24 @@ termgr.deployment.renderDetails = function () {
 
 
 /*
-    Filters, sorts and renders systems.
+    Updates details of the selected deployment.
 */
-termgr.deployment.list = function (deployments) {
-    if (deployments == null)
-        deployments = termgr.storage.deployments.get();
-
-    deployments = termgr.filter.deployments(deployments);
-    deployments = termgr.sort.deployments(deployments);
-    return termgr.deployment.render(deployments).then(
-        termgr.deployment.renderDetails).then(
-        termgr.loader.stop);
+termgr.deployment.updateDetails = function () {
+    return termgr.cache.deployments.getValue().then(termgr.deployment.renderDetails);
 };
 
 
 /*
-    Reloads the systems.
+    Filters, sorts and renders systems.
 */
-termgr.deployment.reload = function () {
-    termgr.loader.start();
-    return termgr.api.getDeployments().then(termgr.deployment.list);
+termgr.deployment.list = function (force = false) {
+    return termgr.cache.deployments.getValue(force).then(
+        termgr.filter.deployments).then(
+        termgr.sort.deployments).then(
+        termgr.deployment.render).then(
+        termgr.deployment.renderDetails).then(
+        termgr.loader.stop
+    );
 };
 
 
@@ -108,20 +105,14 @@ termgr.deployment.deploy = function (system) {
 */
 termgr.deployment.init = function () {
     termgr.loader.start();
-    const system = termgr.storage.system.get();
-    const deployments = termgr.storage.deployments.get();
-
-    if (deployments == null)
-        termgr.deployment.reload();
-    else
-        termgr.deployment.list(deployments);
+    const system = termgr.cache.system.get();
 
     const btnLogout = document.getElementById('logout');
     btnLogout.addEventListener('click', termgr.partial(termgr.api.logout), false);
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', termgr.partial(termgr.deployment.list), false);
     const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(termgr.deployment.reload), false);
+    btnReload.addEventListener('click', termgr.partial(termgr.deployment.list, true), false);
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
@@ -135,7 +126,7 @@ termgr.deployment.init = function () {
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.addEventListener('click', termgr.partial(termgr.deployment.deploy, system), false);
     const deploymentsList = document.getElementById('deployments');
-    deploymentsList.addEventListener('change', termgr.partial(termgr.deployment.renderDetails), false);
+    deploymentsList.addEventListener('change', termgr.partial(termgr.deployment.updateDetails), false);
     const systemId = document.getElementById('system');
     systemId.textContent = system;
 };

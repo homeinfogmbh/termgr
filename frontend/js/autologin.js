@@ -29,7 +29,7 @@ termgr.autologin = {};
     Initialize index.html.
 */
 termgr.autologin.init = function () {
-    const [account, passwd] = termgr.storage.credentials.get();
+    const [account, passwd] = termgr.cache.credentials.get();
 
     if (account == null || passwd == null) {
         window.location = 'login.html';

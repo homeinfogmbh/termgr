@@ -134,7 +134,7 @@ termgr.api.login = function (account, passwd) {
 termgr.api.logout = function () {
     return termgr.api.makeRequest('DELETE', termgr.api.LOGIN_URL + '/!').then(
         function () {
-            termgr.storage.clear();
+            termgr.cache.clear();
             window.location = 'login.html';
         },
         termgr.api.checkSession('Logout konnte nicht durchgeführt werden.')
@@ -147,11 +147,7 @@ termgr.api.logout = function () {
 */
 termgr.api.getDeployments = function () {
     return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/deployments').then(
-        function (response) {
-            const deployments = response.json;
-            termgr.storage.deployments.set(deployments);
-            return deployments;
-        },
+        response => response.json,
         termgr.api.checkSession('Die Liste der Standorte konnte nicht abgerufen werden.')
     );
 };
@@ -162,7 +158,7 @@ termgr.api.getDeployments = function () {
 */
 termgr.api.getSystem = function (id) {
     if (id == null)
-        id = termgr.storage.system.get();
+        id = termgr.cache.system.get();
 
     if (id == null)
         return Promise.reject('Kein System angegeben.');
@@ -179,11 +175,7 @@ termgr.api.getSystem = function (id) {
 */
 termgr.api.getSystems = function () {
     return termgr.api.makeRequest('GET', termgr.api.BASE_URL + '/list/systems').then(
-        function (response) {
-            const systems = response.json;
-            termgr.storage.systems.set(systems);
-            return systems;
-        },
+        response => response.json,
         termgr.api.checkSession('Die Liste der Systeme konnte nicht abgerufen werden.')
     );
 };

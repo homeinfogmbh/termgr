@@ -29,7 +29,7 @@ termgr.list = {};
     Navigates to the management page.
 */
 termgr.list.select = function (system) {
-    termgr.storage.system.set(system);
+    termgr.cache.system.set(system);
     window.location = 'manage.html';
 };
 
@@ -39,7 +39,7 @@ termgr.list.select = function (system) {
 */
 termgr.list.reload = function () {
     termgr.loader.start();
-    return termgr.api.getSystems().then(termgr.list.list).then(termgr.loader.stop);
+    return termgr.cache.systems.getValue(true).then(termgr.list.list).then(termgr.loader.stop);
 };
 
 
@@ -63,7 +63,7 @@ termgr.list.render = function (systems) {
 termgr.list.list = function (systems) {
     if (systems == null) {
         termgr.loader.start();
-        systems = termgr.storage.systems.get();
+        systems = termgr.cache.systems.getValue();
     }
 
     systems = termgr.filter.systems(systems);
