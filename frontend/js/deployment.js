@@ -43,6 +43,8 @@ termgr.deployment.render = function (deployments) {
 
             if (system.deployment)
                 select.value = '' + system.deployment.id;
+
+            return deployments;
         }
     );
 };
@@ -64,6 +66,7 @@ termgr.deployment.renderDetails = function (deployments) {
     const table = termgr.dom.deploymentToTable(deployment);
     deploymentDetails.innerHTML = '';
     deploymentDetails.appendChild(table);
+    return deployments;
 };
 
 
@@ -81,10 +84,6 @@ termgr.deployment.updateDetails = function () {
 termgr.deployment.list = function (force = false) {
     termgr.loader.start();
     return termgr.cache.deployments.getValue(force).then(
-        function (deployments) {
-            console.log('DEBUG: ' + deployments);
-            return deployments;
-        }).then(
         termgr.filter.deployments).then(
         termgr.sort.deployments).then(
         termgr.deployment.render).then(

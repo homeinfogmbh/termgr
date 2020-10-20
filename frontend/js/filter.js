@@ -153,7 +153,6 @@ termgr.filter.systems = function (systems) {
 */
 termgr.filter.deployments = function (deployments) {
     const keyword = document.getElementById('searchField').value.trim();
-    console.log('DEBUG: ' + deployments);
     deployments = termgr.filter._deployments(deployments, keyword);
     return Array.from(deployments);
 };
