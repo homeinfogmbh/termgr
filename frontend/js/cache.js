@@ -31,6 +31,7 @@ termgr.cache.update = function (cache) {
         const json = {'timestamp': now.toString(), 'value': value};
         const raw = JSON.stringify(json);
         localStorage.setItem(cache.key, raw);
+        return json;
     };
 };
 
