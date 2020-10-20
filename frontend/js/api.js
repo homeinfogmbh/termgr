@@ -127,6 +127,7 @@ termgr.api.login = function (account, passwd) {
 termgr.api.logout = function () {
     return termgr.api.makeRequest('DELETE', termgr.api.LOGIN_URL + '/!', data, headers).then(
         function () {
+            termgr.storage.clear();
             window.location = 'login.html';
         },
         function () {
