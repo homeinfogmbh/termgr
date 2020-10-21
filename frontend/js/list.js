@@ -20,7 +20,7 @@
 */
 'use strict';
 
-import { konami } from 'https://javascript.homeinfo.de/konami.js';
+import * as konami from 'https://javascript.homeinfo.de/konami.js';
 import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
 import { logout } from './api.js';
 import { system, systems } from './cache.js';
@@ -90,6 +90,5 @@ export function init () {
     for (const radioButton of radioButtons)
         radioButton.addEventListener('change', suppressEvent(list), false);
 
-    // Konami Code easteregg.
-    document.addEventListener('keydown', konami);
+    konami.init();  // Konami Code easteregg.
 }
