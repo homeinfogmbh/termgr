@@ -54,6 +54,7 @@ export function systemEntry (system, index) {
     colBuffer.classList.add('w3-col');
     colBuffer.classList.add('m1');
     colBuffer.classList.add('s3');
+    colBuffer.innerHTML = '&nbsp;';
 
     const colCustomer = document.createElement('div');
     colCustomer.classList.add('w3-col');
