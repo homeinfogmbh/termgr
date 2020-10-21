@@ -20,7 +20,6 @@
 */
 'use strict';
 
-
 /*
     Returns the respective address as a one-line string.
     TODO: Migrate to mdb.

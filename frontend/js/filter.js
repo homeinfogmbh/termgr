@@ -20,7 +20,7 @@
 */
 'use strict';
 
-import { addressToString } from 'functions.js';
+import { addressToString } from './functions.js';
 
 
 /*

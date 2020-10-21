@@ -20,8 +20,8 @@
 */
 'use strict';
 
-import { application, beep, fit, reboot, sync, getSystem } from 'api.js';
-import { suppressEvent } from 'functions.js';
+import { application, beep, fit, reboot, sync, getSystem } from './api.js';
+import { suppressEvent } from './functions.js';
 
 
 /*

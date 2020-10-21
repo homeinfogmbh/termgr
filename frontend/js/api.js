@@ -21,8 +21,8 @@
 'use strict';
 
 import session from 'https://javascript.homeinfo.de/his/session.js';
-import { clear, system } from 'cache.js';
 import { request } from 'https://javascript.homeinfo.de/his/his.js';
+import { clear, system } from './cache.js';
 
 const BASE_URL = 'https://termgr.homeinfo.de';
 

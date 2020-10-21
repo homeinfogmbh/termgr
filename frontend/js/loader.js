@@ -20,7 +20,6 @@
 */
 'use strict';
 
-
 /*
     Starts loading.
 */

@@ -20,13 +20,13 @@
 */
 'use strict';
 
-import { logout } from 'api.js';
-import { system, systems } from 'cache.js';
-import { systemEntry } from 'dom.js';
-import { autoFilterSystems } from 'filter.js';
-import { suppressEvent } from 'functions.js';
-import loader from 'loader.js';
-import { sortSystems } from 'sort.js';
+import { logout } from './api.js';
+import { system, systems } from './cache.js';
+import { systemEntry } from './dom.js';
+import { autoFilterSystems } from './filter.js';
+import { suppressEvent } from './functions.js';
+import loader from './loader.js';
+import { sortSystems } from './sort.js';
 
 
 /*

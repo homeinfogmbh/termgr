@@ -20,13 +20,13 @@
 */
 'use strict';
 
-import { deploy, getSystem } from 'api.js';
-import { deployments, system } from 'cache.js';
-import { deploymentToTable } from 'dom.js';
-import { autoFilterDeployments } from 'filter.js';
-import { deploymentToString, suppressEvent } from 'functions.js';
-import loader from 'loader.js';
-import { sortDeployments } from 'sort.js';
+import { deploy, getSystem } from './api.js';
+import { deployments, system } from './cache.js';
+import { deploymentToTable } from './dom.js';
+import { autoFilterDeployments } from './filter.js';
+import { deploymentToString, suppressEvent } from './functions.js';
+import loader from './loader.js';
+import { sortDeployments } from './sort.js';
 
 
 /*

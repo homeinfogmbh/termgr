@@ -20,9 +20,9 @@
 */
 'use strict';
 
-import api from 'api.js';
-import { credentials } from 'cache.js';
-import { suppressEvent } from 'functions.js';
+import api from './api.js';
+import { credentials } from './cache.js';
+import { suppressEvent } from './functions.js';
 
 
 /*

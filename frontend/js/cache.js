@@ -21,7 +21,7 @@
 'use strict';
 
 import { Cache } from 'https://javascript.homeinfo.de/caching.js';
-import { getDeployments, getSystems } from 'api.js';
+import { getDeployments, getSystems } from './api.js';
 
 
 /*

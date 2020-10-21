@@ -20,8 +20,8 @@
 */
 'use strict';
 
-import { addressToString, customerToString, suppressEvent } from 'functions.js';
-import { select } from 'list.js';
+import { addressToString, customerToString, suppressEvent } from './functions.js';
+import { select } from './list.js';
 
 
 /*
