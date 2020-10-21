@@ -41,7 +41,7 @@ export function select (systemId) {
 /*
     Renders the respective systems.
 */
-function render = function (systems) {
+function render (systems) {
     const container = document.getElementById('systems');
     container.innerHTML = '';
 

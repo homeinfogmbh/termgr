@@ -108,7 +108,7 @@ function getSettings () {
 /*
     Sorts the systems.
 */
-export function sortSystems = function (systems) {
+export function sortSystems (systems) {
     systems.sort(compareSystems(...getSettings()));
     return systems;
 }
