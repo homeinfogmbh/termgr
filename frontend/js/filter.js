@@ -20,18 +20,8 @@
 */
 'use strict';
 
+import { includesIgnoreCase } from 'https://javascript.homeinfo.de/lib.js';
 import { addressToString } from 'https://javascript.homeinfo.de/mdb.js';
-
-
-/*
-    Case-insensitively returns the index of the substring.
-*/
-function includesIgnoreCase (haystack, needle) {
-    if (! haystack)
-        return false;
-
-    return haystack.toLowerCase().includes(needle.toLowerCase());
-}
 
 
 /*
