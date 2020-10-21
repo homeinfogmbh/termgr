@@ -70,12 +70,16 @@ function list (force = false) {
 */
 export function init () {
     list();
+
     const btnLogout = document.getElementById('logout');
     btnLogout.addEventListener('click', suppressEvent(logout), false);
+
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', suppressEvent(list), false);
+
     const btnReload = document.getElementById('reload');
     btnReload.addEventListener('click', suppressEvent(list, true), false);
+
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
