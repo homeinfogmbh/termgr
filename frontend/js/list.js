@@ -21,11 +21,11 @@
 'use strict';
 
 import { konami } from 'https://javascript.homeinfo.de/konami.js';
+import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
 import { logout } from './api.js';
 import { system, systems } from './cache.js';
 import { systemEntry } from './dom.js';
 import { autoFilterSystems } from './filter.js';
-import { suppressEvent } from './functions.js';
 import * as loader from './loader.js';
 import { sortSystems } from './sort.js';
 

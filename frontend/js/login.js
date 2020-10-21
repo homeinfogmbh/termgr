@@ -20,9 +20,9 @@
 */
 'use strict';
 
+import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
 import * as api from './api.js';
 import { credentials } from './cache.js';
-import { suppressEvent } from './functions.js';
 
 
 /*
