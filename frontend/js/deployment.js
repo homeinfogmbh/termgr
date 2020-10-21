@@ -21,12 +21,11 @@
 'use strict';
 
 import { deploymentToString } from 'https://javascript.homeinfo.de/hwdb.js';
-import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
+import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
 import { deploy, getSystem } from './api.js';
 import { deployments, system } from './cache.js';
 import { deploymentToTable } from './dom.js';
 import { autoFilterDeployments } from './filter.js';
-import * as loader from './loader.js';
 import { sortDeployments } from './sort.js';
 
 
@@ -87,13 +86,12 @@ function updateDetails () {
     Filters, sorts and renders deployments.
 */
 function list (force = false) {
-    loader.start();
-    return deployments.getValue(force).then(
+    return Loader().wrap(
+        deployments.getValue(force).then(
         autoFilterDeployments).then(
         sortDeployments).then(
         render).then(
-        renderDetails).then(
-        loader.stop
+        renderDetails)
     );
 };
 

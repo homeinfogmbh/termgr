@@ -21,12 +21,11 @@
 'use strict';
 
 import { konami } from 'https://javascript.homeinfo.de/konami.js';
-import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
+import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
 import { logout } from './api.js';
 import { system, systems } from './cache.js';
 import { systemEntry } from './dom.js';
 import { autoFilterSystems } from './filter.js';
-import * as loader from './loader.js';
 import { sortSystems } from './sort.js';
 
 
@@ -57,12 +56,11 @@ function render (systems) {
     Loads, filters, sorts and renders systems.
 */
 function list (force = false) {
-    loader.start();
-    return systems.getValue(force).then(
+    return Loader().wrap(
+        systems.getValue(force).then(
         autoFilterSystems).then(
         sortSystems).then(
-        render).then(
-        loader.stop
+        render)
     );
 }
 
