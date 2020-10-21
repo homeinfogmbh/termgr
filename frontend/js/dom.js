@@ -35,7 +35,7 @@ export function systemEntry (system, index) {
 
     if (deployment != null) {
         address = addressToString(deployment.address);
-        customer = customerToString(deployment.customer);
+        customer = customerToString(deployment.customer, true);
     }
 
     const colId = document.createElement('div');
