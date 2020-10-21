@@ -27,7 +27,6 @@ import { getDeployments, getSystems } from './api.js';
 /*
     Account name and password storage.
 */
-
 export const credentials = {
     set: function (account, passwd) {
         localStorage.setItem('termgr.account', account);
