@@ -20,7 +20,8 @@
 */
 'use strict';
 
-import { addressToString, customerToString, suppressEvent } from './functions.js';
+import { addressToString, customerToString } from 'https://javascript.homeinfo.de/mdb.js';
+import { suppressEvent } from './functions.js';
 import { select } from './list.js';
 
 

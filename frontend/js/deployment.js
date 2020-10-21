@@ -20,11 +20,12 @@
 */
 'use strict';
 
+import { deploymentToString } from 'https://javascript.homeinfo.de/hwdb.js';
 import { deploy, getSystem } from './api.js';
 import { deployments, system } from './cache.js';
 import { deploymentToTable } from './dom.js';
 import { autoFilterDeployments } from './filter.js';
-import { deploymentToString, suppressEvent } from './functions.js';
+import { suppressEvent } from './functions.js';
 import * as loader from './loader.js';
 import { sortDeployments } from './sort.js';
 

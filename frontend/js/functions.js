@@ -20,32 +20,6 @@
 */
 'use strict';
 
-/*
-    Returns the respective address as a one-line string.
-    TODO: Migrate to mdb.
-*/
-export function addressToString (address) {
-    return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
-}
-
-
-/*
-    Returns the respective customer as a one-line string.
-    TODO: Migrate to mdb.
-*/
-export function customerToString (customer) {
-    return customer.company.name  + ' (' + customer.id + ')';
-}
-
-
-/*
-    Returns the respective deployment as a one-line string.
-    TODO: Migrate to hwdb.
-*/
-export function deploymentToString (deployment) {
-    return deployment.id + ': ' + addressToString(deployment.address);
-}
-
 
 /*
     Wraps a function and disables the default event.
