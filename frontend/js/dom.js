@@ -38,20 +38,37 @@ export function systemEntry (system, index) {
         customer = customerToString(deployment.customer);
     }
 
-    const colId = document.createElement('td');
-    colId.innerHTML = '#' + system.id;
+    const colId = document.createElement('div');
+    colId.classList.add('w3-col');
+    colId.classList.add('m1');
+    colId.classList.add('s3');
+    colId.textContent = '#' + system.id;
 
-    const colAddress = document.createElement('td');
-    colAddress.innerHTML = address;
+    const colAddress = document.createElement('div');
+    colAddress.classList.add('w3-col');
+    colAddress.classList.add('m5');
+    colAddress.classList.add('s9');
+    colAddress.textContent = address;
 
-    const colCustomer = document.createElement('td');
-    colCustomer.innerHTML = customer;
+    const colBuffer = document.createElement('div');
+    colBuffer.classList.add('w3-col');
+    colBuffer.classList.add('m1');
+    colBuffer.classList.add('s3');
+
+    const colCustomer = document.createElement('div');
+    colCustomer.classList.add('w3-col');
+    colCustomer.classList.add('m5');
+    colCustomer.classList.add('s9');
+    colCustomer.textContent = customer;
 
     const color = (index % 2) ? 'w3-light-grey' : 'w3-white';
-    const entry = document.createElement('tr');
-    entry.setAttribute('class', 'w3-hover-green ' + color);
+    const entry = document.createElement('div');
+    entry.classList.add('w3-row');
+    entry.classList.add('w3-hover-green');
+    entry.classList.add(color);
     entry.appendChild(colId);
     entry.appendChild(colAddress);
+    entry.appendChild(colBuffer);
     entry.appendChild(colCustomer);
     entry.addEventListener('click', suppressEvent(select, system.id), false);
 
@@ -64,7 +81,7 @@ export function systemEntry (system, index) {
 */
 export function deploymentToTable (deployment) {
     const table = document.createElement('table');
-    table.setAttribute('class', 'w3-table-all');
+    table.classList.add('w3-table-all');
     // ID.
     const rowId = document.createElement('tr');
     const headerId = document.createElement('th');
