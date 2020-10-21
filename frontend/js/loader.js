@@ -21,27 +21,23 @@
 'use strict';
 
 
-var termgr = termgr || {};
-termgr.loader = {};
-
-
 /*
     Starts loading.
 */
-termgr.loader.start = function () {
+export function start () {
     const loader = document.getElementById('loader');
     const target = document.getElementById('target');
     target.style.display = 'none';
     loader.style.display = 'block';
-};
+}
 
 
 /*
     Stops loading.
 */
-termgr.loader.stop = function () {
+export function stop () {
     const loader = document.getElementById('loader');
     const target = document.getElementById('target');
     loader.style.display = 'none';
     target.style.display = 'block';
-};
+}

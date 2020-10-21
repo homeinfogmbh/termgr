@@ -20,21 +20,20 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.autologin = {};
+import { login } from 'api.js';
+import { credentials } from 'cache.js';
 
 
 /*
     Initialize index.html.
 */
-termgr.autologin.init = function () {
-    const [account, passwd] = termgr.cache.credentials.get();
+export function init () {
+    const [account, passwd] = credentials.get();
 
     if (account == null || passwd == null) {
         window.location = 'login.html';
     } else {
-        termgr.api.login(account, passwd).then(
+        login(account, passwd).then(
             function () {
                 window.location = 'list.html';
             },
@@ -43,7 +42,4 @@ termgr.autologin.init = function () {
             }
         );
     }
-};
-
-
-document.addEventListener('DOMContentLoaded', termgr.autologin.init);
+}

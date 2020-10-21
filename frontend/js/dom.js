@@ -20,22 +20,21 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.dom = {};
+import { addressToString, customerToString, suppressEvent } from 'functions.js';
+import { select } from 'list.js';
 
 
 /*
     Generates a terminal DOM entry.
 */
-termgr.dom.systemEntry = function (system, index) {
+export function systemEntry (system, index) {
     const deployment = system.deployment;
     let address = 'Keine Adresse';
     let customer = 'Kein Kunde';
 
     if (deployment != null) {
-        address = termgr.addressToString(deployment.address);
-        customer = termgr.customerToString(deployment.customer);
+        address = addressToString(deployment.address);
+        customer = customerToString(deployment.customer);
     }
 
     const colId = document.createElement('td');
@@ -53,16 +52,16 @@ termgr.dom.systemEntry = function (system, index) {
     entry.appendChild(colId);
     entry.appendChild(colAddress);
     entry.appendChild(colCustomer);
-    entry.addEventListener('click', termgr.partial(termgr.list.select, system.id), false);
+    entry.addEventListener('click', suppressEvent(select, system.id), false);
 
     return entry;
-};
+}
 
 
 /*
     Converts a deployment into a table.
 */
-termgr.dom.deploymentToTable = function (deployment) {
+export function deploymentToTable (deployment) {
     const table = document.createElement('table');
     table.setAttribute('class', 'w3-table-all');
     // ID.
@@ -80,7 +79,7 @@ termgr.dom.deploymentToTable = function (deployment) {
     headerCustomer.textContent = 'Kunde';
     rowCustomer.appendChild(headerCustomer);
     const valueCustomer = document.createElement('td');
-    valueCustomer.textContent = termgr.customerToString(deployment.customer);
+    valueCustomer.textContent = customerToString(deployment.customer);
     rowCustomer.appendChild(valueCustomer);
     table.appendChild(rowCustomer);
     // Type.
@@ -107,7 +106,7 @@ termgr.dom.deploymentToTable = function (deployment) {
     headerAddress.textContent = 'Adresse';
     rowAddress.appendChild(headerAddress);
     const valueAddress = document.createElement('td');
-    valueAddress.textContent = termgr.addressToString(deployment.address);
+    valueAddress.textContent = addressToString(deployment.address);
     rowAddress.appendChild(valueAddress);
     table.appendChild(rowAddress);
     // Local Public Transport Address.
@@ -116,7 +115,7 @@ termgr.dom.deploymentToTable = function (deployment) {
     headerLPTAddress.textContent = 'ÖPNV Adresse';
     rowLPTAddress.appendChild(headerLPTAddress);
     const valueLPTAddress = document.createElement('td');
-    valueLPTAddress.textContent = (deployment.lpt_address == null) ? 'N/A' : termgr.addressToString(deployment.lpt_address);
+    valueLPTAddress.textContent = (deployment.lpt_address == null) ? 'N/A' : addressToString(deployment.lpt_address);
     rowLPTAddress.appendChild(valueLPTAddress);
     table.appendChild(rowLPTAddress);
     // Weather.
@@ -174,4 +173,4 @@ termgr.dom.deploymentToTable = function (deployment) {
     rowSystems.appendChild(valueSystems);
     table.appendChild(rowSystems);
     return table;
-};
+}

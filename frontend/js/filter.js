@@ -20,49 +20,47 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.filter = {};
+import { addressToString } from 'functions.js';
 
 
 /*
     Case-insensitively returns the index of the substring.
 */
-termgr.filter.includesIgnoreCase = function (haystack, needle) {
+function includesIgnoreCase (haystack, needle) {
     if (! haystack)
         return false;
 
     return haystack.toLowerCase().includes(needle.toLowerCase());
-};
+}
 
 
 /*
     Matches a deployment.
 */
-termgr.filter.matchDeployment = function (deployment, keyword) {
+function matchDeployment (deployment, keyword) {
     const cid = '' + deployment.customer.id;
 
-    if (termgr.filter.includesIgnoreCase(cid, keyword))
+    if (includesIgnoreCase(cid, keyword))
         return true;
 
     const customerName = deployment.customer.company.name;
 
-    if (termgr.filter.includesIgnoreCase(customerName, keyword))
+    if (includesIgnoreCase(customerName, keyword))
         return true;
 
-    const address = termgr.addressToString(deployment.address);
+    const address = addressToString(deployment.address);
 
-    if (termgr.filter.includesIgnoreCase(address, keyword))
+    if (includesIgnoreCase(address, keyword))
         return true;
 
     return false;
-};
+}
 
 
 /*
     Extracts the ID from a filter keyword.
 */
-termgr.filter._extractId = function (keyword) {
+function extractId (keyword) {
     let fragments = null;
 
     if (keyword.startsWith('#')) {
@@ -76,14 +74,14 @@ termgr.filter._extractId = function (keyword) {
     }
 
     return null;
-};
+}
 
 
 /*
     Filters the provided systems by the respective keyword.
 */
-termgr.filter._systems = function* (systems, keyword) {
-    const id = termgr.filter._extractId(keyword);
+function *filterSystems (systems, keyword) {
+    const id = extractId(keyword);
 
     for (const system of systems) {
         // Yield any copy on empty keyword.
@@ -105,17 +103,17 @@ termgr.filter._systems = function* (systems, keyword) {
         if (deployment == null)
             continue;
 
-        if (termgr.filter.matchDeployment(deployment, keyword))
+        if (matchDeployment(deployment, keyword))
             yield system;
     }
-};
+}
 
 
 /*
     Filters the provided depoloyments by the respective keyword.
 */
-termgr.filter._deployments = function* (deployments, keyword) {
-    const id = termgr.filter._extractId(keyword);
+function *filterDeployments (deployments, keyword) {
+    const id = extractId(keyword);
 
     for (const deployment of deployments) {
         // Yield any deployment on empty keyword.
@@ -132,27 +130,33 @@ termgr.filter._deployments = function* (deployments, keyword) {
             continue;
         }
 
-        if (termgr.filter.matchDeployment(deployment, keyword))
+        if (matchDeployment(deployment, keyword))
             yield deployment;
     }
-};
+}
+
+
+/*
+    Returns the filter keyword.
+*/
+function getKeyword (id = 'searchField') {
+    return document.getElementById(id).value.trim();
+}
 
 
 /*
     Filters systems.
 */
-termgr.filter.systems = function (systems) {
-    const keyword = document.getElementById('searchField').value.trim();
-    systems = termgr.filter._systems(systems, keyword);
+export function autoFilterSystems (systems) {
+    systems = filterSystems(systems, getKeyword());
     return Array.from(systems);
-};
+}
 
 
 /*
     Filters deployments.
 */
-termgr.filter.deployments = function (deployments) {
-    const keyword = document.getElementById('searchField').value.trim();
-    deployments = termgr.filter._deployments(deployments, keyword);
+export function autoFilterDeployments (deployments) {
+    deployments = filterDeployments(deployments, getKeyword());
     return Array.from(deployments);
-};
+}

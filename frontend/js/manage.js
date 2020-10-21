@@ -20,69 +20,65 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.manage = {};
+import { application, beep, fit, reboot, sync, getSystem } from 'api.js';
+import { suppressEvent } from 'functions.js';
 
 
 /*
     Navigates to the deployment page.
 */
-termgr.manage.loadDeployment = function () {
+function loadDeployment () {
     window.location = 'deploy.html';
-};
+}
 
 
 /*
     Checks the last sync.
 */
-termgr.manage.checkLastSync = function (lastSync) {
+function checkLastSync (lastSync) {
     lastSync = Date.parse(lastSync);
     const now = new Date();
     const diff = now - lastSync;    // Milliseconds.
     return diff < 3600000;
-};
+}
 
 
 /*
     Sets up system-related data.
 */
-termgr.manage.setup = function (system) {
+function setup (system) {
     const systemId = document.getElementById('system');
     systemId.textContent = system.id;
 
     const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', termgr.partial(termgr.api.application, system.id, true), false);
+    btnEnable.addEventListener('click', suppressEvent(application, system.id, true), false);
 
     const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', termgr.partial(termgr.api.application, system.id, false), false);
+    btnDisable.addEventListener('click', suppressEvent(application, system.id, false), false);
 
     const btnReboot = document.getElementById('reboot');
-    btnReboot.addEventListener('click', termgr.partial(termgr.api.reboot, system.id), false);
+    btnReboot.addEventListener('click', suppressEvent(reboot, system.id), false);
 
     const btnBeep = document.getElementById('beep');
-    btnBeep.addEventListener('click', termgr.partial(termgr.api.beep, system.id), false);
+    btnBeep.addEventListener('click', suppressEvent(beep, system.id), false);
 
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
-    btnDeploy.addEventListener('click', termgr.partial(termgr.manage.loadDeployment), false);
+    btnDeploy.addEventListener('click', suppressEvent(loadDeployment), false);
 
     const btnFit = document.getElementById('fit');
     btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
-    btnFit.addEventListener('click', termgr.partial(termgr.api.fit, system.id), false);
+    btnFit.addEventListener('click', suppressEvent(fit, system.id), false);
 
     const btnSync = document.getElementById('sync');
-    btnSync.classList.add(termgr.manage.checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
-    btnSync.addEventListener('click', termgr.partial(termgr.api.sync, system.id), false);
+    btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
+    btnSync.addEventListener('click', suppressEvent(sync, system.id), false);
 };
 
 
 /*
     Initializes the management page.
 */
-termgr.manage.init = function () {
-    termgr.api.getSystem().then(termgr.manage.setup);
-};
-
-
-document.addEventListener('DOMContentLoaded', termgr.manage.init);
+export function init () {
+    getSystem().then(setup);
+}

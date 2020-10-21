@@ -20,59 +20,63 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.list = {};
+import { logout } from 'api.js';
+import { system, systems } from 'cache.js';
+import { systemEntry } from 'dom.js';
+import { autoFilterSystems } from 'filter.js';
+import { suppressEvent } from 'functions.js';
+import loader from 'loader.js';
+import { sortSystems } from 'sort.js';
 
 
 /*
     Navigates to the management page.
 */
-termgr.list.select = function (system) {
-    termgr.cache.system.set(system);
+export function select (systemId) {
+    system.set(systemId);
     window.location = 'manage.html';
-};
+}
 
 
 /*
     Renders the respective systems.
 */
-termgr.list.render = function (systems) {
+function render = function (systems) {
     const container = document.getElementById('systems');
     container.innerHTML = '';
 
     for (let i = 0; i < systems.length; i++) {
-        let entry = termgr.dom.systemEntry(systems[i], i);
+        let entry = systemEntry(systems[i], i);
         container.appendChild(entry);
     }
-};
+}
 
 
 /*
     Loads, filters, sorts and renders systems.
 */
-termgr.list.list = function (force = false) {
-    termgr.loader.start();
-    return termgr.cache.systems.getValue(force).then(
-        termgr.filter.systems).then(
-        termgr.sort.systems).then(
-        termgr.list.render).then(
-        termgr.loader.stop
+function list (force = false) {
+    loader.start();
+    return systems.getValue(force).then(
+        autoFilterSystems).then(
+        sortSystems).then(
+        render).then(
+        loader.stop
     );
-};
+}
 
 
 /*
     Initialize list.html.
 */
-termgr.list.init = function () {
-    termgr.list.list();
+export function init () {
+    list();
     const btnLogout = document.getElementById('logout');
-    btnLogout.addEventListener('click', termgr.partial(termgr.api.logout), false);
+    btnLogout.addEventListener('click', suppressEvent(logout), false);
     const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.list.list), false);
+    btnFilter.addEventListener('click', suppressEvent(list), false);
     const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(termgr.list.list, true), false);
+    btnReload.addEventListener('click', suppressEvent(list, true), false);
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
@@ -81,8 +85,5 @@ termgr.list.init = function () {
     ];
 
     for (const radioButton of radioButtons)
-        radioButton.addEventListener('change', termgr.partial(termgr.list.list), false);
-};
-
-
-document.addEventListener('DOMContentLoaded', termgr.list.init);
+        radioButton.addEventListener('change', suppressEvent(list), false);
+}

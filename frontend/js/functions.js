@@ -21,41 +21,41 @@
 'use strict';
 
 
-var termgr = termgr || {};
-
-
 /*
     Returns the respective address as a one-line string.
+    TODO: Migrate to mdb.
 */
-termgr.addressToString = function (address) {
+export function addressToString (address) {
     return address.street + ' ' + address.houseNumber + ', ' + address.zipCode + ' ' + address.city;
-};
+}
 
 
 /*
     Returns the respective customer as a one-line string.
+    TODO: Migrate to mdb.
 */
-termgr.customerToString = function (customer) {
+export function customerToString (customer) {
     return customer.company.name  + ' (' + customer.id + ')';
-};
+}
 
 
 /*
     Returns the respective deployment as a one-line string.
+    TODO: Migrate to hwdb.
 */
-termgr.deploymentToString = function (deployment) {
-    return deployment.id + ': ' + termgr.addressToString(deployment.address);
-};
+export function deploymentToString (deployment) {
+    return deployment.id + ': ' + addressToString(deployment.address);
+}
 
 
 /*
-    Function to wrap a function and disable default events.
+    Wraps a function and disables the default event.
 */
-termgr.partial = function (func, ...args) {
+export function suppressEvent (func, ...args) {
     return function (event) {
         if (event != null)
             event.preventDefault();
 
         return func(...args);
     };
-};
+}

@@ -20,67 +20,62 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.cache = {};
+import { Cache } from 'https://javascript.homeinfo.de/caching.js';
+import { getDeployments, getSystems } from 'api.js';
 
 
 /*
     Account name and password storage.
 */
 
-termgr.cache.credentials = {};
-
-termgr.cache.credentials.set = function (account, passwd) {
-    localStorage.setItem('termgr.account', account);
-    localStorage.setItem('termgr.passwd', passwd);
+export const credentials = {
+    set: function (account, passwd) {
+        localStorage.setItem('termgr.account', account);
+        localStorage.setItem('termgr.passwd', passwd);
+    },
+    get: function () {
+        const account = localStorage.getItem('termgr.account');
+        const passwd = localStorage.getItem('termgr.passwd');
+        return [account, passwd];
+    },
+    clear: function () {
+        localStorage.removeItem('termgr.account');
+        localStorage.removeItem('termgr.passwd');
+    }
 };
 
-termgr.cache.credentials.get = function () {
-    const account = localStorage.getItem('termgr.account');
-    const passwd = localStorage.getItem('termgr.passwd');
-    return [account, passwd];
-};
 
-termgr.cache.credentials.clear = function () {
-    localStorage.removeItem('termgr.account');
-    localStorage.removeItem('termgr.passwd');
-};
-
-
-termgr.cache.deployments = new homeinfo.caching.Cache('termgr.deployments', termgr.api.getDeployments);
-termgr.cache.systems = new homeinfo.caching.Cache('termgr.systems', termgr.api.getSystems);
+export const deployments = new Cache('termgr.deployments', getDeployments);
+export const systems = new Cache('termgr.systems', getSystems);
 
 
 /*
     Current system ID handling.
 */
-termgr.cache.system = {};
+export const system = {
+    set: function (system) {
+        localStorage.setItem('termgr.system', JSON.stringify(system));
+    },
+    get: function () {
+        const raw = localStorage.getItem('termgr.system');
 
-termgr.cache.system.set = function (system) {
-    localStorage.setItem('termgr.system', JSON.stringify(system));
-};
+        if (raw == null)
+            return null;
 
-termgr.cache.system.get = function () {
-    const raw = localStorage.getItem('termgr.system');
-
-    if (raw == null)
-        return null;
-
-    return JSON.parse(raw);
-};
-
-termgr.cache.system.clear = function () {
-    localStorage.removeItem('termgr.system');
+        return JSON.parse(raw);
+    },
+    clear: function () {
+        localStorage.removeItem('termgr.system');
+    }
 };
 
 
 /*
     Clears all storage items.
 */
-termgr.cache.clear = function () {
-    termgr.cache.credentials.clear();
-    termgr.cache.deployments.clear();
-    termgr.cache.systems.clear();
-    termgr.cache.system.clear();
+export function clear () {
+    credentials.clear();
+    deployments.clear();
+    systems.clear();
+    system.clear();
 };

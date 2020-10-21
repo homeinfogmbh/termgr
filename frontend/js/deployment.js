@@ -20,16 +20,20 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.deployment = {};
+import { deploy, getSystem } from 'api.js';
+import { deployments, system } from 'cache.js';
+import { deploymentToTable } from 'dom.js';
+import { autoFilterDeployments } from 'filter.js';
+import { deploymentToString, suppressEvent } from 'functions.js';
+import loader from 'loader.js';
+import { sortDeployments } from 'sort.js';
 
 
 /*
     Renders the respective deployments.
 */
-termgr.deployment.render = function (deployments) {
-    return termgr.api.getSystem().then(
+function render (deployments) {
+    return getSystem().then(
         function (system) {
             const select = document.getElementById('deployments');
             select.innerHTML = '';
@@ -37,7 +41,7 @@ termgr.deployment.render = function (deployments) {
             for (const deployment of deployments) {
                 let option = document.createElement('option');
                 option.value = '' + deployment.id;
-                option.textContent = termgr.deploymentToString(deployment);
+                option.textContent = deploymentToString(deployment);
                 select.appendChild(option);
             }
 
@@ -53,7 +57,7 @@ termgr.deployment.render = function (deployments) {
 /*
     Shows details of the respective deployment.
 */
-termgr.deployment.renderDetails = function (deployments) {
+function renderDetails (deployments) {
     const deploymentId = parseInt(document.getElementById('deployments').value);
     let deployment;
 
@@ -63,7 +67,7 @@ termgr.deployment.renderDetails = function (deployments) {
     }
 
     const deploymentDetails = document.getElementById('deploymentDetails');
-    const table = termgr.dom.deploymentToTable(deployment);
+    const table = deploymentToTable(deployment);
     deploymentDetails.innerHTML = '';
     deploymentDetails.appendChild(table);
     return deployments;
@@ -73,22 +77,22 @@ termgr.deployment.renderDetails = function (deployments) {
 /*
     Updates details of the selected deployment.
 */
-termgr.deployment.updateDetails = function () {
-    return termgr.cache.deployments.getValue().then(termgr.deployment.renderDetails);
+function updateDetails () {
+    return deployments.getValue().then(renderDetails);
 };
 
 
 /*
-    Filters, sorts and renders systems.
+    Filters, sorts and renders deployments.
 */
-termgr.deployment.list = function (force = false) {
-    termgr.loader.start();
-    return termgr.cache.deployments.getValue(force).then(
-        termgr.filter.deployments).then(
-        termgr.sort.deployments).then(
-        termgr.deployment.render).then(
-        termgr.deployment.renderDetails).then(
-        termgr.loader.stop
+function list (force = false) {
+    loader.start();
+    return deployments.getValue(force).then(
+        autoFilterDeployments).then(
+        sortDeployments).then(
+        render).then(
+        renderDetails).then(
+        loader.stop
     );
 };
 
@@ -96,31 +100,34 @@ termgr.deployment.list = function (force = false) {
 /*
     Deploys a system.
 */
-termgr.deployment.deploy = function (system) {
+function deploySystem (system) {
     const deployment = document.getElementById('deployments').value;
     const exclusive = document.getElementById('exclusive').checked;
     const fitted = document.getElementById('fitted').checked;
-    return termgr.api.deploy(system, deployment, exclusive, fitted);
+    return deploy(system, deployment, exclusive, fitted);
 };
 
 
 /*
     Initialize deploy.html.
 */
-termgr.deployment.init = function () {
-    const system = termgr.cache.system.get();
+export function init () {
+    const systemId = system.get();
 
-    const systemId = document.getElementById('system');
-    systemId.textContent = system;
+    const systemIdField = document.getElementById('system');
+    systemIdField.textContent = systemId;
 
-    termgr.deployment.list();
+    list();
 
     const btnLogout = document.getElementById('logout');
-    btnLogout.addEventListener('click', termgr.partial(termgr.api.logout), false);
+    btnLogout.addEventListener('click', suppressEvent(logout), false);
+
     const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', termgr.partial(termgr.deployment.list), false);
+    btnFilter.addEventListener('click', suppressEvent(list), false);
+
     const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', termgr.partial(termgr.deployment.list, true), false);
+    btnReload.addEventListener('click', suppressEvent(list, true), false);
+
     const radioButtons = [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
@@ -129,13 +136,11 @@ termgr.deployment.init = function () {
     ];
 
     for (const radioButton of radioButtons)
-        radioButton.addEventListener('change', termgr.partial(termgr.deployment.list), false);
+        radioButton.addEventListener('change', suppressEvent(list), false);
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', termgr.partial(termgr.deployment.deploy, system), false);
+    btnDeploy.addEventListener('click', suppressEvent(deploySystem, system), false);
+
     const deploymentsList = document.getElementById('deployments');
-    deploymentsList.addEventListener('change', termgr.partial(termgr.deployment.updateDetails), false);
-};
-
-
-document.addEventListener('DOMContentLoaded', termgr.deployment.init);
+    deploymentsList.addEventListener('change', suppressEvent(updateDetails), false);
+}

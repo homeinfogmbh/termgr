@@ -20,19 +20,18 @@
 */
 'use strict';
 
+import session from 'https://javascript.homeinfo.de/his/session.js';
+import { clear, system } from 'cache.js';
+import { request } from 'https://javascript.homeinfo.de/his/his.js';
 
-var termgr = termgr ||  {};
-termgr.api = {};
-
-termgr.api.BASE_URL = 'https://termgr.homeinfo.de';
-termgr.api.LOGIN_URL ='https://his.homeinfo.de/session'
+const BASE_URL = 'https://termgr.homeinfo.de';
 
 
 /*
     Checks whether an error occured due to an expired
     session or displays the given error message otherwise.
 */
-termgr.api.checkSession = function (message) {
+function checkSession (message) {
     return function (response) {
         if (response.status == 401 || response.message == 'Session expired.') {
             alert('Sitzung abgelaufen.');
@@ -41,15 +40,14 @@ termgr.api.checkSession = function (message) {
             alert(message);
         }
     };
-};
+}
 
 
 /*
     Performs a HIS SSO login.
 */
-termgr.api.login = function (account, passwd) {
-    const json = {'account': account, 'passwd': passwd};
-    return homeinfo.requests.postJSON(termgr.api.LOGIN_URL, json).then(
+export function login (account, passwd) {
+    return session.login(account, passwd).then(
         function () {
             window.location = 'list.html';
         },
@@ -57,84 +55,81 @@ termgr.api.login = function (account, passwd) {
             alert('Ungültiger Benutzername und / oder Passwort.');
         }
     );
-};
+}
 
 
 /*
     Performs a HIS SSO logout.
 */
-termgr.api.logout = function () {
-    return homeinfo.requests.delete(termgr.api.LOGIN_URL + '/!').then(
+export function logout () {
+    return session.close().then(
         function () {
-            termgr.cache.clear();
+            clear();
             window.location = 'login.html';
         },
-        termgr.api.checkSession('Logout konnte nicht durchgeführt werden.')
+        checkSession('Logout konnte nicht durchgeführt werden.')
     );
-};
+}
 
 
 /*
     Retrieves deployments from the API.
 */
-termgr.api.getDeployments = function () {
-    return homeinfo.requests.get(termgr.api.BASE_URL + '/list/deployments').then(
+export function getDeployments () {
+    return request.get(BASE_URL + '/list/deployments').then(
         response => response.json,
-        termgr.api.checkSession('Die Liste der Standorte konnte nicht abgerufen werden.')
+        checkSession('Die Liste der Standorte konnte nicht abgerufen werden.')
     );
-};
+}
 
 
 /*
     Retrieves a specific system from the API.
 */
-termgr.api.getSystem = function (id) {
+export function getSystem (id) {
     if (id == null)
-        id = termgr.cache.system.get();
+        id = system.get();
 
     if (id == null)
         return Promise.reject('Kein System angegeben.');
 
-    return homeinfo.requests.get(termgr.api.BASE_URL + '/list/systems/' + id).then(
+    return request.get(BASE_URL + '/list/systems/' + id).then(
         response => response.json,
-        termgr.api.checkSession('Das angegebene System konnte nicht abgerufen werden.')
+        checkSession('Das angegebene System konnte nicht abgerufen werden.')
     );
-};
+}
 
 
 /*
     Retrieves systems from the API.
 */
-termgr.api.getSystems = function () {
-    return homeinfo.requests.get(termgr.api.BASE_URL + '/list/systems').then(
+export function getSystems () {
+    return request.get(BASE_URL + '/list/systems').then(
         response => response.json,
-        termgr.api.checkSession('Die Liste der Systeme konnte nicht abgerufen werden.')
+        checkSession('Die Liste der Systeme konnte nicht abgerufen werden.')
     );
-};
-
-
-termgr.api.application = {};
+}
 
 
 /*
     Enables or disables the application.
 */
-termgr.api.application = function (system, state) {
+export function application (system, state) {
     const stateText = state ? 'aktiviert' : 'deaktiviert';
     const json = {'system': system, 'state': state};
-    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/application', json).then(
+    return request.post(BASE_URL + '/administer/application', json).then(
         function () {
             alert('Digital Signage Anwendung wurde ' + stateText + '.');
         },
-        termgr.api.checkSession('Digital Signage Anwendung konnte nicht ' + stateText + ' werden.')
+        checkSession('Digital Signage Anwendung konnte nicht ' + stateText + ' werden.')
     );
-};
+}
 
 
 /*
     Deploys a system.
 */
-termgr.api.deploy = function (system, deployment, exclusive = false, fitted = false) {
+export function deploy (system, deployment, exclusive = false, fitted = false) {
     const stateTexts = ['Der Standort wurde gesetzt.'];
 
     if (exclusive)
@@ -149,50 +144,50 @@ termgr.api.deploy = function (system, deployment, exclusive = false, fitted = fa
         'exclusive': exclusive,
         'fitted': fitted
     };
-    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/deploy', json).then(
+    return request.post(BASE_URL + '/administer/deploy', json).then(
         function () {
             alert(stateTexts.join('\n'));
         },
-        termgr.api.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
+        checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
     );
-};
+}
 
 
 /*
     Deploys a system.
 */
-termgr.api.fit = function (system, fitted = true) {
+export function fit (system, fitted = true) {
     const stateText = fitted ? 'verbaut' : 'nicht verbaut';
     const json = {'system': system, 'fitted': fitted};
-    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/fit', json).then(
+    return request.post(BASE_URL + '/administer/fit', json).then(
         function () {
             alert('Das System wurde als ' + stateText + ' gekennzeichnet.');
         },
-        termgr.api.checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
+        checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
     );
-};
+}
 
 
 /*
     Lets the respective system beep.
 */
-termgr.api.beep = function (system) {
+export function beep (system) {
     const json = {'system': system};
-    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/beep', json).then(
+    return request.post(BASE_URL + '/administer/beep', json).then(
         function () {
             alert('Das System sollte gepiept haben.');
         },
-        termgr.api.checkSession('Das System konnte nicht zum Piepen gebracht werden.')
+        checkSession('Das System konnte nicht zum Piepen gebracht werden.')
     );
-};
+}
 
 
 /*
     Reboots the respective system.
 */
-termgr.api.reboot = function (system) {
+export function reboot (system) {
     const json = {'system': system};
-    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/reboot', json).then(
+    return request.post(BASE_URL + '/administer/reboot', json).then(
         function () {
             alert('Das System wurde wahrscheinlich neu gestartet.');
         },
@@ -202,21 +197,21 @@ termgr.api.reboot = function (system) {
             if (response.status == 503)
                 message = 'Auf dem System werden aktuell administrative Aufgaben ausgeführt.';
 
-            return termgr.api.checkSession(message)(response);
+            return checkSession(message)(response);
         }
     );
-};
+}
 
 
 /*
     Synchronizes the respective system.
 */
-termgr.api.sync = function (system) {
+export function sync (system) {
     const json = {'system': system};
-    return homeinfo.requests.postJSON(termgr.api.BASE_URL + '/administer/sync', json).then(
+    return request.post(BASE_URL + '/administer/sync', json).then(
         function () {
             alert('Das System wird demnächst synchronisiert.');
         },
-        termgr.api.checkSession('Das System konnte nicht synchronisiert werden.')
+        checkSession('Das System konnte nicht synchronisiert werden.')
     );
-};
+}

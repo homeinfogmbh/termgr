@@ -20,17 +20,13 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.sort = {};
+import { addressToString } from 'functions.js';
 
 
 /*
     Returns a compare function for systems.
 */
-termgr.sort.compareSystems = function () {
-    const desc = document.getElementById('sortDesc').checked;
-    const byId = document.getElementById('sortById').checked;
+function compareSystems (desc, byId) {
     const factor = desc ? -1 : 1;
 
     return function (alice, bob) {
@@ -53,8 +49,8 @@ termgr.sort.compareSystems = function () {
             } else if (deploymentB == null) {
                 value = -Infinity;
             } else {
-                const addressA = termgr.addressToString(deploymentA.address);
-                const addressB = termgr.addressToString(deploymentB.address);
+                const addressA = addressToString(deploymentA.address);
+                const addressB = addressToString(deploymentB.address);
 
                 if (addressA > addressB)
                     value = 1;
@@ -66,15 +62,13 @@ termgr.sort.compareSystems = function () {
         value = factor * value;
         return value;
     };
-};
+}
 
 
 /*
     Returns a compare functionm for deployments.
 */
-termgr.sort.compareDeployments = function () {
-    const desc = document.getElementById('sortDesc').checked;
-    const byId = document.getElementById('sortById').checked;
+function compareDeployments (desc, byId) {
     const factor = desc ? -1 : 1;
 
     return function (alice, bob) {
@@ -86,8 +80,8 @@ termgr.sort.compareDeployments = function () {
             else if (bob.id > alice.id)
                 value = -1;
         } else {
-            const addressA = termgr.addressToString(alice.address);
-            const addressB = termgr.addressToString(bob.address);
+            const addressA = addressToString(alice.address);
+            const addressB = addressToString(bob.address);
 
             if (addressA > addressB)
                 value = 1;
@@ -98,22 +92,32 @@ termgr.sort.compareDeployments = function () {
         value = factor * value;
         return value;
     };
-};
+}
+
+
+/*
+    Reads the sorting settings from the respective checkboxes.
+*/
+function getSettings () {
+    const desc = document.getElementById('sortDesc').checked;
+    const byId = document.getElementById('sortById').checked;
+    return [desc, byId];
+}
 
 
 /*
     Sorts the systems.
 */
-termgr.sort.systems = function (systems) {
-    systems.sort(termgr.sort.compareSystems());
+export function sortSystems = function (systems) {
+    systems.sort(compareSystems(...getSettings()));
     return systems;
-};
+}
 
 
 /*
     Sorts the deployments.
 */
-termgr.sort.deployments = function (deployments) {
-    deployments.sort(termgr.sort.compareDeployments());
+export function sortDeployments (deployments) {
+    deployments.sort(compareDeployments(...getSettings()));
     return deployments;
-};
+}

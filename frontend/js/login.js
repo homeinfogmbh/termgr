@@ -20,35 +20,32 @@
 */
 'use strict';
 
-
-var termgr = termgr || {};
-termgr.login = {};
+import api from 'api.js';
+import { credentials } from 'cache.js';
+import { suppressEvent } from 'functions.js';
 
 
 /*
     Performs the initial login.
 */
-termgr.login.login = function () {
+function login () {
     const account = document.getElementById('account').value;
     const passwd = document.getElementById('passwd').value;
     const storeCredentials = document.getElementById('storeCredentials').checked;
 
     if (storeCredentials)
-        termgr.cache.credentials.set(account, passwd);
+        credentials.set(account, passwd);
     else
-        termgr.cache.credentials.clear();
+        credentials.clear();
 
-    return termgr.api.login(account, passwd);
-};
+    return api.login(account, passwd);
+}
 
 
 /*
     Initialize index.html.
 */
-termgr.login.init = function () {
+export function init = function () {
     const loginButton = document.getElementById('login');
-    loginButton.addEventListener('click', termgr.partial(termgr.login.login), false);
-};
-
-
-document.addEventListener('DOMContentLoaded', termgr.login.init);
+    loginButton.addEventListener('click', suppressEvent(login), false);
+}
