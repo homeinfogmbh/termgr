@@ -41,25 +41,25 @@ export function systemEntry (system, index) {
     const colId = document.createElement('div');
     colId.classList.add('w3-col');
     colId.classList.add('m1');
-    colId.classList.add('s1');
+    colId.classList.add('s2');
     colId.textContent = '#' + system.id;
 
     const colAddress = document.createElement('div');
     colAddress.classList.add('w3-col');
     colAddress.classList.add('m5');
-    colAddress.classList.add('s11');
+    colAddress.classList.add('s10');
     colAddress.textContent = address;
 
     const colBuffer = document.createElement('div');
     colBuffer.classList.add('w3-col');
     colBuffer.classList.add('m1');
-    colBuffer.classList.add('s1');
+    colBuffer.classList.add('s2');
     colBuffer.innerHTML = '&nbsp;';
 
     const colCustomer = document.createElement('div');
     colCustomer.classList.add('w3-col');
     colCustomer.classList.add('m5');
-    colCustomer.classList.add('s11');
+    colCustomer.classList.add('s10');
     colCustomer.textContent = customer;
 
     const color = (index % 2) ? 'w3-light-grey' : 'w3-white';
