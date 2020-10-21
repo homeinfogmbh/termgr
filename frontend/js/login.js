@@ -21,7 +21,6 @@
 'use strict';
 
 import * as api from './api.js';
-import { credentials } from './cache.js';
 
 
 /*
