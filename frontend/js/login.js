@@ -20,7 +20,7 @@
 */
 'use strict';
 
-import api from './api.js';
+import * as api from './api.js';
 import { credentials } from './cache.js';
 import { suppressEvent } from './functions.js';
 
@@ -45,7 +45,7 @@ function login () {
 /*
     Initialize index.html.
 */
-export function init = function () {
+export function init () {
     const loginButton = document.getElementById('login');
     loginButton.addEventListener('click', suppressEvent(login), false);
 }
