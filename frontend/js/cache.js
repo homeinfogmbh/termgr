@@ -20,7 +20,7 @@
 */
 'use strict';
 
-import { Cache } from 'https://javascript.homeinfo.de/caching.js';
+import { Cache, JSONStorage } from 'https://javascript.homeinfo.de/caching.js';
 import { getDeployments, getSystems } from './api.js';
 
 
