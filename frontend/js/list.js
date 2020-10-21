@@ -56,7 +56,7 @@ function render (systems) {
     Loads, filters, sorts and renders systems.
 */
 function list (force = false) {
-    return Loader().wrap(
+    return Loader.wrap(
         systems.getValue(force).then(
         autoFilterSystems).then(
         sortSystems).then(

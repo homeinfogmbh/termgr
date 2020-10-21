@@ -86,7 +86,7 @@ function updateDetails () {
     Filters, sorts and renders deployments.
 */
 function list (force = false) {
-    return Loader().wrap(
+    return Loader.wrap(
         deployments.getValue(force).then(
         autoFilterDeployments).then(
         sortDeployments).then(
