@@ -24,9 +24,9 @@ import { Cache, JSONStorage } from 'https://javascript.homeinfo.de/caching.js';
 import { getDeployments, getSystems } from './api.js';
 
 
-export const deployments = new Cache('termgr.deployments', getDeployments);
-export const system = new JSONStorage('termgr.system');     // System ID.
-export const systems = new Cache('termgr.systems', getSystems);
+export const deployments = new Cache('homeinfo.termgr.deployments', getDeployments);
+export const system = new JSONStorage('homeinfo.termgr.system');  // System ID.
+export const systems = new Cache('homeinfo.termgr.systems', getSystems);
 
 
 /*
