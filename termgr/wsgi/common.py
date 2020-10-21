@@ -10,10 +10,9 @@ from wsgilib import Error
 
 from termacls import can_administer_system
 from termacls import can_deploy
-from termacls import can_setup_system
 
 
-__all__ = ['admin', 'deploy', 'setup']
+__all__ = ['admin', 'deploy']
 
 
 def _get_deployment():
@@ -71,20 +70,5 @@ def deploy(function):
             return function(system, deployment, *args, **kwargs)
 
         raise Error('Deployment operation unauthorized.', status=403)
-
-    return wrapper
-
-
-def setup(function):
-    """Wraps the actual with setup permission checks."""
-
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        system = _get_system()
-
-        if can_setup_system(ACCOUNT, system):
-            return function(system, *args, **kwargs)
-
-        raise Error('Setup operation unauthorized.', status=403)
 
     return wrapper

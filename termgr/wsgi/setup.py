@@ -12,14 +12,14 @@ from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
 from termgr.wireguard import get_wireguard_config, update_peers
-from termgr.wsgi.common import setup
+from termgr.wsgi.common import admin
 
 
 __all__ = ['ROUTES']
 
 
 @authenticated
-@setup
+@admin
 def get_system_info(system):
     """Returns the system information."""
 
@@ -27,7 +27,7 @@ def get_system_info(system):
 
 
 @authenticated
-@setup
+@admin
 def get_openvpn_data(system):
     """Returns the OpenVPN data for the respective system."""
 
@@ -50,7 +50,7 @@ def get_openvpn_data(system):
 
 
 @authenticated
-@setup
+@admin
 def get_wireguard_data(system):
     """Returns the WireGuard configuration for the respective system."""
 
@@ -58,7 +58,7 @@ def get_wireguard_data(system):
 
 
 @authenticated
-@setup
+@admin
 def finalize(system):
     """Posts setup data."""
 
