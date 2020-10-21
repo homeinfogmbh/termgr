@@ -20,7 +20,7 @@
 */
 'use strict';
 
-import session from 'https://javascript.homeinfo.de/his/session.js';
+import * as session from 'https://javascript.homeinfo.de/his/session.js';
 import { request } from 'https://javascript.homeinfo.de/his/his.js';
 import { clear, system } from './cache.js';
 
