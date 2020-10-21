@@ -78,7 +78,7 @@ function renderDetails (deployments) {
     Updates details of the selected deployment.
 */
 function updateDetails () {
-    return deployments.getValue().then(renderDetails);
+    return deployments.get().then(renderDetails);
 };
 
 
@@ -87,7 +87,7 @@ function updateDetails () {
 */
 function list (force = false) {
     return Loader.wrap(
-        deployments.getValue(force).then(
+        deployments.get(force).then(
         autoFilterDeployments).then(
         sortDeployments).then(
         render).then(

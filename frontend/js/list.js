@@ -57,7 +57,7 @@ function render (systems) {
 */
 function list (force = false) {
     return Loader.wrap(
-        systems.getValue(force).then(
+        systems.get(force).then(
         autoFilterSystems).then(
         sortSystems).then(
         render)
