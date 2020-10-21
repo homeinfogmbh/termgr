@@ -24,57 +24,16 @@ import { Cache } from 'https://javascript.homeinfo.de/caching.js';
 import { getDeployments, getSystems } from './api.js';
 
 
-/*
-    Account name and password storage.
-*/
-export const credentials = {
-    set: function (account, passwd) {
-        localStorage.setItem('termgr.account', account);
-        localStorage.setItem('termgr.passwd', passwd);
-    },
-    get: function () {
-        const account = localStorage.getItem('termgr.account');
-        const passwd = localStorage.getItem('termgr.passwd');
-        return [account, passwd];
-    },
-    clear: function () {
-        localStorage.removeItem('termgr.account');
-        localStorage.removeItem('termgr.passwd');
-    }
-};
-
-
 export const deployments = new Cache('termgr.deployments', getDeployments);
+export const system = new JSONStorage('termgr.system');     // System ID.
 export const systems = new Cache('termgr.systems', getSystems);
-
-
-/*
-    Current system ID handling.
-*/
-export const system = {
-    set: function (system) {
-        localStorage.setItem('termgr.system', JSON.stringify(system));
-    },
-    get: function () {
-        const raw = localStorage.getItem('termgr.system');
-
-        if (raw == null)
-            return null;
-
-        return JSON.parse(raw);
-    },
-    clear: function () {
-        localStorage.removeItem('termgr.system');
-    }
-};
 
 
 /*
     Clears all storage items.
 */
 export function clear () {
-    credentials.clear();
     deployments.clear();
-    systems.clear();
     system.clear();
+    systems.clear();
 };

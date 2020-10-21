@@ -20,7 +20,6 @@
 */
 'use strict';
 
-import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
 import * as api from './api.js';
 import { credentials } from './cache.js';
 
@@ -31,13 +30,6 @@ import { credentials } from './cache.js';
 function login () {
     const account = document.getElementById('account').value;
     const passwd = document.getElementById('passwd').value;
-    const storeCredentials = document.getElementById('storeCredentials').checked;
-
-    if (storeCredentials)
-        credentials.set(account, passwd);
-    else
-        credentials.clear();
-
     return api.login(account, passwd);
 }
 

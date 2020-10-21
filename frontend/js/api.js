@@ -65,7 +65,7 @@ export function logout () {
     return session.close().then(
         function () {
             clear();
-            window.location = 'login.html';
+            window.location = 'index.html';
         },
         checkSession('Logout konnte nicht durchgeführt werden.')
     );
