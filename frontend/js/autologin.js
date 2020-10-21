@@ -20,8 +20,8 @@
 */
 'use strict';
 
-import { login } from 'api.js';
-import { credentials } from 'cache.js';
+import { login } from 'api';
+import { credentials } from 'cache';
 
 
 /*
