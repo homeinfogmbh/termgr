@@ -1,5 +1,5 @@
 /*
-    login.js - Terminal Manager login handling.
+    filter.js - Terminal Manager systems filtering.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -20,24 +20,31 @@
 */
 'use strict';
 
-import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
-import * as api from './api.js';
+import { filterDeployments, filterSystems } from 'https://javascript.homeinfo.de/hwdb.mjs';
+import { addressToString } from 'https://javascript.homeinfo.de/mdb.mjs';
 
 
 /*
-    Performs the initial login.
+    Returns the filter keyword.
 */
-function login () {
-    const account = document.getElementById('account').value;
-    const passwd = document.getElementById('passwd').value;
-    return api.login(account, passwd);
+function getKeyword (id = 'searchField') {
+    return document.getElementById(id).value.trim();
 }
 
 
 /*
-    Initialize index.html.
+    Filters systems.
 */
-export function init () {
-    const loginButton = document.getElementById('login');
-    loginButton.addEventListener('click', suppressEvent(login), false);
+export function autoFilterSystems (systems) {
+    systems = filterSystems(systems, getKeyword());
+    return Array.from(systems);
+}
+
+
+/*
+    Filters deployments.
+*/
+export function autoFilterDeployments (deployments) {
+    deployments = filterDeployments(deployments, getKeyword());
+    return Array.from(deployments);
 }

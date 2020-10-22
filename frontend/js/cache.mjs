@@ -1,5 +1,5 @@
 /*
-    filter.js - Terminal Manager systems filtering.
+    cache.js - Terminal Manager local storage caching.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -20,31 +20,20 @@
 */
 'use strict';
 
-import { filterDeployments, filterSystems } from 'https://javascript.homeinfo.de/hwdb.js';
-import { addressToString } from 'https://javascript.homeinfo.de/mdb.js';
+import { Cache, JSONStorage } from 'https://javascript.homeinfo.de/caching.mjs';
+import { getDeployments, getSystems } from './api.mjs';
+
+
+export const deployments = new Cache('homeinfo.termgr.deployments', getDeployments);
+export const system = new JSONStorage('homeinfo.termgr.system');  // System ID.
+export const systems = new Cache('homeinfo.termgr.systems', getSystems);
 
 
 /*
-    Returns the filter keyword.
+    Clears all storage items.
 */
-function getKeyword (id = 'searchField') {
-    return document.getElementById(id).value.trim();
-}
-
-
-/*
-    Filters systems.
-*/
-export function autoFilterSystems (systems) {
-    systems = filterSystems(systems, getKeyword());
-    return Array.from(systems);
-}
-
-
-/*
-    Filters deployments.
-*/
-export function autoFilterDeployments (deployments) {
-    deployments = filterDeployments(deployments, getKeyword());
-    return Array.from(deployments);
-}
+export function clear () {
+    deployments.clear();
+    system.clear();
+    systems.clear();
+};

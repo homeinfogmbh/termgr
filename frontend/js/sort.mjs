@@ -20,7 +20,7 @@
 */
 'use strict';
 
-import { addressToString } from 'https://javascript.homeinfo.de/mdb.js';
+import { addressToString } from 'https://javascript.homeinfo.de/mdb.mjs';
 
 
 /*

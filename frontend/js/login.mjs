@@ -1,5 +1,5 @@
 /*
-    cache.js - Terminal Manager local storage caching.
+    login.js - Terminal Manager login handling.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
@@ -20,20 +20,24 @@
 */
 'use strict';
 
-import { Cache, JSONStorage } from 'https://javascript.homeinfo.de/caching.js';
-import { getDeployments, getSystems } from './api.js';
-
-
-export const deployments = new Cache('homeinfo.termgr.deployments', getDeployments);
-export const system = new JSONStorage('homeinfo.termgr.system');  // System ID.
-export const systems = new Cache('homeinfo.termgr.systems', getSystems);
+import { suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
+import * as api from './api.mjs';
 
 
 /*
-    Clears all storage items.
+    Performs the initial login.
 */
-export function clear () {
-    deployments.clear();
-    system.clear();
-    systems.clear();
-};
+function login () {
+    const account = document.getElementById('account').value;
+    const passwd = document.getElementById('passwd').value;
+    return api.login(account, passwd);
+}
+
+
+/*
+    Initialize index.html.
+*/
+export function init () {
+    const loginButton = document.getElementById('login');
+    loginButton.addEventListener('click', suppressEvent(login), false);
+}

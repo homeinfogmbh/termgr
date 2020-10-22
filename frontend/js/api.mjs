@@ -20,9 +20,9 @@
 */
 'use strict';
 
-import * as session from 'https://javascript.homeinfo.de/his/session.js';
-import { request } from 'https://javascript.homeinfo.de/his/his.js';
-import { clear, system } from './cache.js';
+import * as session from 'https://javascript.homeinfo.de/his/session.mjs';
+import { request } from 'https://javascript.homeinfo.de/his/his.mjs';
+import { clear, system } from './cache.mjs';
 
 const BASE_URL = 'https://termgr.homeinfo.de';
 

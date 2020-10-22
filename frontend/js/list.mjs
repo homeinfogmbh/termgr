@@ -20,13 +20,13 @@
 */
 'use strict';
 
-import * as konami from 'https://javascript.homeinfo.de/konami.js';
-import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
-import { logout } from './api.js';
-import { system, systems } from './cache.js';
-import { systemEntry } from './dom.js';
-import { autoFilterSystems } from './filter.js';
-import { sortSystems } from './sort.js';
+import * as konami from 'https://javascript.homeinfo.de/konami.mjs';
+import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
+import { logout } from './api.mjs';
+import { system, systems } from './cache.mjs';
+import { systemEntry } from './dom.mjs';
+import { autoFilterSystems } from './filter.mjs';
+import { sortSystems } from './sort.mjs';
 
 
 /*

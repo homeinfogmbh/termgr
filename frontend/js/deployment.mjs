@@ -20,13 +20,13 @@
 */
 'use strict';
 
-import { deploymentToString } from 'https://javascript.homeinfo.de/hwdb.js';
-import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
-import { deploy, getSystem } from './api.js';
-import { deployments, system } from './cache.js';
-import { deploymentToTable } from './dom.js';
-import { autoFilterDeployments } from './filter.js';
-import { sortDeployments } from './sort.js';
+import { deploymentToString } from 'https://javascript.homeinfo.de/hwdb.mjs';
+import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
+import { deploy, getSystem } from './api.mjs';
+import { deployments, system } from './cache.mjs';
+import { deploymentToTable } from './dom.mjs';
+import { autoFilterDeployments } from './filter.mjs';
+import { sortDeployments } from './sort.mjs';
 
 
 /*

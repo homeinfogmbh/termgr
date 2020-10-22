@@ -20,8 +20,8 @@
 */
 'use strict';
 
-import { suppressEvent } from 'https://javascript.homeinfo.de/lib.js';
-import { application, beep, fit, reboot, sync, getSystem } from './api.js';
+import { suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
+import { application, beep, fit, reboot, sync, getSystem } from './api.mjs';
 
 
 /*
