@@ -5,7 +5,7 @@ from functools import partial
 from flask import request
 
 from hipster.orm import Queue
-from his import ACCOUNT, authenticated
+from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline
 
 from termgr.notify import notify
@@ -17,6 +17,7 @@ __all__ = ['ROUTES']
 
 
 @authenticated
+@authorized('termgr')
 @deploy
 def deploy_system(system, deployment):
     """Deploys the respective system."""
@@ -30,6 +31,7 @@ def deploy_system(system, deployment):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def fit_system(system):
     """Marks a system as fitted."""
@@ -41,6 +43,7 @@ def fit_system(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def toggle_application(system):
     """Activates and deactivates the digital signage application
@@ -61,6 +64,7 @@ def toggle_application(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def reboot_system(system):
     """Reboots the respective system."""
@@ -77,6 +81,7 @@ def reboot_system(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def sync_system(system):
     """Synchronizes the respective system."""
@@ -86,6 +91,7 @@ def sync_system(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def beep_system(system):
     """Identifies the respective system by beep test."""

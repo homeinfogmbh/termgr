@@ -1,6 +1,6 @@
 """List systems."""
 
-from his import ACCOUNT, authenticated
+from his import ACCOUNT, authenticated, authorized
 from hwdb import System
 from wsgilib import JSON
 
@@ -11,6 +11,7 @@ __all__ = ['ROUTES']
 
 
 @authenticated
+@authorized('termgr')
 def list_deployments():
     """Lists available deployments."""
 
@@ -20,6 +21,7 @@ def list_deployments():
 
 
 @authenticated
+@authorized('termgr')
 def get_system(ident):
     """Lists the available systems."""
 
@@ -34,6 +36,7 @@ def get_system(ident):
 
 
 @authenticated
+@authorized('termgr')
 def list_systems():
     """Lists the available systems."""
 

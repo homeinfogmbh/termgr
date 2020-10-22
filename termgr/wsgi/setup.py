@@ -6,7 +6,7 @@ from os.path import basename
 
 from flask import request
 
-from his import authenticated
+from his import authenticated, authorized
 from hwdb import operating_system
 from wsgilib import Error, JSON, Binary
 
@@ -19,6 +19,7 @@ __all__ = ['ROUTES']
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def get_system_info(system):
     """Returns the system information."""
@@ -27,6 +28,7 @@ def get_system_info(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def get_openvpn_data(system):
     """Returns the OpenVPN data for the respective system."""
@@ -50,6 +52,7 @@ def get_openvpn_data(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def get_wireguard_data(system):
     """Returns the WireGuard configuration for the respective system."""
@@ -58,6 +61,7 @@ def get_wireguard_data(system):
 
 
 @authenticated
+@authorized('termgr')
 @admin
 def finalize(system):
     """Posts setup data."""
