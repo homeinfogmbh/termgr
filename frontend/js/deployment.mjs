@@ -138,7 +138,7 @@ export function init () {
         radioButton.addEventListener('change', suppressEvent(list), false);
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', suppressEvent(deploySystem, system), false);
+    btnDeploy.addEventListener('click', suppressEvent(deploySystem, systemId), false);
 
     const deploymentsList = document.getElementById('deployments');
     deploymentsList.addEventListener('change', suppressEvent(updateDetails), false);
