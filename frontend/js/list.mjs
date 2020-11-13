@@ -21,7 +21,7 @@
 'use strict';
 
 import * as konami from 'https://javascript.homeinfo.de/konami.mjs';
-import { Loader, suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
+import { Loader, enumerate, suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
 import { logout } from './api.mjs';
 import { system, systems } from './cache.mjs';
 import { systemEntry } from './dom.mjs';
@@ -44,11 +44,10 @@ export function select (systemId) {
 function render (systems) {
     const container = document.getElementById('systems');
     container.innerHTML = '';
+    let index, system;
 
-    for (let i = 0; i < systems.length; i++) {
-        let entry = systemEntry(systems[i], i);
-        container.appendChild(entry);
-    }
+    for ([index, system] of enumerate(systems))
+        container.appendChild(systemEntry(system, index));
 }
 
 
