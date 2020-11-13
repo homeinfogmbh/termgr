@@ -38,8 +38,6 @@ def get_args():
 def retrieve_data(login_data, args):
     """Retrieves OpenVPN data for the respective system."""
 
-    vpn_data = {'system': args.system, 'windows': args.windows}
-
     with session() as sess:
         response = sess.post(HIS_LOGIN_URL, json=login_data)
 
@@ -48,6 +46,7 @@ def retrieve_data(login_data, args):
             LOGGER.debug(response.content)
             exit(2)
 
+        vpn_data = {'system': args.system, 'windows': args.windows}
         response = sess.post(TERMGR_VPN_URL, json=vpn_data)
 
         if response.status_code != 200:
