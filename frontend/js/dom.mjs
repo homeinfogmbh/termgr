@@ -59,13 +59,13 @@ export function systemEntry (system, index) {
 
     const colAddress = document.createElement('div');
     colAddress.classList.add('w3-col');
-    colAddress.classList.add('m3');
+    colAddress.classList.add('m2');
     colAddress.classList.add('s10');
     colAddress.textContent = address;
 
     const colCustomer = document.createElement('div');
     colCustomer.classList.add('w3-col');
-    colCustomer.classList.add('m3');
+    colCustomer.classList.add('m4');
     colCustomer.classList.add('s10');
     colCustomer.textContent = customer;
 
