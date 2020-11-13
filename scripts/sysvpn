@@ -14,24 +14,31 @@ LOGGER = getLogger('sysvpn')
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 HIS_LOGIN_URL = 'https://his.homeinfo.de/session'
 TERMGR_VPN_URL = 'https://termgr.homeinfo.de/setup/openvpn'
+TERMGR_FINALIZE_URL = 'https://termgr.homeinfo.de/setup/finalize'
 
 
 def get_args():
     """Parses the command line arguments."""
 
     parser = ArgumentParser(description='OpenVPN configuration retrieval.')
+    parser.add_argument('system', type=int, help='the system ID')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='enable debug mode')
+    parser.add_argument('-f', '--file', type=Path, help='output file')
+    parser.add_argument('-m', '--model', help='Set model')
+    parser.add_argument('-o', '--operating-system', help='Set OS')
+    parser.add_argument('-p', '--pubkey', help='Set WireGuard pubkey')
+    parser.add_argument('-s', '--serial-number', help='Set serial number')
     parser.add_argument('-u', '--user', help='HIS user name')
     parser.add_argument('-w', '--windows', action='store_true',
                         help='package for MS Windows systems')
-    parser.add_argument('-o', '-f', '--file', type=Path, help='output file')
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='enable debug mode')
-    parser.add_argument('system', type=int, help='the system ID')
     return parser.parse_args()
 
 
-def retrieve_data(login_data, vpn_data, path):
+def retrieve_data(login_data, args):
     """Retrieves OpenVPN data for the respective system."""
+
+    vpn_data = {'system': args.system, 'windows': args.windows}
 
     with session() as sess:
         response = sess.post(HIS_LOGIN_URL, json=login_data)
@@ -48,11 +55,24 @@ def retrieve_data(login_data, vpn_data, path):
             LOGGER.debug(response.content)
             exit(3)
 
-        if path:
-            with path.open('wb') as file:
+        if args.path:
+            with args.path.open('wb') as file:
                 file.write(response.content)
         else:
             stdout.buffer.write(response.content)
+
+        finalize_data = {
+            'sn': args.serial_number,
+            'os': args.operating_system,
+            'model': args.model,
+            'wg_pubkey': args.pubkey
+        }
+        response = sess.post(TERMGR_FINALIZE_URL, json=finalize_data)
+
+        if response.status_code != 200:
+            LOGGER.error('Error during finalizing.')
+            LOGGER.debug(response.content)
+            exit(4)
 
 
 def main():
@@ -79,8 +99,7 @@ def main():
         exit(1)
 
     login_data = {'account': user, 'passwd': passwd}
-    vpn_data = {'system': args.system, 'windows': args.windows}
-    retrieve_data(login_data, vpn_data, args.file)
+    retrieve_data(login_data, args)
 
 
 if __name__ == '__main__':
