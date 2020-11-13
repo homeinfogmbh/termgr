@@ -26,6 +26,19 @@ import { select } from './list.mjs';
 
 
 /*
+    Returns a buffer column.
+*/
+function getBufferCol () {
+    const colBuffer = document.createElement('div');
+    colBuffer.classList.add('w3-col');
+    colBuffer.classList.add('m1');
+    colBuffer.classList.add('s2');
+    colBuffer.innerHTML = '&nbsp;';
+    return colBuffer;
+}
+
+
+/*
     Generates a terminal DOM entry.
 */
 export function systemEntry (system, index) {
@@ -46,21 +59,21 @@ export function systemEntry (system, index) {
 
     const colAddress = document.createElement('div');
     colAddress.classList.add('w3-col');
-    colAddress.classList.add('m5');
+    colAddress.classList.add('m3');
     colAddress.classList.add('s10');
     colAddress.textContent = address;
 
-    const colBuffer = document.createElement('div');
-    colBuffer.classList.add('w3-col');
-    colBuffer.classList.add('m1');
-    colBuffer.classList.add('s2');
-    colBuffer.innerHTML = '&nbsp;';
-
     const colCustomer = document.createElement('div');
     colCustomer.classList.add('w3-col');
-    colCustomer.classList.add('m5');
+    colCustomer.classList.add('m3');
     colCustomer.classList.add('s10');
     colCustomer.textContent = customer;
+
+    const colConfigured = document.createElement('div');
+    colConfigured.classList.add('w3-col');
+    colConfigured.classList.add('m3');
+    colConfigured.classList.add('s10');
+    colConfigured.textContent = 'Programmiert: ' + (system.configured || 'N/A');
 
     const color = (index % 2) ? 'w3-light-grey' : 'w3-white';
     const entry = document.createElement('div');
@@ -69,8 +82,10 @@ export function systemEntry (system, index) {
     entry.classList.add(color);
     entry.appendChild(colId);
     entry.appendChild(colAddress);
-    entry.appendChild(colBuffer);
+    entry.appendChild(getBufferCol());
     entry.appendChild(colCustomer);
+    entry.appendChild(getBufferCol());
+    entry.appendChild(colConfigured);
     entry.addEventListener('click', suppressEvent(select, system.id), false);
 
     return entry;
