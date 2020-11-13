@@ -59,7 +59,7 @@ export function systemEntry (system, index) {
 
     const colAddress = document.createElement('div');
     colAddress.classList.add('w3-col');
-    colAddress.classList.add('m2');
+    colAddress.classList.add('m3');
     colAddress.classList.add('s10');
     colAddress.textContent = address;
 
@@ -71,7 +71,7 @@ export function systemEntry (system, index) {
 
     const colConfigured = document.createElement('div');
     colConfigured.classList.add('w3-col');
-    colConfigured.classList.add('m3');
+    colConfigured.classList.add('m2');
     colConfigured.classList.add('s10');
     colConfigured.textContent = 'Programmiert: ' + (system.configured || 'N/A');
 
