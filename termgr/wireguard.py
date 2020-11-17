@@ -1,17 +1,42 @@
 """Wireguard configuration."""
-
+from ipaddress import ip_address
+from ipaddress import ip_network
 from tempfile import NamedTemporaryFile
+from typing import NamedTuple
 
 from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System, WireGuard
 from wgtools import clear_peers, set as wg_set
 
 from termgr.config import CONFIG
+from termgr.types import IPAddress, IPNetwork
 
 
 __all__ = ['get_wireguard_config', 'update_peers']
 
 
 WG = ('/usr/bin/sudo', '/usr/bin/wg')
+
+
+class Route(NamedTuple):
+    """Represents a route."""
+
+    destination: IPNetwork
+    gateway: IPAddress
+    gateway_onlink: bool
+
+    @classmethod
+    def from_string(cls, string):
+        """Creates the route from a string representation."""
+        destination, gateway = map(str.strip, string.split('via'))
+        return cls(ip_network(destination), ip_address(gateway), True)
+
+    def to_json(self):
+        """Returns a JSON-ish dict."""
+        return {
+            'destination': str(self.destination),
+            'gateway': str(self.gateway),
+            'gateway_onlink': self.gateway_onlink
+        }
 
 
 def get_systems():
@@ -24,22 +49,13 @@ def get_configured_routes():
     """Yields the configured routes."""
 
     for route in CONFIG['WireGuard']['routes'].split(','):
-        destination, gateway = route.strip().split('via')
-        yield {
-            'destination': destination.strip(),
-            'gateway': gateway.strip(),
-            'gateway_onlink': True
-        }
+        yield Route.from_string(route.strip())
 
 
 def get_client_routes():
     """Yields configured routes."""
 
-    yield {
-        'destination': str(WIREGUARD_NETWORK),
-        'gateway': str(WIREGUARD_SERVER),
-        'gateway_onlink': True
-    }
+    yield Route(WIREGUARD_NETWORK, WIREGUARD_SERVER, True)
     yield from get_configured_routes()
 
 
@@ -54,7 +70,7 @@ def get_wireguard_config(system):
         'psk': CONFIG['WireGuard'].get('psk'),
         'pubkey': system.wireguard.pubkey,
         'endpoint': CONFIG['WireGuard']['endpoint'],
-        'routes': list(get_client_routes()),
+        'routes': [route.to_json() for route in get_client_routes()],
         'persistent_keepalive': CONFIG.getint(
             'WireGuard', 'persistent_keepalive')
     }
@@ -63,7 +79,7 @@ def get_wireguard_config(system):
 def _add_peers(psk=None):
     """Adds all terminal peers with the respective psk."""
 
-    common_ips = [route['destination'] for route in get_configured_routes()]
+    common_ips = [str(route.destination) for route in get_configured_routes()]
     peers = {}
 
     for system in get_systems():
