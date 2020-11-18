@@ -1,6 +1,7 @@
 """Common WSGI functions."""
 
 from functools import wraps
+from typing import Callable
 
 from flask import request
 
@@ -15,7 +16,7 @@ from termacls import can_deploy
 __all__ = ['admin', 'deploy']
 
 
-def _get_deployment():
+def _get_deployment() -> Deployment:
     """Returns the respective deployment."""
 
     ident = request.json.get('deployment')
@@ -29,7 +30,7 @@ def _get_deployment():
         raise Error('No such deployment.', status=404) from None
 
 
-def _get_system():
+def _get_system() -> System:
     """Returns the respective system."""
 
     ident = request.json.get('system')
@@ -43,7 +44,7 @@ def _get_system():
         raise Error('No such system.', status=404) from None
 
 
-def admin(function):
+def admin(function: Callable) -> Callable:
     """Wraps the actual with admin permission checks."""
 
     @wraps(function)
@@ -58,7 +59,7 @@ def admin(function):
     return wrapper
 
 
-def deploy(function):
+def deploy(function: Callable) -> Callable:
     """Wraps the actual deployment permission checks."""
 
     @wraps(function)

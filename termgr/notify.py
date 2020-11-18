@@ -2,6 +2,7 @@
 
 from logging import getLogger
 from xml.etree.ElementTree import tostring, Element, SubElement
+from typing import Iterable, List
 
 from emaillib import Mailer, EMail
 
@@ -30,33 +31,15 @@ MAILER = Mailer(
 )
 
 
-def admins():
+def get_admins() -> Iterable[str]:
     """Yields admins's emails."""
 
     emails_ = CONFIG['notify']['admins'].split(',')
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
-def get_html_emails(subject, html):
-    """Send emails to admins."""
-
-    html = tostring(html, encoding='unicode', method='html')
-
-    for admin in admins():
-        yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
-
-
-def notify(deployments=None, order=True):
-    """Notifies the adminstrators about deployments."""
-
-    if deployments is None:
-        deployments = Deployments.of_today()
-
-    if order:
-        deployments = deployments.order_by(Deployments.timestamp.desc())
-
-    if not deployments:
-        return False
+def get_html(deployments: List[Deployments]) -> Element:
+    """Returns an HTML element."""
 
     html = Element('html')
     header = SubElement(html, 'header')
@@ -77,6 +60,29 @@ def notify(deployments=None, order=True):
     for deployment in deployments:
         table.append(deployment.to_html_table_row())
 
-    emails = get_html_emails('Verbaute HOMEINFO Systeme', html)
+    return html
+
+
+def get_emails(subject: str, html: str) -> Iterable[EMail]:
+    """Yields emails with HTML body."""
+
+    html = tostring(html, encoding='unicode', method='html')
+
+    for admin in get_admins():
+        yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
+
+
+def notify(deployments: Iterable[Deployments] = None) -> bool:
+    """Notifies the adminstrators about deployments."""
+
+    if deployments is None:
+        deployments = Deployments.of_today()
+
+    deployments = deployments.order_by(Deployments.timestamp.desc())
+
+    if not deployments:
+        return False
+
+    emails = get_emails('Verbaute HOMEINFO Systeme', get_html(deployments))
     MAILER.send(emails, background=False)
     return True

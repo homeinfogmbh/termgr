@@ -1,7 +1,9 @@
 """ORM models for termgr."""
 
+from __future__ import annotations
 from datetime import date, datetime, timedelta
 from xml.etree.ElementTree import Element, SubElement
+from typing import Iterable
 
 from peewee import DateTimeField, ForeignKeyField
 
@@ -49,16 +51,14 @@ class Deployments(TermgrModel):
     timestamp = DateTimeField(default=datetime.now)
 
     @classmethod
-    def add(cls, account, system, deployment, timestamp=None):
+    def add(cls, account: Account, system: System, deployment: Deployment):
         """Creates and saves a new record."""
-        record = cls(
-            account=account.id, system=system, deployment=deployment,
-            timestamp=timestamp or datetime.now())
+        record = cls(account=account.id, system=system, deployment=deployment)
         record.save()
         return record
 
     @classmethod
-    def of_today(cls):
+    def of_today(cls) -> Iterable[Deployments]:
         """Yields deployments that were made today."""
         today = date.today()
         tomorrow = today + timedelta(days=1)
@@ -66,7 +66,7 @@ class Deployments(TermgrModel):
         return cls.select().where(condition)
 
     @classmethod
-    def html_table_header(cls):
+    def html_table_header(cls) -> Element:
         """Returns an HTML DOM of the table header."""
         row = Element('tr')
 
@@ -77,7 +77,7 @@ class Deployments(TermgrModel):
         return row
 
     @property
-    def html_table_columns(self):
+    def html_table_columns(self) -> Iterable[str]:
         """Yields the column contents for the HTML table representation."""
         yield self.account.full_name or self.account.name
         yield str(self.system.id)
@@ -87,7 +87,7 @@ class Deployments(TermgrModel):
         yield str(self.deployment.address)
         yield self.timestamp.isoformat()    # pylint: disable=E1101
 
-    def to_html_table_row(self):
+    def to_html_table_row(self) -> Element:
         """Returns an HTML DOM of a table row."""
         row = Element('tr')
 

@@ -2,7 +2,7 @@
 from ipaddress import ip_address
 from ipaddress import ip_network
 from tempfile import NamedTemporaryFile
-from typing import NamedTuple
+from typing import Iterable, NamedTuple
 
 from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System, WireGuard
 from wgtools import clear_peers, set as wg_set
@@ -25,12 +25,12 @@ class Route(NamedTuple):
     gateway_onlink: bool
 
     @classmethod
-    def from_string(cls, string):
+    def from_string(cls, string: str):
         """Creates the route from a string representation."""
         destination, gateway = map(str.strip, string.split('via'))
         return cls(ip_network(destination), ip_address(gateway), True)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Returns a JSON-ish dict."""
         return {
             'destination': str(self.destination),
@@ -39,27 +39,27 @@ class Route(NamedTuple):
         }
 
 
-def get_systems():
+def get_systems() -> Iterable[System]:
     """Yields WireGuard enabled systems."""
 
     return System.select().join(WireGuard).where(~(WireGuard.pubkey >> None))
 
 
-def get_configured_routes():
+def get_configured_routes() -> Iterable[Route]:
     """Yields the configured routes."""
 
     for route in CONFIG['WireGuard']['routes'].split(','):
         yield Route.from_string(route.strip())
 
 
-def get_client_routes():
+def get_client_routes() -> Iterable[Route]:
     """Yields configured routes."""
 
     yield Route(WIREGUARD_NETWORK, WIREGUARD_SERVER, True)
     yield from get_configured_routes()
 
 
-def get_wireguard_config(system):
+def get_wireguard_config(system: System) -> dict:
     """Returns a JSON-ish WireGuard configuration
     for the specified system.
     """
@@ -76,7 +76,7 @@ def get_wireguard_config(system):
     }
 
 
-def _add_peers(psk=None):
+def _add_peers(psk: str = None):
     """Adds all terminal peers with the respective psk."""
 
     common_ips = [str(route.destination) for route in get_configured_routes()]

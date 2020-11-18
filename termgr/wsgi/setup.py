@@ -4,10 +4,10 @@ from contextlib import suppress
 from datetime import datetime
 from os.path import basename
 
-from flask import request
+from flask import Response, request
 
 from his import authenticated, authorized
-from hwdb import operating_system
+from hwdb import System, operating_system
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
@@ -21,7 +21,7 @@ __all__ = ['ROUTES']
 @authenticated
 @authorized('termgr')
 @admin
-def get_system_info(system):
+def get_system_info(system: System) -> Response:
     """Returns the system information."""
 
     return JSON(system.to_json(brief=True))
@@ -30,7 +30,7 @@ def get_system_info(system):
 @authenticated
 @authorized('termgr')
 @admin
-def get_openvpn_data(system):
+def get_openvpn_data(system: System) -> Response:
     """Returns the OpenVPN data for the respective system."""
 
     windows = request.json.get('windows', False)
@@ -54,7 +54,7 @@ def get_openvpn_data(system):
 @authenticated
 @authorized('termgr')
 @admin
-def get_wireguard_data(system):
+def get_wireguard_data(system: System) -> Response:
     """Returns the WireGuard configuration for the respective system."""
 
     return JSON(get_wireguard_config(system))
@@ -63,7 +63,7 @@ def get_wireguard_data(system):
 @authenticated
 @authorized('termgr')
 @admin
-def finalize(system):
+def finalize(system: System) -> Response:
     """Posts setup data."""
 
     with suppress(KeyError):

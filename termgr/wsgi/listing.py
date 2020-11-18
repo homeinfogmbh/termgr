@@ -4,6 +4,8 @@ from his import ACCOUNT, authenticated, authorized
 from hwdb import System
 from wsgilib import JSON
 
+from flask import Response
+
 from termacls import get_administerable_deployments, get_administerable_systems
 
 
@@ -12,7 +14,7 @@ __all__ = ['ROUTES']
 
 @authenticated
 @authorized('termgr')
-def list_deployments():
+def list_deployments() -> Response:
     """Lists available deployments."""
 
     return JSON([
@@ -22,7 +24,7 @@ def list_deployments():
 
 @authenticated
 @authorized('termgr')
-def get_system(ident):
+def get_system(ident: int) -> Response:
     """Lists the available systems."""
 
     systems = get_administerable_systems(ACCOUNT).where(System.id == ident)
@@ -37,7 +39,7 @@ def get_system(ident):
 
 @authenticated
 @authorized('termgr')
-def list_systems():
+def list_systems() -> Response:
     """Lists the available systems."""
 
     return JSON([

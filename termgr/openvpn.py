@@ -4,6 +4,9 @@ from pathlib import Path
 from tarfile import open as TarFile
 from tempfile import TemporaryFile, NamedTemporaryFile
 from zipfile import ZipFile
+from typing import IO, Tuple
+
+from hwdb import OpenVPN
 
 
 __all__ = ['package']
@@ -19,13 +22,13 @@ CA_FILE_PATH = KEYS_DIR.joinpath(CA_FILE)
 MTU = 'tun-mtu {}\n'
 
 
-def get_key(openvpn):
+def get_key(openvpn: OpenVPN) -> str:
     """Returns the key name."""
 
     return openvpn.key or str(openvpn.id)
 
 
-def get_mtu(openvpn):
+def get_mtu(openvpn: OpenVPN) -> str:
     """Returns the respective MTU value."""
 
     if openvpn.mtu is not None:
@@ -34,7 +37,7 @@ def get_mtu(openvpn):
     return ''
 
 
-def get_configuration(key_file, crt_file, mtu):
+def get_configuration(key_file: Path, crt_file: Path, mtu: str) -> str:
     """Returns the rendered client configuration file."""
 
     with CFG_TEMP.open('r') as template:
@@ -43,15 +46,7 @@ def get_configuration(key_file, crt_file, mtu):
     return template.format(crtfile=crt_file, keyfile=key_file, mtu=mtu)
 
 
-def get_files(key_file, crt_file):
-    """Returns the mandatory files."""
-
-    key_file_path = KEYS_DIR.joinpath(key_file)
-    crt_file_path = KEYS_DIR.joinpath(crt_file)
-    return (CA_FILE_PATH, key_file_path, crt_file_path)
-
-
-def create_zip_file(openvpn, file):
+def create_zip_file(openvpn: OpenVPN, file: IO):
     """ZIPs OpenVPN files for Windows devices."""
 
     key = get_key(openvpn)
@@ -74,7 +69,7 @@ def create_zip_file(openvpn, file):
             zip_file.write(cfg.name, arcname=CONFIG_FILE.format('.ovpn'))
 
 
-def create_tar_file(openvpn, file):
+def create_tar_file(openvpn: OpenVPN, file: IO):
     """Tar OpenVPN files for POSIX devices."""
 
     key = get_key(openvpn)
@@ -96,7 +91,7 @@ def create_tar_file(openvpn, file):
             tar_file.add(cfg.name, arcname=CONFIG_FILE.format('.conf'))
 
 
-def package(openvpn, windows=False):
+def package(openvpn: OpenVPN, windows: bool = False) -> Tuple[bytes, str]:
     """Packages the files for the specified client."""
 
     key = get_key(openvpn)
