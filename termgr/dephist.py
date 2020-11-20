@@ -2,9 +2,9 @@
 
 from argparse import ArgumentParser, Namespace
 
+from functoolsplus import exiting
 from his.pseudotypes import account
 from hwdb.pseudotypes import deployment, system
-from syslib import exiting
 
 from termgr.orm import DeploymentHistory
 
