@@ -14,17 +14,15 @@ from peeweeplus import MySQLDatabase, JSONModel
 from termgr.config import CONFIG
 
 
-__all__ = ['Deployments']
+__all__ = ['DeploymentHistory']
 
 
 DATABASE = MySQLDatabase.from_config(CONFIG['db'])
 HTML_TABLE_HEADERS = (
     'Techniker',
     'System',
-    'Kunde',
-    'Kundennummer',
-    'Typ',
-    'Standort',
+    'Alter Standort',
+    'Neuer Standort',
     'Zeitstempel'
 )
 
@@ -37,28 +35,44 @@ class TermgrModel(JSONModel):   # pylint: disable=R0903
         schema = database.database
 
 
-class Deployments(TermgrModel):
+class DeploymentHistory(TermgrModel):
     """Deployment actions of technitians."""
+
+    class Meta:     # pylint: disable=C0115,R0903
+        table_name = 'deployment_history'
 
     account = ForeignKeyField(
         Account, column_name='account', on_update='CASCADE',
         on_delete='CASCADE')
     system = ForeignKeyField(
         System, column_name='system', on_update='CASCADE', on_delete='CASCADE')
-    deployment = ForeignKeyField(
-        Deployment, column_name='deployment', on_update='CASCADE',
+    old_deployment = ForeignKeyField(
+        Deployment, null=True, column_name='deployment', on_update='CASCADE',
+        on_delete='SET NULL')
+    new_deployment = ForeignKeyField(
+        Deployment, null=True, column_name='deployment', on_update='CASCADE',
         on_delete='CASCADE')
     timestamp = DateTimeField(default=datetime.now)
 
+    def __str__(self):
+        """Returns a string for the terminal."""
+        return '\t'.join(
+            (self.timstamp.isoformat(), self.account.name,
+             str(self.system_id), str(self.old_deployment_id),
+             str(self.new_deployment_id))
+        )
+
     @classmethod
-    def add(cls, account: Account, system: System, deployment: Deployment):
+    def add(cls, account: Account, system: System, old_deployment: Deployment):
         """Creates and saves a new record."""
-        record = cls(account=account.id, system=system, deployment=deployment)
+        record = cls(
+            account=account.id, system=system, old_deployment=old_deployment,
+            new_deployment=system.deployment)
         record.save()
         return record
 
     @classmethod
-    def of_today(cls) -> Iterable[Deployments]:
+    def of_today(cls) -> Iterable[DeploymentHistory]:
         """Yields deployments that were made today."""
         today = date.today()
         tomorrow = today + timedelta(days=1)
@@ -81,18 +95,20 @@ class Deployments(TermgrModel):
         """Yields the column contents for the HTML table representation."""
         yield self.account.full_name or self.account.name
         yield str(self.system.id)
-        yield self.deployment.customer.name
-        yield str(self.deployment.customer.id)
-        yield self.deployment.type.value
-        yield str(self.deployment.address)
+        yield self.old_deployment.to_html()
+        yield self.new_deployment.to_html()
         yield self.timestamp.isoformat()    # pylint: disable=E1101
 
     def to_html_table_row(self) -> Element:
         """Returns an HTML DOM of a table row."""
         row = Element('tr')
 
-        for column in self.html_table_columns:
+        for value in self.html_table_columns:
             table_column = SubElement(row, 'td')
-            table_column.text = column
+
+            if isinstance(value, Element):
+                table_column.append(value)
+            else:
+                table_column.text = value
 
         return row

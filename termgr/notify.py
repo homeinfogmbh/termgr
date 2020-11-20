@@ -7,7 +7,7 @@ from typing import Iterable, List
 from emaillib import Mailer, EMail
 
 from termgr.config import CONFIG
-from termgr.orm import Deployments
+from termgr.orm import DeploymentHistory
 
 
 __all__ = ['notify']
@@ -38,7 +38,7 @@ def get_admins() -> Iterable[str]:
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
-def get_html(deployments: List[Deployments]) -> Element:
+def get_html(deployments: List[DeploymentHistory]) -> Element:
     """Returns an HTML element."""
 
     html = Element('html')
@@ -55,7 +55,7 @@ def get_html(deployments: List[Deployments]) -> Element:
         text.text = 'die folgenden HOMEINFO Systeme wurden heute verbaut:'
 
     table = SubElement(body, 'table', attrib={'border': '1'})
-    table.append(Deployments.html_table_header())
+    table.append(DeploymentHistory.html_table_header())
 
     for deployment in deployments:
         table.append(deployment.to_html_table_row())
@@ -72,13 +72,13 @@ def get_emails(subject: str, html: str) -> Iterable[EMail]:
         yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
 
 
-def notify(deployments: Iterable[Deployments] = None) -> bool:
+def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
     """Notifies the adminstrators about deployments."""
 
     if deployments is None:
-        deployments = Deployments.of_today()
+        deployments = DeploymentHistory.of_today()
 
-    deployments = deployments.order_by(Deployments.timestamp.desc())
+    deployments = deployments.order_by(DeploymentHistory.timestamp.desc())
 
     if not deployments:
         return False

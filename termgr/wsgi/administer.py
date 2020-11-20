@@ -9,7 +9,7 @@ from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, Deployment, System
 
 from termgr.notify import notify
-from termgr.orm import Deployments
+from termgr.orm import DeploymentHistory
 from termgr.wsgi.common import admin, deploy
 
 
@@ -19,13 +19,16 @@ __all__ = ['ROUTES']
 @authenticated
 @authorized('termgr')
 @deploy
-def deploy_system(system: System, deployment: Deployment) -> Response:
+def deploy_system(system: System, new_deployment: Deployment) -> Response:
     """Deploys the respective system."""
 
     exclusive = request.json.get('exclusive', False)
     fitted = request.json.get('exclusive', False)
-    system.deploy(deployment, exclusive=exclusive, fitted=fitted)
-    Deployments.add(ACCOUNT, system, deployment)
+
+    for system_, old_deployment in system.deploy(
+            new_deployment, exclusive=exclusive, fitted=fitted):
+        DeploymentHistory.add(ACCOUNT, system_, old_deployment)
+
     notify()
     return 'System has been deployed.'
 

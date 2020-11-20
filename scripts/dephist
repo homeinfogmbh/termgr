@@ -1,0 +1,8 @@
+#! /usr/bin/env python3
+"""System deployment history utility."""
+
+from termgr.dephist import main
+
+
+if __name__ == '__main__':
+    main()
