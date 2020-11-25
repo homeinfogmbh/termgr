@@ -84,5 +84,5 @@ def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
         return False
 
     emails = get_emails('Verbaute HOMEINFO Systeme', get_html(deployments))
-    MAILER.send(emails, background=False)
+    MAILER.send(emails)
     return True
