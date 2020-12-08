@@ -33,6 +33,14 @@ function loadDeployment () {
 
 
 /*
+    Reloads the page.
+*/
+function reload () {
+    window.location = 'manage.html';
+}
+
+
+/*
     Checks the last sync.
 */
 function checkLastSync (lastSync) {
@@ -44,39 +52,10 @@ function checkLastSync (lastSync) {
 
 
 /*
-    Render the page.
+    Runs a function with arguments and reloads the page afterwards.
 */
-function render (system) {
-    const systemId = document.getElementById('system');
-    systemId.textContent = system.id;
-
-    const btnDeploy = document.getElementById('deploy');
-    btnDeploy.classList.remove('w3-green', 'w3-red');
-    btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
-
-    const btnFit = document.getElementById('fit');
-    btnFit.classList.remove('w3-green', 'w3-red');
-    btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
-
-    const btnSync = document.getElementById('sync');
-    btnSync.classList.remove('w3-green', 'w3-red');
-    btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
-}
-
-
-/*
-    Updates system-related data.
-*/
-function update () {
-    getSystem().then(render);
-}
-
-
-/*
-    Runs a function with arguments and updated the page afterwards.
-*/
-function updateAfterwards (func, ...args) {
-    func(...args).then(update)
+function reloadAfterwards (func, ...args) {
+    func(...args).then(reload)
 }
 
 
@@ -84,7 +63,8 @@ function updateAfterwards (func, ...args) {
     Sets up system-related data.
 */
 function setup (system) {
-    render(system)
+    const systemId = document.getElementById('system');
+    systemId.textContent = system.id;
 
     const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', suppressEvent(application, system.id, true), false);
@@ -99,12 +79,18 @@ function setup (system) {
     btnBeep.addEventListener('click', suppressEvent(beep, system.id), false);
 
     const btnDeploy = document.getElementById('deploy');
+    btnDeploy.classList.remove('w3-green', 'w3-red');
+    btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
     btnDeploy.addEventListener('click', suppressEvent(loadDeployment), false);
 
     const btnFit = document.getElementById('fit');
-    btnFit.addEventListener('click', suppressEvent(updateAfterwards, fit, system.id, !system.fitted), false);
+    btnFit.classList.remove('w3-green', 'w3-red');
+    btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
+    btnFit.addEventListener('click', suppressEvent(reloadAfterwards, fit, system.id, !system.fitted), false);
 
     const btnSync = document.getElementById('sync');
+    btnSync.classList.remove('w3-green', 'w3-red');
+    btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
     btnSync.addEventListener('click', suppressEvent(sync, system.id), false);
 };
 
