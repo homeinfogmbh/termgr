@@ -68,7 +68,7 @@ function setup (system) {
 
     const btnFit = document.getElementById('fit');
     btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
-    btnFit.addEventListener('click', suppressEvent(fit, !system.fitted), false);
+    btnFit.addEventListener('click', suppressEvent(fit, system,id, !system.fitted), false);
 
     const btnSync = document.getElementById('sync');
     btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
