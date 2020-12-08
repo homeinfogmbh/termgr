@@ -73,6 +73,14 @@ function update () {
 
 
 /*
+    Runs a function with arguments and updated the page afterwards.
+*/
+function updateAfterwards (func, ...args) {
+    func(...args).then(update)
+}
+
+
+/*
     Sets up system-related data.
 */
 function setup (system) {
@@ -94,8 +102,7 @@ function setup (system) {
     btnDeploy.addEventListener('click', suppressEvent(loadDeployment), false);
 
     const btnFit = document.getElementById('fit');
-    btnFit.addEventListener('click', suppressEvent(fit, system.id, !system.fitted), false);
-    btnFit.addEventListener('click', suppressEvent(update), false);   // Reload sytem and page.
+    btnFit.addEventListener('click', suppressEvent(updateAfterwards, fit, system.id, !system.fitted), false);
 
     const btnSync = document.getElementById('sync');
     btnSync.addEventListener('click', suppressEvent(sync, system.id), false);
