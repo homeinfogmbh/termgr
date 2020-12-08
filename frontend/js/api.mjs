@@ -163,7 +163,7 @@ export function fit (system, fitted = true) {
         function () {
             alert('Das System wurde als ' + stateText + ' gekennzeichnet.');
         },
-        checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
+        checkSession('Das System konnte nicht als "' + stateText + '" gekennzeichnet werden.')
     );
 }
 
