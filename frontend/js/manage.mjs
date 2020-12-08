@@ -44,11 +44,39 @@ function checkLastSync (lastSync) {
 
 
 /*
+    Render the page.
+*/
+function render (system) {
+    const systemId = document.getElementById('system');
+    systemId.textContent = system.id;
+
+    const btnDeploy = document.getElementById('deploy');
+    btnDeploy.classList.remove('w3-green', 'w3-red');
+    btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
+
+    const btnFit = document.getElementById('fit');
+    btnFit.classList.remove('w3-green', 'w3-red');
+    btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
+
+    const btnSync = document.getElementById('sync');
+    btnSync.classList.remove('w3-green', 'w3-red');
+    btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
+}
+
+
+/*
+    Updates system-related data.
+*/
+function update () {
+    getSystem().then(render);
+}
+
+
+/*
     Sets up system-related data.
 */
 function setup (system) {
-    const systemId = document.getElementById('system');
-    systemId.textContent = system.id;
+    render(system)
 
     const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', suppressEvent(application, system.id, true), false);
@@ -63,16 +91,13 @@ function setup (system) {
     btnBeep.addEventListener('click', suppressEvent(beep, system.id), false);
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.classList.add(system.deployment == null ? 'w3-red' : 'w3-green');
     btnDeploy.addEventListener('click', suppressEvent(loadDeployment), false);
 
     const btnFit = document.getElementById('fit');
-    btnFit.classList.add(system.fitted ? 'w3-green' : 'w3-red');
     btnFit.addEventListener('click', suppressEvent(fit, system.id, !system.fitted), false);
-    btnFit.addEventListener('click', suppressEvent(init), false);   // Reload sytem and page.
+    btnFit.addEventListener('click', suppressEvent(update), false);   // Reload sytem and page.
 
     const btnSync = document.getElementById('sync');
-    btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
     btnSync.addEventListener('click', suppressEvent(sync, system.id), false);
 };
 
