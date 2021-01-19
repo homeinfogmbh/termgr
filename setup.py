@@ -5,8 +5,6 @@ from setuptools import setup
 setup(
     name='termgr',
     use_scm_version={
-        "root": "..",
-        "relative_to": __file__,
         "local_scheme": "node-and-timestamp"
     },
     setup_requires=['setuptools_scm'],
