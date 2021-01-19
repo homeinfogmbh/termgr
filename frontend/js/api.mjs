@@ -25,6 +25,8 @@ import { request } from 'https://javascript.homeinfo.de/his/his.mjs';
 import { clear, system } from './cache.mjs';
 
 const BASE_URL = 'https://termgr.homeinfo.de';
+const SESSION_DURATION = 90;
+const HEADERS = {'session-duration': SESSION_DURATION};
 
 
 /*
@@ -47,7 +49,7 @@ function checkSession (message) {
     Performs a HIS SSO login.
 */
 export function login (account, passwd) {
-    return session.login(account, passwd).then(
+    return session.login(account, passwd, null, HEADERS).then(
         function () {
             window.location = 'list.html';
         },
@@ -76,7 +78,7 @@ export function logout () {
     Retrieves deployments from the API.
 */
 export function getDeployments () {
-    return request.get(BASE_URL + '/list/deployments').then(
+    return request.get(BASE_URL + '/list/deployments', null, HEADERS).then(
         response => response.json,
         checkSession('Die Liste der Standorte konnte nicht abgerufen werden.')
     );
@@ -93,7 +95,7 @@ export function getSystem (id) {
     if (id == null)
         return Promise.reject('Kein System angegeben.');
 
-    return request.get(BASE_URL + '/list/systems/' + id).then(
+    return request.get(BASE_URL + '/list/systems/' + id, null, HEADERS).then(
         response => response.json,
         checkSession('Das angegebene System konnte nicht abgerufen werden.')
     );
@@ -104,7 +106,7 @@ export function getSystem (id) {
     Retrieves systems from the API.
 */
 export function getSystems () {
-    return request.get(BASE_URL + '/list/systems').then(
+    return request.get(BASE_URL + '/list/systems', null, HEADERS).then(
         response => response.json,
         checkSession('Die Liste der Systeme konnte nicht abgerufen werden.')
     );
@@ -117,7 +119,7 @@ export function getSystems () {
 export function application (system, state) {
     const stateText = state ? 'aktiviert' : 'deaktiviert';
     const json = {'system': system, 'state': state};
-    return request.post(BASE_URL + '/administer/application', json).then(
+    return request.post(BASE_URL + '/administer/application', json, null, HEADERS).then(
         function () {
             alert('Digital Signage Anwendung wurde ' + stateText + '.');
         },
@@ -144,7 +146,7 @@ export function deploy (system, deployment, exclusive = false, fitted = false) {
         'exclusive': exclusive,
         'fitted': fitted
     };
-    return request.post(BASE_URL + '/administer/deploy', json).then(
+    return request.post(BASE_URL + '/administer/deploy', json, null, HEADERS).then(
         function () {
             alert(stateTexts.join('\n'));
         },
@@ -159,7 +161,7 @@ export function deploy (system, deployment, exclusive = false, fitted = false) {
 export function fit (system, fitted = true) {
     const stateText = fitted ? 'verbaut' : 'nicht verbaut';
     const json = {'system': system, 'fitted': fitted};
-    return request.post(BASE_URL + '/administer/fit', json).then(
+    return request.post(BASE_URL + '/administer/fit', json, null, HEADERS).then(
         function () {
             alert('Das System wurde als ' + stateText + ' gekennzeichnet.');
         },
@@ -173,7 +175,7 @@ export function fit (system, fitted = true) {
 */
 export function beep (system) {
     const json = {'system': system};
-    return request.post(BASE_URL + '/administer/beep', json).then(
+    return request.post(BASE_URL + '/administer/beep', json, null, HEADERS).then(
         function () {
             alert('Das System sollte gepiept haben.');
         },
@@ -187,7 +189,7 @@ export function beep (system) {
 */
 export function reboot (system) {
     const json = {'system': system};
-    return request.post(BASE_URL + '/administer/reboot', json).then(
+    return request.post(BASE_URL + '/administer/reboot', json, null, HEADERS).then(
         function () {
             alert('Das System wurde wahrscheinlich neu gestartet.');
         },
@@ -208,7 +210,7 @@ export function reboot (system) {
 */
 export function sync (system) {
     const json = {'system': system};
-    return request.post(BASE_URL + '/administer/sync', json).then(
+    return request.post(BASE_URL + '/administer/sync', json, null, HEADERS).then(
         function () {
             alert('Das System wird demnächst synchronisiert.');
         },
