@@ -1,14 +1,31 @@
 #! /usr/bin/env python3
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='termgr',
-    version='latest',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
+    install_requires=[
+        'configlib',
+        'emaillib',
+        'flask',
+        'functoolsplus',
+        'hipster',
+        'his',
+        'hwdb',
+        'peewee',
+        'peeweeplus',
+        'setuptools',
+        'termacls',
+        'wgtools',
+        'wsgilib'
+    ],
     author='HOMEINFO - Digitale Informationssysteme GmbH',
     author_email='info@homeinfo.de',
     maintainer='Richard Neumann',
     maintainer_email='r.neumann@homeinfo.de',
     packages=['termgr', 'termgr.wsgi'],
-    scripts=['scripts/dephist'],
-    description=('Homeinfo Terminal Manager'))
+    entry_points={'console_scripts': ['dephist = termgr.dephist:main']},
+    description=('Homeinfo Terminal Manager')
+)
