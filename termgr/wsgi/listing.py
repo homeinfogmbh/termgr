@@ -21,7 +21,9 @@ def _get_deployments() -> Iterable[Deployment]:
 
     condition = get_deployment_admin_condition(ACCOUNT)
     lpt_address = Address.alias()
-    select = Deployment.select().join(Customer, join_type=JOIN.LEFT_OUTER)
+    select = Deployment.select(
+        Deployment, Customer, Company, Address, lpt_address)
+    select = select.join(Customer, join_type=JOIN.LEFT_OUTER)
     select = select.join(Company, join_type=JOIN.LEFT_OUTER).join_from(
         Deployment, Address, join_type=JOIN.LEFT_OUTER,
         on=Deployment.address == Address.id).join_from(
@@ -36,6 +38,13 @@ def _get_systems() -> Iterable[System]:
 
     condition = get_system_admin_condition(ACCOUNT)
     lpt_address = Address.alias()
+    dataset = Deployment.alias()
+    dataset_address = Address.alias()
+    dataset_lpt_address = Address.alias()
+    select = System.select(
+        System, Deployment, Address, Customer, Company, lpt_address, dataset,
+        dataset_address, dataset_lpt_address
+    )
     select = System.select().join(Deployment, join_type=JOIN.LEFT_OUTER)
     select = select.join(Customer, join_type=JOIN.LEFT_OUTER)
     select = select.join(Company, join_type=JOIN.LEFT_OUTER)
@@ -45,9 +54,6 @@ def _get_systems() -> Iterable[System]:
         Deployment, lpt_address, join_type=JOIN.LEFT_OUTER,
         on=Deployment.lpt_address == lpt_address.id
     )
-    dataset = Deployment.alias()
-    dataset_address = Address.alias()
-    dataset_lpt_address = Address.alias()
     select = select.join_from(
         System, dataset, join_type=JOIN.LEFT_OUTER,
         on=System.dataset == dataset.id).join_from(
