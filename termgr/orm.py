@@ -57,7 +57,7 @@ class DeploymentHistory(TermgrModel):
     def __str__(self):
         """Returns a string for the terminal."""
         return '\t'.join(
-            (self.timstamp.isoformat(), self.account.name,
+            (self.timestamp.isoformat(), self.account.name,
              str(self.system_id), str(self.old_deployment_id),
              str(self.new_deployment_id))
         )
