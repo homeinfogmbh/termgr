@@ -29,5 +29,5 @@ setup(
     maintainer_email='r.neumann@homeinfo.de',
     packages=['termgr', 'termgr.wsgi'],
     entry_points={'console_scripts': ['dephist = termgr.dephist:main']},
-    description=('Homeinfo Terminal Manager')
+    description='Homeinfo Terminal Manager'
 )
