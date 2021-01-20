@@ -23,13 +23,19 @@ def _get_deployments() -> Iterable[Deployment]:
     lpt_address = Address.alias()
     select = Deployment.select(
         Deployment, Customer, Company, Address, lpt_address)
-    select = select.join(Customer, join_type=JOIN.LEFT_OUTER)
-    select = select.join(Company, join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        Deployment, Address, on=Deployment.address == Address.id)
+        Deployment, Customer, on=Deployment.customer == Customer.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        Deployment, lpt_address, join_type=JOIN.LEFT_OUTER,
-        on=Deployment.lpt_address == lpt_address.id)
+        Customer, Company, on=Customer.company == Company.id,
+        join_type=JOIN.LEFT_OUTER)
+    select = select.join_from(
+        Deployment, Address, on=Deployment.address == Address.id,
+        join_type=JOIN.LEFT_OUTER)
+    select = select.join_from(
+        Deployment, lpt_address,
+        on=Deployment.lpt_address == lpt_address.id,
+        join_type=JOIN.LEFT_OUTER)
     return select.where(condition)
 
 
@@ -46,20 +52,28 @@ def _get_systems() -> Iterable[System]:
         dataset_address, dataset_lpt_address
     )
     select = System.select().join(Deployment, join_type=JOIN.LEFT_OUTER)
-    select = select.join_from(Deployment, Customer)
-    select = select.join_from(Customer, Company)
     select = select.join_from(
-        Deployment, Address, on=Deployment.address == Address.id)
+        Deployment, Customer, on=Deployment.customer == Customer.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        Deployment, lpt_address, on=Deployment.lpt_address == lpt_address.id)
+        Customer, Company, on=Customer.company == Company.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        System, dataset, join_type=JOIN.LEFT_OUTER,
-        on=System.dataset == dataset.id)
+        Deployment, Address, on=Deployment.address == Address.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        dataset, dataset_address, on=dataset.address == dataset_address.id)
+        Deployment, lpt_address, on=Deployment.lpt_address == lpt_address.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        dataset, dataset_lpt_address, join_type=JOIN.LEFT_OUTER,
-        on=dataset.lpt_address == dataset_lpt_address.id)
+        System, dataset, on=System.dataset == dataset.id,
+        join_type=JOIN.LEFT_OUTER)
+    select = select.join_from(
+        dataset, dataset_address, on=dataset.address == dataset_address.id,
+        join_type=JOIN.LEFT_OUTER)
+    select = select.join_from(
+        dataset, dataset_lpt_address,
+        on=dataset.lpt_address == dataset_lpt_address.id,
+        join_type=JOIN.LEFT_OUTER)
     return select.where(condition)
 
 
