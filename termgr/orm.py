@@ -58,8 +58,8 @@ class DeploymentHistory(TermgrModel):
         """Returns a string for the terminal."""
         return '\t'.join(
             (self.timestamp.isoformat(), self.account.name,
-             str(self.system_id), str(self.old_deployment_id),
-             str(self.new_deployment_id))
+             str(self.system_id), str(self.old_deployment),
+             str(self.new_deployment))
         )
 
     @classmethod
@@ -77,7 +77,8 @@ class DeploymentHistory(TermgrModel):
         today = date.today()
         tomorrow = today + timedelta(days=1)
         condition = (cls.timestamp >= today) & (cls.timestamp < tomorrow)
-        return cls.select().where(condition)
+        select = cls.select(cls, Account).join(Account)
+        return select.where(condition)
 
     @classmethod
     def html_table_header(cls) -> Element:
