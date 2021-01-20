@@ -43,15 +43,16 @@ class DeploymentHistory(TermgrModel):
 
     account = ForeignKeyField(
         Account, column_name='account', on_update='CASCADE',
-        on_delete='CASCADE')
+        on_delete='CASCADE', lazy_load=False)
     system = ForeignKeyField(
-        System, column_name='system', on_update='CASCADE', on_delete='CASCADE')
+        System, column_name='system', on_update='CASCADE', on_delete='CASCADE',
+        lazy_load=False)
     old_deployment = ForeignKeyField(
         Deployment, null=True, column_name='old_deployment',
-        on_update='CASCADE', on_delete='SET NULL')
+        on_update='CASCADE', on_delete='SET NULL', lazy_load=False)
     new_deployment = ForeignKeyField(
         Deployment, null=True, column_name='new_deployment',
-        on_update='CASCADE', on_delete='CASCADE')
+        on_update='CASCADE', on_delete='CASCADE', lazy_load=False)
     timestamp = DateTimeField(default=datetime.now)
 
     def __str__(self):
