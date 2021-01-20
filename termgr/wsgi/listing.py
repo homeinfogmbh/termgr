@@ -54,10 +54,15 @@ def _get_systems() -> Iterable[System]:
     select = select.join_from(
         System, Deployment, on=System.deployment == Deployment.id,
         join_type=JOIN.LEFT_OUTER)
-    select = select.join_from(Deployment, Customer)
-    select = select.join_from(Customer, Company)
     select = select.join_from(
-        Deployment, Address, on=Deployment.address == Address.id)
+        Deployment, Customer, on=Deployment.customer == Customer.id,
+        join_type=JOIN.LEFT_OUTER)
+    select = select.join_from(
+        Customer, Company, on=Customer.company == Company.id,
+        join_type=JOIN.LEFT_OUTER)
+    select = select.join_from(
+        Deployment, Address, on=Deployment.address == Address.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
         Deployment, lpt_address, on=Deployment.lpt_address == lpt_address.id,
         join_type=JOIN.LEFT_OUTER)
@@ -65,7 +70,8 @@ def _get_systems() -> Iterable[System]:
         System, dataset, on=System.dataset == dataset.id,
         join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
-        dataset, dataset_address, on=dataset.address == dataset_address.id)
+        dataset, dataset_address, on=dataset.address == dataset_address.id,
+        join_type=JOIN.LEFT_OUTER)
     select = select.join_from(
         dataset, dataset_lpt_address,
         on=dataset.lpt_address == dataset_lpt_address.id,
