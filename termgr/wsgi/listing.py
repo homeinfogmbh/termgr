@@ -1,14 +1,12 @@
 """List systems."""
 
-from typing import Iterable
-
 from his import ACCOUNT, authenticated, authorized
 from hwdb import Deployment, System
 from mdb import Address, Company, Customer
 from wsgilib import JSON
 
 from flask import Response
-from peewee import JOIN
+from peewee import JOIN, ModelSelect
 
 from termacls import get_deployment_admin_condition, get_system_admin_condition
 
@@ -16,7 +14,7 @@ from termacls import get_deployment_admin_condition, get_system_admin_condition
 __all__ = ['ROUTES']
 
 
-def _get_deployments() -> Iterable[Deployment]:
+def _get_deployments() -> ModelSelect:
     """Returns the respective deployments."""
 
     condition = get_deployment_admin_condition(ACCOUNT)
@@ -39,7 +37,7 @@ def _get_deployments() -> Iterable[Deployment]:
     return select.where(condition)
 
 
-def _get_systems() -> Iterable[System]:
+def _get_systems() -> ModelSelect:
     """Returns the respective systems."""
 
     condition = get_system_admin_condition(ACCOUNT)

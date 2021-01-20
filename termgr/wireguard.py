@@ -4,6 +4,8 @@ from ipaddress import ip_network
 from tempfile import NamedTemporaryFile
 from typing import Iterable, NamedTuple
 
+from peewee import ModelSelect
+
 from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System, WireGuard
 from wgtools import clear_peers, set as wg_set
 
@@ -39,7 +41,7 @@ class Route(NamedTuple):
         }
 
 
-def get_systems() -> Iterable[System]:
+def get_systems() -> ModelSelect:
     """Yields WireGuard enabled systems."""
 
     condition = ~(WireGuard.pubkey >> None)

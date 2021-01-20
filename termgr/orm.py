@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from xml.etree.ElementTree import Element, SubElement
 from typing import Iterable
 
-from peewee import DateTimeField, ForeignKeyField
+from peewee import DateTimeField, ForeignKeyField, ModelSelect
 
 from his import Account
 from hwdb import Deployment, System
@@ -72,7 +72,7 @@ class DeploymentHistory(TermgrModel):
         return record
 
     @classmethod
-    def of_today(cls) -> Iterable[DeploymentHistory]:
+    def of_today(cls) -> ModelSelect:
         """Yields deployments that were made today."""
         today = date.today()
         tomorrow = today + timedelta(days=1)
