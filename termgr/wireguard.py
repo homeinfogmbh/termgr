@@ -42,7 +42,9 @@ class Route(NamedTuple):
 def get_systems() -> Iterable[System]:
     """Yields WireGuard enabled systems."""
 
-    return System.select().join(WireGuard).where(~(WireGuard.pubkey >> None))
+    condition = ~(WireGuard.pubkey >> None)
+    select = System.select(System, WireGuard).join(WireGuard)
+    return select.where(condition)
 
 
 def get_configured_routes() -> Iterable[Route]:
