@@ -51,7 +51,6 @@ def _get_systems() -> Iterable[System]:
         System, Deployment, Address, Customer, Company, lpt_address, dataset,
         dataset_address, dataset_lpt_address
     )
-    select = System.select()
     select = select.join_from(
         System, Deployment, on=System.deployment == Deployment.id,
         join_type=JOIN.LEFT_OUTER)
