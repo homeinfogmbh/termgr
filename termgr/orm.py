@@ -58,8 +58,8 @@ class DeploymentHistory(TermgrModel):
         """Returns a string for the terminal."""
         return '\t'.join(
             (self.timestamp.isoformat(), self.account.name,
-             str(self.system_id), str(self.old_deployment.id),
-             str(self.new_deployment.id))
+             str(self.system_id), str(self.old_deployment_id),
+             str(self.new_deployment_id))
         )
 
     @classmethod
