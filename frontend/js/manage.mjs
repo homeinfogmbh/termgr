@@ -67,16 +67,16 @@ function setup (system) {
     systemId.textContent = system.id;
 
     const btnEnable = document.getElementById('enable');
-    btnEnable.addEventListener('click', suppressEvent(application, system.id, true), false);
+    btnEnable.addEventListener('click', suppressEvent(reloadAfterwards, application, system.id, true), false);
 
     const btnDisable = document.getElementById('disable');
-    btnDisable.addEventListener('click', suppressEvent(application, system.id, false), false);
+    btnDisable.addEventListener('click', suppressEvent(reloadAfterwards, application, system.id, false), false);
 
     const btnReboot = document.getElementById('reboot');
-    btnReboot.addEventListener('click', suppressEvent(reboot, system.id), false);
+    btnReboot.addEventListener('click', suppressEvent(reloadAfterwards, reboot, system.id), false);
 
     const btnBeep = document.getElementById('beep');
-    btnBeep.addEventListener('click', suppressEvent(beep, system.id), false);
+    btnBeep.addEventListener('click', suppressEvent(reloadAfterwards, beep, system.id), false);
 
     const btnDeploy = document.getElementById('deploy');
     btnDeploy.classList.remove('w3-green', 'w3-red');
@@ -91,7 +91,7 @@ function setup (system) {
     const btnSync = document.getElementById('sync');
     btnSync.classList.remove('w3-green', 'w3-red');
     btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
-    btnSync.addEventListener('click', suppressEvent(sync, system.id), false);
+    btnSync.addEventListener('click', suppressEvent(reloadAfterwards, sync, system.id), false);
 };
 
 
