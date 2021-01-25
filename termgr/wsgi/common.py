@@ -25,7 +25,8 @@ def _get_deployment() -> Deployment:
         raise Error('No deployment ID specified.')
 
     try:
-        return Deployment[ident]
+        return Deployment.select(cascade=True).where(
+            Deployment.id == ident).get()
     except Deployment.DoesNotExist:
         raise Error('No such deployment.', status=404) from None
 
@@ -39,7 +40,7 @@ def _get_system() -> System:
         raise Error('No system specified.')
 
     try:
-        return System[ident]
+        return System.select(cascade=True).where(System.id == ident).get()
     except System.DoesNotExist:
         raise Error('No such system.', status=404) from None
 
