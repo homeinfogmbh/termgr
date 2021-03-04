@@ -5,9 +5,10 @@ from datetime import date, datetime, timedelta
 from xml.etree.ElementTree import Element, SubElement
 from typing import Iterable
 
-from peewee import DateTimeField, ForeignKeyField, ModelSelect
+from peewee import JOIN, DateTimeField, ForeignKeyField, ModelSelect
 
 from his import Account
+from mdb import Address, Company, Customer
 from hwdb import Deployment, System
 from peeweeplus import MySQLDatabase, JSONModel
 
@@ -73,13 +74,43 @@ class DeploymentHistory(TermgrModel):
         return record
 
     @classmethod
+    def select(cls, *args, cascade: bool = False, **kwargs) -> ModelSelect:
+        """Selects deployment histories."""
+        if not cascade:
+            return super().select(*args, **kwargs)
+
+        new_deployment = Deployment.alias()
+        new_deployment_customer = Customer.alias()
+        new_deployment_company = Company.alias()
+        new_deployment_address = Address.alias()
+        args = {
+            cls, new_deployment, new_deployment_address,
+            new_deployment_customer, new_deployment_company, *args
+        }
+        return super().select(*args, **kwargs).join(Account).join_from(
+            # Old deployment.
+            cls, Deployment, on=cls.old_deployment == Deployment.id,
+            join_type=JOIN.LEFT_OUTER).join(
+            Customer, join_type=JOIN.LEFT_OUTER).join(
+            Company, join_type=JOIN.LEFT_OUTER).join_from(
+            Deployment, Address, on=Deployment.address == Address.id,
+            join_type=JOIN.LEFT_OUTER).join_from(
+            # New deployment.
+            cls, new_deployment, on=cls.new_deployment == new_deployment.id,
+            join_type=JOIN.LEFT_OUTER).join(
+            new_deployment_customer, join_type=JOIN.LEFT_OUTER).join(
+            new_deployment_company, join_type=JOIN.LEFT_OUTER).join_from(
+            new_deployment, new_deployment_address,
+            on=new_deployment.address == new_deployment_address.id,
+            join_type=JOIN.LEFT_OUTER)
+
+    @classmethod
     def of_today(cls) -> ModelSelect:
         """Yields deployments that were made today."""
         today = date.today()
         tomorrow = today + timedelta(days=1)
         condition = (cls.timestamp >= today) & (cls.timestamp < tomorrow)
-        select = cls.select(cls, Account).join(Account)
-        return select.where(condition)
+        return cls.select(cascade=True).where(condition)
 
     @classmethod
     def html_table_header(cls) -> Element:
