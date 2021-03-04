@@ -130,8 +130,17 @@ class DeploymentHistory(TermgrModel):
         """Yields the column contents for the HTML table representation."""
         yield self.account.full_name or self.account.name
         yield str(self.system.id)
-        yield self.old_deployment.to_html()
-        yield self.new_deployment.to_html()
+
+        if self.old_deployment is None:
+            yield 'N/A'
+        else:
+            yield self.old_deployment.to_html()
+
+        if self.new_deployment is None:
+            yield '-'
+        else:
+            yield self.new_deployment.to_html()
+
         yield self.timestamp.isoformat()    # pylint: disable=E1101
 
     def to_html_table_row(self) -> Element:
