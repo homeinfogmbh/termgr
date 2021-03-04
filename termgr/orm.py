@@ -84,11 +84,12 @@ class DeploymentHistory(TermgrModel):
         new_deployment_company = Company.alias()
         new_deployment_address = Address.alias()
         args = {
-            cls, Account, Deployment, Customer, Company, Address,
+            cls, Account, System, Deployment, Customer, Company, Address,
             new_deployment, new_deployment_address, new_deployment_customer,
             new_deployment_company, *args
         }
         return super().select(*args, **kwargs).join(Account).join_from(
+            cls, System).join_from(
             # Old deployment.
             cls, Deployment, on=cls.old_deployment == Deployment.id,
             join_type=JOIN.LEFT_OUTER).join(
