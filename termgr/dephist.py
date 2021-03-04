@@ -4,7 +4,6 @@ from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
 
 from functoolsplus import exiting
-from his import Account
 from his.pseudotypes import account
 from hwdb.pseudotypes import deployment, system
 
@@ -60,10 +59,8 @@ def main() -> int:
     else:
         order = DeploymentHistory.timestamp
 
-    select = DeploymentHistory.select(DeploymentHistory, Account)
-    select = select.join(Account)
-
-    for record in select.where(condition).order_by(order):
+    for record in DeploymentHistory.select(cascade=True).where(
+            condition).order_by(order):
         print(record, flush=True)
 
     return 0
