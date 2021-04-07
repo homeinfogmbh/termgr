@@ -7,7 +7,6 @@ from flask import Response, request
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, Deployment, System
-from wsgilib import Binary
 
 from termgr.notify import notify
 from termgr.orm import DeploymentHistory
@@ -108,29 +107,11 @@ def beep(system: System) -> Response:
     return (response.text, response.status_code)
 
 
-@authenticated
-@authorized('termgr')
-@admin
-def screenshot(system: System) -> Response:
-    """Identifies the respective system by beep test."""
-
-    try:
-        response = system.screenshot()
-    except SystemOffline:
-        return ('System is offline.', 400)
-
-    if response.status_code == 200:
-        return Binary(response.content)
-
-    return ('Could not get screenshot.', 500)
-
-
 ROUTES = (
     ('POST', '/administer/deploy', deploy_),
     ('POST', '/administer/fit', fit),
     ('POST', '/administer/application', toggle_application),
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
-    ('POST', '/administer/beep', beep),
-    ('GET', '/screenshot/<int:system>', screenshot)
+    ('POST', '/administer/beep', beep)
 )
