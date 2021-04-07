@@ -24,7 +24,7 @@ import * as session from 'https://javascript.homeinfo.de/his/session.mjs';
 import { request } from 'https://javascript.homeinfo.de/his/his.mjs';
 import { clear, system } from './cache.mjs';
 
-const BASE_URL = 'https://termgr.homeinfo.de';
+export const BASE_URL = 'https://termgr.homeinfo.de';
 const SESSION_DURATION = 90;
 const HEADERS = {'session-duration': SESSION_DURATION};
 

@@ -21,7 +21,7 @@
 'use strict';
 
 import { suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
-import { application, beep, fit, reboot, sync, getSystem } from './api.mjs';
+import { BASE_URL, application, beep, fit, reboot, sync, getSystem } from './api.mjs';
 
 
 /*
@@ -60,6 +60,14 @@ function reloadAfterwards (func, ...args) {
 
 
 /*
+    Opens a screenshot in a new tab.
+*/
+function screenshot (system) {
+    window.open(BASE_URL + '/screenshot/' + system, '_blank')
+}
+
+
+/*
     Sets up system-related data.
 */
 function setup (system) {
@@ -92,6 +100,9 @@ function setup (system) {
     btnSync.classList.remove('w3-green', 'w3-red');
     btnSync.classList.add(checkLastSync(system.lastSync) ? 'w3-green' : 'w3-red');
     btnSync.addEventListener('click', suppressEvent(reloadAfterwards, sync, system.id), false);
+
+    const btnScreenshot = document.getElementById('screenshot');
+    btnScreenshot.addEventListener('click', suppressEvent(screenshot, system.id), false);
 };
 
 
