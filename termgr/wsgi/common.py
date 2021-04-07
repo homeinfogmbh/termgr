@@ -1,7 +1,7 @@
 """Common WSGI functions."""
 
 from functools import wraps
-from typing import Callable
+from typing import Callable, Optional
 
 from flask import request
 
@@ -31,16 +31,17 @@ def _get_deployment() -> Deployment:
         raise Error('No such deployment.', status=404) from None
 
 
-def _get_system() -> System:
+def _get_system(system: Optional[int] = None) -> System:
     """Returns the respective system."""
 
-    ident = request.json.get('system')
+    if system is None:
+        system = request.json.get('system')
 
-    if ident is None:
+    if system is None:
         raise Error('No system specified.')
 
     try:
-        return System.select(cascade=True).where(System.id == ident).get()
+        return System.select(cascade=True).where(System.id == system).get()
     except System.DoesNotExist:
         raise Error('No such system.', status=404) from None
 
@@ -49,8 +50,8 @@ def admin(function: Callable) -> Callable:
     """Wraps the actual with admin permission checks."""
 
     @wraps(function)
-    def wrapper(*args, **kwargs):
-        system = _get_system()
+    def wrapper(*args, system: Optional[int] = None, **kwargs):
+        system = _get_system(system=system)
 
         if can_administer_system(ACCOUNT, system):
             return function(system, *args, **kwargs)
@@ -64,8 +65,8 @@ def deploy(function: Callable) -> Callable:
     """Wraps the actual deployment permission checks."""
 
     @wraps(function)
-    def wrapper(*args, **kwargs):
-        system = _get_system()
+    def wrapper(*args, system: Optional[int] = None, **kwargs):
+        system = _get_system(system=system)
         deployment = _get_deployment()
 
         if can_deploy(ACCOUNT, system, deployment):
