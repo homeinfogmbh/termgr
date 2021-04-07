@@ -132,5 +132,5 @@ ROUTES = (
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
     ('POST', '/administer/beep', beep),
-    ('POST', '/administer/screenshot', screenshot)
+    ('GET', '/administer/screenshot/<int:system>', screenshot)
 )
