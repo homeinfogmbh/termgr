@@ -20,7 +20,7 @@ __all__ = ['ROUTES']
 @authenticated
 @authorized('termgr')
 @deploy
-def deploy_system(system: System, new_deployment: Deployment) -> Response:
+def deploy_(system: System, new_deployment: Deployment) -> Response:
     """Deploys the respective system."""
 
     exclusive = request.json.get('exclusive', False)
@@ -37,7 +37,7 @@ def deploy_system(system: System, new_deployment: Deployment) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def fit_system(system: System) -> Response:
+def fit(system: System) -> Response:
     """Marks a system as fitted."""
 
     system.fitted = fitted = request.json.get('fitted', False)
@@ -70,7 +70,7 @@ def toggle_application(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def reboot_system(system: System) -> Response:
+def reboot(system: System) -> Response:
     """Reboots the respective system."""
 
     try:
@@ -87,7 +87,7 @@ def reboot_system(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def sync_system(system: System) -> Response:
+def sync(system: System) -> Response:
     """Synchronizes the respective system."""
 
     Queue.enqueue(system)
@@ -97,7 +97,7 @@ def sync_system(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def beep_system(system: System) -> Response:
+def beep(system: System) -> Response:
     """Identifies the respective system by beep test."""
 
     try:
@@ -126,11 +126,11 @@ def screenshot(system: System) -> Response:
 
 
 ROUTES = (
-    ('POST', '/administer/deploy', deploy_system),
-    ('POST', '/administer/fit', fit_system),
+    ('POST', '/administer/deploy', deploy_),
+    ('POST', '/administer/fit', fit),
     ('POST', '/administer/application', toggle_application),
-    ('POST', '/administer/reboot', reboot_system),
-    ('POST', '/administer/sync', sync_system),
-    ('POST', '/administer/beep', beep_system),
+    ('POST', '/administer/reboot', reboot),
+    ('POST', '/administer/sync', sync),
+    ('POST', '/administer/beep', beep),
     ('POST', '/administer/screenshot', screenshot)
 )
