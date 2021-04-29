@@ -1,5 +1,5 @@
 /*
-    list.js - Terminal Manager systems listing.
+    list.mjs - Terminal Manager systems listing.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
