@@ -1,5 +1,5 @@
 /*
-    login.js - Terminal Manager login handling.
+    login.mjs - Terminal Manager login handling.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
