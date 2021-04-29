@@ -1,5 +1,5 @@
 /*
-    filter.js - Terminal Manager systems filtering.
+    filter.mjs - Terminal Manager systems filtering.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
