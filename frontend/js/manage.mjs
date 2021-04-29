@@ -1,5 +1,5 @@
 /*
-    manage.js - Terminal Manager systems management.
+    manage.mjs - Terminal Manager systems management.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
