@@ -1,5 +1,5 @@
 /*
-    api.js - Terminal Manager API library.
+    api.mjs - Terminal Manager API library.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
