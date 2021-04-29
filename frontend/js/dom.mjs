@@ -1,5 +1,5 @@
 /*
-    dom.js - Terminal Manager DOM library.
+    dom.mjs - Terminal Manager DOM library.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
