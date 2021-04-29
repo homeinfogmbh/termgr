@@ -1,5 +1,5 @@
 /*
-    deploy.js - Terminal Manager systems deployment.
+    deploy.mjs - Terminal Manager systems deployment.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
