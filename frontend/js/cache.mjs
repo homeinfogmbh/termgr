@@ -1,5 +1,5 @@
 /*
-    cache.js - Terminal Manager local storage caching.
+    cache.mjs - Terminal Manager local storage caching.
 
     (C) 2019-2020 HOMEINFO - Digitale Informationssysteme GmbH
 
