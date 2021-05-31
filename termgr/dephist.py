@@ -4,8 +4,8 @@ from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
 
 from functoolsplus import exiting
-from his.pseudotypes import account
-from hwdb.pseudotypes import deployment, system
+from his import account
+from hwdb import deployment, system
 
 from termgr.config import LOG_FORMAT
 from termgr.orm import DeploymentHistory
