@@ -39,7 +39,7 @@ class TermgrModel(JSONModel):   # pylint: disable=R0903
 class DeploymentHistory(TermgrModel):
     """Deployment actions of technitians."""
 
-    FIELDS = ['Timestamp     ', 'Account', 'System', 'Old', 'New']
+    FIELDS = ['Timestamp           ', 'Account', 'System', 'Old', 'New']
 
     class Meta:     # pylint: disable=C0115,R0903
         table_name = 'deployment_history'
