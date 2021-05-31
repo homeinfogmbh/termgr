@@ -77,6 +77,7 @@ def finalize(system: System) -> Response:
 
     system.configured = datetime.now()  # Mark system as configured.
     system.wireguard.pubkey = request.json.get('wg_pubkey')
+    print('Pubkey:', system.wireguard.pubkey, flush=True)
     system.wireguard.save()
     system.save()
     update_peers()
