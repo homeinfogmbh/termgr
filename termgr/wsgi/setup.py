@@ -76,9 +76,11 @@ def finalize(system: System) -> Response:
         system.model = request.json['model']
 
     system.configured = datetime.now()  # Mark system as configured.
-    system.wireguard.pubkey = request.json.get('wg_pubkey')
-    print('Pubkey:', system.wireguard.pubkey, flush=True)
-    system.wireguard.save()
+    pubkey = request.json.get('wg_pubkey')
+
+    if pubkey is not None:
+        system.wireguard.pubkey = pubkey
+
     system.save()
     update_peers()
     return 'System finalized.'
