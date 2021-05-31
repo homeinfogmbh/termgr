@@ -70,6 +70,7 @@ def get_wireguard_config(system: System) -> dict:
 
     return {
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
+        'server': str(WIREGUARD_SERVER),
         'peers': [
             {
                 'pubkey': CONFIG.get('WireGuard', 'pubkey'),
