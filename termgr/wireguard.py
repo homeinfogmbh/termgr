@@ -70,10 +70,10 @@ def get_wireguard_config(system: System) -> dict:
 
     return {
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
-        'server_pubkey': CONFIG['WireGuard']['pubkey'],
-        'psk': CONFIG['WireGuard'].get('psk'),
+        'server_pubkey': CONFIG.get('WireGuard', 'pubkey'),
+        'psk': CONFIG.get('WireGuard', 'psk'),
         'pubkey': system.wireguard.pubkey,
-        'endpoint': CONFIG['WireGuard']['endpoint'],
+        'endpoint': CONFIG.get('WireGuard', 'endpoint'),
         'routes': [route.to_json() for route in get_client_routes()],
         'persistent_keepalive': CONFIG.getint(
             'WireGuard', 'persistent_keepalive')
@@ -94,13 +94,13 @@ def _add_peers(psk: str = None):
             peers[system.wireguard.pubkey]['preshared-key'] = psk
 
     if peers:
-        wg_set(CONFIG['WireGuard']['devname'], peers=peers, _wg=WG)
+        wg_set(CONFIG.get('WireGuard', 'devname'), peers=peers, _wg=WG)
 
 
 def add_peers():
     """Adds all terminal network peers."""
 
-    psk = CONFIG['WireGuard'].get('psk')
+    psk = CONFIG.get('WireGuard', 'psk')
 
     if psk:
         with NamedTemporaryFile('w+') as tmp:
@@ -114,5 +114,5 @@ def add_peers():
 def update_peers():
     """Adds a peer to the terminals network."""
 
-    clear_peers(CONFIG['WireGuard']['devname'], _wg=WG)
+    clear_peers(CONFIG.get('WireGuard', 'devname'), _wg=WG)
     add_peers()
