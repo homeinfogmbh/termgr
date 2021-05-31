@@ -110,7 +110,7 @@ def get_peers(psk: Optional[str] = None) -> dict:
     peers = {}
 
     for system in get_systems():
-        peers[system.wireguard.pubkey] = system_to_peer(system, psk=psk)
+        peers[system.pubkey] = system_to_peer(system, psk=psk)
 
     return peers
 
