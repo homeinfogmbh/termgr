@@ -6,7 +6,7 @@ from typing import Iterator, NamedTuple, Optional
 
 from peewee import ModelSelect
 
-from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System, WireGuard
+from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System
 from wgtools import clear_peers, set as wg_set
 
 from termgr.config import CONFIG
@@ -44,9 +44,9 @@ class Route(NamedTuple):
 def get_systems() -> ModelSelect:
     """Yields WireGuard enabled systems."""
 
-    condition = ~(WireGuard.pubkey >> None)
-    select = System.select(System, WireGuard).join(WireGuard)
-    return select.where(condition)
+    condition = ~(System.pubkey >> None)
+    condition &= ~(System.ipv6address >> None)
+    return System.select(cascade=True).where(condition)
 
 
 def get_configured_routes() -> Iterator[Route]:
