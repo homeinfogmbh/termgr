@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
+from sys import stdout
 
 from functoolsplus import exiting
 from his import account
@@ -58,6 +59,10 @@ def main() -> int:
         order = DeploymentHistory.timestamp.desc()
     else:
         order = DeploymentHistory.timestamp
+
+    if stdout.isatty():
+        print('\t'.join(f'\033[1m{field}\033[0m'
+              for field in DeploymentHistory.FIELDS))
 
     for record in DeploymentHistory.select(cascade=True).where(
             condition).order_by(order):
