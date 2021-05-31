@@ -70,10 +70,9 @@ def get_wireguard_config(system: System) -> dict:
 
     return {
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
-        'server_pubkey': CONFIG.get('WireGuard', 'pubkey'),
         'peers': [
             {
-                'pubkey': system.wireguard.pubkey,
+                'pubkey': CONFIG.get('WireGuard', 'pubkey'),
                 'psk': CONFIG.get('WireGuard', 'psk'),
                 'endpoint': CONFIG.get('WireGuard', 'endpoint'),
                 'routes': [route.to_json() for route in get_client_routes()],
