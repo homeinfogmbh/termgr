@@ -71,12 +71,16 @@ def get_wireguard_config(system: System) -> dict:
     return {
         'ipaddress': str(system.wireguard.ipv4address) + '/32',
         'server_pubkey': CONFIG.get('WireGuard', 'pubkey'),
-        'psk': CONFIG.get('WireGuard', 'psk'),
-        'pubkey': system.wireguard.pubkey,
-        'endpoint': CONFIG.get('WireGuard', 'endpoint'),
-        'routes': [route.to_json() for route in get_client_routes()],
-        'persistent_keepalive': CONFIG.getint(
-            'WireGuard', 'persistent_keepalive')
+        'peers': [
+            {
+                'pubkey': system.wireguard.pubkey,
+                'psk': CONFIG.get('WireGuard', 'psk'),
+                'endpoint': CONFIG.get('WireGuard', 'endpoint'),
+                'routes': [route.to_json() for route in get_client_routes()],
+                'persistent_keepalive': CONFIG.getint(
+                    'WireGuard', 'persistent_keepalive')
+            }
+        ]
     }
 
 
