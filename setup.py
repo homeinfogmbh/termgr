@@ -28,6 +28,9 @@ setup(
     maintainer='Richard Neumann',
     maintainer_email='r.neumann@homeinfo.de',
     packages=['termgr', 'termgr.wsgi'],
-    entry_points={'console_scripts': ['dephist = termgr.dephist:main']},
+    entry_points={'console_scripts': [
+        'dephist = termgr.dephist:main',
+        'reload-terminals = termgr.wireguard:update_peers'
+    ]},
     description='Homeinfo Terminal Manager'
 )
