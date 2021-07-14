@@ -88,7 +88,7 @@ export function init () {
     btnLogout.addEventListener('click', suppressEvent(logout), false);
 
     const btnIdmap = document.getElementById('idmap');
-    btnLogout.addEventListener('click', suppressEvent(idmap), false);
+    btnIdmap.addEventListener('click', suppressEvent(idmap), false);
 
     const radioButtons = [
         document.getElementById('sortAsc'),
