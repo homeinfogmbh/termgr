@@ -45,10 +45,10 @@ def idmap() -> Response:
     if cid is None:
         return JSONMessage('No CID specified.', status=400)
 
-    key = f'{tid.strip()}.{cid.strip()}'
+    condition = OpenVPN.key == f'{tid.strip()}.{cid.strip()}'
 
     try:
-        system = System.select().join(OpenVPN).where(OpenVPN.key == key).get()
+        system = System.select(cascade=True).where(condition).get()
     except System.DoesNotExist:
         return JSONMessage('No such system.', status=404)
 
