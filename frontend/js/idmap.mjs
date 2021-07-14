@@ -38,8 +38,10 @@ function list () {
 function map () {
     const tid = document.getElementById('tid').value;
     const cid = document.getElementById('cid').value;
+    const systemId = document.getElementById('systemId');
+    systemId.value = '';
     return api.idmap(tid, cid).then(function (json) {
-        document.getElementById('systemId').value = json.system;
+        systemId.value = json.system;
     });
 }
 
