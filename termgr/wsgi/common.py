@@ -9,8 +9,7 @@ from his import ACCOUNT
 from hwdb import Deployment, System
 from wsgilib import Error
 
-from termacls import can_administer_system
-from termacls import can_deploy
+from termacls import can_administer_system, can_deploy
 
 
 __all__ = ['admin', 'deploy']

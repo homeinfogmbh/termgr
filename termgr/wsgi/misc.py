@@ -2,8 +2,9 @@
 
 from flask import Response, request
 
-from his import authenticated, authorized, require_json
+from his import ACCOUNT, authenticated, authorized, require_json
 from hwdb import SystemOffline, OpenVPN, System
+from termacls import can_administer_system
 from wsgilib import Binary, JSON, JSONMessage
 
 from termgr.wsgi.common import admin
@@ -52,7 +53,10 @@ def idmap() -> Response:
     except System.DoesNotExist:
         return JSONMessage('No such system.', status=404)
 
-    return JSON({'system': system.id})
+    if can_administer_system(ACCOUNT, system):
+        return JSON({'system': system.id})
+
+    return JSONMessage('No such system.', status=404)
 
 
 ROUTES = [
