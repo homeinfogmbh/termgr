@@ -1,10 +1,10 @@
 """Miscellaneous endpoints."""
 
-from flask import Response
+from flask import Response, request
 
-from his import authenticated, authorized
-from hwdb import SystemOffline, System
-from wsgilib import Binary
+from his import authenticated, authorized, require_json
+from hwdb import SystemOffline, OpenVPN, System
+from wsgilib import Binary, JSON
 
 from termgr.wsgi.common import admin
 
@@ -29,4 +29,33 @@ def screenshot(system: System) -> Response:
     return ('Could not get screenshot.', 500)
 
 
-ROUTES = [('GET', '/screenshot/<int:system>', screenshot)]
+@authenticated
+@authorized('termgr')
+@require_json(dict)
+def idmap() -> Response:
+    """Maps old to new IDs."""
+
+    tid = request.json.get('tid')
+
+    if tid is None:
+        return ('No TID specified.', 400)
+
+    cid = request.json.get('cid')
+
+    if cid is None:
+        return ('No CID specified.', 400)
+
+    key = f'{tid.strip()}.{cid.strip()}'
+
+    try:
+        system = System.select().join(OpenVPN).where(OpenVPN.key == key)
+    except System.DoesNotExist:
+        return ('No such system.', 404)
+
+    return JSON({'system': system.id})
+
+
+ROUTES = [
+    ('GET', '/screenshot/<int:system>', screenshot),
+    ('POST', '/idmap', idmap)
+]

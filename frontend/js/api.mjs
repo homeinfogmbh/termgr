@@ -217,3 +217,20 @@ export function sync (system) {
         checkSession('Das System konnte nicht synchronisiert werden.')
     );
 }
+
+
+/*
+  Map old TID and CID to new system ID.
+*/
+export function idmap (tid, cid) {
+    const json = {'tid': tid, 'cid': cid};
+    return request.post(BASE_URL + '/idmap', json, null, HEADERS).then(
+        response => response.json['system'],
+        function (response) {
+            if (response.status == 404)
+                return 'System nicht gefunden.';
+
+            return rescheckSession('Konnte System ID nicht übersetzen.')(response);
+        }
+    );
+}
