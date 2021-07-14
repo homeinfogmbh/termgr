@@ -39,7 +39,7 @@ function map () {
     const tid = document.getElementById('tid').value;
     const cid = document.getElementById('cid').value;
     return api.idmap(tid, cid).then(function (json) {
-        document.getElementById('systemId').value = json['system'];
+        document.getElementById('systemId').value = json.system;
     });
 }
 

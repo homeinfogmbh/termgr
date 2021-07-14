@@ -225,7 +225,7 @@ export function sync (system) {
 export function idmap (tid, cid) {
     const json = {'tid': tid, 'cid': cid};
     return request.post(BASE_URL + '/idmap', json, null, HEADERS).then(
-        response => response.json['system'],
+        response => response.json,
         function (response) {
             if (response.status == 404)
                 return 'System nicht gefunden.';
