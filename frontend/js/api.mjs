@@ -230,7 +230,7 @@ export function idmap (tid, cid) {
             if (response.status == 404)
                 return 'System nicht gefunden.';
 
-            return rescheckSession('Konnte System ID nicht übersetzen.')(response);
+            return checkSession('Konnte System ID nicht übersetzen.')(response);
         }
     );
 }
