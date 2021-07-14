@@ -25,6 +25,14 @@ import * as api from './api.mjs';
 
 
 /*
+    Navigates to the listing page.
+*/
+function list () {
+    window.location = 'list.html';
+}
+
+
+/*
     Map old TID+CID to new system ID.
 */
 function map () {
@@ -39,6 +47,8 @@ function map () {
     Initialize index.html.
 */
 export function init () {
-    const mapButton = document.getElementById('btnMap');
-    mapButton.addEventListener('click', suppressEvent(map), false);
+    const btnList = document.getElementById('btnList');
+    btnList.addEventListener('click', suppressEvent(list), false);
+    const btnMap = document.getElementById('btnMap');
+    btnMap.addEventListener('click', suppressEvent(map), false);
 }

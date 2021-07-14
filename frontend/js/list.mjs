@@ -39,6 +39,14 @@ export function select (systemId) {
 
 
 /*
+    Navigates to the ID mapper page.
+*/
+function idmap () {
+    window.location = 'idmap.html';
+}
+
+
+/*
     Renders the respective systems.
 */
 function render (systems) {
@@ -70,14 +78,17 @@ function list (force = false) {
 export function init () {
     list();
 
-    const btnLogout = document.getElementById('logout');
-    btnLogout.addEventListener('click', suppressEvent(logout), false);
-
     const btnFilter = document.getElementById('filter');
     btnFilter.addEventListener('click', suppressEvent(list), false);
 
     const btnReload = document.getElementById('reload');
     btnReload.addEventListener('click', suppressEvent(list, true), false);
+
+    const btnLogout = document.getElementById('logout');
+    btnLogout.addEventListener('click', suppressEvent(logout), false);
+
+    const btnIdmap = document.getElementById('idmap');
+    btnLogout.addEventListener('click', suppressEvent(idmap), false);
 
     const radioButtons = [
         document.getElementById('sortAsc'),
