@@ -2,10 +2,10 @@
 
 from flask import Response, request
 
-from his import ACCOUNT, authenticated, authorized, require_json
+from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, OpenVPN, System
 from termacls import can_administer_system
-from wsgilib import Binary, JSON, JSONMessage
+from wsgilib import Binary, JSON, JSONMessage, require_json
 
 from termgr.wsgi.common import admin
 
