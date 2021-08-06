@@ -53,5 +53,5 @@ export function init () {
     const btnList = document.getElementById('btnList');
     btnList.addEventListener('click', suppressEvent(list), false);
     const btnMap = document.getElementById('btnMap');
-    btnMap.addEventListener('click', suppressEvent(map), false);
+    btnMap.addEventListener('click', map, false);
 }
