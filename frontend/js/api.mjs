@@ -223,8 +223,7 @@ export function sync (system) {
   Map old TID and CID to new system ID.
 */
 export function idmap (tid, cid) {
-    let json = {'tid': tid, 'cid': cid};
-    console.log(JSON.stringify(json));
+    const json = {'tid': tid, 'cid': cid};
     return request.post(BASE_URL + '/idmap', json, null, HEADERS).then(
         response => response.json,
         checkSession('System nicht gefunden.')

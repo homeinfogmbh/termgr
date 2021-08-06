@@ -40,7 +40,7 @@ function map () {
     const cid = document.getElementById('cid').value;
     const systemId = document.getElementById('systemId');
     systemId.value = '';
-    return api.idmap(tid, cid).then(function (json) {
+    api.idmap(tid, cid).then(function (json) {
         systemId.value = json.system;
     });
 }
