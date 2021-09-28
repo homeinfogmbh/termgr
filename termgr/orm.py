@@ -60,13 +60,8 @@ class DeploymentHistory(TermgrModel):
 
     def __str__(self):
         """Returns a string for the terminal."""
-        if isinstance(self.account, int):
-            account = str(self.account)
-        else:
-            account = self.account.name
-
         return '\t'.join((
-            self.timestamp.isoformat(), account, str(self.system_id),
+            self.timestamp.isoformat(), self.account_name, str(self.system_id),
             str(self.old_deployment_id), str(self.new_deployment_id)
         ))
 
@@ -130,6 +125,14 @@ class DeploymentHistory(TermgrModel):
             header.text = text
 
         return row
+
+    @property
+    def account_name(self) -> str:
+        """Returns the account name."""
+        try:
+            return self.account.name
+        except AttributeError:
+            return str(self.account)
 
     @property
     def html_table_columns(self) -> Iterable[str]:
