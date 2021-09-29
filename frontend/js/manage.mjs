@@ -24,6 +24,9 @@ import { suppressEvent } from 'https://javascript.homeinfo.de/lib.mjs';
 import { BASE_URL, application, beep, fit, reboot, sync, getSystem } from './api.mjs';
 
 
+const ONE_HOUR = 3600000;   // in ms
+
+
 /*
     Navigates to the deployment page.
 */
@@ -44,10 +47,7 @@ function reload () {
     Checks the last sync.
 */
 function checkLastSync (lastSync) {
-    lastSync = Date.parse(lastSync);
-    const now = new Date();
-    const diff = now - lastSync;    // Milliseconds.
-    return diff < 3600000;
+    return (new Date() - Date.parse(lastSync)) < ONE_HOUR;
 }
 
 
@@ -71,8 +71,7 @@ function screenshot (system) {
     Sets up system-related data.
 */
 function setup (system) {
-    const systemId = document.getElementById('system');
-    systemId.textContent = system.id;
+    document.getElementById('system').textContent = system.id;
 
     const btnEnable = document.getElementById('enable');
     btnEnable.addEventListener('click', suppressEvent(reloadAfterwards, application, system.id, true), false);
