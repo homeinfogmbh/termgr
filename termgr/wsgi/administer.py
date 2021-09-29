@@ -7,6 +7,7 @@ from flask import Response, request
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, Deployment, System
+from wsgilib import JSON
 
 from termgr.notify import notify
 from termgr.orm import DeploymentHistory
@@ -30,7 +31,14 @@ def deploy_(system: System, new_deployment: Deployment) -> Response:
         DeploymentHistory.add(ACCOUNT.id, system_, old_deployment)
 
     notify()
-    return 'System has been deployed.'
+    response = {
+        'system': system.id,
+        'deployment': new_deployment.id,
+        'address': str(new_deployment.address),
+        'exclusive': exclusive,
+        'fitted': fitted
+    }
+    return JSON(response)
 
 
 @authenticated
