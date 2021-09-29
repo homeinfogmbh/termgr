@@ -132,14 +132,6 @@ export function application (system, state) {
     Deploys a system.
 */
 export function deploy (system, deployment, exclusive = false, fitted = false) {
-    const stateTexts = ['Der Standort wurde gesetzt.'];
-
-    if (exclusive)
-        stateTexts.push('Andere Systeme wurden vom Standort entfernt.');
-
-    if (fitted)
-        stateTexts.push('Das System wurde als verbaut markiert.');
-
     const json = {
         'system': system,
         'deployment': deployment,
@@ -147,7 +139,18 @@ export function deploy (system, deployment, exclusive = false, fitted = false) {
         'fitted': fitted
     };
     return request.post(BASE_URL + '/administer/deploy', json, null, HEADERS).then(
-        function () {
+        function (response) {
+            const stateTexts = [
+                'Das System Nr. ' + response.system + ' wurde verbaut unter:',
+                response.address
+            ];
+
+            if (response.exclusive)
+                stateTexts.push('Andere Systeme wurden vom Standort entfernt.');
+
+            if (response.fitted)
+                stateTexts.push('Das System wurde als verbaut markiert.');
+
             alert(stateTexts.join('\n'));
         },
         checkSession('Das System konnte nicht als verbaut gekennzeichnet werden.')
