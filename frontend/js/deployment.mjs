@@ -30,28 +30,43 @@ import { sortDeployments } from './sort.mjs';
 
 
 /*
+    Renders a system.
+*/
+function renderSystem (system) {
+    const select = document.getElementById('deployments');
+    select.innerHTML = '';
+
+    for (const deployment of deployments) {
+        let option = document.createElement('option');
+        option.value = '' + deployment.id;
+        option.textContent = deploymentToString(deployment);
+        select.appendChild(option);
+    }
+
+    if (system.deployment)
+        select.value = '' + system.deployment.id;
+}
+
+
+/*
     Renders the respective deployments.
 */
 function render (deployments) {
-    return getSystem().then(
-        (system) => {
-            const select = document.getElementById('deployments');
-            select.innerHTML = '';
-
-            for (const deployment of deployments) {
-                let option = document.createElement('option');
-                option.value = '' + deployment.id;
-                option.textContent = deploymentToString(deployment);
-                select.appendChild(option);
-            }
-
-            if (system.deployment)
-                select.value = '' + system.deployment.id;
-
-            return deployments;
-        }
-    );
+    return getSystem().then((system) => {
+        renderSystem(system);
+        return deployments;
+    });
 };
+
+
+/*
+    Renders a deployment.
+*/
+function renderDeployment (deployment) {
+    const deploymentDetails = document.getElementById('deploymentDetails');
+    deploymentDetails.innerHTML = '';
+    deploymentDetails.appendChild(deploymentToTable(deployment));
+}
 
 
 /*
@@ -63,11 +78,8 @@ function renderDetails (deployments) {
 
     for (const deployment of deployments)
         if (deployment.id == deploymentId)
-            break;
+            renderDeployment(deployment);
 
-    const deploymentDetails = document.getElementById('deploymentDetails');
-    deploymentDetails.innerHTML = '';
-    deploymentDetails.appendChild(deploymentToTable(deployment));
     return deployments;
 };
 
