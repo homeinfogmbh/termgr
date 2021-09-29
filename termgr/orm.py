@@ -69,7 +69,7 @@ class DeploymentHistory(TermgrModel):
     def add(cls, account: Account, system: System, old_deployment: Deployment):
         """Creates and saves a new record."""
         record = cls(
-            account=account.id, system=system, old_deployment=old_deployment,
+            account=account, system=system, old_deployment=old_deployment,
             new_deployment=system.deployment)
         record.save()
         return record

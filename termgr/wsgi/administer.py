@@ -27,7 +27,7 @@ def deploy_(system: System, new_deployment: Deployment) -> Response:
 
     for system_, old_deployment in system.deploy(
             new_deployment, exclusive=exclusive, fitted=fitted):
-        DeploymentHistory.add(ACCOUNT, system_, old_deployment)
+        DeploymentHistory.add(ACCOUNT.id, system_, old_deployment)
 
     notify()
     return 'System has been deployed.'
