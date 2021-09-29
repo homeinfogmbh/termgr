@@ -34,7 +34,7 @@ import { sortDeployments } from './sort.mjs';
 */
 function render (deployments) {
     return getSystem().then(
-        function (system) {
+        (system) => {
             const select = document.getElementById('deployments');
             select.innerHTML = '';
 
@@ -58,20 +58,16 @@ function render (deployments) {
     Shows details of the respective deployment.
 */
 function renderDetails (deployments) {
-    const systemIdField = document.getElementById('system');
-    systemIdField.textContent = system.get();
+    document.getElementById('system').textContent = system.get();
     const deploymentId = parseInt(document.getElementById('deployments').value);
-    let deployment;
 
-    for (deployment of deployments) {
+    for (const deployment of deployments)
         if (deployment.id == deploymentId)
             break;
-    }
 
     const deploymentDetails = document.getElementById('deploymentDetails');
-    const table = deploymentToTable(deployment);
     deploymentDetails.innerHTML = '';
-    deploymentDetails.appendChild(table);
+    deploymentDetails.appendChild(deploymentToTable(deployment));
     return deployments;
 };
 
@@ -110,11 +106,9 @@ function deploySystem () {
 
 
 /*
-    Initialize deploy.html.
+    Initialize the buttons.
 */
-export function init () {
-    list();
-
+function initButtons () {
     const btnLogout = document.getElementById('logout');
     btnLogout.addEventListener('click', suppressEvent(logout), false);
 
@@ -139,4 +133,13 @@ export function init () {
 
     const deploymentsList = document.getElementById('deployments');
     deploymentsList.addEventListener('change', suppressEvent(updateDetails), false);
+}
+
+
+/*
+    Initialize deploy.html.
+*/
+export function init () {
+    list();
+    initButtons();
 }
