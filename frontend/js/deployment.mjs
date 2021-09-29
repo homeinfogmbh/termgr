@@ -58,6 +58,8 @@ function render (deployments) {
     Shows details of the respective deployment.
 */
 function renderDetails (deployments) {
+    const systemIdField = document.getElementById('system');
+    systemIdField.textContent = system.get();
     const deploymentId = parseInt(document.getElementById('deployments').value);
     let deployment;
 
@@ -99,11 +101,11 @@ function list (force = false) {
 /*
     Deploys a system.
 */
-function deploySystem (system) {
+function deploySystem () {
     const deployment = document.getElementById('deployments').value;
     const exclusive = document.getElementById('exclusive').checked;
     const fitted = document.getElementById('fitted').checked;
-    return deploy(system, deployment, exclusive, fitted);
+    return deploy(system.get(), deployment, exclusive, fitted);
 };
 
 
@@ -111,11 +113,6 @@ function deploySystem (system) {
     Initialize deploy.html.
 */
 export function init () {
-    const systemId = system.get();
-
-    const systemIdField = document.getElementById('system');
-    systemIdField.textContent = systemId;
-
     list();
 
     const btnLogout = document.getElementById('logout');
@@ -138,7 +135,7 @@ export function init () {
         radioButton.addEventListener('change', suppressEvent(list), false);
 
     const btnDeploy = document.getElementById('deploy');
-    btnDeploy.addEventListener('click', suppressEvent(deploySystem, systemId), false);
+    btnDeploy.addEventListener('click', suppressEvent(deploySystem), false);
 
     const deploymentsList = document.getElementById('deployments');
     deploymentsList.addEventListener('change', suppressEvent(updateDetails), false);
