@@ -32,7 +32,7 @@ import { sortDeployments } from './sort.mjs';
 /*
     Renders a system.
 */
-function renderSystem (system) {
+function renderSystem (system, deployments) {
     const select = document.getElementById('deployments');
     select.innerHTML = '';
 
@@ -45,6 +45,8 @@ function renderSystem (system) {
 
     if (system.deployment)
         select.value = '' + system.deployment.id;
+
+    return deployments;
 }
 
 
@@ -52,10 +54,7 @@ function renderSystem (system) {
     Renders the respective deployments.
 */
 function render (deployments) {
-    return getSystem().then((system) => {
-        renderSystem(system);
-        return deployments;
-    });
+    return getSystem().then((system) => renderSystem(system, deployments));
 };
 
 
