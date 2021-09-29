@@ -141,14 +141,14 @@ export function deploy (system, deployment, exclusive = false, fitted = false) {
     return request.post(BASE_URL + '/administer/deploy', json, null, HEADERS).then(
         function (response) {
             const stateTexts = [
-                'Das System Nr. ' + response.system + ' wurde verbaut unter:',
-                response.address
+                'Das System Nr. ' + response.json.system + ' wurde verbaut unter:',
+                response.json.address
             ];
 
-            if (response.exclusive)
+            if (response.json.exclusive)
                 stateTexts.push('Andere Systeme wurden vom Standort entfernt.');
 
-            if (response.fitted)
+            if (response.json.fitted)
                 stateTexts.push('Das System wurde als verbaut markiert.');
 
             alert(stateTexts.join('\n'));
