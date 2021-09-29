@@ -24,7 +24,7 @@ def deploy_(system: System, new_deployment: Deployment) -> Response:
     """Deploys the respective system."""
 
     exclusive = request.json.get('exclusive', False)
-    fitted = request.json.get('exclusive', False)
+    fitted = request.json.get('fitted', False)
 
     for system_, old_deployment in system.deploy(
             new_deployment, exclusive=exclusive, fitted=fitted):
