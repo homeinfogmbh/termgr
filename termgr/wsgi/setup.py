@@ -142,5 +142,5 @@ ROUTES = (
     ('POST', '/setup/wireguard', get_wireguard_data),
     ('POST', '/setup/finalize', finalize),
     ('POST', '/setup/system', add_system),
-    ('PATCH', '/setup/system/<int:system>', patch_system)
+    ('PATCH', '/setup/system', patch_system)
 )
