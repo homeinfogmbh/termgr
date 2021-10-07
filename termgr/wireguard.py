@@ -69,7 +69,7 @@ def get_wireguard_config(system: System) -> dict:
     """
 
     return {
-        'ipaddress': str(system.wireguard.ipv4address) + '/32',
+        'ipaddress': str(system.ipv6address) + '/128',
         'server': str(WIREGUARD_SERVER),
         'peers': [
             {
