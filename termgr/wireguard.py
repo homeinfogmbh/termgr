@@ -1,6 +1,6 @@
 """Wireguard configuration."""
-from ipaddress import ip_address
-from ipaddress import ip_network
+
+from ipaddress import ip_address, ip_network
 from subprocess import run
 from tempfile import NamedTemporaryFile
 from typing import Iterator, NamedTuple, Optional
