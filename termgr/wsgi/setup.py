@@ -11,7 +11,7 @@ from hwdb import System, operating_system
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
-from termgr.wireguard import get_wireguard_config, update_peers
+from termgr.wireguard import get_wireguard_config, reload
 from termgr.wsgi.common import admin
 
 
@@ -82,7 +82,10 @@ def finalize(system: System) -> Response:
         system.pubkey = pubkey
 
     system.save()
-    update_peers()
+
+    if pubkey is not None:
+        reload()
+
     return 'System finalized.'
 
 
