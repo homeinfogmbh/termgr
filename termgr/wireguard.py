@@ -17,7 +17,7 @@ from termgr.types import IPAddress, IPNetwork
 __all__ = ['get_wireguard_config', 'update_peers', 'reload']
 
 
-WG = '/usr/local/bin/sudowg'
+WG = ('/usr/bin/sudo', '/usr/bin/wg')
 
 
 class Route(NamedTuple):
