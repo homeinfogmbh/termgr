@@ -146,4 +146,4 @@ def reload():
     """Reloads the WireGuard peers and DNS services."""
 
     update_peers()
-    run(['/usr/bin/sudo', 'hwadm', 'run-hooks'], check=True)
+    run(['/usr/bin/sudo', '/usr/local/bin/hwadm', 'run-hooks'], check=True)
