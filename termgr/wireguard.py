@@ -1,6 +1,7 @@
 """Wireguard configuration."""
 from ipaddress import ip_address
 from ipaddress import ip_network
+from subprocess import run
 from tempfile import NamedTemporaryFile
 from typing import Iterator, NamedTuple, Optional
 
@@ -13,7 +14,7 @@ from termgr.config import CONFIG
 from termgr.types import IPAddress, IPNetwork
 
 
-__all__ = ['get_wireguard_config', 'update_peers']
+__all__ = ['get_wireguard_config', 'update_peers', 'reload']
 
 
 WG = '/usr/local/bin/sudowg'
@@ -139,3 +140,10 @@ def update_peers():
 
     clear_peers(CONFIG.get('WireGuard', 'devname'), _wg=WG)
     add_peers()
+
+
+def reload():
+    """Reloads the WireGuard peers and DNS services."""
+
+    update_peers()
+    run(['/usr/bin/sudo', 'hwadm', 'run-hooks'], check=True)
