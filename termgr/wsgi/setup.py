@@ -79,7 +79,7 @@ def finalize(system: System) -> Response:
     pubkey = request.json.get('wg_pubkey')
 
     if pubkey is not None:
-        system.wireguard.pubkey = pubkey
+        system.pubkey = pubkey
 
     system.save()
     update_peers()
