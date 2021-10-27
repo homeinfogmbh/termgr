@@ -7,11 +7,7 @@ from os.path import basename
 from flask import Response, request
 
 from his import authenticated, authorized
-from hwdb import Group
-from hwdb import OperatingSystem
-from hwdb import System
-from hwdb import operating_system
-from hwdb import get_free_ipv6_address
+from hwdb import Group, System, operating_system, get_free_ipv6_address
 from wsgilib import Error, JSON, Binary
 
 from termgr.openvpn import package
@@ -86,8 +82,7 @@ def add_system(group: Group) -> JSON:
         ipv6address=get_free_ipv6_address(),
         pubkey=request.json['pubkey'],
         configured=datetime.now(),
-        operating_system=operating_system(
-            request.json.get('os'), fallback=OperatingSystem.ARCH_LINUX),
+        operating_system=operating_system(request.json['os']),
         monitor=request.json.get('monitor'),
         serial_number=request.json.get('sn'),
         model=request.json.get('model')
