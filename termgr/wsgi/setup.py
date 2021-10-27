@@ -107,7 +107,10 @@ def add_system(group: Group) -> JSON:
     )
     system.save()
     reload()
-    return JSON(system.to_json(brief=True))
+    return JSON({
+        **system.to_json(brief=True),
+        'wireguard': get_wireguard_config(system)
+    })
 
 
 @authenticated
@@ -133,7 +136,10 @@ def patch_system(system: System) -> JSON:
 
     system.save()
     reload()
-    return JSON(system.to_json(brief=True))
+    return JSON({
+        **system.to_json(brief=True),
+        'wireguard': get_wireguard_config(system)
+    })
 
 
 ROUTES = (
