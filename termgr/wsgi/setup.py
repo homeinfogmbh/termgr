@@ -54,15 +54,6 @@ def get_openvpn_data(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def get_wireguard_data(system: System) -> Response:
-    """Returns the WireGuard configuration for the respective system."""
-
-    return JSON(get_wireguard_config(system))
-
-
-@authenticated
-@authorized('termgr')
-@admin
 def finalize(system: System) -> Response:
     """Posts setup data."""
 
@@ -75,17 +66,8 @@ def finalize(system: System) -> Response:
     with suppress(KeyError):
         system.model = request.json['model']
 
-    system.configured = datetime.now()  # Mark system as configured.
-    pubkey = request.json.get('wg_pubkey')
-
-    if pubkey is not None:
-        system.pubkey = pubkey
-
+    system.configured = datetime.now()
     system.save()
-
-    if pubkey is not None:
-        reload()
-
     return 'System finalized.'
 
 
@@ -98,7 +80,7 @@ def add_system(group: Group) -> JSON:
     system = System(
         group=group,
         ipv6address=get_free_ipv6_address(),
-        pubkey=request.json['wg_pubkey'],
+        pubkey=request.json['pubkey'],
         configured=datetime.now(),
         operating_system=operating_system(request.json['os']),
         monitor=request.json.get('monitor'),
@@ -120,7 +102,7 @@ def patch_system(system: System) -> JSON:
     """Patches the given system."""
 
     with suppress(KeyError):
-        system.pubkey = request.json['wg_pubkey']
+        system.pubkey = request.json['pubkey']
 
     with suppress(KeyError):
         system.operating_system = operating_system(request.json['os'])
@@ -134,6 +116,7 @@ def patch_system(system: System) -> JSON:
     with suppress(KeyError):
         system.model = request.json['model']
 
+    system.configured = datetime.now()
     system.save()
     reload()
     return JSON({
@@ -145,7 +128,6 @@ def patch_system(system: System) -> JSON:
 ROUTES = (
     ('POST', '/setup/info', get_system_info),
     ('POST', '/setup/openvpn', get_openvpn_data),
-    ('POST', '/setup/wireguard', get_wireguard_data),
     ('POST', '/setup/finalize', finalize),
     ('POST', '/setup/system', add_system),
     ('PATCH', '/setup/system', patch_system)
