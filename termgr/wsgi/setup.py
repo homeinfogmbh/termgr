@@ -69,6 +69,7 @@ def finalize(system: System) -> Response:
     system.configured = datetime.now()
     system.pubkey = None
     system.save()
+    reload()
     return 'System finalized.'
 
 
