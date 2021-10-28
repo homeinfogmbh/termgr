@@ -67,7 +67,6 @@ def finalize(system: System) -> Response:
         system.model = request.json['model']
 
     system.configured = datetime.now()
-    system.pubkey = None
     system.save()
     reload()
     return 'System finalized.'
