@@ -3,7 +3,7 @@
 from ipaddress import ip_address, ip_network
 from subprocess import run
 from tempfile import NamedTemporaryFile
-from typing import Iterator, NamedTuple, Optional
+from typing import Iterable, Iterator, NamedTuple, Optional
 
 from peewee import ModelSelect
 
@@ -142,8 +142,13 @@ def update_peers():
     add_peers()
 
 
-def reload():
+def reload(hooks: Optional[Iterable[str]] = None):
     """Reloads the WireGuard peers and DNS services."""
 
     update_peers()
-    run(['/usr/bin/sudo', '/usr/local/bin/hwadm', 'run-hooks'], check=True)
+    hooks_cmd = ['/usr/bin/sudo', '/usr/local/bin/hwadm', 'run-hooks']
+
+    if hooks is not None:
+        hooks += ['-H', *hooks]
+
+    run(hooks_cmd, check=True)
