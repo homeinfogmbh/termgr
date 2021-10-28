@@ -68,7 +68,7 @@ def finalize(system: System) -> Response:
 
     system.configured = datetime.now()
     system.save()
-    reload()
+    reload('bind9')
     return 'System finalized.'
 
 
