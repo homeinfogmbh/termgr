@@ -149,6 +149,6 @@ def reload(*hooks: str):
     hooks_cmd = ['/usr/bin/sudo', '/usr/local/bin/hwadm', 'run-hooks']
 
     if hooks:
-        hooks += ['-H', *hooks]
+        hooks_cmd += ['-H', *hooks]
 
     run(hooks_cmd, check=True)
