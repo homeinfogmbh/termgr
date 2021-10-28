@@ -90,7 +90,7 @@ def add_system(group: Group) -> JSON:
         model=request.json.get('model')
     )
     system.save()
-    reload()
+    reload('bind9')
     return JSON({
         **system.to_json(brief=True),
         'wireguard': get_wireguard_config(system)
@@ -120,7 +120,7 @@ def patch_system(system: System) -> JSON:
 
     system.configured = datetime.now()
     system.save()
-    reload()
+    reload('bind9')
     return JSON({
         **system.to_json(brief=True),
         'wireguard': get_wireguard_config(system)
