@@ -47,15 +47,6 @@ def get_current_peers() -> set[str]:
     return set(show(CONFIG.get('WireGuard', 'devname'), _wg=WG).keys())
 
 
-def get_active_peers(systems: Iterable[System]) -> dict:
-    """Returns the active peers dict."""
-
-    return {
-        system.pubkey: {'allowed-ips': list(get_allowed_ips(system))}
-        for system in systems
-    }
-
-
 def get_systems() -> ModelSelect:
     """Yields WireGuard enabled systems."""
 
@@ -70,6 +61,24 @@ def get_configured_routes() -> Iterator[Route]:
 
     for route in CONFIG['WireGuard']['routes'].split(','):
         yield Route.from_string(route.strip())
+
+
+def get_allowed_ips(system: System) -> Iterator[str]:
+    """Yields allowed IP addresses."""
+
+    yield str(system.ipv6address) + '/128'
+
+    for route in get_configured_routes():
+        yield str(route.destination)
+
+
+def get_active_peers(systems: Iterable[System]) -> dict:
+    """Returns the active peers dict."""
+
+    return {
+        system.pubkey: {'allowed-ips': list(get_allowed_ips(system))}
+        for system in systems
+    }
 
 
 def get_client_routes() -> Iterator[Route]:
@@ -98,15 +107,6 @@ def get_wireguard_config(system: System) -> dict:
             }
         ]
     }
-
-
-def get_allowed_ips(system: System) -> Iterator[str]:
-    """Yields allowed IP addresses."""
-
-    yield str(system.ipv6address) + '/128'
-
-    for route in get_configured_routes():
-        yield str(route.destination)
 
 
 def set_psk(peers: dict[str, dict], psk: Optional[str]) -> dict[str, dict]:
