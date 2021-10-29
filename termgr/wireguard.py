@@ -7,7 +7,7 @@ from typing import Iterator, NamedTuple, Optional
 from peewee import ModelSelect
 
 from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System
-from wgtools import clear_peers, set as wg_set
+from wgtools import set as wg_set, show
 
 from termgr.config import CONFIG
 from termgr.types import IPAddress, IPNetwork
@@ -39,6 +39,12 @@ class Route(NamedTuple):
             'gateway': str(self.gateway),
             'gateway_onlink': self.gateway_onlink
         }
+
+
+def get_current_peers() -> set[str]:
+    """Lists the current peers."""
+
+    return set(show(CONFIG.get('WireGuard', 'devname'), _wg=WG).keys())
 
 
 def get_systems() -> ModelSelect:
@@ -93,49 +99,59 @@ def get_allowed_ips(system: System) -> Iterator[str]:
         yield str(route.destination)
 
 
-def system_to_peer(system: System, *, psk: Optional[str] = None) -> dict:
-    """Converts a system into a peer dict."""
-
-    peer = {'allowed-ips': list(get_allowed_ips(system))}
-
-    if psk:
-        peer['preshared-key'] = psk
-
-    return peer
-
-
-def get_peers(psk: Optional[str] = None) -> dict:
+def get_peers() -> dict:
     """Returns the peers dict."""
 
     peers = {}
 
     for system in get_systems():
-        peers[system.pubkey] = system_to_peer(system, psk=psk)
+        peers[system.pubkey] = {'allowed-ips': list(get_allowed_ips(system))}
 
     return peers
 
 
-def _add_peers(psk: Optional[str] = None):
+def set_psk(peers: dict[str, dict], psk: Optional[str]) -> dict[str, dict]:
+    """Sets the pre-shared key to the peers."""
+
+    if not psk:
+        return peers
+
+    return {
+        key: {**value, 'preshared-key': psk} for key, value in peers.items()
+        if not value.get('remove')
+    }
+
+
+def set_peers(peers: dict[str, dict], psk: Optional[str] = None) -> None:
     """Adds all terminal peers with the respective psk."""
 
-    wg_set(CONFIG.get('WireGuard', 'devname'), peers=get_peers(psk=psk),
+    wg_set(CONFIG.get('WireGuard', 'devname'), peers=set_psk(peers, psk),
            _wg=WG)
 
 
-def add_peers():
+def add_peers(peers: dict[str, dict]) -> None:
     """Adds all terminal network peers."""
 
     if psk := CONFIG.get('WireGuard', 'psk'):
         with NamedTemporaryFile('w+') as tmp:
             tmp.write(psk)
             tmp.flush()
-            return _add_peers(psk=tmp.name)
+            return set_peers(peers, psk=tmp.name)
 
-    return _add_peers()
+    return set_peers(peers)
 
 
-def update_peers():
+def update_peers() -> None:
     """Adds a peer to the terminals network."""
 
-    clear_peers(CONFIG.get('WireGuard', 'devname'), _wg=WG)
-    add_peers()
+    current_peers = get_current_peers()
+    active_peers = get_peers()
+    delete_peers = {
+        key: {'remove': True} for key in current_peers
+        if key not in active_peers
+    }
+    new_peers = {
+        key: value for key, value in active_peers.items()
+        if key not in current_peers
+    }
+    return add_peers({**new_peers, **delete_peers})
