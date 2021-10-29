@@ -2,7 +2,7 @@
 
 from ipaddress import ip_address, ip_network
 from tempfile import NamedTemporaryFile
-from typing import Iterable, Iterator, NamedTuple, Optional
+from typing import Iterable, Iterator, NamedTuple
 
 from peewee import ModelSelect
 
@@ -109,11 +109,8 @@ def get_wireguard_config(system: System) -> dict:
     }
 
 
-def set_psk(peers: dict[str, dict], psk: Optional[str]) -> dict[str, dict]:
-    """Sets the pre-shared key to the peers."""
-
-    if not psk:
-        return peers
+def add_psk(peers: dict[str, dict], psk: str) -> dict[str, dict]:
+    """Adds the pre-shared key to the peers."""
 
     return {
         key: {**value, 'preshared-key': psk} for key, value in peers.items()
@@ -121,11 +118,10 @@ def set_psk(peers: dict[str, dict], psk: Optional[str]) -> dict[str, dict]:
     }
 
 
-def set_peers(peers: dict[str, dict], psk: Optional[str] = None) -> None:
+def set_peers(peers: dict[str, dict]) -> None:
     """Adds all terminal peers with the respective psk."""
 
-    wg_set(CONFIG.get('WireGuard', 'devname'), peers=set_psk(peers, psk),
-           _wg=WG)
+    wg_set(CONFIG.get('WireGuard', 'devname'), peers=peers, _wg=WG)
 
 
 def add_peers(peers: dict[str, dict]) -> None:
@@ -135,7 +131,7 @@ def add_peers(peers: dict[str, dict]) -> None:
         with NamedTemporaryFile('w+') as tmp:
             tmp.write(psk)
             tmp.flush()
-            return set_peers(peers, psk=tmp.name)
+            return set_peers(add_psk(peers, tmp.name))
 
     return set_peers(peers)
 
