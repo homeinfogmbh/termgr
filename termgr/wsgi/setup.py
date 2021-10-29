@@ -10,8 +10,9 @@ from his import authenticated, authorized
 from hwdb import Group, System, operating_system, get_free_ipv6_address
 from wsgilib import Error, JSON, Binary
 
+from termgr.hooks import reload
 from termgr.openvpn import package
-from termgr.wireguard import get_wireguard_config, reload
+from termgr.wireguard import get_wireguard_config
 from termgr.wsgi.common import admin, groupadmin
 
 
@@ -89,7 +90,7 @@ def add_system(group: Group) -> JSON:
         model=request.json.get('model')
     )
     system.save()
-    reload('bind9')
+    reload('bind9', wireguard=True)
     return JSON({
         **system.to_json(brief=True),
         'wireguard': get_wireguard_config(system)
@@ -119,7 +120,7 @@ def patch_system(system: System) -> JSON:
 
     system.configured = datetime.now()
     system.save()
-    reload('bind9')
+    reload('bind9', wireguard=True)
     return JSON({
         **system.to_json(brief=True),
         'wireguard': get_wireguard_config(system)
