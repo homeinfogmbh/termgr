@@ -2,7 +2,7 @@
 
 from ipaddress import ip_address, ip_network
 from tempfile import NamedTemporaryFile
-from typing import Iterator, NamedTuple, Optional
+from typing import Iterable, Iterator, NamedTuple, Optional
 
 from peewee import ModelSelect
 
@@ -47,12 +47,22 @@ def get_current_peers() -> set[str]:
     return set(show(CONFIG.get('WireGuard', 'devname'), _wg=WG).keys())
 
 
+def get_active_peers(systems: Iterable[System]) -> dict:
+    """Returns the active peers dict."""
+
+    return {
+        system.pubkey: {'allowed-ips': list(get_allowed_ips(system))}
+        for system in systems
+    }
+
+
 def get_systems() -> ModelSelect:
     """Yields WireGuard enabled systems."""
 
-    condition = ~(System.pubkey >> None)
-    condition &= ~(System.ipv6address >> None)
-    return System.select(cascade=True).where(condition)
+    return System.select(cascade=True).where(
+        (~(System.pubkey >> None))
+        & (~(System.ipv6address >> None))
+    )
 
 
 def get_configured_routes() -> Iterator[Route]:
@@ -99,17 +109,6 @@ def get_allowed_ips(system: System) -> Iterator[str]:
         yield str(route.destination)
 
 
-def get_peers() -> dict:
-    """Returns the peers dict."""
-
-    peers = {}
-
-    for system in get_systems():
-        peers[system.pubkey] = {'allowed-ips': list(get_allowed_ips(system))}
-
-    return peers
-
-
 def set_psk(peers: dict[str, dict], psk: Optional[str]) -> dict[str, dict]:
     """Sets the pre-shared key to the peers."""
 
@@ -145,7 +144,7 @@ def update_peers() -> None:
     """Adds a peer to the terminals network."""
 
     current_peers = get_current_peers()
-    active_peers = get_peers()
+    active_peers = get_active_peers(get_systems())
     delete_peers = {
         key: {'remove': True} for key in current_peers
         if key not in active_peers
