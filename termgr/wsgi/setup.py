@@ -67,6 +67,9 @@ def finalize(system: System) -> Response:
     with suppress(KeyError):
         system.model = request.json['model']
 
+    if request.json.get('exclusive', False):
+        system.pubkey = None
+
     system.configured = datetime.now()
     system.save()
     reload('bind9')
