@@ -1,14 +1,15 @@
 """Terminal setup configuration."""
 
+from functools import cache, partial
 from logging import getLogger
 
-from configlib import loadcfg
+from configlib import load_config
 
 
-__all__ = ['CONFIG', 'LOG_FORMAT', 'LOGGER', 'SYSTEMD_NETWORKD']
+__all__ = ['LOG_FORMAT', 'LOGGER', 'SYSTEMD_NETWORKD', 'get_config']
 
 
-CONFIG = loadcfg('termgr.conf')
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger('termgr')
 SYSTEMD_NETWORKD = 'systemd-networkd'
+get_config = partial(cache(load_config), 'termgr.conf')

@@ -9,7 +9,7 @@ from peewee import ModelSelect
 from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System
 from wgtools import set as wg_set, show
 
-from termgr.config import CONFIG
+from termgr.config import get_config
 from termgr.types import IPAddress, IPNetwork
 
 
@@ -44,7 +44,7 @@ class Route(NamedTuple):
 def get_current_peers() -> set[str]:
     """Lists the current peers."""
 
-    return set(show(CONFIG.get('WireGuard', 'devname'), _wg=WG).keys())
+    return set(show(get_config().get('WireGuard', 'devname'), _wg=WG).keys())
 
 
 def get_systems() -> ModelSelect:
@@ -59,7 +59,7 @@ def get_systems() -> ModelSelect:
 def get_configured_routes() -> Iterator[Route]:
     """Yields the configured routes."""
 
-    for route in CONFIG['WireGuard']['routes'].split(','):
+    for route in get_config().get('WireGuard', 'routes').split(','):
         yield Route.from_string(route.strip())
 
 
@@ -98,11 +98,11 @@ def get_wireguard_config(system: System) -> dict:
         'server': str(WIREGUARD_SERVER),
         'peers': [
             {
-                'pubkey': CONFIG.get('WireGuard', 'pubkey'),
-                'psk': CONFIG.get('WireGuard', 'psk'),
-                'endpoint': CONFIG.get('WireGuard', 'endpoint'),
+                'pubkey': (config := get_config()).get('WireGuard', 'pubkey'),
+                'psk': config.get('WireGuard', 'psk'),
+                'endpoint': config.get('WireGuard', 'endpoint'),
                 'routes': [route.to_json() for route in get_client_routes()],
-                'persistent_keepalive': CONFIG.getint(
+                'persistent_keepalive': config.getint(
                     'WireGuard', 'persistent_keepalive')
             }
         ]
@@ -121,13 +121,13 @@ def add_psk(peers: dict[str, dict], psk: str) -> dict[str, dict]:
 def set_peers(peers: dict[str, dict]) -> None:
     """Adds all terminal peers with the respective psk."""
 
-    wg_set(CONFIG.get('WireGuard', 'devname'), peers=peers, _wg=WG)
+    wg_set(get_config().get('WireGuard', 'devname'), peers=peers, _wg=WG)
 
 
 def add_peers(peers: dict[str, dict]) -> None:
     """Adds all terminal network peers."""
 
-    if psk := CONFIG.get('WireGuard', 'psk'):
+    if psk := get_config().get('WireGuard', 'psk'):
         with NamedTemporaryFile('w+') as tmp:
             tmp.write(psk)
             tmp.flush()

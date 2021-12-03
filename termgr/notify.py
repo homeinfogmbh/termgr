@@ -6,7 +6,7 @@ from typing import Iterable, List
 
 from emaillib import Mailer, EMail
 
-from termgr.config import CONFIG
+from termgr.config import get_config
 from termgr.orm import DeploymentHistory
 
 
@@ -23,18 +23,23 @@ HEADERS = (
     'Zeitstempel'
 )
 LOGGER = getLogger(__file__)
-MAILER = Mailer(
-    CONFIG['mail']['host'],
-    CONFIG['mail']['port'],
-    CONFIG['mail']['user'],
-    CONFIG['mail']['passwd']
-)
+
+
+def get_mailer() -> Mailer:
+    """Returns the mailer from the configuration."""
+
+    return Mailer(
+        (config := get_config()).get('mail', 'host'),
+        config.get('mail', 'port'),
+        config.get('mail', 'user'),
+        config.get('mail', 'passwd')
+    )
 
 
 def get_admins() -> Iterable[str]:
     """Yields admins's emails."""
 
-    emails_ = CONFIG['notify']['admins'].split(',')
+    emails_ = get_config().get('notify', 'admins').split(',')
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
@@ -69,7 +74,8 @@ def get_emails(subject: str, html: str) -> Iterable[EMail]:
     html = tostring(html, encoding='unicode', method='html')
 
     for admin in get_admins():
-        yield EMail(subject, CONFIG['mail']['from'], admin, html=html)
+        yield EMail(subject, get_config().get('mail', 'from'), admin,
+                    html=html)
 
 
 def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
@@ -84,5 +90,5 @@ def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
         return False
 
     emails = get_emails('Verbaute HOMEINFO Systeme', get_html(deployments))
-    MAILER.send(emails)
+    get_mailer().send(emails)
     return True

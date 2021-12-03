@@ -10,15 +10,13 @@ from peewee import JOIN, DateTimeField, ForeignKeyField, ModelSelect
 from his import Account
 from mdb import Address, Company, Customer
 from hwdb import Deployment, System
-from peeweeplus import MySQLDatabase, JSONModel
-
-from termgr.config import CONFIG
+from peeweeplus import MySQLDatabaseProxy, JSONModel
 
 
 __all__ = ['DeploymentHistory']
 
 
-DATABASE = MySQLDatabase.from_config(CONFIG['db'])
+DATABASE = MySQLDatabaseProxy('termgr')
 HTML_TABLE_HEADERS = (
     'Techniker',
     'System',
