@@ -6,7 +6,7 @@ from typing import Iterable, Iterator, NamedTuple
 
 from peewee import ModelSelect
 
-from hwdb import WIREGUARD_NETWORK, WIREGUARD_SERVER, System
+from hwdb import get_wireguard_network, get_wireguard_server, System
 from wgtools import set as wg_set, show
 
 from termgr.config import get_config
@@ -84,7 +84,7 @@ def get_active_peers(systems: Iterable[System]) -> dict:
 def get_client_routes() -> Iterator[Route]:
     """Yields configured routes."""
 
-    yield Route(WIREGUARD_NETWORK, WIREGUARD_SERVER, True)
+    yield Route(get_wireguard_network(), get_wireguard_server(), True)
     yield from get_configured_routes()
 
 
@@ -95,7 +95,7 @@ def get_wireguard_config(system: System) -> dict:
 
     return {
         'ipaddress': str(system.ipv6address) + '/128',
-        'server': str(WIREGUARD_SERVER),
+        'server': str(get_wireguard_server()),
         'peers': [
             {
                 'pubkey': (config := get_config()).get('WireGuard', 'pubkey'),
