@@ -1,7 +1,5 @@
 """Terminal administration."""
 
-from functools import partial
-
 from flask import Response, request
 
 from hipster.orm import Queue
@@ -62,11 +60,10 @@ def toggle_application(system: System) -> Response:
     """
 
     state = request.json.get('state', False)
-    function = partial(system.application, state)
     system.fitted = state
 
     try:
-        response = function()
+        response = system.application(state)
     except SystemOffline:
         return ('System is offline.', 400)
 
