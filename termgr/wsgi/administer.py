@@ -59,8 +59,7 @@ def toggle_application(system: System) -> Response:
     on the system and marks the system as fitted / non-fitted.
     """
 
-    state = request.json.get('state', False)
-    system.fitted = state
+    system.fitted = state = request.json.get('state', False)
 
     try:
         response = system.application(state)
