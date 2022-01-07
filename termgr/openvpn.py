@@ -40,7 +40,7 @@ def get_mtu(openvpn: OpenVPN) -> str:
 def get_configuration(key_file: Path, crt_file: Path, mtu: str) -> str:
     """Returns the rendered client configuration file."""
 
-    with CFG_TEMP.open('r') as template:
+    with CFG_TEMP.open('r', encoding='utf-8') as template:
         template = template.read()
 
     return template.format(crtfile=crt_file, keyfile=key_file, mtu=mtu)
