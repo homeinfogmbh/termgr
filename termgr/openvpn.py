@@ -99,10 +99,10 @@ def package(openvpn: OpenVPN, windows: bool = False) -> Tuple[bytes, str]:
     with TemporaryFile(mode='w+b') as tmp:
         if windows:
             create_zip_file(openvpn, tmp)
-            filename = '{}.zip'.format(key)
+            filename = f'{key}.zip'
         else:
             create_tar_file(openvpn, tmp)
-            filename = '{}.tar'.format(key)
+            filename = f'{key}.tar'
 
         tmp.flush()
         tmp.seek(0)
