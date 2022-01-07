@@ -18,7 +18,7 @@ CA_FILE = 'ca.crt'
 CONFIG_FILE = 'terminals{}'
 CFG_TEMP = Path('/usr/share/terminals/openvpn.conf.temp')
 KEYS_DIR = Path('/usr/lib/terminals/keys')
-CA_FILE_PATH = KEYS_DIR.joinpath(CA_FILE)
+CA_FILE_PATH = KEYS_DIR / CA_FILE
 MTU = 'tun-mtu {}\n'
 
 
@@ -53,8 +53,8 @@ def create_zip_file(openvpn: OpenVPN, file: IO):
     key_file = KEY_FILE.format(key)
     crt_file = CRT_FILE.format(key)
     mtu = get_mtu(openvpn)
-    key_file_path = KEYS_DIR.joinpath(key_file)
-    crt_file_path = KEYS_DIR.joinpath(crt_file)
+    key_file_path = KEYS_DIR / key_file
+    crt_file_path = KEYS_DIR / crt_file
     configuration = get_configuration(key_file, crt_file, mtu)
     configuration = configuration.replace('\n', '\r\n')
 
@@ -76,8 +76,8 @@ def create_tar_file(openvpn: OpenVPN, file: IO):
     key_file = KEY_FILE.format(key)
     crt_file = CRT_FILE.format(key)
     mtu = get_mtu(openvpn)
-    key_file_path = KEYS_DIR.joinpath(key_file)
-    crt_file_path = KEYS_DIR.joinpath(crt_file)
+    key_file_path = KEYS_DIR / key_file
+    crt_file_path = KEYS_DIR / crt_file
     configuration = get_configuration(key_file, crt_file, mtu)
 
     with TarFile(mode='w', fileobj=file) as tar_file:
