@@ -4,7 +4,6 @@ from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
 from sys import stdout
 
-from functoolsplus import exiting
 from his import account
 from hwdb import deployment, system
 
@@ -36,7 +35,6 @@ def get_args() -> Namespace:
     return parser.parse_args()
 
 
-@exiting
 def main() -> int:
     """Runs the script and returns a returncode."""
 
