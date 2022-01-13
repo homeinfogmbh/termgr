@@ -1,6 +1,8 @@
 """Terminal administration."""
 
-from flask import Response, request
+from typing import Optional
+
+from flask import request
 
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
@@ -18,31 +20,30 @@ __all__ = ['ROUTES']
 @authenticated
 @authorized('termgr')
 @deploy
-def deploy_(system: System, new_deployment: Deployment) -> Response:
+def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
     """Deploys the respective system."""
 
     exclusive = request.json.get('exclusive', False)
     fitted = request.json.get('fitted', False)
 
-    for system_, old_deployment in system.deploy(
-            new_deployment, exclusive=exclusive, fitted=fitted):
-        DeploymentHistory.add(ACCOUNT.id, system_, old_deployment)
+    for sys, old, _ in system.deploy(
+            deployment, exclusive=exclusive, fitted=fitted):
+        DeploymentHistory.add(ACCOUNT.id, sys, old)
 
     notify()
-    response = {
+    return JSON({
         'system': system.id,
-        'deployment': new_deployment.id,
-        'address': str(new_deployment.address),
+        'deployment': deployment.id,
+        'address': str(deployment.address),
         'exclusive': exclusive,
         'fitted': fitted
-    }
-    return JSON(response)
+    })
 
 
 @authenticated
 @authorized('termgr')
 @admin
-def fit(system: System) -> Response:
+def fit(system: System) -> str:
     """Marks a system as fitted."""
 
     system.fitted = fitted = request.json.get('fitted', False)
@@ -54,7 +55,7 @@ def fit(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def toggle_application(system: System) -> Response:
+def toggle_application(system: System) -> tuple[str, int]:
     """Activates and deactivates the digital signage application
     on the system and marks the system as fitted / non-fitted.
     """
@@ -64,51 +65,51 @@ def toggle_application(system: System) -> Response:
     try:
         response = system.application(state)
     except SystemOffline:
-        return ('System is offline.', 400)
+        return 'System is offline.', 400
 
     system.save()
-    return (response.text, response.status_code)
+    return response.text, response.status_code
 
 
 @authenticated
 @authorized('termgr')
 @admin
-def reboot(system: System) -> Response:
+def reboot(system: System) -> tuple[str, int]:
     """Reboots the respective system."""
 
     try:
         response = system.reboot()
     except SystemOffline:
-        return ('System is offline.', 400)
+        return 'System is offline.', 400
 
     if response is None:
-        return 'Probably rebooted system.'
+        return 'Probably rebooted system.', 200
 
-    return (response.text, response.status_code)
+    return response.text, response.status_code
 
 
 @authenticated
 @authorized('termgr')
 @admin
-def sync(system: System) -> Response:
+def sync(system: System) -> tuple[str, int]:
     """Synchronizes the respective system."""
 
     Queue.enqueue(system)
-    return ('Synchronization queued.', 202)
+    return 'Synchronization queued.', 202
 
 
 @authenticated
 @authorized('termgr')
 @admin
-def beep(system: System) -> Response:
+def beep(system: System) -> tuple[str, int]:
     """Identifies the respective system by beep test."""
 
     try:
         response = system.beep()
     except SystemOffline:
-        return ('System is offline.', 400)
+        return 'System is offline.', 400
 
-    return (response.text, response.status_code)
+    return response.text, response.status_code
 
 
 ROUTES = (
