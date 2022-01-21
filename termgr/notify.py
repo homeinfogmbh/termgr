@@ -37,7 +37,7 @@ def get_mailer() -> Mailer:
 
 
 def get_admins() -> Iterable[str]:
-    """Yields admins's emails."""
+    """Yields admins' emails."""
 
     emails_ = get_config().get('notify', 'admins').split(',')
     return filter(None, map(lambda email: email.strip(), emails_))
