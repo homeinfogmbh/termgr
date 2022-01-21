@@ -25,15 +25,19 @@ def get_args() -> Namespace:
     parser = ArgumentParser('Deployment history utility.')
     parser.add_argument(
         '-S', '--system', type=system, metavar='system',
-        help='lists the deployment history of the given system')
+        help='lists the deployment history of the given system'
+    )
     parser.add_argument(
         '-D', '--deployment', type=deployment, metavar='deployment',
-        help='lists the deployment history of the given deployment')
+        help='lists the deployment history of the given deployment'
+    )
     parser.add_argument(
         '-a', '--accounts', type=account, nargs='+', metavar='account',
-        help='filters for deployments performed by the given accounts')
+        help='filters for deployments performed by the given accounts'
+    )
     parser.add_argument(
-        '-d', '--desc', action='store_true', help='sort descending')
+        '-d', '--desc', action='store_true', help='sort descending'
+    )
     return parser.parse_args()
 
 
