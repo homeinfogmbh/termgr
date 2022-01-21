@@ -4,6 +4,8 @@ from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
 from sys import stdout
 
+from peewee import Field
+
 from his import account
 from hwdb import deployment, system
 
@@ -35,6 +37,29 @@ def get_args() -> Namespace:
     return parser.parse_args()
 
 
+def get_condition(args: Namespace) -> Expression:
+    """Returns the select condition."""
+
+    if args.deployment:
+        condition = DeploymentHistory.new_deployment == args.deployment
+    else:
+        condition = DeploymentHistory.system == args.system
+
+    if args.accounts:
+        condition &= DeploymentHistory.account << args.accounts
+
+    return condition
+
+
+def get_ordering(descending: bool) -> Field:
+    """Returns the ordering."""
+
+    if descending:
+        return DeploymentHistory.timestamp.desc()
+
+    return DeploymentHistory.timestamp
+
+
 def main() -> int:
     """Runs the script and returns a returncode."""
 
@@ -45,18 +70,8 @@ def main() -> int:
         LOGGER.error('Must specify either system or deployment.')
         return 1
 
-    if args.deployment:
-        condition = DeploymentHistory.new_deployment == args.deployment
-    else:
-        condition = DeploymentHistory.system == args.system
-
-    if args.accounts:
-        condition &= DeploymentHistory.account << args.accounts
-
-    if args.desc:
-        order = DeploymentHistory.timestamp.desc()
-    else:
-        order = DeploymentHistory.timestamp
+    condition = get_condition(args)
+    order = get_ordering(args.desc)
 
     if stdout.isatty():
         print('\t'.join(f'\033[1m{field}\033[0m'
