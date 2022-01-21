@@ -61,7 +61,7 @@ def get_ordering(descending: bool) -> Field:
 
 
 def main() -> int:
-    """Runs the script and returns a returncode."""
+    """Runs the script and returns a return code."""
 
     args = get_args()
     basicConfig(level=INFO, format=LOG_FORMAT)
