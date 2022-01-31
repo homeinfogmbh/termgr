@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from xml.etree.ElementTree import Element, SubElement
 from typing import Iterable
 
-from peewee import JOIN, DateTimeField, ForeignKeyField, ModelSelect
+from peewee import JOIN, DateTimeField, ForeignKeyField, Select
 
 from his import Account
 from mdb import Address, Company, Customer
@@ -73,10 +73,10 @@ class DeploymentHistory(TermgrModel):
         return record
 
     @classmethod
-    def select(cls, *args, cascade: bool = False, **kwargs) -> ModelSelect:
+    def select(cls, *args, cascade: bool = False) -> Select:
         """Selects deployment histories."""
         if not cascade:
-            return super().select(*args, **kwargs)
+            return super().select(*args)
 
         new_deployment = Deployment.alias()
         new_deployment_customer = Customer.alias()
@@ -87,7 +87,7 @@ class DeploymentHistory(TermgrModel):
             new_deployment, new_deployment_address, new_deployment_customer,
             new_deployment_company, *args
         }
-        return super().select(*args, **kwargs).join(Account).join_from(
+        return super().select(*args).join(Account).join_from(
             cls, System).join_from(
             # Old deployment.
             cls, Deployment, on=cls.old_deployment == Deployment.id,
@@ -106,7 +106,7 @@ class DeploymentHistory(TermgrModel):
             join_type=JOIN.LEFT_OUTER)
 
     @classmethod
-    def of_today(cls) -> ModelSelect:
+    def of_today(cls) -> Select:
         """Yields deployments that were made today."""
         today = date.today()
         tomorrow = today + timedelta(days=1)
