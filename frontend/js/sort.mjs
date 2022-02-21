@@ -23,77 +23,79 @@
 import { addressToString } from 'https://javascript.homeinfo.de/mdb.mjs';
 
 
-/*
-    Returns a compare function for systems.
-*/
-function compareSystems (desc, byId) {
+function compareNullable (desc) {
     const factor = desc ? -1 : 1;
 
-    if (byId)
-        return function (alice, bob) {
-            if (alice.id > bob.id)
-                return factor;
-
-            if (bob.id > alice.id)
-                return -factor;
-
-            return 0
-        };
-
     return function (alice, bob) {
-        const deploymentA = alice.deployment;
-        const deploymentB = bob.deployment;
-
-        if (deploymentA == null) {
-            if (deploymentB == null)
+        if (alice == null) {
+            if (bob == null)
                 return 0;
 
             return Infinity * factor;
         }
 
-        if (deploymentB == null)
+        if (bob == null)
             return -Infinity * factor;
 
-        const addressA = addressToString(deploymentA.address);
-        const addressB = addressToString(deploymentB.address);
+        return null;
+    };
+};
 
-        if (addressA > addressB)
+
+function compareValues (desc) {
+    const factor = desc ? -1 : 1;
+
+    return function (alice, bob) {
+        if (alice > bob)
             return factor;
 
-        if (addressB > addressA)
+        if (bob > alice)
             return -factor;
 
         return 0;
+    };
+};
+
+
+/*
+    Returns a compare function for systems.
+*/
+function compareSystems (desc, byId) {
+    if (byId)
+        return function (alice, bob) {
+            return compareValues(desc)(alice.id, bob.id);
+        };
+
+    return function (alice, bob) {
+        const deploymentA = alice.deployment;
+        const deploymentB = bob.deployment;
+        const nullComp = compareNullable(deploymentA, deploymentB);
+
+        if (nullComp != null)
+            return nullComp;
+
+        return compareValues(desc)(
+            addressToString(deploymentA.address),
+            addressToString(deploymentB.address)
+        );
     };
 }
 
 
 /*
-    Returns a compare functionm for deployments.
+    Returns a compare function for deployments.
 */
 function compareDeployments (desc, byId) {
-    const factor = desc ? -1 : 1;
+    if (byId)
+        return function (alice, bob) {
+            return compareValues(desc)(alice.id, bob.id);
+        };
 
     return function (alice, bob) {
-        let value = 0;
-
-        if (byId) {
-            if (alice.id > bob.id)
-                value = 1;
-            else if (bob.id > alice.id)
-                value = -1;
-        } else {
-            const addressA = addressToString(alice.address);
-            const addressB = addressToString(bob.address);
-
-            if (addressA > addressB)
-                value = 1;
-            else if (addressB > addressA)
-                value = -1;
-        }
-
-        value = factor * value;
-        return value;
+        return compareValues(desc)(
+            addressToString(alice.address),
+            addressToString(bob.address)
+        );
     };
 }
 
