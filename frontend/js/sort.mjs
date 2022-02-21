@@ -29,38 +29,41 @@ import { addressToString } from 'https://javascript.homeinfo.de/mdb.mjs';
 function compareSystems (desc, byId) {
     const factor = desc ? -1 : 1;
 
-    return function (alice, bob) {
-        let value = 0;
-
-        if (byId) {
+    if (byId)
+        return function (alice, bob) {
             if (alice.id > bob.id)
-                value = 1;
-            else if (bob.id > alice.id)
-                value = -1;
-        } else {
-            const deploymentA = alice.deployment;
-            const deploymentB = bob.deployment;
+                return factor;
 
-            if (deploymentA == null) {
-                if (deploymentB == null)
-                    value = 0;
+            if (bob.id > alice.id)
+                return -factor;
 
-                value = Infinity;
-            } else if (deploymentB == null) {
-                value = -Infinity;
-            } else {
-                const addressA = addressToString(deploymentA.address);
-                const addressB = addressToString(deploymentB.address);
+            return 0
+        };
 
-                if (addressA > addressB)
-                    value = 1;
-                else if (addressB > addressA)
-                    value = -1;
-            }
+    return function (alice, bob) {
+        const deploymentA = alice.deployment;
+        const deploymentB = bob.deployment;
+
+        if (deploymentA == null) {
+            if (deploymentB == null)
+                return 0;
+
+            return Infinity * factor;
         }
 
-        value = factor * value;
-        return value;
+        if (deploymentB == null)
+            return -Infinity * factor;
+
+        const addressA = addressToString(deploymentA.address);
+        const addressB = addressToString(deploymentB.address);
+
+        if (addressA > addressB)
+            return factor;
+
+        if (addressB > addressA)
+            return -factor;
+
+        return 0;
     };
 }
 
