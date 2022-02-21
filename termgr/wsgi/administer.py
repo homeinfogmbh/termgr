@@ -56,14 +56,10 @@ def fit(system: System) -> str:
 @authorized('termgr')
 @admin
 def toggle_application(system: System) -> tuple[str, int]:
-    """Activates and deactivates the digital signage application
-    on the system and marks the system as fitted / non-fitted.
-    """
-
-    system.fitted = state = request.json.get('state', False)
+    """Activates and deactivates the digital signage application."""
 
     try:
-        response = system.application(state)
+        response = system.application(request.json.get('state', False))
     except SystemOffline:
         return 'System is offline.', 400
 
