@@ -3,6 +3,7 @@
 from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
 from sys import stdout
+from typing import Union
 
 from peewee import Expression, Field
 
@@ -41,7 +42,7 @@ def get_args() -> Namespace:
     return parser.parse_args()
 
 
-def get_condition(args: Namespace) -> Expression | bool:
+def get_condition(args: Namespace) -> Union[Expression, bool]:
     """Returns the select condition."""
 
     if args.deployment:
