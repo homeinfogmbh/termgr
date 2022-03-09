@@ -4,7 +4,7 @@ from argparse import ArgumentParser, Namespace
 from logging import INFO, basicConfig, getLogger
 from sys import stdout
 
-from peewee import Field
+from peewee import Expression, Field
 
 from his import account
 from hwdb import deployment, system
@@ -41,7 +41,7 @@ def get_args() -> Namespace:
     return parser.parse_args()
 
 
-def get_condition(args: Namespace) -> Expression:
+def get_condition(args: Namespace) -> Expression | bool:
     """Returns the select condition."""
 
     if args.deployment:
