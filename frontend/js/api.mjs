@@ -30,7 +30,7 @@ const HEADERS = {'session-duration': SESSION_DURATION};
 
 
 /*
-    Checks whether an error occured due to an expired
+    Checks whether an error occurred due to an expired
     session or displays the given error message otherwise.
 */
 function checkSession (message) {
