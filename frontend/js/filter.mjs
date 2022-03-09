@@ -36,8 +36,7 @@ function getKeyword (id = 'searchField') {
     Filters systems.
 */
 export function autoFilterSystems (systems) {
-    systems = filterSystems(systems, getKeyword());
-    return Array.from(systems);
+    return Array.from(filterSystems(systems, getKeyword()));
 }
 
 
@@ -45,6 +44,5 @@ export function autoFilterSystems (systems) {
     Filters deployments.
 */
 export function autoFilterDeployments (deployments) {
-    deployments = filterDeployments(deployments, getKeyword());
-    return Array.from(deployments);
+    return Array.from(filterDeployments(deployments, getKeyword()));
 }
