@@ -3,8 +3,9 @@
 from contextlib import suppress
 from datetime import datetime
 from os.path import basename
+from typing import Union
 
-from flask import Response, request
+from flask import request
 
 from his import authenticated, authorized
 from hwdb import Group, System, operating_system, get_free_ipv6_address
@@ -22,7 +23,7 @@ __all__ = ['ROUTES']
 @authenticated
 @authorized('termgr')
 @admin
-def get_system_info(system: System) -> Response:
+def get_system_info(system: System) -> JSON:
     """Returns the system information."""
 
     return JSON(system.to_json(brief=True))
@@ -31,7 +32,7 @@ def get_system_info(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def get_openvpn_data(system: System) -> Response:
+def get_openvpn_data(system: System) -> Union[Binary, Error]:
     """Returns the OpenVPN data for the respective system."""
 
     windows = request.json.get('windows', False)
@@ -55,7 +56,7 @@ def get_openvpn_data(system: System) -> Response:
 @authenticated
 @authorized('termgr')
 @admin
-def finalize(system: System) -> Response:
+def finalize(system: System) -> str:
     """Posts setup data."""
 
     with suppress(KeyError):
