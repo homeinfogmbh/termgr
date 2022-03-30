@@ -1,10 +1,11 @@
 """Miscellaneous endpoints."""
 
-from flask import Response, request
+from flask import request
 
 from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, OpenVPN, System
 from termacls import can_administer_system
+from typing import Union
 from wsgilib import Binary, JSON, JSONMessage, require_json
 
 from termgr.wsgi.common import admin
@@ -16,24 +17,24 @@ __all__ = ['ROUTES']
 @authenticated
 @authorized('termgr')
 @admin
-def screenshot(system: System) -> Response:
+def screenshot(system: System) -> Union[Binary, tuple[str, int]]:
     """Identifies the respective system by beep test."""
 
     try:
         response = system.screenshot()
     except SystemOffline:
-        return ('System is offline.', 400)
+        return 'System is offline.', 400
 
     if response.status_code == 200:
         return Binary(response.content)
 
-    return ('Could not get screenshot.', 500)
+    return 'Could not get screenshot.', 500
 
 
 @authenticated
 @authorized('termgr')
 @require_json(dict)
-def idmap() -> Response:
+def idmap() -> Union[JSON, JSONMessage]:
     """Maps old to new IDs."""
 
     tid = request.json.get('tid')
