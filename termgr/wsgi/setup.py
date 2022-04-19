@@ -2,17 +2,14 @@
 
 from contextlib import suppress
 from datetime import datetime
-from os.path import basename
-from typing import Union
 
 from flask import request
 
 from his import authenticated, authorized
 from hwdb import Group, System, operating_system, get_free_ipv6_address
-from wsgilib import Error, JSON, Binary
+from wsgilib import JSON
 
 from termgr.hooks import reload
-from termgr.openvpn import package
 from termgr.wireguard import get_wireguard_config
 from termgr.wsgi.common import admin, groupadmin
 
@@ -27,30 +24,6 @@ def get_system_info(system: System) -> JSON:
     """Returns the system information."""
 
     return JSON(system.to_json(brief=True))
-
-
-@authenticated
-@authorized('termgr')
-@admin
-def get_openvpn_data(system: System) -> Union[Binary, Error]:
-    """Returns the OpenVPN data for the respective system."""
-
-    windows = request.json.get('windows', False)
-    openvpn = system.openvpn
-
-    if openvpn is None:
-        raise Error('Missing OpenVPN coniguration for system.')
-
-    try:
-        data, filename = package(openvpn, windows=windows)
-    except FileNotFoundError as error:
-        raise Error(f'Missing file: {basename(error.filename)}',
-                    status=500) from None
-    except PermissionError as error:
-        raise Error(f'Cannot access file: {basename(error.filename)}',
-                    status=500) from None
-
-    return Binary(data, filename=filename)
 
 
 @authenticated
@@ -133,7 +106,6 @@ def patch_system(system: System) -> JSON:
 
 ROUTES = (
     ('POST', '/setup/info', get_system_info),
-    ('POST', '/setup/openvpn', get_openvpn_data),
     ('POST', '/setup/finalize', finalize),
     ('POST', '/setup/system', add_system),
     ('PATCH', '/setup/system', patch_system)
