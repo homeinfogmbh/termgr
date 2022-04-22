@@ -1,6 +1,6 @@
 """List systems."""
 
-from his import ACCOUNT, authenticated, authorized
+from his import ACCOUNT, Account, authenticated, authorized
 from hwdb import Deployment, System
 from mdb import Address, Company, Customer
 from wsgilib import JSON
@@ -14,7 +14,7 @@ from termacls import get_deployment_admin_condition, get_system_admin_condition
 __all__ = ['ROUTES']
 
 
-def _get_deployments() -> ModelSelect:
+def _get_deployments(account: Account) -> ModelSelect:
     """Returns the respective deployments."""
 
     lpt_address = Address.alias()
@@ -34,11 +34,11 @@ def _get_deployments() -> ModelSelect:
         on=Deployment.lpt_address == lpt_address.id,
         join_type=JOIN.LEFT_OUTER
     ).where(
-        get_deployment_admin_condition(ACCOUNT)
+        get_deployment_admin_condition(account)
     )
 
 
-def _get_systems() -> ModelSelect:
+def _get_systems(account: Account) -> ModelSelect:
     """Returns the respective systems."""
 
     lpt_address = Address.alias()
@@ -74,7 +74,7 @@ def _get_systems() -> ModelSelect:
         on=dataset.lpt_address == dataset_lpt_address.id,
         join_type=JOIN.LEFT_OUTER
     ).where(
-        get_system_admin_condition(ACCOUNT)
+        get_system_admin_condition(account)
     )
 
 
@@ -84,7 +84,8 @@ def list_deployments() -> Response:
     """Lists available deployments."""
 
     return JSON([
-        dep.to_json(systems=True, cascade=2) for dep in _get_deployments()
+        deployment.to_json(systems=True, cascade=2)
+        for deployment in _get_deployments(ACCOUNT)
     ])
 
 
@@ -93,7 +94,7 @@ def list_deployments() -> Response:
 def get_system(ident: int) -> Response:
     """Lists the available systems."""
 
-    systems = _get_systems().where(System.id == ident)
+    systems = _get_systems(ACCOUNT).where(System.id == ident)
 
     try:
         system = systems.get()
@@ -108,7 +109,10 @@ def get_system(ident: int) -> Response:
 def list_systems() -> Response:
     """Lists the available systems."""
 
-    return JSON([sys.to_json(cascade=3, brief=True) for sys in _get_systems()])
+    return JSON([
+        system.to_json(cascade=3, brief=True)
+        for system in _get_systems(ACCOUNT)
+    ])
 
 
 ROUTES = (
