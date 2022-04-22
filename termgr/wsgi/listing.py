@@ -37,8 +37,7 @@ def _get_deployments(account: Account) -> Iterable[Deployment]:
     ).where(
         get_deployment_admin_condition(account)
     )
-    systems = System.select().where(System.deployment << deployments)
-    return prefetch(deployments, systems)
+    return prefetch(deployments, System.select())
 
 
 def _get_systems(account: Account) -> ModelSelect:
