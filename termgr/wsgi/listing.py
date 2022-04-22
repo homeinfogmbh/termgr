@@ -1,11 +1,12 @@
 """List systems."""
 
+from typing import Union
+
 from his import ACCOUNT, Account, authenticated, authorized
 from hwdb import Deployment, System
 from mdb import Address, Company, Customer
-from wsgilib import JSON
+from wsgilib import JSON, JSONMessage
 
-from flask import Response
 from peewee import JOIN, ModelSelect
 
 from termacls import get_deployment_admin_condition, get_system_admin_condition
@@ -80,7 +81,7 @@ def _get_systems(account: Account) -> ModelSelect:
 
 @authenticated
 @authorized('termgr')
-def list_deployments() -> Response:
+def list_deployments() -> JSON:
     """Lists available deployments."""
 
     return JSON([
@@ -91,7 +92,7 @@ def list_deployments() -> Response:
 
 @authenticated
 @authorized('termgr')
-def get_system(ident: int) -> Response:
+def get_system(ident: int) -> Union[JSONMessage, JSON]:
     """Lists the available systems."""
 
     systems = _get_systems(ACCOUNT).where(System.id == ident)
@@ -99,14 +100,14 @@ def get_system(ident: int) -> Response:
     try:
         system = systems.get()
     except System.DoesNotExist:
-        return ('No such system.', 404)
+        return JSONMessage('No such system.', status=404)
 
     return JSON(system.to_json(cascade=3, brief=True))
 
 
 @authenticated
 @authorized('termgr')
-def list_systems() -> Response:
+def list_systems() -> JSON:
     """Lists the available systems."""
 
     return JSON([
