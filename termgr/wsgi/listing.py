@@ -1,13 +1,13 @@
 """List systems."""
 
-from typing import Union
+from typing import Iterable, Union
 
 from his import ACCOUNT, Account, authenticated, authorized
 from hwdb import Deployment, System
 from mdb import Address, Company, Customer
 from wsgilib import JSON, JSONMessage
 
-from peewee import JOIN, ModelSelect
+from peewee import JOIN, ModelSelect, prefetch
 
 from termacls import get_deployment_admin_condition, get_system_admin_condition
 
@@ -15,11 +15,11 @@ from termacls import get_deployment_admin_condition, get_system_admin_condition
 __all__ = ['ROUTES']
 
 
-def _get_deployments(account: Account) -> ModelSelect:
+def _get_deployments(account: Account) -> Iterable[Deployment]:
     """Returns the respective deployments."""
 
     lpt_address = Address.alias()
-    return Deployment.select(
+    deployments = Deployment.select(
         Deployment, Customer, Company, Address, lpt_address
     ).join_from(
         Deployment, Customer, on=Deployment.customer == Customer.id,
@@ -37,6 +37,8 @@ def _get_deployments(account: Account) -> ModelSelect:
     ).where(
         get_deployment_admin_condition(account)
     )
+    systems = System.select().where(System.deployment << deployments)
+    return prefetch(deployments, systems)
 
 
 def _get_systems(account: Account) -> ModelSelect:
