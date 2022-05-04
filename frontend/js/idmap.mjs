@@ -36,11 +36,12 @@ function list () {
     Map old TID+CID to new system ID.
 */
 function map () {
-    const tid = document.getElementById('tid').value;
-    const cid = document.getElementById('cid').value;
     const systemId = document.getElementById('systemId');
     systemId.value = '';
-    return api.idmap(tid, cid).then(function (json) {
+    return api.idmap(
+        document.getElementById('tid').value,
+        document.getElementById('cid').value
+    ).then(function (json) {
         systemId.value = json.system;
     });
 }
@@ -50,8 +51,10 @@ function map () {
     Initialize index.html.
 */
 export function init () {
-    const btnList = document.getElementById('btnList');
-    btnList.addEventListener('click', suppressEvent(list), false);
-    const btnMap = document.getElementById('btnMap');
-    btnMap.addEventListener('click', suppressEvent(map), false);
+    document.getElementById('btnList').addEventListener(
+        'click', suppressEvent(list), false
+    );
+    document.getElementById('btnMap').addEventListener(
+        'click', suppressEvent(map), false
+    );
 }

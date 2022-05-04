@@ -28,9 +28,10 @@ import * as api from './api.mjs';
     Performs the initial login.
 */
 function login () {
-    const account = document.getElementById('account').value;
-    const passwd = document.getElementById('passwd').value;
-    return api.login(account, passwd);
+    return api.login(
+        document.getElementById('account').value,
+        document.getElementById('passwd').value
+    );
 }
 
 
@@ -38,6 +39,7 @@ function login () {
     Initialize index.html.
 */
 export function init () {
-    const loginButton = document.getElementById('login');
-    loginButton.addEventListener('click', suppressEvent(login), false);
+    document.getElementById('login').addEventListener(
+        'click', suppressEvent(login), false
+    );
 }

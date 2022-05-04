@@ -30,6 +30,31 @@ import { sortSystems } from './sort.mjs';
 
 
 /*
+    Initialize list.html.
+*/
+export function init () {
+    list();
+    document.getElementById('filter').addEventListener(
+        'click', suppressEvent(list), false
+    );
+    document.getElementById('reload').addEventListener(
+        'click', suppressEvent(list, true), false
+    );
+    document.getElementById('logout').addEventListener(
+        'click', suppressEvent(logout), false
+    );
+    document.getElementById('idmap').addEventListener(
+        'click', suppressEvent(idmap), false
+    );
+
+    for (const radioButton of getRadioButtons())
+        radioButton.addEventListener('change', suppressEvent(list), false);
+
+    konami.init();  // Konami Code easter egg.
+}
+
+
+/*
     Navigates to the management page.
 */
 export function select (systemId) {
@@ -73,32 +98,13 @@ function list (force = false) {
 
 
 /*
-    Initialize list.html.
+    Return a list of radio buttons.
 */
-export function init () {
-    list();
-
-    const btnFilter = document.getElementById('filter');
-    btnFilter.addEventListener('click', suppressEvent(list), false);
-
-    const btnReload = document.getElementById('reload');
-    btnReload.addEventListener('click', suppressEvent(list, true), false);
-
-    const btnLogout = document.getElementById('logout');
-    btnLogout.addEventListener('click', suppressEvent(logout), false);
-
-    const btnIdmap = document.getElementById('idmap');
-    btnIdmap.addEventListener('click', suppressEvent(idmap), false);
-
-    const radioButtons = [
+function getRadioButtons () {
+    return [
         document.getElementById('sortAsc'),
         document.getElementById('sortDesc'),
         document.getElementById('sortById'),
         document.getElementById('sortByAddress')
     ];
-
-    for (const radioButton of radioButtons)
-        radioButton.addEventListener('change', suppressEvent(list), false);
-
-    konami.init();  // Konami Code easteregg.
 }
