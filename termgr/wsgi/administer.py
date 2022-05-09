@@ -33,8 +33,8 @@ def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
     notify()
     return JSON({
         'system': system.id,
-        'deployment': deployment.id if deployment is not None else None,
-        'address': str(deployment.address),
+        'deployment': None if deployment is None else deployment.id,
+        'address': None if deployment is None else str(deployment.address),
         'exclusive': exclusive,
         'fitted': fitted
     })
