@@ -14,13 +14,16 @@ from wsgilib import Error
 __all__ = ['admin', 'deploy', 'groupadmin']
 
 
-def _get_deployment() -> Deployment:
+def _get_deployment() -> Optional[Deployment]:
     """Returns the respective deployment."""
 
-    ident = request.json.get('deployment')
+    try:
+        ident = request.json['deployment']
+    except KeyError:
+        raise Error('No deployment ID specified.')
 
     if ident is None:
-        raise Error('No deployment ID specified.')
+        return None
 
     try:
         return Deployment.select(cascade=True).where(
