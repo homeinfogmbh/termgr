@@ -21,6 +21,8 @@ def get_deployment_history(system: System) -> JSON:
         dephist.to_json(shallow=True)
         for dephist in DeploymentHistory.select(cascade=True).where(
             DeploymentHistory.system == system
+        ).order_by(
+            DeploymentHistory.timestamp.desc()
         )
     ])
 
