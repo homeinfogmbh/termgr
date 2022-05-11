@@ -170,7 +170,8 @@ class DeploymentHistory(TermgrModel):
             'id': self.id,
             'account': {
                 'id': self.account.id,
-                'name': self.account.name
+                'name': self.account.name,
+                'fullName': self.account.full_name
             },
             'system': self.system_id,
             'oldDeployment': self.old_deployment_id,
