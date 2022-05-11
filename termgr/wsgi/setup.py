@@ -104,9 +104,9 @@ def patch_system(system: System) -> JSON:
     })
 
 
-ROUTES = (
+ROUTES = [
     ('POST', '/setup/info', get_system_info),
     ('POST', '/setup/finalize', finalize),
     ('POST', '/setup/system', add_system),
     ('PATCH', '/setup/system', patch_system)
-)
+]

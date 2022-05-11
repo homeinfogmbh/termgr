@@ -128,7 +128,7 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     return 'LPT address updated.', 200
 
 
-ROUTES = (
+ROUTES = [
     ('POST', '/administer/deploy', deploy_),
     ('POST', '/administer/fit', fit),
     ('POST', '/administer/application', toggle_application),
@@ -136,4 +136,4 @@ ROUTES = (
     ('POST', '/administer/sync', sync),
     ('POST', '/administer/beep', beep),
     ('POST', '/administer/lpt-address/<int:deployment>', set_lpt_address)
-)
+]
