@@ -12,7 +12,7 @@ from wsgilib import JSON
 
 from termgr.notify import notify
 from termgr.orm import DeploymentHistory
-from termgr.wsgi.common import sysadmin, deploy
+from termgr.wsgi.common import depadmin, sysadmin, deploy
 
 
 __all__ = ['ROUTES']
