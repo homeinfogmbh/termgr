@@ -144,5 +144,5 @@ ROUTES = (
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
     ('POST', '/administer/beep', beep),
-    ('POST', '/administer/lpt-address', beep)
+    ('POST', '/administer/lpt-address/<int:deployment>', beep)
 )
