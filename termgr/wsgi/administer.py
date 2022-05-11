@@ -7,6 +7,7 @@ from flask import request
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, Deployment, System
+from mdb import Address
 from wsgilib import JSON
 
 from termgr.notify import notify
@@ -108,11 +109,31 @@ def beep(system: System) -> tuple[str, int]:
     return response.text, response.status_code
 
 
+@authenticated
+@authorized('termgr')
+@depadmin
+def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
+    """Set the LPT address of the given deployment."""
+
+    try:
+        address = Address.add(*request.json)
+    except TypeError:
+        return 'Invalid address provided.', 400
+
+    if address.id is None:
+        address.save()
+
+    deployment.lpt_address = address
+    deployment.save()
+    return 'LPT address updated.', 200
+
+
 ROUTES = (
     ('POST', '/administer/deploy', deploy_),
     ('POST', '/administer/fit', fit),
     ('POST', '/administer/application', toggle_application),
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
-    ('POST', '/administer/beep', beep)
+    ('POST', '/administer/beep', beep),
+    ('POST', '/administer/lpt-address', beep)
 )
