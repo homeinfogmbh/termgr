@@ -11,6 +11,9 @@ from peewee import JOIN, ModelSelect, prefetch
 
 from termacls import get_deployment_admin_condition, get_system_admin_condition
 
+from termgr.orm import DeploymentHistory
+from termgr.wsgi.common import sysadmin
+
 
 __all__ = ['ROUTES']
 
@@ -117,8 +120,23 @@ def list_systems() -> JSON:
     ])
 
 
+@authenticated
+@authorized('termgr')
+@sysadmin
+def get_deployment_history(system: System) -> JSON:
+    """Return the deployment history of the given deployment."""
+
+    return JSON([
+        dephist.to_json(shallow=True)
+        for dephist in DeploymentHistory.select(cascade=True).where(
+            DeploymentHistory.system == system
+        )
+    ])
+
+
 ROUTES = (
     ('GET', '/list/deployments', list_deployments),
     ('GET', '/list/systems/<int:ident>', get_system),
-    ('GET', '/list/systems', list_systems)
+    ('GET', '/list/systems', list_systems),
+    ('GET', '/list/deployment-history/<int:system>', get_deployment_history)
 )

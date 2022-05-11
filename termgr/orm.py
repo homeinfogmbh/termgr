@@ -3,7 +3,7 @@
 from __future__ import annotations
 from datetime import date, datetime, timedelta
 from xml.etree.ElementTree import Element, SubElement
-from typing import Iterable
+from typing import Any, Iterable
 
 from peewee import JOIN, DateTimeField, ForeignKeyField, Select
 
@@ -163,3 +163,21 @@ class DeploymentHistory(TermgrModel):
                 table_column.text = value
 
         return row
+
+    def to_json(self, *, shallow: bool = False, **kwargs) -> dict[str, Any]:
+        """Return a JSON-ish dict."""
+
+        if shallow:
+            return {
+                'id': self.id,
+                'account': {
+                    'id': self.account.id,
+                    'name': self.account.name
+                },
+                'system': self.system_id,
+                'oldDeployment': self.old_deployment_id,
+                'newDeployment': self.new_deployment_id,
+                'timestamp': self.timestamp.isoformat()
+            }
+
+        return super().to_json(**kwargs)
