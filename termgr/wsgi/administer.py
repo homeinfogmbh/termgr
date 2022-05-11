@@ -128,15 +128,6 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     return 'LPT address updated.', 200
 
 
-@authenticated
-@authorized('termgr')
-@depadmin
-def get_deployment_history(deployment: Deployment) -> tuple[str, int]:
-    """Return the deployment history of the given deployment."""
-
-    return 'Not implemented.', 400
-
-
 ROUTES = (
     ('POST', '/administer/deploy', deploy_),
     ('POST', '/administer/fit', fit),
@@ -144,5 +135,5 @@ ROUTES = (
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
     ('POST', '/administer/beep', beep),
-    ('POST', '/administer/lpt-address/<int:deployment>', beep)
+    ('POST', '/administer/lpt-address/<int:deployment>', set_lpt_address)
 )
