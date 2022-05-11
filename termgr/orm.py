@@ -150,6 +150,21 @@ class DeploymentHistory(TermgrModel):
 
         yield self.timestamp.isoformat()    # pylint: disable=E1101
 
+    @property
+    def shallow_json(self) -> dict[str, Any]:
+        """Return a shallow JSON representation with minimal information."""
+        return {
+            'id': self.id,
+            'account': {
+                'id': self.account.id,
+                'name': self.account.name
+            },
+            'system': self.system_id,
+            'oldDeployment': self.old_deployment_id,
+            'newDeployment': self.new_deployment_id,
+            'timestamp': self.timestamp.isoformat()
+        }
+
     def to_html_table_row(self) -> Element:
         """Returns an HTML DOM of a table row."""
         row = Element('tr')
@@ -168,16 +183,6 @@ class DeploymentHistory(TermgrModel):
         """Return a JSON-ish dict."""
 
         if shallow:
-            return {
-                'id': self.id,
-                'account': {
-                    'id': self.account.id,
-                    'name': self.account.name
-                },
-                'system': self.system_id,
-                'oldDeployment': self.old_deployment_id,
-                'newDeployment': self.new_deployment_id,
-                'timestamp': self.timestamp.isoformat()
-            }
+            return self.shallow_json
 
         return super().to_json(**kwargs)
