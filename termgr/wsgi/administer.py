@@ -11,7 +11,7 @@ from wsgilib import JSON
 
 from termgr.notify import notify
 from termgr.orm import DeploymentHistory
-from termgr.wsgi.common import admin, deploy
+from termgr.wsgi.common import sysadmin, deploy
 
 
 __all__ = ['ROUTES']
@@ -42,7 +42,7 @@ def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def fit(system: System) -> str:
     """Marks a system as fitted."""
 
@@ -54,7 +54,7 @@ def fit(system: System) -> str:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def toggle_application(system: System) -> tuple[str, int]:
     """Activates and deactivates the digital signage application."""
 
@@ -69,7 +69,7 @@ def toggle_application(system: System) -> tuple[str, int]:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def reboot(system: System) -> tuple[str, int]:
     """Reboots the respective system."""
 
@@ -86,7 +86,7 @@ def reboot(system: System) -> tuple[str, int]:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def sync(system: System) -> tuple[str, int]:
     """Synchronizes the respective system."""
 
@@ -96,7 +96,7 @@ def sync(system: System) -> tuple[str, int]:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def beep(system: System) -> tuple[str, int]:
     """Identifies the respective system by beep test."""
 

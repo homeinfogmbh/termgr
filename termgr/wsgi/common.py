@@ -7,27 +7,32 @@ from flask import request
 
 from his import ACCOUNT
 from hwdb import Deployment, Group, System
-from termacls import can_administer_system, can_deploy, GroupAdmin
+from termacls import can_administer_deployment
+from termacls import can_administer_system
+from termacls import can_deploy
+from termacls import GroupAdmin
 from wsgilib import Error
 
 
-__all__ = ['admin', 'deploy', 'groupadmin']
+__all__ = ['depadmin', 'sysadmin', 'deploy', 'groupadmin']
 
 
-def _get_deployment() -> Optional[Deployment]:
+def _get_deployment(deployment: Optional[int] = None) -> Optional[Deployment]:
     """Returns the respective deployment."""
 
-    try:
-        ident = request.json['deployment']
-    except KeyError:
-        raise Error('No deployment ID specified.')
+    if deployment is None:
+        try:
+            deployment = request.json['deployment']
+        except KeyError:
+            raise Error('No deployment ID specified.')
 
-    if ident is None:
+    if deployment is None:
         return None
 
     try:
         return Deployment.select(cascade=True).where(
-            Deployment.id == ident).get()
+            Deployment.id == deployment
+        ).get()
     except Deployment.DoesNotExist:
         raise Error('No such deployment.', status=404) from None
 
@@ -58,8 +63,23 @@ def _get_group(ident: int) -> Group:
     ).get()
 
 
-def admin(function: Callable) -> Callable:
-    """Wraps the actual with admin permission checks."""
+def depadmin(function: Callable) -> Callable:
+    """Wraps a deployment-related action with admin permission checks."""
+
+    @wraps(function)
+    def wrapper(*args, deployment: Optional[int] = None, **kwargs):
+        deployment = _get_deployment(deployment=deployment)
+
+        if can_administer_deployment(ACCOUNT, deployment):
+            return function(deployment, *args, **kwargs)
+
+        raise Error('Deployment administration unauthorized.', status=403)
+
+    return wrapper
+
+
+def sysadmin(function: Callable) -> Callable:
+    """Wraps a system-related action  with admin permission checks."""
 
     @wraps(function)
     def wrapper(*args, system: Optional[int] = None, **kwargs):
@@ -68,7 +88,7 @@ def admin(function: Callable) -> Callable:
         if can_administer_system(ACCOUNT, system):
             return function(system, *args, **kwargs)
 
-        raise Error('Administration unauthorized.', status=403)
+        raise Error('System administration unauthorized.', status=403)
 
     return wrapper
 

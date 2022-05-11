@@ -11,7 +11,7 @@ from wsgilib import JSON
 
 from termgr.hooks import reload
 from termgr.wireguard import get_wireguard_config
-from termgr.wsgi.common import admin, groupadmin
+from termgr.wsgi.common import sysadmin, groupadmin
 
 
 __all__ = ['ROUTES']
@@ -19,7 +19,7 @@ __all__ = ['ROUTES']
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def get_system_info(system: System) -> JSON:
     """Returns the system information."""
 
@@ -28,7 +28,7 @@ def get_system_info(system: System) -> JSON:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def finalize(system: System) -> str:
     """Posts setup data."""
 
@@ -76,7 +76,7 @@ def add_system(group: Group) -> JSON:
 
 @authenticated
 @authorized('termgr')
-@admin
+@sysadmin
 def patch_system(system: System) -> JSON:
     """Patches the given system."""
 
