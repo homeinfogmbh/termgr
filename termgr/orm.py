@@ -26,10 +26,10 @@ HTML_TABLE_HEADERS = (
 )
 
 
-class TermgrModel(JSONModel):   # pylint: disable=R0903
+class TermgrModel(JSONModel):
     """Terminal manager basic Model."""
 
-    class Meta:     # pylint: disable=C0111,R0903
+    class Meta:
         database = DATABASE
         schema = database.database
 
@@ -39,21 +39,25 @@ class DeploymentHistory(TermgrModel):
 
     FIELDS = ['Timestamp           ', 'Account', 'System', 'Old', 'New']
 
-    class Meta:     # pylint: disable=C0115,R0903
+    class Meta:
         table_name = 'deployment_history'
 
     account = ForeignKeyField(
         Account, column_name='account', on_update='CASCADE',
-        on_delete='CASCADE', lazy_load=False)
+        on_delete='CASCADE', lazy_load=False
+    )
     system = ForeignKeyField(
         System, column_name='system', on_update='CASCADE', on_delete='CASCADE',
-        lazy_load=False)
+        lazy_load=False
+    )
     old_deployment = ForeignKeyField(
         Deployment, null=True, column_name='old_deployment',
-        on_update='CASCADE', on_delete='SET NULL', lazy_load=False)
+        on_update='CASCADE', on_delete='SET NULL', lazy_load=False
+    )
     new_deployment = ForeignKeyField(
         Deployment, null=True, column_name='new_deployment',
-        on_update='CASCADE', on_delete='CASCADE', lazy_load=False)
+        on_update='CASCADE', on_delete='CASCADE', lazy_load=False
+    )
     timestamp = DateTimeField(default=datetime.now)
 
     def __str__(self):
@@ -68,7 +72,8 @@ class DeploymentHistory(TermgrModel):
         """Creates and saves a new record."""
         record = cls(
             account=account, system=system, old_deployment=old_deployment,
-            new_deployment=system.deployment)
+            new_deployment=system.deployment
+        )
         record.save()
         return record
 
@@ -82,28 +87,36 @@ class DeploymentHistory(TermgrModel):
         new_deployment_customer = Customer.alias()
         new_deployment_company = Company.alias()
         new_deployment_address = Address.alias()
-        args = {
+        return super().select(
             cls, Account, System, Deployment, Customer, Company, Address,
             new_deployment, new_deployment_address, new_deployment_customer,
             new_deployment_company, *args
-        }
-        return super().select(*args).join(Account).join_from(
-            cls, System).join_from(
+        ).join(Account).join_from(
+            cls, System
+        ).join_from(
             # Old deployment.
             cls, Deployment, on=cls.old_deployment == Deployment.id,
-            join_type=JOIN.LEFT_OUTER).join(
-            Customer, join_type=JOIN.LEFT_OUTER).join(
-            Company, join_type=JOIN.LEFT_OUTER).join_from(
+            join_type=JOIN.LEFT_OUTER
+        ).join(
+            Customer, join_type=JOIN.LEFT_OUTER
+        ).join(
+            Company, join_type=JOIN.LEFT_OUTER
+        ).join_from(
             Deployment, Address, on=Deployment.address == Address.id,
-            join_type=JOIN.LEFT_OUTER).join_from(
+            join_type=JOIN.LEFT_OUTER
+        ).join_from(
             # New deployment.
             cls, new_deployment, on=cls.new_deployment == new_deployment.id,
-            join_type=JOIN.LEFT_OUTER).join(
-            new_deployment_customer, join_type=JOIN.LEFT_OUTER).join(
-            new_deployment_company, join_type=JOIN.LEFT_OUTER).join_from(
+            join_type=JOIN.LEFT_OUTER
+        ).join(
+            new_deployment_customer, join_type=JOIN.LEFT_OUTER
+        ).join(
+            new_deployment_company, join_type=JOIN.LEFT_OUTER
+        ).join_from(
             new_deployment, new_deployment_address,
             on=new_deployment.address == new_deployment_address.id,
-            join_type=JOIN.LEFT_OUTER)
+            join_type=JOIN.LEFT_OUTER
+        )
 
     @classmethod
     def of_today(cls) -> Select:
@@ -148,7 +161,7 @@ class DeploymentHistory(TermgrModel):
         else:
             yield self.new_deployment.to_html()
 
-        yield self.timestamp.isoformat()    # pylint: disable=E1101
+        yield self.timestamp.isoformat()
 
     @property
     def shallow_json(self) -> dict[str, Any]:
