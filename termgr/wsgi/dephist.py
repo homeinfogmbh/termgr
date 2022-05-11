@@ -26,5 +26,5 @@ def get_deployment_history(system: System) -> JSON:
 
 
 ROUTES = [
-    ('GET', '/list/deployment-history/<int:system>', get_deployment_history)
+    ('GET', '/deployment-history/<int:system>', get_deployment_history)
 ]
