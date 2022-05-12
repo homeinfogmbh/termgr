@@ -7,12 +7,11 @@ from flask import request
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, Deployment, System
-from mdb import Address
 from wsgilib import JSON
 
 from termgr.notify import notify
 from termgr.orm import DeploymentHistory
-from termgr.wsgi.common import depadmin, sysadmin, deploy
+from termgr.wsgi.common import depadmin, deploy, get_address, sysadmin
 
 
 __all__ = ['ROUTES']
@@ -116,14 +115,10 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     """Set the LPT address of the given deployment."""
 
     try:
-        address = Address.add(*request.json)
+        deployment.lpt_address = get_address(request.json)
     except TypeError:
         return 'Invalid address provided.', 400
 
-    if address.id is None:
-        address.save()
-
-    deployment.lpt_address = address
     deployment.save()
     return 'LPT address updated.', 200
 

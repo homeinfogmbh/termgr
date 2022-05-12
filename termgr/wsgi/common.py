@@ -1,12 +1,13 @@
 """Common WSGI functions."""
 
 from functools import wraps
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 from flask import request
 
 from his import ACCOUNT
 from hwdb import Deployment, Group, System
+from mdb import Address
 from termacls import can_administer_deployment
 from termacls import can_administer_system
 from termacls import can_deploy
@@ -14,7 +15,7 @@ from termacls import GroupAdmin
 from wsgilib import Error
 
 
-__all__ = ['depadmin', 'sysadmin', 'deploy', 'groupadmin']
+__all__ = ['depadmin', 'sysadmin', 'deploy', 'groupadmin', 'get_address']
 
 
 def _get_deployment(deployment: Optional[int] = None) -> Optional[Deployment]:
@@ -124,3 +125,17 @@ def groupadmin(function: Callable) -> Callable:
         return function(group, *args, **kwargs)
 
     return wrapper
+
+
+def get_address(address: Union[list[str], None]) -> Optional[Address]:
+    """Returns an address object or None."""
+
+    if address is None:
+        return None
+
+    address = Address.add(*address)
+
+    if address.id is None:
+        address.save()
+
+    return address
