@@ -3,8 +3,10 @@
 from pathlib import Path
 from typing import Union
 
+from flask import Response
+
 from his import authenticated, authorized
-from wsgilib import Binary, JSONMessage
+from wsgilib import Binary, JSONMessage, filestream
 
 
 __all__ = ['ROUTES']
@@ -18,24 +20,24 @@ MANUAL = BASEDIR / 'Installationsanleitung_DDB.pdf'
 
 @authenticated
 @authorized('termgr')
-def get_hidsl_iso() -> Union[Binary, JSONMessage]:
+def get_hidsl_iso() -> Union[Response, JSONMessage]:
     """Returns the latest HIDSL ISO."""
 
     for path in sorted(BASEDIR.glob(HIDSL_ISO), reverse=True):
         with path.open('rb') as file:
-            return Binary(file.read())
+            return filestream(file)
 
     return JSONMessage('File not found.', status=404)
 
 
 @authenticated
 @authorized('termgr')
-def get_hidsl_arm_image() -> Union[Binary, JSONMessage]:
+def get_hidsl_arm_image() -> Union[Response, JSONMessage]:
     """Returns the latest HIDSL ARM image."""
 
     for path in sorted(BASEDIR.glob(HIDSL_ARM_IMAGE), reverse=True):
         with path.open('rb') as file:
-            return Binary(file.read())
+            return filestream(file)
 
     return JSONMessage('File not found.', status=404)
 
