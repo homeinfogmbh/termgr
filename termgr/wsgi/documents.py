@@ -18,7 +18,7 @@ HIDSL_ARM_IMAGE = 'HIDSL-arm-raspi4-*.tar.lzop'
 MANUAL = BASEDIR / 'Installationsanleitung_DDB.pdf'
 
 
-def stream_file(path: Path, *, chunk_size: int = 4096) -> Iterator[bytes]:
+def iter_file(path: Path, *, chunk_size: int = 4096) -> Iterator[bytes]:
     """Yields chunks of a file."""
 
     with path.open('rb') as file:
@@ -33,7 +33,7 @@ def get_hidsl_iso() -> Union[Response, JSONMessage]:
 
     for path in sorted(BASEDIR.glob(HIDSL_ISO), reverse=True):
         return Response(
-            stream_file(path),
+            iter_file(path),
             mimetype='application/x-iso9660-image'
         )
 
@@ -47,7 +47,7 @@ def get_hidsl_arm_image() -> Union[Response, JSONMessage]:
 
     for path in sorted(BASEDIR.glob(HIDSL_ARM_IMAGE), reverse=True):
         return Response(
-            stream_file(path),
+            iter_file(path),
             mimetype='application/octet-stream'
         )
 
