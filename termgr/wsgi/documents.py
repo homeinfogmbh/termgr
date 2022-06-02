@@ -35,7 +35,7 @@ def get_hidsl_iso() -> Union[Response, JSONMessage]:
         return Response(
             iter_file(path),
             mimetype='application/x-iso9660-image',
-            headers={'Content-Disposition': 'filename="{path.name}"'}
+            headers={'Content-Disposition': f'filename="{path.name}"'}
         )
 
     return JSONMessage('File not found.', status=404)
@@ -50,7 +50,7 @@ def get_hidsl_arm_image() -> Union[Response, JSONMessage]:
         return Response(
             iter_file(path),
             mimetype='application/octet-stream',
-            headers={'Content-Disposition': 'filename="{path.name}"'}
+            headers={'Content-Disposition': f'filename="{path.name}"'}
         )
 
     return JSONMessage('File not found.', status=404)
