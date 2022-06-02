@@ -62,7 +62,6 @@ def add_system(group: Group) -> JSON:
         pubkey=request.json['pubkey'],
         configured=datetime.now(),
         operating_system=operating_system(request.json['os']),
-        monitor=request.json.get('monitor'),
         serial_number=request.json.get('sn'),
         model=request.json.get('model')
     )
@@ -85,9 +84,6 @@ def patch_system(system: System) -> JSON:
 
     with suppress(KeyError):
         system.operating_system = operating_system(request.json['os'])
-
-    with suppress(KeyError):
-        system.monitor = request.json['monitor']
 
     with suppress(KeyError):
         system.serial_number = request.json['sn']
