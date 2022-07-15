@@ -12,7 +12,7 @@ __all__ = ['main']
 
 
 DESCRIPTION = 'Manage temporary access to configure systems.'
-EMAIL = 'ddbinstall-{}@homeinfo.de'
+EMAIL = 'ddbinstall@homeinfo.de'
 FULL_NAME = 'DDB Setup Account'
 GROUP = 1
 NAME = 'ddbinstall'
@@ -31,16 +31,17 @@ def get_account(customer: Customer) -> Account:
     """Update the image account."""
 
     try:
-        return Account.select(cascade=True).where(
-            (Account.name == NAME) & (Account.customer == customer)
-        ).get()
+        account = Account.get(Account.name == NAME)
     except Account.DoesNotExist:
         return Account(
-            full_name=FULL_NAME,
-            name=NAME,
             customer=customer,
-            email=EMAIL.format(customer.id)
+            email=EMAIL,
+            full_name=FULL_NAME,
+            name=NAME
         )
+
+    account.customer = customer
+    return account
 
 
 def get_service(name: str) -> Service:
@@ -83,16 +84,6 @@ def enable_customer_service(
         return customer_service
 
 
-def disable_account_service(account: Account, service: Service) -> None:
-    """Disable the account for the given service."""
-
-    for account_service in AccountService.select().where(
-            (AccountService.account == account)
-            & (AccountService.service == service)
-    ):
-        account_service.delete_instance()
-
-
 def disable_customer_service(customer: Customer, service: Service) -> None:
     """Disable the customer for the given service."""
 
@@ -129,24 +120,6 @@ def enable_type_admin(account: Account, type: DeploymentType) -> TypeAdmin:
         return type_admin
 
 
-def disable_group_admin(account: Account, group: int) -> None:
-    """Disable the account as admin for the given group."""
-
-    for group_admin in GroupAdmin.select().where(
-            (GroupAdmin.account == account) & (GroupAdmin.group == group)
-    ):
-        group_admin.delete_instance()
-
-
-def disable_type_admin(account: Account, type: DeploymentType) -> None:
-    """Disable the account as admin for the given type."""
-
-    for type_admin in TypeAdmin.select().where(
-            (TypeAdmin.account == account) & (TypeAdmin.type == type)
-    ):
-        type_admin.delete_instance()
-
-
 def enable_account(account: Account) -> None:
     """Update and print the account data."""
 
@@ -166,12 +139,8 @@ def enable_account(account: Account) -> None:
 def disable_account(account: Account) -> None:
     """Disables the account."""
 
-    account.disabled = True
-    account.save()
-    disable_account_service(account, termgr := get_service('termgr'))
-    disable_customer_service(account.customer, termgr)
-    disable_group_admin(account, GROUP)
-    disable_type_admin(account, TYPE)
+    disable_customer_service(account.customer, get_service('termgr'))
+    account.delete_instance()
 
 
 def toggle_account(account: Account) -> None:
