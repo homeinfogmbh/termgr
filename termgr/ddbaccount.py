@@ -141,6 +141,7 @@ def disable_account(account: Account) -> None:
 
     disable_customer_service(account.customer, get_service('termgr'))
     account.delete_instance()
+    print('Account', f'"{account.name}', 'deleted.')
 
 
 def toggle_account(account: Account) -> None:
