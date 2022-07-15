@@ -12,6 +12,8 @@ __all__ = ['main']
 
 
 DESCRIPTION = 'Manage temporary access to configure systems.'
+EMAIL = 'ddbinstall-{}@homeinfo.de'
+FULL_NAME = 'DDB Setup Account'
 GROUP = 1
 NAME = 'ddbinstall'
 TYPE = DeploymentType.DDB
@@ -33,7 +35,12 @@ def get_account(customer: Customer) -> Account:
             (Account.name == NAME) & (Account.customer == customer)
         ).get()
     except Account.DoesNotExist:
-        return Account(name=NAME, customer=customer)
+        return Account(
+            full_name=FULL_NAME,
+            name=NAME,
+            customer=customer,
+            email=EMAIL.format(customer.id)
+        )
 
 
 def get_service(name: str) -> Service:
