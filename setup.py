@@ -30,7 +30,8 @@ setup(
     packages=['termgr', 'termgr.wsgi'],
     entry_points={'console_scripts': [
         'dephist = termgr.dephist:main',
-        'reload-terminals = termgr.wireguard:update_peers'
+        'reload-terminals = termgr.wireguard:update_peers',
+        'toggle-ddb-install-account = termgr.ddbaccount:main'
     ]},
     description='Homeinfo Terminal Manager'
 )
