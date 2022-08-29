@@ -3,6 +3,7 @@
 from typing import Optional
 
 from flask import request
+from peewee import OperationalError
 
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
@@ -110,6 +111,25 @@ def beep(system: System) -> tuple[str, int]:
 
 @authenticated
 @authorized('termgr')
+@sysadmin
+def set_serial_number(system: System) -> tuple[str, int]:
+    """Set the serial number of the given system."""
+
+    try:
+        system.serial_number = request.json['serialNumber']
+    except TypeError:
+        return 'Invalid serial number provided.', 400
+
+    try:
+        system.save()
+    except OperationalError as error:
+        return f'Could not set new serial number: {error}', 400
+
+    return 'Serial number updated.', 200
+
+
+@authenticated
+@authorized('termgr')
 @depadmin
 def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     """Set the LPT address of the given deployment."""
@@ -130,5 +150,6 @@ ROUTES = [
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
     ('POST', '/administer/beep', beep),
+    ('POST', '/administer/serial-number', set_serial_number),
     ('POST', '/administer/lpt-address/<int:deployment>', set_lpt_address)
 ]
