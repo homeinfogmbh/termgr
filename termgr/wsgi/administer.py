@@ -117,6 +117,8 @@ def set_serial_number(system: System) -> tuple[str, int]:
 
     try:
         system.serial_number = request.json['serialNumber']
+    except KeyError:
+        return 'No serial number provided.', 400
     except TypeError:
         return 'Invalid serial number provided.', 400
 
