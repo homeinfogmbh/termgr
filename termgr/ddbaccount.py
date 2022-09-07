@@ -4,7 +4,7 @@ from argparse import ArgumentParser, Namespace
 
 from his import Account, AccountService, CustomerService, Service, genpw
 from hwdb import DeploymentType
-from mdb import Customer, customer
+from mdb import Customer, customer as customer_type
 from termacls import GroupAdmin, TypeAdmin
 
 
@@ -22,7 +22,7 @@ def get_args() -> Namespace:
     """Return the command line arguments."""
 
     parser = ArgumentParser(description=DESCRIPTION)
-    parser.add_argument('customer', type=customer, help='the customer')
+    parser.add_argument('customer', type=customer_type, help='the customer')
     return parser.parse_args()
 
 
@@ -108,15 +108,15 @@ def enable_group_admin(account: Account, group: int) -> GroupAdmin:
         return group_admin
 
 
-def enable_type_admin(account: Account, type: DeploymentType) -> TypeAdmin:
+def enable_type_admin(account: Account, typ: DeploymentType) -> TypeAdmin:
     """Enable the account as admin for the given type."""
 
     try:
         return TypeAdmin.get(
-            (TypeAdmin.account == account) & (TypeAdmin.type == type)
+            (TypeAdmin.account == account) & (TypeAdmin.type == typ)
         )
     except TypeAdmin.DoesNotExist:
-        type_admin = TypeAdmin(account=account, type=type)
+        type_admin = TypeAdmin(account=account, type=typ)
         type_admin.save()
         return type_admin
 
