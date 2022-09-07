@@ -163,8 +163,8 @@ def enable_account(account: Account) -> None:
     enable_customer_service(account.customer, termgr)
     enable_group_admin(account, GROUP)
     enable_type_admin(account, TYPE)
-    print('Account: ', account.name)
     print('Customer:', account.customer)
+    print('Account: ', account.name)
     print('Password:', passwd)
 
 
