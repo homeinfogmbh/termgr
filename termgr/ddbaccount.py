@@ -1,6 +1,7 @@
 """Handling of a temporary DDB setup accounts."""
 
 from argparse import ArgumentParser, Namespace
+from typing import Iterable, Iterator
 
 from his import Account, AccountService, CustomerService, Service, genpw
 from hwdb import DeploymentType
@@ -22,14 +23,44 @@ def get_args() -> Namespace:
     """Return the command line arguments."""
 
     parser = ArgumentParser(description=DESCRIPTION)
-    parser.add_argument('customer', type=customer_type, help='the customer')
+    parser.add_argument(
+        'customer', nargs='?', type=customer_type, help='the customer'
+    )
     return parser.parse_args()
+
+
+def print_accounts() -> None:
+    """Print DDB setup accounts."""
+
+    for account in list_accounts():
+        print(account.name, account.customer)
+
+
+def list_accounts() -> Iterable[Account]:
+    """List DDB setup accounts."""
+
+    return Account.select(cascade=True).where(
+        Account.name << set(list_account_names())
+    )
+
+
+def list_account_names() -> Iterator[str]:
+    """Yield names of potential DDB setup accounts."""
+
+    for customer in Customer.select().where(True):
+        yield get_account_name(customer)
+
+
+def get_account_name(customer: Customer) -> str:
+    """Return the DDB setup account name for the given customer."""
+
+    return f'ddb-{customer.id}'
 
 
 def get_account(customer: Customer) -> Account:
     """Update the image account."""
 
-    name = f'ddb-{customer.id}'
+    name = get_account_name(customer.id)
 
     try:
         account = Account.get(Account.name == name)
@@ -158,5 +189,10 @@ def main() -> int:
     """Run the program."""
 
     args = get_args()
-    toggle_account(get_account(args.customer))
+
+    if args.customer is None:
+        print_accounts()
+    else:
+        toggle_account(get_account(args.customer))
+
     return 0
