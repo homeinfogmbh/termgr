@@ -159,8 +159,9 @@ def enable_account(account: Account) -> None:
     account.failed_logins = 0
     account.passwd = passwd = genpw(length=8)
     account.save()
-    enable_account_service(account, termgr := get_service('termgr'))
-    enable_customer_service(account.customer, termgr)
+    service = get_service('termgr')
+    enable_account_service(account, service)
+    enable_customer_service(account.customer, service)
     enable_group_admin(account, GROUP)
     enable_type_admin(account, TYPE)
     print('Customer:', account.customer)
