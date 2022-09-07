@@ -60,7 +60,7 @@ def get_account_name(customer: Customer) -> str:
 def get_account(customer: Customer) -> Account:
     """Update the image account."""
 
-    name = get_account_name(customer.id)
+    name = get_account_name(customer)
 
     try:
         account = Account.get(Account.name == name)
