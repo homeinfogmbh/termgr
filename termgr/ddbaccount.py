@@ -15,7 +15,6 @@ DESCRIPTION = 'Manage temporary access to configure systems.'
 EMAIL = 'ddbinstall@homeinfo.de'
 FULL_NAME = 'DDB Setup Account'
 GROUP = 1
-NAME = 'ddbinstall'
 TYPE = DeploymentType.DDB
 
 
@@ -30,14 +29,16 @@ def get_args() -> Namespace:
 def get_account(customer: Customer) -> Account:
     """Update the image account."""
 
+    name = f'ddb-{customer.id}'
+
     try:
-        account = Account.get(Account.name == NAME)
+        account = Account.get(Account.name == name)
     except Account.DoesNotExist:
         return Account(
             customer=customer,
             email=EMAIL,
             full_name=FULL_NAME,
-            name=NAME
+            name=name
         )
 
     account.customer = customer
