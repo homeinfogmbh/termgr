@@ -13,7 +13,6 @@ __all__ = ['main']
 
 
 DESCRIPTION = 'Manage temporary access to configure systems.'
-EMAIL = 'ddbinstall@homeinfo.de'
 FULL_NAME = 'DDB Setup Account'
 GROUP = 1
 TYPE = DeploymentType.DDB
@@ -67,7 +66,7 @@ def get_account(customer: Customer) -> Account:
     except Account.DoesNotExist:
         return Account(
             customer=customer,
-            email=EMAIL,
+            email=f'name@homeinfo.de',
             full_name=FULL_NAME,
             name=name
         )
