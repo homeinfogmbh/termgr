@@ -91,7 +91,7 @@ def reboot(system: System) -> tuple[str, int]:
 def sync(system: System) -> tuple[str, int]:
     """Synchronizes the respective system."""
 
-    Queue.enqueue(system)
+    Queue.enqueue(system, priority=True, force=True)
     return 'Synchronization queued.', 202
 
 
