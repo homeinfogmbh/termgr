@@ -59,9 +59,7 @@ def fit(system: System) -> str:
 def set_application(system: System) -> tuple[str, int]:
     """Set the running digital signage application."""
 
-    mode = request.json.get('mode')
-
-    if mode is not None:
+    if (mode := request.json.get('mode')) is not None:
         try:
             mode = ApplicationMode[mode]
         except KeyError:
