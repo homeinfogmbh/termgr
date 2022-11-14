@@ -28,7 +28,8 @@ def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
     fitted = request.json.get('fitted', False)
 
     for sys, old, _ in system.deploy(
-            deployment, exclusive=exclusive, fitted=fitted):
+            deployment, exclusive=exclusive, fitted=fitted
+    ):
         DeploymentHistory.add(ACCOUNT.id, sys, old)
 
     notify()
