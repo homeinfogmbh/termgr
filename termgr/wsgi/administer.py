@@ -7,7 +7,7 @@ from peewee import OperationalError
 
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
-from hwdb import SystemOffline, Deployment, System
+from hwdb import SystemOffline, ApplicationMode, Deployment, System
 from wsgilib import JSON
 
 from termgr.notify import notify
@@ -56,15 +56,22 @@ def fit(system: System) -> str:
 @authenticated
 @authorized('termgr')
 @sysadmin
-def toggle_application(system: System) -> tuple[str, int]:
-    """Activates and deactivates the digital signage application."""
+def set_application(system: System) -> tuple[str, int]:
+    """Set the running digital signage application."""
+
+    mode = request.json.get('mode')
+
+    if mode is not None:
+        try:
+            mode = ApplicationMode[mode]
+        except KeyError:
+            return 'Invalid application mode.', 400
 
     try:
-        response = system.application(request.json.get('state', False))
+        response = system.application(mode)
     except SystemOffline:
         return 'System is offline.', 400
 
-    system.save()
     return response.text, response.status_code
 
 
@@ -148,7 +155,7 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
 ROUTES = [
     ('POST', '/administer/deploy', deploy_),
     ('POST', '/administer/fit', fit),
-    ('POST', '/administer/application', toggle_application),
+    ('POST', '/administer/application', set_application),
     ('POST', '/administer/reboot', reboot),
     ('POST', '/administer/sync', sync),
     ('POST', '/administer/beep', beep),
