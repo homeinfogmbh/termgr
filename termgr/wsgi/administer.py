@@ -22,7 +22,7 @@ __all__ = ['ROUTES']
 @authorized('termgr')
 @deploy
 def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
-    """Deploys the respective system."""
+    """Deploy the respective system."""
 
     exclusive = request.json.get('exclusive', False)
     fitted = request.json.get('fitted', False)
@@ -46,7 +46,7 @@ def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
 @authorized('termgr')
 @sysadmin
 def fit(system: System) -> str:
-    """Marks a system as fitted."""
+    """Mark a system as fitted."""
 
     system.fitted = fitted = request.json.get('fitted', False)
     system.save()
@@ -78,7 +78,7 @@ def set_application(system: System) -> tuple[str, int]:
 @authorized('termgr')
 @sysadmin
 def reboot(system: System) -> tuple[str, int]:
-    """Reboots the respective system."""
+    """Reboot the respective system."""
 
     try:
         response = system.reboot()
@@ -95,7 +95,7 @@ def reboot(system: System) -> tuple[str, int]:
 @authorized('termgr')
 @sysadmin
 def sync(system: System) -> tuple[str, int]:
-    """Synchronizes the respective system."""
+    """Synchronize the respective system."""
 
     Queue.enqueue(system, priority=True, force=True)
     return 'Synchronization queued.', 202
@@ -105,7 +105,7 @@ def sync(system: System) -> tuple[str, int]:
 @authorized('termgr')
 @sysadmin
 def beep(system: System) -> tuple[str, int]:
-    """Identifies the respective system by beep test."""
+    """Identify the respective system by beep test."""
 
     try:
         response = system.beep()
