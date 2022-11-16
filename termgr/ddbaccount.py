@@ -9,7 +9,13 @@ from mdb import Customer, customer as customer_type
 from termacls import GroupAdmin, TypeAdmin
 
 
-__all__ = ['main']
+__all__ = [
+    'disable_account',
+    'enable_account',
+    'get_account',
+    'list_accounts',
+    'main'
+]
 
 
 DESCRIPTION = 'Manage temporary access to configure systems.'
@@ -151,7 +157,7 @@ def enable_type_admin(account: Account, typ: DeploymentType) -> TypeAdmin:
         return type_admin
 
 
-def enable_account(account: Account) -> None:
+def enable_account(account: Account) -> str:
     """Update and print the account data."""
 
     account.disabled = False
@@ -163,9 +169,7 @@ def enable_account(account: Account) -> None:
     enable_customer_service(account.customer, service)
     enable_group_admin(account, GROUP)
     enable_type_admin(account, TYPE)
-    print('Customer:', account.customer)
-    print('Account: ', account.name)
-    print('Password:', passwd)
+    return passwd
 
 
 def disable_account(account: Account) -> None:
@@ -173,16 +177,19 @@ def disable_account(account: Account) -> None:
 
     disable_customer_service(account.customer, get_service('termgr'))
     account.delete_instance()
-    print('Account', f'"{account.name}"', 'deleted.')
 
 
 def toggle_account(account: Account) -> None:
     """Toggle the account."""
 
     if account.id is None or account.disabled:
-        return enable_account(account)
-
-    return disable_account(account)
+        passwd = enable_account(account)
+        print('Customer:', account.customer)
+        print('Account: ', account.name)
+        print('Password:', passwd)
+    else:
+        disable_account(account)
+        print('Account', f'"{account.name}"', 'deleted.')
 
 
 def main() -> int:
