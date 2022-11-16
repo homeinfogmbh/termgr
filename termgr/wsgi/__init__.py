@@ -2,14 +2,23 @@
 
 from his import Application
 
-from termgr.wsgi import administer, dephist, documents, listing, setup
+from termgr.wsgi import administer
+from termgr.wsgi import ddbaccounts
+from termgr.wsgi import dephist
+from termgr.wsgi import documents
+from termgr.wsgi import listing
+from termgr.wsgi import setup
 
 
 __all__ = ['ROUTES', 'APPLICATION']
 
 
 ROUTES = (
-    *administer.ROUTES, *dephist.ROUTES, *documents.ROUTES, *listing.ROUTES,
+    *administer.ROUTES,
+    *ddbaccounts.ROUTES,
+    *dephist.ROUTES,
+    *documents.ROUTES,
+    *listing.ROUTES,
     *setup.ROUTES
 )
 APPLICATION = Application('termgr', debug=True)
