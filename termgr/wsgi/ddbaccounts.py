@@ -1,7 +1,5 @@
 """Manage temporary DDB setup accounts."""
 
-from typing import Union
-
 from flask import request
 
 from his import Account, authenticated, authorized, root
@@ -45,7 +43,7 @@ def _list_accounts() -> JSON:
 @authenticated
 @authorized('termgr')
 @root
-def _enable_account() -> Union[JSON, JSONMessage]:
+def _enable_account() -> JSON:
     """Enables / adds a temporary setup accounts."""
 
     passwd = enable_account(account := get_account_from_json())
