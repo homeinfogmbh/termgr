@@ -124,6 +124,14 @@ def enable_customer_service(
 def disable_customer_service(customer: Customer, service: Service) -> None:
     """Disable the customer for the given service."""
 
+    for _ in AccountService.select().join(Account).where(
+        (Account.customer == customer)
+        & (AccountService.service == service)
+    ):
+        # Do not disable customer service if it is used
+        # by other accounts of that customer.
+        return
+
     for customer_service in CustomerService.select().where(
             (CustomerService.customer == customer)
             & (CustomerService.service == service)
@@ -175,8 +183,8 @@ def enable_account(account: Account) -> str:
 def disable_account(account: Account) -> None:
     """Disables the account."""
 
-    disable_customer_service(account.customer, get_service('termgr'))
     account.delete_instance()
+    disable_customer_service(account.customer, get_service('termgr'))
 
 
 def toggle_account(account: Account) -> None:
