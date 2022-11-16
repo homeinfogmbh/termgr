@@ -72,7 +72,7 @@ def get_account(customer: Customer) -> Account:
     except Account.DoesNotExist:
         return Account(
             customer=customer,
-            email=f'name@homeinfo.de',
+            email=f'{name}@homeinfo.de',
             full_name=FULL_NAME,
             name=name
         )
