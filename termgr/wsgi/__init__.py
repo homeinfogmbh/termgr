@@ -5,7 +5,6 @@ from his import Application
 from termgr.wsgi import administer
 from termgr.wsgi import ddbaccounts
 from termgr.wsgi import dephist
-from termgr.wsgi import documents
 from termgr.wsgi import listing
 from termgr.wsgi import setup
 
@@ -17,7 +16,6 @@ ROUTES = (
     *administer.ROUTES,
     *ddbaccounts.ROUTES,
     *dephist.ROUTES,
-    *documents.ROUTES,
     *listing.ROUTES,
     *setup.ROUTES
 )
