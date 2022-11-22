@@ -1,5 +1,7 @@
 """Manage temporary DDB setup accounts."""
 
+from typing import Any
+
 from flask import request
 
 from his import Account, authenticated, authorized, root
@@ -15,10 +17,10 @@ from termgr.ddbaccount import list_accounts
 __all__ = ['ROUTES']
 
 
-def get_account_from_json() -> Account:
+def get_account_from_json(json: dict[str, Any]) -> Account:
     """Returns the requested account from the JSON data."""
 
-    if (cid := request.json.get('customer')) is None:
+    if (cid := json.get('customer')) is None:
         raise JSONMessage('No customer specified', status=400)
 
     try:
@@ -46,7 +48,7 @@ def _list_accounts() -> JSON:
 def _enable_account() -> JSON:
     """Enables / adds a temporary setup accounts."""
 
-    passwd = enable_account(account := get_account_from_json())
+    passwd = enable_account(account := get_account_from_json(request.json))
     return JSON({**account.to_json(), 'passwd': passwd})
 
 
@@ -56,7 +58,7 @@ def _enable_account() -> JSON:
 def _disable_account() -> JSONMessage:
     """Removes a temporary setup account."""
 
-    disable_account(get_account_from_json())
+    disable_account(get_account_from_json(request.json))
     return JSONMessage('Account deleted.')
 
 
