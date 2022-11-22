@@ -47,7 +47,7 @@ def _enable_account() -> JSON:
     """Enables / adds a temporary setup accounts."""
 
     passwd = enable_account(account := get_account_from_json())
-    return JSON({**account.to_json, 'passwd': passwd})
+    return JSON({**account.to_json(), 'passwd': passwd})
 
 
 @authenticated
