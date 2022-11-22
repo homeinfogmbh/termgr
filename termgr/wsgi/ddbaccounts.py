@@ -24,7 +24,7 @@ def get_account_from_json(json: dict[str, Any]) -> Account:
         raise JSONMessage('No customer specified', status=400)
 
     try:
-        customer = Customer.get(cid)
+        customer = Customer.get(Customer.id == cid)
     except (ValueError, TypeError):
         raise JSONMessage('invalid customer ID', status=400)
     except Customer.DoesNotExist:
