@@ -74,8 +74,12 @@ def get_emails(subject: str, html: Element) -> Iterable[EMail]:
     html = tostring(html, encoding='unicode', method='html')
 
     for admin in get_admins():
-        yield EMail(subject, get_config().get('mail', 'from'), admin,
-                    html=html)
+        yield EMail(
+            subject,
+            get_config().get('mail', 'from'),
+            admin,
+            html=html
+        )
 
 
 def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
