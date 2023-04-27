@@ -53,11 +53,12 @@ def get_html(deployments: List[DeploymentHistory]) -> Element:
     salutation = SubElement(body, 'p')
     salutation.text = 'Sehr geehrter Administrator,'
     text = SubElement(body, 'p')
+    template = get_config().get('notify', 'body')
 
     if len(deployments) == 1:
-        text.text = 'das folgende HOMEINFO System wurde heute verbaut:'
+        text.text = template.format(article='das', pl1='', pl2='')
     else:
-        text.text = 'die folgenden HOMEINFO Systeme wurden heute verbaut:'
+        text.text = template.format(article='die', pl1='n', pl2='n')
 
     table = SubElement(body, 'table', attrib={'border': '1'})
     table.append(DeploymentHistory.html_table_header())
