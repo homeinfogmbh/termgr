@@ -89,6 +89,9 @@ def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
     if not deployments:
         return False
 
-    emails = get_emails('Verbaute HOMEINFO Systeme', get_html(deployments))
+    emails = get_emails(
+        get_config().get('notify', 'subject'),
+        get_html(deployments)
+    )
     get_mailer().send(emails)
     return True
