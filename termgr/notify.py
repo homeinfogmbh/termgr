@@ -68,7 +68,7 @@ def get_html(deployments: List[DeploymentHistory]) -> Element:
     return html
 
 
-def get_emails(subject: str, html: str) -> Iterable[EMail]:
+def get_emails(subject: str, html: Element) -> Iterable[EMail]:
     """Yields emails with HTML body."""
 
     html = tostring(html, encoding='unicode', method='html')
