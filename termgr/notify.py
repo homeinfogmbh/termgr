@@ -79,7 +79,7 @@ def get_emails(subject: str, html: str) -> Iterable[EMail]:
 
 
 def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
-    """Notifies the adminstrators about deployments."""
+    """Notifies the administrators about deployments."""
 
     if deployments is None:
         deployments = DeploymentHistory.of_today()
