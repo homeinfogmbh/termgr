@@ -58,7 +58,7 @@ def get_html(deployments: List[DeploymentHistory]) -> Element:
     if len(deployments) == 1:
         text.text = template.format(article='das', pl1='', pl2='')
     else:
-        text.text = template.format(article='die', pl1='n', pl2='n')
+        text.text = template.format(article='die', pl1='n', pl2='e')
 
     table = SubElement(body, 'table', attrib={'border': '1'})
     table.append(DeploymentHistory.html_table_header())
