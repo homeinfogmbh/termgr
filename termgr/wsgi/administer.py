@@ -15,67 +15,67 @@ from termgr.orm import DeploymentHistory
 from termgr.wsgi.common import depadmin, deploy, get_address, sysadmin
 
 
-__all__ = ['ROUTES']
+__all__ = ["ROUTES"]
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @deploy
 def deploy_(system: System, deployment: Optional[Deployment]) -> JSON:
     """Deploy the respective system."""
 
-    exclusive = request.json.get('exclusive', False)
-    fitted = request.json.get('fitted', False)
+    exclusive = request.json.get("exclusive", False)
+    fitted = request.json.get("fitted", False)
 
-    for sys, old, _ in system.deploy(
-            deployment, exclusive=exclusive, fitted=fitted
-    ):
+    for sys, old, _ in system.deploy(deployment, exclusive=exclusive, fitted=fitted):
         DeploymentHistory.add(ACCOUNT.id, sys, old)
 
     notify()
-    return JSON({
-        'system': system.id,
-        'deployment': None if deployment is None else deployment.id,
-        'address': None if deployment is None else str(deployment.address),
-        'exclusive': exclusive,
-        'fitted': fitted
-    })
+    return JSON(
+        {
+            "system": system.id,
+            "deployment": None if deployment is None else deployment.id,
+            "address": None if deployment is None else str(deployment.address),
+            "exclusive": exclusive,
+            "fitted": fitted,
+        }
+    )
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def fit(system: System) -> str:
     """Mark a system as fitted."""
 
-    system.fitted = fitted = request.json.get('fitted', False)
+    system.fitted = fitted = request.json.get("fitted", False)
     system.save()
-    text = 'fitted' if fitted else 'unfitted'
-    return f'System has been {text}.'
+    text = "fitted" if fitted else "unfitted"
+    return f"System has been {text}."
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def set_application(system: System) -> tuple[str, int]:
     """Set the running digital signage application."""
 
-    if (mode := request.json.get('mode')) is not None:
+    if (mode := request.json.get("mode")) is not None:
         try:
             mode = ApplicationMode[mode]
         except KeyError:
-            return 'Invalid application mode.', 400
+            return "Invalid application mode.", 400
 
     try:
         response = system.application(mode)
     except SystemOffline:
-        return 'System is offline.', 400
+        return "System is offline.", 400
 
     return response.text, response.status_code
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def reboot(system: System) -> tuple[str, int]:
     """Reboot the respective system."""
@@ -83,26 +83,26 @@ def reboot(system: System) -> tuple[str, int]:
     try:
         response = system.reboot()
     except SystemOffline:
-        return 'System is offline.', 400
+        return "System is offline.", 400
 
     if response is None:
-        return 'Probably rebooted system.', 200
+        return "Probably rebooted system.", 200
 
     return response.text, response.status_code
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def sync(system: System) -> tuple[str, int]:
     """Synchronize the respective system."""
 
     Queue.enqueue(system, priority=True, force=True)
-    return 'Synchronization queued.', 202
+    return "Synchronization queued.", 202
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def beep(system: System) -> tuple[str, int]:
     """Identify the respective system by beep test."""
@@ -110,34 +110,34 @@ def beep(system: System) -> tuple[str, int]:
     try:
         response = system.beep()
     except SystemOffline:
-        return 'System is offline.', 400
+        return "System is offline.", 400
 
     return response.text, response.status_code
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def set_serial_number(system: System) -> tuple[str, int]:
     """Set the serial number of the given system."""
 
     try:
-        system.serial_number = request.json['serialNumber']
+        system.serial_number = request.json["serialNumber"]
     except KeyError:
-        return 'No serial number provided.', 400
+        return "No serial number provided.", 400
     except TypeError:
-        return 'Invalid serial number provided.', 400
+        return "Invalid serial number provided.", 400
 
     try:
         system.save()
     except OperationalError as error:
-        return f'Could not set new serial number: {error}', 400
+        return f"Could not set new serial number: {error}", 400
 
-    return 'Serial number updated.', 200
+    return "Serial number updated.", 200
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @depadmin
 def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     """Set the LPT address of the given deployment."""
@@ -145,19 +145,19 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     try:
         deployment.lpt_address = get_address(request.json)
     except TypeError:
-        return 'Invalid address provided.', 400
+        return "Invalid address provided.", 400
 
     deployment.save()
-    return 'LPT address updated.', 200
+    return "LPT address updated.", 200
 
 
 ROUTES = [
-    ('POST', '/administer/deploy', deploy_),
-    ('POST', '/administer/fit', fit),
-    ('POST', '/administer/application', set_application),
-    ('POST', '/administer/reboot', reboot),
-    ('POST', '/administer/sync', sync),
-    ('POST', '/administer/beep', beep),
-    ('POST', '/administer/serial-number', set_serial_number),
-    ('POST', '/administer/lpt-address/<int:deployment>', set_lpt_address)
+    ("POST", "/administer/deploy", deploy_),
+    ("POST", "/administer/fit", fit),
+    ("POST", "/administer/application", set_application),
+    ("POST", "/administer/reboot", reboot),
+    ("POST", "/administer/sync", sync),
+    ("POST", "/administer/beep", beep),
+    ("POST", "/administer/serial-number", set_serial_number),
+    ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
 ]

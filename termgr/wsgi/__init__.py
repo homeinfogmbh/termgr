@@ -9,7 +9,7 @@ from termgr.wsgi import listing
 from termgr.wsgi import setup
 
 
-__all__ = ['ROUTES', 'APPLICATION']
+__all__ = ["ROUTES", "APPLICATION"]
 
 
 ROUTES = (
@@ -17,7 +17,7 @@ ROUTES = (
     *ddbaccounts.ROUTES,
     *dephist.ROUTES,
     *listing.ROUTES,
-    *setup.ROUTES
+    *setup.ROUTES,
 )
-APPLICATION = Application('termgr', debug=True)
+APPLICATION = Application("termgr", debug=True)
 APPLICATION.add_routes(ROUTES)

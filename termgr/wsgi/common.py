@@ -15,7 +15,7 @@ from termacls import GroupAdmin
 from wsgilib import Error
 
 
-__all__ = ['depadmin', 'sysadmin', 'deploy', 'groupadmin', 'get_address']
+__all__ = ["depadmin", "sysadmin", "deploy", "groupadmin", "get_address"]
 
 
 def _get_deployment(deployment: Optional[int] = None) -> Optional[Deployment]:
@@ -23,34 +23,32 @@ def _get_deployment(deployment: Optional[int] = None) -> Optional[Deployment]:
 
     if deployment is None:
         try:
-            deployment = request.json['deployment']
+            deployment = request.json["deployment"]
         except KeyError:
-            raise Error('No deployment ID specified.')
+            raise Error("No deployment ID specified.")
 
     if deployment is None:
         return None
 
     try:
-        return Deployment.select(cascade=True).where(
-            Deployment.id == deployment
-        ).get()
+        return Deployment.select(cascade=True).where(Deployment.id == deployment).get()
     except Deployment.DoesNotExist:
-        raise Error('No such deployment.', status=404) from None
+        raise Error("No such deployment.", status=404) from None
 
 
 def _get_system(system: Optional[int] = None) -> System:
     """Returns the respective system."""
 
     if system is None:
-        system = request.json.get('system')
+        system = request.json.get("system")
 
     if system is None:
-        raise Error('No system specified.')
+        raise Error("No system specified.")
 
     try:
         return System.select(cascade=True).where(System.id == system).get()
     except System.DoesNotExist:
-        raise Error('No such system.', status=404) from None
+        raise Error("No such system.", status=404) from None
 
 
 def _get_group(ident: int) -> Group:
@@ -59,9 +57,12 @@ def _get_group(ident: int) -> Group:
     if ACCOUNT.root:
         return Group[ident]
 
-    return Group.select().join(GroupAdmin).where(
-        (Group.id == ident) & (GroupAdmin.account == ACCOUNT.id)
-    ).get()
+    return (
+        Group.select()
+        .join(GroupAdmin)
+        .where((Group.id == ident) & (GroupAdmin.account == ACCOUNT.id))
+        .get()
+    )
 
 
 def depadmin(function: Callable) -> Callable:
@@ -74,7 +75,7 @@ def depadmin(function: Callable) -> Callable:
         if can_administer_deployment(ACCOUNT, deployment):
             return function(deployment, *args, **kwargs)
 
-        raise Error('Deployment administration unauthorized.', status=403)
+        raise Error("Deployment administration unauthorized.", status=403)
 
     return wrapper
 
@@ -89,7 +90,7 @@ def sysadmin(function: Callable) -> Callable:
         if can_administer_system(ACCOUNT, system):
             return function(system, *args, **kwargs)
 
-        raise Error('System administration unauthorized.', status=403)
+        raise Error("System administration unauthorized.", status=403)
 
     return wrapper
 
@@ -105,7 +106,7 @@ def deploy(function: Callable) -> Callable:
         if can_deploy(ACCOUNT, system, deployment):
             return function(system, deployment, *args, **kwargs)
 
-        raise Error('Deployment operation unauthorized.', status=403)
+        raise Error("Deployment operation unauthorized.", status=403)
 
     return wrapper
 
@@ -116,11 +117,11 @@ def groupadmin(function: Callable) -> Callable:
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
-            group = _get_group(request.json['group'])
+            group = _get_group(request.json["group"])
         except KeyError:
-            raise Error('No group specified.') from None
+            raise Error("No group specified.") from None
         except Group.DoesNotExist:
-            raise Error('No such group.') from None
+            raise Error("No such group.") from None
 
         return function(group, *args, **kwargs)
 

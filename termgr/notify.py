@@ -10,17 +10,17 @@ from termgr.config import get_config
 from termgr.orm import DeploymentHistory
 
 
-__all__ = ['notify']
+__all__ = ["notify"]
 
 
 HEADERS = (
-    'Techniker',
-    'System',
-    'Kunde',
-    'Kundennummer',
-    'Typ',
-    'Standort',
-    'Zeitstempel'
+    "Techniker",
+    "System",
+    "Kunde",
+    "Kundennummer",
+    "Typ",
+    "Standort",
+    "Zeitstempel",
 )
 LOGGER = getLogger(__file__)
 
@@ -29,38 +29,38 @@ def get_mailer() -> Mailer:
     """Returns the mailer from the configuration."""
 
     return Mailer(
-        (config := get_config()).get('mail', 'host'),
-        config.get('mail', 'port'),
-        config.get('mail', 'user'),
-        config.get('mail', 'passwd')
+        (config := get_config()).get("mail", "host"),
+        config.get("mail", "port"),
+        config.get("mail", "user"),
+        config.get("mail", "passwd"),
     )
 
 
 def get_admins() -> Iterable[str]:
     """Yields admins' emails."""
 
-    emails_ = get_config().get('notify', 'admins', fallback='').split(',')
+    emails_ = get_config().get("notify", "admins", fallback="").split(",")
     return filter(None, map(lambda email: email.strip(), emails_))
 
 
 def get_html(deployments: List[DeploymentHistory]) -> Element:
     """Returns an HTML element."""
 
-    html = Element('html')
-    header = SubElement(html, 'header')
-    SubElement(header, 'meta', attrib={'charset': 'UTF-8'})
-    body = SubElement(html, 'body')
-    salutation = SubElement(body, 'p')
-    salutation.text = 'Sehr geehrter Administrator,'
-    text = SubElement(body, 'p')
-    template = get_config().get('notify', 'body')
+    html = Element("html")
+    header = SubElement(html, "header")
+    SubElement(header, "meta", attrib={"charset": "UTF-8"})
+    body = SubElement(html, "body")
+    salutation = SubElement(body, "p")
+    salutation.text = "Sehr geehrter Administrator,"
+    text = SubElement(body, "p")
+    template = get_config().get("notify", "body")
 
     if len(deployments) == 1:
-        text.text = template.format(article='das', pl1='', pl2='')
+        text.text = template.format(article="das", pl1="", pl2="")
     else:
-        text.text = template.format(article='die', pl1='n', pl2='e')
+        text.text = template.format(article="die", pl1="n", pl2="e")
 
-    table = SubElement(body, 'table', attrib={'border': '1'})
+    table = SubElement(body, "table", attrib={"border": "1"})
     table.append(DeploymentHistory.html_table_header())
 
     for deployment in deployments:
@@ -72,8 +72,8 @@ def get_html(deployments: List[DeploymentHistory]) -> Element:
 def get_emails(subject: str, html: Element) -> Iterable[EMail]:
     """Yields emails with HTML body."""
 
-    html = tostring(html, encoding='unicode', method='html')
-    sender = get_config().get('mail', 'from')
+    html = tostring(html, encoding="unicode", method="html")
+    sender = get_config().get("mail", "from")
 
     for admin in get_admins():
         yield EMail(subject, sender, admin, html=html)
@@ -90,9 +90,6 @@ def notify(deployments: Iterable[DeploymentHistory] = None) -> bool:
     if not deployments:
         return False
 
-    emails = get_emails(
-        get_config().get('notify', 'subject'),
-        get_html(deployments)
-    )
+    emails = get_emails(get_config().get("notify", "subject"), get_html(deployments))
     get_mailer().send(emails)
     return True

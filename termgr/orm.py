@@ -13,16 +13,16 @@ from hwdb import Deployment, System
 from peeweeplus import MySQLDatabaseProxy, JSONModel
 
 
-__all__ = ['DeploymentHistory']
+__all__ = ["DeploymentHistory"]
 
 
-DATABASE = MySQLDatabaseProxy('termgr')
+DATABASE = MySQLDatabaseProxy("termgr")
 HTML_TABLE_HEADERS = (
-    'Techniker',
-    'System',
-    'Alter Standort',
-    'Neuer Standort',
-    'Zeitstempel'
+    "Techniker",
+    "System",
+    "Alter Standort",
+    "Neuer Standort",
+    "Zeitstempel",
 )
 
 
@@ -37,42 +37,63 @@ class TermgrModel(JSONModel):
 class DeploymentHistory(TermgrModel):
     """Deployment actions of technitians."""
 
-    FIELDS = ['Timestamp           ', 'Account', 'System', 'Old', 'New']
+    FIELDS = ["Timestamp           ", "Account", "System", "Old", "New"]
 
     class Meta:
-        table_name = 'deployment_history'
+        table_name = "deployment_history"
 
     account = ForeignKeyField(
-        Account, column_name='account', on_update='CASCADE',
-        on_delete='CASCADE', lazy_load=False
+        Account,
+        column_name="account",
+        on_update="CASCADE",
+        on_delete="CASCADE",
+        lazy_load=False,
     )
     system = ForeignKeyField(
-        System, column_name='system', on_update='CASCADE', on_delete='CASCADE',
-        lazy_load=False
+        System,
+        column_name="system",
+        on_update="CASCADE",
+        on_delete="CASCADE",
+        lazy_load=False,
     )
     old_deployment = ForeignKeyField(
-        Deployment, null=True, column_name='old_deployment',
-        on_update='CASCADE', on_delete='SET NULL', lazy_load=False
+        Deployment,
+        null=True,
+        column_name="old_deployment",
+        on_update="CASCADE",
+        on_delete="SET NULL",
+        lazy_load=False,
     )
     new_deployment = ForeignKeyField(
-        Deployment, null=True, column_name='new_deployment',
-        on_update='CASCADE', on_delete='CASCADE', lazy_load=False
+        Deployment,
+        null=True,
+        column_name="new_deployment",
+        on_update="CASCADE",
+        on_delete="CASCADE",
+        lazy_load=False,
     )
     timestamp = DateTimeField(default=datetime.now)
 
     def __str__(self):
         """Returns a string for the terminal."""
-        return '\t'.join((
-            self.timestamp.isoformat(), self.account_name, str(self.system_id),
-            str(self.old_deployment_id), str(self.new_deployment_id)
-        ))
+        return "\t".join(
+            (
+                self.timestamp.isoformat(),
+                self.account_name,
+                str(self.system_id),
+                str(self.old_deployment_id),
+                str(self.new_deployment_id),
+            )
+        )
 
     @classmethod
     def add(cls, account: Account, system: System, old_deployment: Deployment):
         """Creates and saves a new record."""
         record = cls(
-            account=account, system=system, old_deployment=old_deployment,
-            new_deployment=system.deployment
+            account=account,
+            system=system,
+            old_deployment=old_deployment,
+            new_deployment=system.deployment,
         )
         record.save()
         return record
@@ -87,35 +108,54 @@ class DeploymentHistory(TermgrModel):
         new_deployment_customer = Customer.alias()
         new_deployment_company = Company.alias()
         new_deployment_address = Address.alias()
-        return super().select(
-            cls, Account, System, Deployment, Customer, Company, Address,
-            new_deployment, new_deployment_address, new_deployment_customer,
-            new_deployment_company, *args
-        ).join(Account).join_from(
-            cls, System
-        ).join_from(
-            # Old deployment.
-            cls, Deployment, on=cls.old_deployment == Deployment.id,
-            join_type=JOIN.LEFT_OUTER
-        ).join(
-            Customer, join_type=JOIN.LEFT_OUTER
-        ).join(
-            Company, join_type=JOIN.LEFT_OUTER
-        ).join_from(
-            Deployment, Address, on=Deployment.address == Address.id,
-            join_type=JOIN.LEFT_OUTER
-        ).join_from(
-            # New deployment.
-            cls, new_deployment, on=cls.new_deployment == new_deployment.id,
-            join_type=JOIN.LEFT_OUTER
-        ).join(
-            new_deployment_customer, join_type=JOIN.LEFT_OUTER
-        ).join(
-            new_deployment_company, join_type=JOIN.LEFT_OUTER
-        ).join_from(
-            new_deployment, new_deployment_address,
-            on=new_deployment.address == new_deployment_address.id,
-            join_type=JOIN.LEFT_OUTER
+        return (
+            super()
+            .select(
+                cls,
+                Account,
+                System,
+                Deployment,
+                Customer,
+                Company,
+                Address,
+                new_deployment,
+                new_deployment_address,
+                new_deployment_customer,
+                new_deployment_company,
+                *args,
+            )
+            .join(Account)
+            .join_from(cls, System)
+            .join_from(
+                # Old deployment.
+                cls,
+                Deployment,
+                on=cls.old_deployment == Deployment.id,
+                join_type=JOIN.LEFT_OUTER,
+            )
+            .join(Customer, join_type=JOIN.LEFT_OUTER)
+            .join(Company, join_type=JOIN.LEFT_OUTER)
+            .join_from(
+                Deployment,
+                Address,
+                on=Deployment.address == Address.id,
+                join_type=JOIN.LEFT_OUTER,
+            )
+            .join_from(
+                # New deployment.
+                cls,
+                new_deployment,
+                on=cls.new_deployment == new_deployment.id,
+                join_type=JOIN.LEFT_OUTER,
+            )
+            .join(new_deployment_customer, join_type=JOIN.LEFT_OUTER)
+            .join(new_deployment_company, join_type=JOIN.LEFT_OUTER)
+            .join_from(
+                new_deployment,
+                new_deployment_address,
+                on=new_deployment.address == new_deployment_address.id,
+                join_type=JOIN.LEFT_OUTER,
+            )
         )
 
     @classmethod
@@ -129,10 +169,10 @@ class DeploymentHistory(TermgrModel):
     @classmethod
     def html_table_header(cls) -> Element:
         """Returns an HTML DOM of the table header."""
-        row = Element('tr')
+        row = Element("tr")
 
         for text in HTML_TABLE_HEADERS:
-            header = SubElement(row, 'th')
+            header = SubElement(row, "th")
             header.text = text
 
         return row
@@ -152,12 +192,12 @@ class DeploymentHistory(TermgrModel):
         yield str(self.system.id)
 
         if self.old_deployment is None:
-            yield 'N/A'
+            yield "N/A"
         else:
             yield self.old_deployment.to_html()
 
         if self.new_deployment is None:
-            yield '-'
+            yield "-"
         else:
             yield self.new_deployment.to_html()
 
@@ -167,24 +207,24 @@ class DeploymentHistory(TermgrModel):
     def shallow_json(self) -> dict[str, Any]:
         """Return a shallow JSON representation with minimal information."""
         return {
-            'id': self.id,
-            'account': {
-                'id': self.account.id,
-                'name': self.account.name,
-                'fullName': self.account.full_name
+            "id": self.id,
+            "account": {
+                "id": self.account.id,
+                "name": self.account.name,
+                "fullName": self.account.full_name,
             },
-            'system': self.system_id,
-            'oldDeployment': self.old_deployment_id,
-            'newDeployment': self.new_deployment_id,
-            'timestamp': self.timestamp.isoformat()
+            "system": self.system_id,
+            "oldDeployment": self.old_deployment_id,
+            "newDeployment": self.new_deployment_id,
+            "timestamp": self.timestamp.isoformat(),
         }
 
     def to_html_table_row(self) -> Element:
         """Returns an HTML DOM of a table row."""
-        row = Element('tr')
+        row = Element("tr")
 
         for value in self.html_table_columns:
-            table_column = SubElement(row, 'td')
+            table_column = SubElement(row, "td")
 
             if isinstance(value, Element):
                 table_column.append(value)

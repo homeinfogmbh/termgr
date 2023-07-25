@@ -8,25 +8,23 @@ from termgr.orm import DeploymentHistory
 from termgr.wsgi.common import sysadmin
 
 
-__all__ = ['ROUTES']
+__all__ = ["ROUTES"]
 
 
 @authenticated
-@authorized('termgr')
+@authorized("termgr")
 @sysadmin
 def get_deployment_history(system: System) -> JSON:
     """Return the deployment history of the given deployment."""
 
-    return JSON([
-        dephist.to_json(shallow=True)
-        for dephist in DeploymentHistory.select(cascade=True).where(
-            DeploymentHistory.system == system
-        ).order_by(
-            DeploymentHistory.timestamp.desc()
-        )
-    ])
+    return JSON(
+        [
+            dephist.to_json(shallow=True)
+            for dephist in DeploymentHistory.select(cascade=True)
+            .where(DeploymentHistory.system == system)
+            .order_by(DeploymentHistory.timestamp.desc())
+        ]
+    )
 
 
-ROUTES = [
-    ('GET', '/deployment-history/<int:system>', get_deployment_history)
-]
+ROUTES = [("GET", "/deployment-history/<int:system>", get_deployment_history)]

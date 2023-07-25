@@ -9,17 +9,11 @@ from mdb import Customer, customer as customer_type
 from termacls import GroupAdmin, TypeAdmin
 
 
-__all__ = [
-    'disable_account',
-    'enable_account',
-    'get_account',
-    'list_accounts',
-    'main'
-]
+__all__ = ["disable_account", "enable_account", "get_account", "list_accounts", "main"]
 
 
-DESCRIPTION = 'Manage temporary access to configure systems.'
-FULL_NAME = 'DDB Setup Account'
+DESCRIPTION = "Manage temporary access to configure systems."
+FULL_NAME = "DDB Setup Account"
 GROUP = 1
 TYPE = DeploymentType.DDB
 
@@ -28,9 +22,7 @@ def get_args() -> Namespace:
     """Return the command line arguments."""
 
     parser = ArgumentParser(description=DESCRIPTION)
-    parser.add_argument(
-        'customer', nargs='?', type=customer_type, help='the customer'
-    )
+    parser.add_argument("customer", nargs="?", type=customer_type, help="the customer")
     return parser.parse_args()
 
 
@@ -44,9 +36,7 @@ def print_accounts() -> None:
 def list_accounts() -> Iterable[Account]:
     """List DDB setup accounts."""
 
-    return Account.select(cascade=True).where(
-        Account.name << set(list_account_names())
-    )
+    return Account.select(cascade=True).where(Account.name << set(list_account_names()))
 
 
 def list_account_names() -> Iterator[str]:
@@ -59,7 +49,7 @@ def list_account_names() -> Iterator[str]:
 def get_account_name(customer: Customer) -> str:
     """Return the DDB setup account name for the given customer."""
 
-    return f'ddb-{customer.id}'
+    return f"ddb-{customer.id}"
 
 
 def get_account(customer: Customer) -> Account:
@@ -72,9 +62,9 @@ def get_account(customer: Customer) -> Account:
     except Account.DoesNotExist:
         return Account(
             customer=customer,
-            email=f'{name}@homeinfo.de',
+            email=f"{name}@homeinfo.de",
             full_name=FULL_NAME,
-            name=name
+            name=name,
         )
 
     account.customer = customer
@@ -87,16 +77,12 @@ def get_service(name: str) -> Service:
     return Service.get(Service.name == name)
 
 
-def enable_account_service(
-        account: Account,
-        service: Service
-) -> AccountService:
+def enable_account_service(account: Account, service: Service) -> AccountService:
     """Enable the account for the given service."""
 
     try:
         return AccountService.get(
-            (AccountService.account == account)
-            & (AccountService.service == service)
+            (AccountService.account == account) & (AccountService.service == service)
         )
     except AccountService.DoesNotExist:
         account_service = AccountService(account=account, service=service)
@@ -104,10 +90,7 @@ def enable_account_service(
         return account_service
 
 
-def enable_customer_service(
-        customer: Customer,
-        service: Service
-) -> CustomerService:
+def enable_customer_service(customer: Customer, service: Service) -> CustomerService:
     """Enable the customer for the given service."""
 
     try:
@@ -124,17 +107,17 @@ def enable_customer_service(
 def disable_customer_service(customer: Customer, service: Service) -> None:
     """Disable the customer for the given service."""
 
-    for _ in AccountService.select().join(Account).where(
-        (Account.customer == customer)
-        & (AccountService.service == service)
+    for _ in (
+        AccountService.select()
+        .join(Account)
+        .where((Account.customer == customer) & (AccountService.service == service))
     ):
         # Do not disable customer service if it is used
         # by other accounts of that customer.
         return
 
     for customer_service in CustomerService.select().where(
-            (CustomerService.customer == customer)
-            & (CustomerService.service == service)
+        (CustomerService.customer == customer) & (CustomerService.service == service)
     ):
         customer_service.delete_instance()
 
@@ -156,9 +139,7 @@ def enable_type_admin(account: Account, typ: DeploymentType) -> TypeAdmin:
     """Enable the account as admin for the given type."""
 
     try:
-        return TypeAdmin.get(
-            (TypeAdmin.account == account) & (TypeAdmin.type == typ)
-        )
+        return TypeAdmin.get((TypeAdmin.account == account) & (TypeAdmin.type == typ))
     except TypeAdmin.DoesNotExist:
         type_admin = TypeAdmin(account=account, type=typ)
         type_admin.save()
@@ -172,7 +153,7 @@ def enable_account(account: Account) -> str:
     account.failed_logins = 0
     account.passwd = passwd = genpw(length=8)
     account.save()
-    service = get_service('termgr')
+    service = get_service("termgr")
     enable_account_service(account, service)
     enable_customer_service(account.customer, service)
     enable_group_admin(account, GROUP)
@@ -184,7 +165,7 @@ def disable_account(account: Account) -> None:
     """Disables the account."""
 
     account.delete_instance()
-    disable_customer_service(account.customer, get_service('termgr'))
+    disable_customer_service(account.customer, get_service("termgr"))
 
 
 def toggle_account(account: Account) -> None:
@@ -192,12 +173,12 @@ def toggle_account(account: Account) -> None:
 
     if account.id is None or account.disabled:
         passwd = enable_account(account)
-        print('Customer:', account.customer)
-        print('Account: ', account.name)
-        print('Password:', passwd)
+        print("Customer:", account.customer)
+        print("Account: ", account.name)
+        print("Password:", passwd)
     else:
         disable_account(account)
-        print('Account', f'"{account.name}"', 'deleted.')
+        print("Account", f'"{account.name}"', "deleted.")
 
 
 def main() -> int:
