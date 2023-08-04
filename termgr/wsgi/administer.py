@@ -151,6 +151,17 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     return "LPT address updated.", 200
 
 
+@authenticated
+@authorized("termgr")
+@depadmin
+def set_url(deployment: Deployment) -> tuple[str, int]:
+    """Set the URL of the given deployment."""
+
+    deployment.url = request.json.get("url")
+    deployment.save()
+    return "URL set.", 200
+
+
 ROUTES = [
     ("POST", "/administer/deploy", deploy_),
     ("POST", "/administer/fit", fit),
@@ -160,4 +171,5 @@ ROUTES = [
     ("POST", "/administer/beep", beep),
     ("POST", "/administer/serial-number", set_serial_number),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
+    ("POST", "/administer/url/<int:deployment>", set_url),
 ]
