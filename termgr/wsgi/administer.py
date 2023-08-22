@@ -138,6 +138,23 @@ def set_serial_number(system: System) -> tuple[str, int]:
 
 @authenticated
 @authorized("termgr")
+@sysadmin
+def set_url(system: System) -> tuple[str, int]:
+    """Set the TYPO 3 URL of the given system."""
+
+    try:
+        response = system.set_url(request.json["url"])
+    except KeyError:
+        return "No serial number provided.", 400
+
+    if response.status_code != 200:
+        return "Failed to set URL", 500
+
+    return "URL set.", 200
+
+
+@authenticated
+@authorized("termgr")
 @depadmin
 def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     """Set the LPT address of the given deployment."""
@@ -170,6 +187,7 @@ ROUTES = [
     ("POST", "/administer/sync", sync),
     ("POST", "/administer/beep", beep),
     ("POST", "/administer/serial-number", set_serial_number),
+    ("POST", "/administer/url", set_url),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
     ("POST", "/administer/url/<int:deployment>", set_url),
 ]
