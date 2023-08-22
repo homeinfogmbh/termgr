@@ -8,7 +8,7 @@ from peewee import OperationalError
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
 from hwdb import SystemOffline, ApplicationMode, Deployment, System
-from wsgilib import JSON
+from wsgilib import JSON, JSONMessage
 
 from termgr.notify import notify
 from termgr.orm import DeploymentHistory
@@ -138,23 +138,6 @@ def set_serial_number(system: System) -> tuple[str, int]:
 
 @authenticated
 @authorized("termgr")
-@sysadmin
-def set_url(system: System) -> tuple[str, int]:
-    """Set the TYPO 3 URL of the given system."""
-
-    try:
-        response = system.set_url(request.json["url"])
-    except KeyError:
-        return "No serial number provided.", 400
-
-    if response.status_code != 200:
-        return "Failed to set URL", 500
-
-    return "URL set.", 200
-
-
-@authenticated
-@authorized("termgr")
 @depadmin
 def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
     """Set the LPT address of the given deployment."""
@@ -171,12 +154,26 @@ def set_lpt_address(deployment: Deployment) -> tuple[str, int]:
 @authenticated
 @authorized("termgr")
 @depadmin
-def set_url(deployment: Deployment) -> tuple[str, int]:
+def set_url(deployment: Deployment) -> JSONMessage:
     """Set the URL of the given deployment."""
 
-    deployment.url = request.json.get("url")
+    deployment.url = url = request.json.get("url")
     deployment.save()
-    return "URL set.", 200
+    failed_systems = []
+
+    for system in System.select().where(
+        ((System.dataset >> None) & (System.deployment == deployment))
+        | (System.dataset == deployment)
+    ):
+        if system.set_url(url).status_code != 200:
+            failed_systems.append(system.id)
+
+    if failed_systems:
+        return JSONMessage(
+            "Could not set URL on some systems.", systems=failed_systems, status=500
+        )
+
+    return JSONMessage("URL set.")
 
 
 ROUTES = [
@@ -187,7 +184,6 @@ ROUTES = [
     ("POST", "/administer/sync", sync),
     ("POST", "/administer/beep", beep),
     ("POST", "/administer/serial-number", set_serial_number),
-    ("POST", "/administer/url", set_url),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
     ("POST", "/administer/url/<int:deployment>", set_url),
 ]
