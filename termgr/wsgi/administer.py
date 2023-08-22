@@ -165,7 +165,7 @@ def set_url(deployment: Deployment) -> JSONMessage:
         ((System.dataset >> None) & (System.deployment == deployment))
         | (System.dataset == deployment)
     ):
-        if system.set_url(url).status_code != 200:
+        if system.apply_url(url).status_code != 200:
             failed_systems.append(system.id)
 
     if failed_systems:
