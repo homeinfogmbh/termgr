@@ -1,9 +1,11 @@
 """Terminal administration."""
 
+from collections import defaultdict
 from typing import Optional
 
 from flask import request
 from peewee import OperationalError
+from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
@@ -159,14 +161,19 @@ def set_url(deployment: Deployment) -> JSONMessage:
 
     deployment.url = url = request.json.get("url")
     deployment.save()
-    failed_systems = []
+    failed_systems = defaultdict(list)
 
     for system in System.select().where(
         ((System.dataset >> None) & (System.deployment == deployment))
         | (System.dataset == deployment)
     ):
-        if system.apply_url(url).status_code != 200:
-            failed_systems.append(system.id)
+        try:
+            response = system.apply_url(url)
+        except (ConnectionError, ChunkedEncodingError, Timeout):
+            failed_systems["offline"].append(system.id)
+        else:
+            if response.status_code != 200:
+                failed_systems["status_code"] = system.id
 
     if failed_systems:
         return JSONMessage(

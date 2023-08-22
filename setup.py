@@ -16,6 +16,7 @@ setup(
         "mdb",
         "peewee",
         "peeweeplus",
+        "requests",
         "setuptools",
         "termacls",
         "wgtools",
