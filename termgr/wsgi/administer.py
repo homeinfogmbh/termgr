@@ -162,6 +162,7 @@ def set_url(deployment: Deployment) -> JSONMessage:
     deployment.url = url = request.json.get("url")
     deployment.save()
     failed_systems = defaultdict(list)
+    success = []
 
     for system in System.select().where(
         ((System.dataset >> None) & (System.deployment == deployment))
@@ -174,10 +175,15 @@ def set_url(deployment: Deployment) -> JSONMessage:
         else:
             if response.status_code != 200:
                 failed_systems["status_code"] = system.id
+            else:
+                success.append(system.id)
 
     if failed_systems:
         return JSONMessage(
-            "Could not set URL on some systems.", systems=failed_systems, status=500
+            "Could not set URL on some systems.",
+            failed=failed_systems,
+            success=success,
+            status=500,
         )
 
     return JSONMessage("URL set.")
