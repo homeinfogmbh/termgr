@@ -161,7 +161,7 @@ def set_url(deployment: Deployment) -> JSONMessage:
 
     deployment.url = url = request.json.get("url")
     deployment.save()
-    failed_systems = defaultdict(list)
+    failures = defaultdict(list)
     success = []
 
     for system in System.select().where(
@@ -171,22 +171,19 @@ def set_url(deployment: Deployment) -> JSONMessage:
         try:
             response = system.apply_url(url)
         except (ConnectionError, ChunkedEncodingError, Timeout):
-            failed_systems["offline"].append(system.id)
+            failures["offline"].append(system.id)
         else:
             if response.status_code != 200:
-                failed_systems["status_code"] = system.id
+                failures["statusCode"] = system.id
             else:
                 success.append(system.id)
 
-    if failed_systems:
-        return JSONMessage(
-            "Could not set URL on some systems.",
-            failed=failed_systems,
-            success=success,
-            status=500,
-        )
-
-    return JSONMessage("URL set.")
+    return JSONMessage(
+        "URL set.",
+        failed=failures,
+        success=success,
+        status=200,
+    )
 
 
 ROUTES = [
