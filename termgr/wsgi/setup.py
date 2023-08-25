@@ -64,6 +64,7 @@ def add_system(group: Group) -> JSON:
         operating_system=operating_system(request.json["os"]),
         serial_number=request.json.get("sn"),
         model=request.json.get("model"),
+        ddb_os=request.json.get("ddb_os", False),
     )
     system.save()
     reload("bind9", wireguard=True)
@@ -89,6 +90,9 @@ def patch_system(system: System) -> JSON:
 
     with suppress(KeyError):
         system.model = request.json["model"]
+
+    with suppress(KeyError):
+        system.ddb_os = request.json["ddb_os"]
 
     system.configured = datetime.now()
     system.save()
