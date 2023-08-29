@@ -213,4 +213,5 @@ ROUTES = [
     ("POST", "/administer/serial-number", set_serial_number),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
     ("POST", "/administer/url/<int:deployment>", set_url),
+    ("POST", "/administer/restart-web-browser", restart_web_browser),
 ]
