@@ -186,6 +186,23 @@ def set_url(deployment: Deployment) -> JSONMessage:
     )
 
 
+@authenticated
+@authorized("termgr")
+@sysadmin
+def restart_web_browser(system: System) -> JSONMessage:
+    """Set the URL of the given deployment."""
+
+    try:
+        response = system.restart_web_browser()
+    except (ConnectionError, ChunkedEncodingError, Timeout):
+        return JSONMessage("Could not connect to system", 500)
+
+    if response.status_code != 200:
+        return JSONMessage("Web browser restarted.", status=200)
+
+    return JSONMessage("Could not restart web browser.", 500)
+
+
 ROUTES = [
     ("POST", "/administer/deploy", deploy_),
     ("POST", "/administer/fit", fit),
