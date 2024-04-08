@@ -197,7 +197,7 @@ def restart_web_browser(system: System) -> JSONMessage:
     except (ConnectionError, ChunkedEncodingError, Timeout):
         return JSONMessage("Could not connect to system", status=500)
 
-    if response.status_code != 200:
+    if response.status_code == 200:
         return JSONMessage("Web browser restarted.", status=200)
 
     return JSONMessage("Could not restart web browser.", status=500)
