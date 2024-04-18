@@ -40,7 +40,7 @@ def _get_system(system: Optional[int] = None) -> System:
     """Returns the respective system."""
 
     if system is None:
-        system = request.json.get("system")
+        system = request.json("system")
 
     if system is None:
         raise Error("No system specified.")
