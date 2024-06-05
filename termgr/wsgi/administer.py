@@ -175,7 +175,7 @@ def set_ddbos(system: System) -> tuple[str, int]:
     except OperationalError as error:
         return f"Could not set new operating system: {error}", 400
 
-    return "Operating system.", 200
+    return "Operating system updated.", 200
 
 
 @authenticated
