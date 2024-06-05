@@ -164,7 +164,7 @@ def set_ddbos(system: System) -> tuple[str, int]:
     """Set the operating system of the given system."""
 
     try:
-        system.ddbos = request.json["ddbOs"]
+        system.ddb_os = request.json["ddbOs"]
     except KeyError:
         return "No operating system provided.", 400
     except TypeError:
