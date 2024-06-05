@@ -141,12 +141,12 @@ def set_serial_number(system: System) -> tuple[str, int]:
 @authorized("termgr")
 @sysadmin
 def set_warranty(system: System) -> tuple[str, int]:
-    """Set the serial number of the given system."""
+    """Set the warranty date of the given system."""
 
     try:
         system.warranty = request.json["warranty"]
     except KeyError:
-        return "No serial warranty date provided.", 400
+        return "No warranty date provided.", 400
     except TypeError:
         return "Invalid warranty date provided.", 400
 
@@ -156,6 +156,27 @@ def set_warranty(system: System) -> tuple[str, int]:
         return f"Could not set new warranty date: {error}", 400
 
     return "Warranty date updated.", 200
+
+@authenticated
+@authorized("termgr")
+@sysadmin
+def set_ddbos(system: System) -> tuple[str, int]:
+    """Set the operating system of the given system."""
+
+    try:
+        system.ddbos = request.json["ddbos"]
+    except KeyError:
+        return "No operating system provided.", 400
+    except TypeError:
+        return "pperating system provided.", 400
+
+    try:
+        system.save()
+    except OperationalError as error:
+        return f"Could not set new operating system: {error}", 400
+
+    return "Operating system.", 200
+
 
 @authenticated
 @authorized("termgr")
@@ -231,6 +252,7 @@ ROUTES = [
     ("POST", "/administer/beep", beep),
     ("POST", "/administer/serial-number", set_serial_number),
     ("POST", "/administer/warranty", set_warranty),
+    ("POST", "/administer/ddbos", set_ddbos),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
     ("POST", "/administer/url/<int:deployment>", set_url),
     ("POST", "/administer/restart-web-browser", restart_web_browser),
