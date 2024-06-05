@@ -177,6 +177,25 @@ def set_ddbos(system: System) -> tuple[str, int]:
 
     return "Operating system updated.", 200
 
+@authenticated
+@authorized("termgr")
+@sysadmin
+def set_testing(system: System) -> tuple[str, int]:
+    """Set the testing flag of the given system."""
+
+    try:
+        system.testing = request.json["testing"]
+    except KeyError:
+        return "No testing flag provided.", 400
+    except TypeError:
+        return "Invalid testing flag provided.", 400
+
+    try:
+        system.save()
+    except OperationalError as error:
+        return f"Could not set new testing flag: {error}", 400
+
+    return "Testing flag updated.", 200
 
 @authenticated
 @authorized("termgr")
@@ -251,6 +270,7 @@ ROUTES = [
     ("POST", "/administer/sync", sync),
     ("POST", "/administer/beep", beep),
     ("POST", "/administer/serial-number", set_serial_number),
+    ("POST", "/administer/testing", set_testing),
     ("POST", "/administer/warranty", set_warranty),
     ("POST", "/administer/ddbos", set_ddbos),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
