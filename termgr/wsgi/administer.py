@@ -168,7 +168,7 @@ def set_ddbos(system: System) -> tuple[str, int]:
     except KeyError:
         return "No operating system provided.", 400
     except TypeError:
-        return "pperating system provided.", 400
+        return "Invalid operating system provided.", 400
 
     try:
         system.save()
