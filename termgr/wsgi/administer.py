@@ -171,7 +171,7 @@ def set_processing(system: System) -> tuple[str, int]:
         return "Invalid processing provided.", 400
 
     try:
-        system.save()
+        system.deployment.save()
     except OperationalError as error:
         return f"Could not set new processing state: {error}", 400
 
