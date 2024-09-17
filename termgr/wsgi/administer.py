@@ -164,7 +164,7 @@ def set_processing(system: System) -> tuple[str, int]:
     """Set the warranty date of the given system."""
 
     try:
-        system.processing = request.json["processing"]
+        system.deployment.processing = request.json["processing"]
     except KeyError:
         return "No processing provided.", 400
     except TypeError:
