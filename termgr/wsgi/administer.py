@@ -160,6 +160,26 @@ def set_warranty(system: System) -> tuple[str, int]:
 @authenticated
 @authorized("termgr")
 @sysadmin
+def set_processing(system: System) -> tuple[str, int]:
+    """Set the warranty date of the given system."""
+
+    try:
+        system.processing = request.json["processing"]
+    except KeyError:
+        return "No processing provided.", 400
+    except TypeError:
+        return "Invalid processing provided.", 400
+
+    try:
+        system.save()
+    except OperationalError as error:
+        return f"Could not set new processing state: {error}", 400
+
+    return "Processing updated.", 200
+
+@authenticated
+@authorized("termgr")
+@sysadmin
 def set_ddbos(system: System) -> tuple[str, int]:
     """Set the operating system of the given system."""
 
@@ -273,6 +293,7 @@ ROUTES = [
     ("POST", "/administer/testing", set_testing),
     ("POST", "/administer/warranty", set_warranty),
     ("POST", "/administer/ddbos", set_ddbos),
+    ("POST", "/administer/processing", set_processing),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
     ("POST", "/administer/url/<int:deployment>", set_url),
     ("POST", "/administer/restart-web-browser", restart_web_browser),
