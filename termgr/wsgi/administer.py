@@ -263,7 +263,31 @@ def set_url(deployment: Deployment) -> JSONMessage:
         success=success,
         status=200,
     )
+@authenticated
+@authorized("termgr")
+@sysadmin
+def send_url_to_system(system: System) -> JSONMessage:
+    """Sends url to system."""
 
+    url = request.json.get("url")
+    failures = defaultdict(list)
+    success = []
+    try:
+        response = system.apply_url(url)
+    except (ConnectionError, ChunkedEncodingError, Timeout):
+        failures["offline"].append(system.id)
+    else:
+        if response.status_code != 200:
+            failures["statusCode"] = system.id
+        else:
+            success.append(system.id)
+
+    return JSONMessage(
+        "URL set.",
+        failed=failures,
+        success=success,
+        status=200,
+    )
 
 @authenticated
 @authorized("termgr")
@@ -296,5 +320,6 @@ ROUTES = [
     ("POST", "/administer/processing", set_processing),
     ("POST", "/administer/lpt-address/<int:deployment>", set_lpt_address),
     ("POST", "/administer/url/<int:deployment>", set_url),
+    ("POST", "/administer/send-url/<int:system>", send_url_to_system),
     ("POST", "/administer/restart-web-browser", restart_web_browser),
 ]
