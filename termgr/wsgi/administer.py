@@ -249,7 +249,7 @@ def set_url(deployment: Deployment) -> JSONMessage:
     ):
         try:
             response = system.apply_url(url)
-        except (ConnectionError, ChunkedEncodingError, Timeout):
+        except (ConnectionError, ChunkedEncodingError, Timeout, SystemOffline):
             failures["offline"].append(system.id)
         else:
             if response.status_code != 200:
