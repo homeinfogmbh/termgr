@@ -20,7 +20,7 @@ from termgr.wsgi.common import depadmin, deploy, get_address, sysadmin
 __all__ = ["ROUTES"]
 
 def get_url()-> JSON:
-    system=System.select(cascade=True).where(System.id == int(request.args.get('hostname')))
+    system=System.select(cascade=True).where(System.id == int(request.args.get('hostname'))).get()
     return JSON(
         {
             "url": system.deployment.url,
