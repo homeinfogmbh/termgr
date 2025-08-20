@@ -328,6 +328,6 @@ ROUTES = [
     ("POST", "/administer/url/<int:deployment>", set_url),
     ("POST", "/administer/send-url/<int:system>", send_url_to_system),
     ("POST", "/administer/restart-web-browser", restart_web_browser),
-    ("POST", "/administer/get-url", get_url),
+    ("GET", "/administer/get-url", get_url),
 
 ]
