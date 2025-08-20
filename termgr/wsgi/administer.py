@@ -19,6 +19,12 @@ from termgr.wsgi.common import depadmin, deploy, get_address, sysadmin
 
 __all__ = ["ROUTES"]
 
+def get_url()-> JSON:
+    system=System.select(cascade=True).where(System.id == int(request.GET.get('hostname')))
+    return JSON(
+        {
+            "url": system.deployment.url,
+        })
 
 @authenticated
 @authorized("termgr")
@@ -322,4 +328,6 @@ ROUTES = [
     ("POST", "/administer/url/<int:deployment>", set_url),
     ("POST", "/administer/send-url/<int:system>", send_url_to_system),
     ("POST", "/administer/restart-web-browser", restart_web_browser),
+    ("POST", "/administer/get-url", get_url),
+
 ]
