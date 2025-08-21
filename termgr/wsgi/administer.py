@@ -6,6 +6,7 @@ from typing import Optional
 from flask import request
 from peewee import OperationalError
 from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
+from html import unescape
 
 from hipster.orm import Queue
 from his import ACCOUNT, authenticated, authorized
@@ -23,7 +24,7 @@ def get_url()-> JSON:
     system=System.select(cascade=True).where(System.id == int(request.args.get('hostname'))).get()
     return JSON(
         {
-            "url": system.deployment.url,
+            "url": unescape(system.deployment.url),
         })
 
 @authenticated
