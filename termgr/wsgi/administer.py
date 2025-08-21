@@ -25,7 +25,7 @@ def get_url()-> JSON:
     return JSON(
         {
             "url": unescape(system.deployment.url),
-        })
+        },preprocess=None)
 
 @authenticated
 @authorized("termgr")
