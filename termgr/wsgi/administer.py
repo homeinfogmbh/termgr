@@ -326,7 +326,7 @@ def set_isvirtual(system: System) -> tuple[str, int]:
         return "Invalid isvirtual provided.", 400
 
     try:
-        system.deployment.save()
+        system.save()
     except OperationalError as error:
         return f"Could not set new isvirtual flag: {error}", 400
 
