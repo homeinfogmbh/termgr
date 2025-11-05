@@ -312,6 +312,25 @@ def restart_web_browser(system: System) -> JSONMessage:
 
     return JSONMessage("Could not restart web browser.", status=500)
 
+@authenticated
+@authorized("termgr")
+@sysadmin
+def set_isvirtual(system: System) -> tuple[str, int]:
+    """Set the isvirtual flag of the given system."""
+
+    try:
+        system.isvirtual = request.json["isvirtual"]
+    except KeyError:
+        return "No isvirtual provided.", 400
+    except TypeError:
+        return "Invalid isvirtual provided.", 400
+
+    try:
+        system.deployment.save()
+    except OperationalError as error:
+        return f"Could not set new isvirtual flag: {error}", 400
+
+    return "Isvirtual updated.", 200
 
 ROUTES = [
     ("POST", "/administer/deploy", deploy_),
@@ -330,5 +349,5 @@ ROUTES = [
     ("POST", "/administer/send-url/<int:system>", send_url_to_system),
     ("POST", "/administer/restart-web-browser", restart_web_browser),
     ("GET", "/administer/get-url", get_url),
-
+    ("POST", "/administer/isvirtual", set_isvirtual),
 ]
