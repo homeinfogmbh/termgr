@@ -332,6 +332,26 @@ def set_isvirtual(system: System) -> tuple[str, int]:
 
     return "Isvirtual updated.", 200
 
+@authenticated
+@authorized("termgr")
+@sysadmin
+def set_model(system: System) -> tuple[str, int]:
+    """Set model of the given system."""
+
+    try:
+        system.model = request.json["model"]
+    except KeyError:
+        return "No model provided.", 400
+    except TypeError:
+        return "Invalid model provided.", 400
+
+    try:
+        system.save()
+    except OperationalError as error:
+        return f"Could not set new model flag: {error}", 400
+
+    return "model updated.", 200
+
 ROUTES = [
     ("POST", "/administer/deploy", deploy_),
     ("POST", "/administer/fit", fit),
@@ -350,4 +370,5 @@ ROUTES = [
     ("POST", "/administer/restart-web-browser", restart_web_browser),
     ("GET", "/administer/get-url", get_url),
     ("POST", "/administer/isvirtual", set_isvirtual),
+    ("POST", "/administer/model", set_model),
 ]
