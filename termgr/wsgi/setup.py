@@ -2,13 +2,17 @@
 
 from contextlib import suppress
 from datetime import datetime
+from json import dumps
+from threading import Thread
 
 from flask import request
+from requests import post
 
 from his import authenticated, authorized
 from hwdb import Group, System, operating_system, get_free_ipv6_address
 from wsgilib import JSON
 
+from termgr.config import get_config
 from termgr.hooks import reload
 from termgr.wireguard import get_wireguard_config
 from termgr.wsgi.common import sysadmin, groupadmin
@@ -68,6 +72,20 @@ def add_system(group: Group) -> JSON:
     )
     system.save()
     reload("bind9", wireguard=True)
+
+    if get_config().get("smitrac", "enabled"):
+        try:           
+            data = dumps(
+                {
+                    "customer":1000,
+                    "system": system.id,
+                    "password": get_config().get("smitrac", "apipassword"),
+                }
+            )
+            Thread(target=post, kwargs={"url": get_config().get("smitrac", "url"), "data": data}, daemon=True).start()
+        except Exception as e:
+            print(e, "error sending new system to smitrac api system ", system.id)
+
     return JSON(
         {**system.to_json(brief=True), "wireguard": get_wireguard_config(system)}
     )
