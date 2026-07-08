@@ -77,7 +77,7 @@ def add_system(group: Group) -> JSON:
         try:           
             data = dumps(
                 {
-                    "customer":1000,
+                    "customer":10000,
                     "system": system.id,
                     "password": get_config().get("smitrac", "apipassword"),
                 }
