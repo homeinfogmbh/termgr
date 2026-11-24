@@ -1,5 +1,5 @@
 # termgr
-Stand: 2026-07-29, geprüft gegen Commit b3dd254
+Stand: 2026-11-24, geprüft gegen Commit fe85d68
 
 ## Zweck
 Server-seitiges Backend zur Verwaltung von Terminals (Digital-Signage-Systemen
@@ -45,7 +45,10 @@ Console-Scripts (`setup.py`): `dephist` (Deployment-Historie),
     `restart-web-browser`, `isvirtual`, `model`; sowie
     `GET /administer/get-url` (liefert `{ "url": ... }` — von digsigctl konsumiert).
   - `/setup/*`: `POST info`, `POST finalize`, `POST system`, `PATCH system`.
-  - `/list/*` (GET): `deployments`, `systems`, `systems/<ident>`.
+  - `/list/*` (GET): `customers` (Kunden mit Systemanzahl:
+    `{"customers": [{"id", "abbreviation", "company": {"name"}, "systems"}], "systems"}`,
+    äußeres `systems` = alle verwaltbaren Systeme, auch ohne Standort),
+    `deployments`, `systems`, `systems/<ident>`.
   - zusätzlich Routen aus `ddbaccounts` und `dephist`.
 - **Console-Scripts / Wartung:** `reload-terminals` schreibt WireGuard-Peers neu,
   `dephist`, `toggle-ddb-install-account`.

@@ -1,13 +1,13 @@
 """List systems."""
 
-from typing import Iterable, Union
+from typing import Any, Iterable, Union
 
 from his import ACCOUNT, Account, authenticated, authorized
 from hwdb import Deployment, System
 from mdb import Address, Company, Customer
 from wsgilib import JSON, JSONMessage
 
-from peewee import JOIN, ModelSelect, prefetch
+from peewee import JOIN, ModelSelect, fn, prefetch
 
 from termacls import get_deployment_admin_condition, get_system_admin_condition
 
@@ -118,6 +118,58 @@ def _get_systems(account: Account) -> ModelSelect:
     )
 
 
+def _get_customers(account: Account) -> dict[str, Any]:
+    """Returns the customers of the respective
+    systems and the amount of systems of each one.
+    """
+
+    customers = []
+    systems = 0
+
+    for ident, abbreviation, company, count in (
+        System.select(
+            Customer.id, Customer.abbreviation, Company.name, fn.COUNT(System.id)
+        )
+        .join_from(
+            System,
+            Deployment,
+            on=System.deployment == Deployment.id,
+            join_type=JOIN.LEFT_OUTER,
+        )
+        .join_from(
+            Deployment,
+            Customer,
+            on=Deployment.customer == Customer.id,
+            join_type=JOIN.LEFT_OUTER,
+        )
+        .join_from(
+            Customer,
+            Company,
+            on=Customer.company == Company.id,
+            join_type=JOIN.LEFT_OUTER,
+        )
+        .where(get_system_admin_condition(account))
+        .group_by(Customer.id, Customer.abbreviation, Company.name)
+        .order_by(Customer.abbreviation, Customer.id)
+        .tuples()
+    ):
+        systems += count
+
+        if ident is None:  # Systems without a deployment.
+            continue
+
+        customers.append(
+            {
+                "id": ident,
+                "abbreviation": abbreviation,
+                "company": {"name": company},
+                "systems": count,
+            }
+        )
+
+    return {"customers": customers, "systems": systems}
+
+
 @authenticated
 @authorized("termgr")
 def list_deployments() -> JSON:
@@ -156,7 +208,18 @@ def list_systems() -> JSON:
     )
 
 
+@authenticated
+@authorized("termgr")
+def list_customers() -> JSON:
+    """Lists the customers of the available
+    systems with their respective amount of systems.
+    """
+
+    return JSON(_get_customers(ACCOUNT))
+
+
 ROUTES = [
+    ("GET", "/list/customers", list_customers),
     ("GET", "/list/deployments", list_deployments),
     ("GET", "/list/systems/<int:ident>", get_system),
     ("GET", "/list/systems", list_systems),
